@@ -1,5 +1,5 @@
 <script setup lang="ts"></script>
 
 <template>
-  <main>hello mmio!</main>
+  <main class="bg-blue-400">hello mmio!</main>
 </template>
