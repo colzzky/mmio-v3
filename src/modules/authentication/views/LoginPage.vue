@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Button from '@/components/ui/button/Button.vue'
-import Label from '@/components/ui/label/Label.vue'
-import Input from '@/components/ui/input/Input.vue'
-import Checkbox from '@/components/ui/checkbox/Checkbox.vue'
+import Button from '@/core/components/ui/button/Button.vue'
+import Label from '@/core/components/ui/label/Label.vue'
+import Input from '@/core/components/ui/input/Input.vue'
+import Checkbox from '@/core/components/ui/checkbox/Checkbox.vue'
 </script>
 
 <template>
