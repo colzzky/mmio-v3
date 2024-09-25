@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import Button from '@/core/components/ui/button/Button.vue'
-import Label from '@/core/components/ui/label/Label.vue'
-import Input from '@/core/components/ui/input/Input.vue'
-import Checkbox from '@/core/components/ui/checkbox/Checkbox.vue'
+import { Button } from '@/core/components/ui/button'
+import { Label } from '@/core/components/ui/label'
+import { Input } from '@/core/components/ui/input'
+import { Checkbox } from '@/core/components/ui/checkbox'
 import { useRouter } from 'vue-router'
 import { reactive } from 'vue'
 

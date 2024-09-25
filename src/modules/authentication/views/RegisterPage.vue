@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import Button from '@/core/components/ui/button/Button.vue'
-import Label from '@/core/components/ui/label/Label.vue'
-import Input from '@/core/components/ui/input/Input.vue'
-import Checkbox from '@/core/components/ui/checkbox/Checkbox.vue'
+import { Button } from '@/core/components/ui/button'
+import { Label } from '@/core/components/ui/label'
+import { Input } from '@/core/components/ui/input'
+import { Checkbox } from '@/core/components/ui/checkbox'
+
+// REGISTER USER
+async function handleRegisterUser() {
+  // todo: implement authentication
+}
 </script>
 
 <template>
@@ -28,7 +33,7 @@ import Checkbox from '@/core/components/ui/checkbox/Checkbox.vue'
 
         <div class="mt-10">
           <div>
-            <form class="space-y-6">
+            <form class="space-y-6" @submit.prevent="handleRegisterUser">
               <div class="space-y-2">
                 <Label for="email">Email address</Label>
                 <Input id="email" name="email" type="email" autocomplete="email" required />

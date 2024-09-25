@@ -1,38 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
-import {
-  Bars3Icon,
-  CalendarIcon,
-  ChartPieIcon,
-  DocumentDuplicateIcon,
-  FolderIcon,
-  HomeIcon,
-  UsersIcon,
-  XMarkIcon,
-} from '@heroicons/vue/24/outline'
-import { ChevronDownIcon } from '@heroicons/vue/20/solid'
 import Button from '../components/ui/button/Button.vue'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+} from '@/core/components/ui/dropdown-menu'
+import { Icon } from '@iconify/vue'
+import { Avatar, AvatarFallback, AvatarImage } from '@/core/components/ui/avatar'
 
-const navigation = [
-  { name: 'Dashboard', href: '/services', icon: HomeIcon, current: true },
-  { name: 'Team', href: '/team', icon: UsersIcon, current: false },
-  { name: 'Projects', href: '/projects', icon: FolderIcon, current: false },
-  { name: 'Calendar', href: '/calendar', icon: CalendarIcon, current: false },
-  { name: 'Documents', href: '/documents', icon: DocumentDuplicateIcon, current: false },
-  { name: 'Reports', href: '/reports', icon: ChartPieIcon, current: false },
-]
-
-const userNavigation = [
-  { name: 'Your profile', href: '/profile' },
-  { name: 'Sign out', href: '/signout' },
-]
+const navigation = [{ name: 'Home', href: 'services', icon: 'material-symbols:home-outline' }]
 
 const sidebarOpen = ref(false)
 </script>
@@ -98,8 +77,8 @@ const sidebarOpen = ref(false)
                         as-child
                       >
                         <RouterLink :to="item.href">
-                          <component
-                            :is="item.icon"
+                          <Icon
+                            :icon="item.icon"
                             class="size-6 shrink-0 text-current group-hover:text-primary-foreground"
                             aria-hidden="true"
                           />
@@ -135,8 +114,8 @@ const sidebarOpen = ref(false)
                 class="group flex justify-start gap-x-3 px-2 text-white/50 hover:bg-black/50 hover:text-primary-foreground aria-[current=page]:bg-black/25 aria-[current=page]:text-primary-foreground"
               >
                 <RouterLink :to="item.href">
-                  <component
-                    :is="item.icon"
+                  <Icon
+                    :icon="item.icon"
                     class="size-6 shrink-0 text-current group-hover:text-primary-foreground"
                     aria-hidden="true"
                   />
@@ -159,7 +138,7 @@ const sidebarOpen = ref(false)
           @click="sidebarOpen = true"
         >
           <span class="sr-only">Open sidebar</span>
-          <Bars3Icon class="h-6 w-6" aria-hidden="true" />
+          <Icon icon="material-symbols:menu" class="size-6" aria-hidden="true" />
         </Button>
 
         <!-- Separator -->
@@ -174,40 +153,32 @@ const sidebarOpen = ref(false)
             <DropdownMenu>
               <DropdownMenuTrigger class="-m-1.5 flex items-center p-1.5">
                 <span class="sr-only">Open user menu</span>
-                <img
-                  class="h-8 w-8 rounded-full bg-gray-50"
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt=""
-                />
+                <Avatar class="size-8">
+                  <AvatarImage
+                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                    alt=""
+                  />
+                  <AvatarFallback>TC</AvatarFallback>
+                </Avatar>
                 <span class="hidden lg:flex lg:items-center">
                   <span
                     class="ml-4 text-sm font-semibold leading-6 text-gray-900"
                     aria-hidden="true"
-                    >Tom Cook</span
                   >
+                    Tom Cook
+                  </span>
                   <ChevronDownIcon class="ml-2 h-5 w-5 text-gray-400" aria-hidden="true" />
                 </span>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                <DropdownMenuItem
-                  v-for="item in userNavigation"
-                  :key="item.name"
-                  class="cursor-pointer"
-                  as-child
-                >
-                  <RouterLink :to="item.href">{{ item.name }}</RouterLink>
-                </DropdownMenuItem>
+                <DropdownMenuItem class="cursor-pointer">Sign out</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
       </div>
 
-      <main class="py-10">
-        <div class="px-4 sm:px-6 lg:px-8">
-          <slot />
-        </div>
-      </main>
+      <slot />
     </div>
   </div>
 </template>
