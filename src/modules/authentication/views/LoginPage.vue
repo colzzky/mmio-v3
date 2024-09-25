@@ -3,6 +3,22 @@ import Button from '@/core/components/ui/button/Button.vue'
 import Label from '@/core/components/ui/label/Label.vue'
 import Input from '@/core/components/ui/input/Input.vue'
 import Checkbox from '@/core/components/ui/checkbox/Checkbox.vue'
+import { useRouter } from 'vue-router'
+import { reactive } from 'vue'
+
+const router = useRouter()
+
+// LOGIN USER
+const form = reactive({
+  email: 'superadmin@mmio.com',
+  password: 'password',
+})
+
+async function handleLoginUser() {
+  // todo: implement authentication
+
+  router.push('/services')
+}
 </script>
 
 <template>
@@ -28,10 +44,17 @@ import Checkbox from '@/core/components/ui/checkbox/Checkbox.vue'
 
         <div class="mt-10">
           <div>
-            <form class="space-y-6">
+            <form class="space-y-6" @submit.prevent="handleLoginUser">
               <div class="space-y-2">
                 <Label for="email">Email address</Label>
-                <Input id="email" name="email" type="email" autocomplete="email" required />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autocomplete="email"
+                  required
+                  v-model="form.email"
+                />
               </div>
 
               <div class="space-y-2">
@@ -44,6 +67,7 @@ import Checkbox from '@/core/components/ui/checkbox/Checkbox.vue'
                   type="password"
                   autocomplete="current-password"
                   required
+                  v-model="form.password"
                 />
               </div>
 
@@ -54,12 +78,12 @@ import Checkbox from '@/core/components/ui/checkbox/Checkbox.vue'
                 </div>
 
                 <Button variant="link" as-child class="h-[unset] p-0">
-                  <RouterLink to="/forgot-password">Forgot password?</RouterLink>
+                  <RouterLink to="#">Forgot password?</RouterLink>
                 </Button>
               </div>
 
               <div>
-                <Button type="button" class="w-full">Sign in</Button>
+                <Button class="w-full">Sign in</Button>
               </div>
             </form>
           </div>

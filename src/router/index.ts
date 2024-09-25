@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import authenticationRoutes from '@/modules/authentication/routes'
+import servicesRoutes from '@/modules/services/routes'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -8,6 +9,7 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/HomeView.vue'),
   },
   ...authenticationRoutes,
+  ...servicesRoutes,
 ]
 
 const router = createRouter({
