@@ -1,34 +1,15 @@
 <script setup lang="ts">
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
-import {
-  CalendarIcon,
-  ChartPieIcon,
-  Cog6ToothIcon,
-  DocumentDuplicateIcon,
-  FolderIcon,
-  HomeIcon,
-  UsersIcon,
-  XMarkIcon,
-} from '@heroicons/vue/24/outline'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import Header from '../components/Header.vue'
+import { useRoute } from 'vue-router'
+import { Icon } from '@iconify/vue'
+import SidebarNavigationItem from '../components/SidebarNavigationItem.vue'
 
 // TOGGLE MOBILE SIDEBAR
 const sidebarStore = useSidebarStore()
-
-const navigation = [
-  { name: 'Dashboard', href: '#', icon: HomeIcon, current: true },
-  { name: 'Team', href: '#', icon: UsersIcon, current: false },
-  { name: 'Projects', href: '#', icon: FolderIcon, current: false },
-  { name: 'Calendar', href: '#', icon: CalendarIcon, current: false },
-  { name: 'Documents', href: '#', icon: DocumentDuplicateIcon, current: false },
-  { name: 'Reports', href: '#', icon: ChartPieIcon, current: false },
-]
-const teams = [
-  { id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false },
-  { id: 2, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
-  { id: 3, name: 'Workcation', href: '#', initial: 'W', current: false },
-]
+const route = useRoute()
+const routes = sidebarStore.getServiceRoutes(route.name)
 </script>
 <template>
   <div>
@@ -73,7 +54,7 @@ const teams = [
                     @click="sidebarStore.toggleMobileSidebarOff"
                   >
                     <span class="sr-only">Close sidebar</span>
-                    <XMarkIcon class="h-6 w-6 text-white" aria-hidden="true" />
+                    <Icon icon="iconoir:xmark" class="size-6 text-background" aria-hidden="true" />
                   </button>
                 </div>
               </TransitionChild>
@@ -90,64 +71,23 @@ const teams = [
                   <ul role="list" class="flex flex-1 flex-col gap-y-7">
                     <li>
                       <ul role="list" class="-mx-2 space-y-1">
-                        <li v-for="item in navigation" :key="item.name">
-                          <a
-                            :href="item.href"
-                            :class="[
-                              item.current
-                                ? 'bg-indigo-700 text-white'
-                                : 'text-indigo-200 hover:bg-indigo-700 hover:text-white',
-                              'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
-                            ]"
-                          >
-                            <component
-                              :is="item.icon"
-                              :class="[
-                                item.current
-                                  ? 'text-white'
-                                  : 'text-indigo-200 group-hover:text-white',
-                                'h-6 w-6 shrink-0',
-                              ]"
-                              aria-hidden="true"
-                            />
-                            {{ item.name }}
-                          </a>
-                        </li>
-                      </ul>
-                    </li>
-                    <li>
-                      <div class="text-xs font-semibold leading-6 text-indigo-200">Your teams</div>
-                      <ul role="list" class="-mx-2 mt-2 space-y-1">
-                        <li v-for="team in teams" :key="team.name">
-                          <a
-                            :href="team.href"
-                            :class="[
-                              team.current
-                                ? 'bg-indigo-700 text-white'
-                                : 'text-indigo-200 hover:bg-indigo-700 hover:text-white',
-                              'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
-                            ]"
-                          >
-                            <span
-                              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-indigo-400 bg-indigo-500 text-[0.625rem] font-medium text-white"
-                              >{{ team.initial }}</span
-                            >
-                            <span class="truncate">{{ team.name }}</span>
-                          </a>
+                        <li v-for="route in routes" :key="route.name">
+                          <SidebarNavigationItem :to="route.href">
+                            <Icon :icon="route.icon" class="size-6 shrink-0" aria-hidden="true" />
+                            {{ route.name }}
+                          </SidebarNavigationItem>
                         </li>
                       </ul>
                     </li>
                     <li class="mt-auto">
-                      <a
-                        href="#"
-                        class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white"
-                      >
-                        <Cog6ToothIcon
-                          class="h-6 w-6 shrink-0 text-indigo-200 group-hover:text-white"
+                      <SidebarNavigationItem to="/settings" class-name="-mx-3 px-3">
+                        <Icon
+                          icon="material-symbols:settings-outline"
+                          class="size-6 shrink-0"
                           aria-hidden="true"
                         />
                         Settings
-                      </a>
+                      </SidebarNavigationItem>
                     </li>
                   </ul>
                 </nav>
@@ -173,62 +113,23 @@ const teams = [
           <ul role="list" class="flex flex-1 flex-col gap-y-7">
             <li>
               <ul role="list" class="-mx-2 space-y-1">
-                <li v-for="item in navigation" :key="item.name">
-                  <a
-                    :href="item.href"
-                    :class="[
-                      item.current
-                        ? 'bg-indigo-700 text-white'
-                        : 'text-indigo-200 hover:bg-indigo-700 hover:text-white',
-                      'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
-                    ]"
-                  >
-                    <component
-                      :is="item.icon"
-                      :class="[
-                        item.current ? 'text-white' : 'text-indigo-200 group-hover:text-white',
-                        'h-6 w-6 shrink-0',
-                      ]"
-                      aria-hidden="true"
-                    />
-                    {{ item.name }}
-                  </a>
-                </li>
-              </ul>
-            </li>
-            <li>
-              <div class="text-xs font-semibold leading-6 text-indigo-200">Your teams</div>
-              <ul role="list" class="-mx-2 mt-2 space-y-1">
-                <li v-for="team in teams" :key="team.name">
-                  <a
-                    :href="team.href"
-                    :class="[
-                      team.current
-                        ? 'bg-indigo-700 text-white'
-                        : 'text-indigo-200 hover:bg-indigo-700 hover:text-white',
-                      'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
-                    ]"
-                  >
-                    <span
-                      class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-indigo-400 bg-indigo-500 text-[0.625rem] font-medium text-white"
-                      >{{ team.initial }}</span
-                    >
-                    <span class="truncate">{{ team.name }}</span>
-                  </a>
+                <li v-for="route in routes" :key="route.name">
+                  <SidebarNavigationItem :to="route.href">
+                    <Icon :icon="route.icon" class="size-6 shrink-0" aria-hidden="true" />
+                    {{ route.name }}
+                  </SidebarNavigationItem>
                 </li>
               </ul>
             </li>
             <li class="mt-auto">
-              <a
-                href="#"
-                class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white"
-              >
-                <Cog6ToothIcon
-                  class="h-6 w-6 shrink-0 text-indigo-200 group-hover:text-white"
+              <SidebarNavigationItem to="/settings" class-name="-mx-3 px-3">
+                <Icon
+                  icon="material-symbols:settings-outline"
+                  class="size-6 shrink-0"
                   aria-hidden="true"
                 />
                 Settings
-              </a>
+              </SidebarNavigationItem>
             </li>
           </ul>
         </nav>

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useSidebarStore } from '@/stores/sidebarStore'
-import { Bars3Icon } from '@heroicons/vue/20/solid'
-import { ChevronDownIcon, BellIcon } from '@heroicons/vue/24/outline'
+import { ChevronDownIcon } from '@heroicons/vue/24/outline'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,6 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/core/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
+import { Icon } from '@iconify/vue'
 
 const sidebarStore = useSidebarStore()
 
@@ -29,7 +29,7 @@ withDefaults(defineProps<{ showSidebarButton?: boolean; showServicesButton?: boo
         @click="sidebarStore.toggleMobileSidebarOn"
       >
         <span class="sr-only">Open sidebar</span>
-        <Bars3Icon class="h-6 w-6" aria-hidden="true" />
+        <Icon icon="material-symbols:menu" class="size-6" />
       </button>
 
       <!-- Separator -->
@@ -41,7 +41,7 @@ withDefaults(defineProps<{ showSidebarButton?: boolean; showServicesButton?: boo
         <template v-if="showServicesButton">
           <button type="button" class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
             <span class="sr-only">View notifications</span>
-            <BellIcon class="h-6 w-6" aria-hidden="true" />
+            <Icon icon="mingcute:dot-grid-fill" class="size-6" />
           </button>
 
           <!-- Separator -->

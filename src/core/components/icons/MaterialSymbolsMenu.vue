@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent } from 'vue'
 
 defineComponent({
   name: 'MaterialSymbolsMenu',
-});
+})
 </script>
 <template>
-	<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-		<path fill="currentColor" d="M3 18v-2h18v2zm0-5v-2h18v2zm0-5V6h18v2z" />
-	</svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path fill="currentColor" d="M3 18v-2h18v2zm0-5v-2h18v2zm0-5V6h18v2z" />
+  </svg>
 </template>
