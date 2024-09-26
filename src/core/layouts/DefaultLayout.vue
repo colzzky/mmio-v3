@@ -1,30 +1,39 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
-import Button from '../components/ui/button/Button.vue'
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/core/components/ui/dropdown-menu'
-import { Icon } from '@iconify/vue'
-import { Avatar, AvatarFallback, AvatarImage } from '@/core/components/ui/avatar'
+  CalendarIcon,
+  ChartPieIcon,
+  Cog6ToothIcon,
+  DocumentDuplicateIcon,
+  FolderIcon,
+  HomeIcon,
+  UsersIcon,
+  XMarkIcon,
+} from '@heroicons/vue/24/outline'
 import { useSidebarStore } from '@/stores/sidebarStore'
-import { useRoute } from 'vue-router'
+import Header from '../components/Header.vue'
 
-// GET SERVICE ROUTES
+// TOGGLE MOBILE SIDEBAR
 const sidebarStore = useSidebarStore()
-const route = useRoute()
-const routes = sidebarStore.getServiceRoutes(route.name)
 
-const sidebarOpen = ref(false)
+const navigation = [
+  { name: 'Dashboard', href: '#', icon: HomeIcon, current: true },
+  { name: 'Team', href: '#', icon: UsersIcon, current: false },
+  { name: 'Projects', href: '#', icon: FolderIcon, current: false },
+  { name: 'Calendar', href: '#', icon: CalendarIcon, current: false },
+  { name: 'Documents', href: '#', icon: DocumentDuplicateIcon, current: false },
+  { name: 'Reports', href: '#', icon: ChartPieIcon, current: false },
+]
+const teams = [
+  { id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false },
+  { id: 2, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
+  { id: 3, name: 'Workcation', href: '#', initial: 'W', current: false },
+]
 </script>
-
 <template>
   <div>
-    <TransitionRoot as="template" :show="sidebarOpen">
-      <Dialog class="relative z-50 lg:hidden" @close="sidebarOpen = false">
+    <TransitionRoot as="template" :show="sidebarStore.isMobileSidebarOpen">
+      <Dialog class="relative z-50 lg:hidden" @close="sidebarStore.toggleMobileSidebarOff">
         <TransitionChild
           as="template"
           enter="transition-opacity ease-linear duration-300"
@@ -58,13 +67,16 @@ const sidebarOpen = ref(false)
                 leave-to="opacity-0"
               >
                 <div class="absolute left-full top-0 flex w-16 justify-center pt-5">
-                  <button type="button" class="-m-2.5 p-2.5" @click="sidebarOpen = false">
+                  <button
+                    type="button"
+                    class="-m-2.5 p-2.5"
+                    @click="sidebarStore.toggleMobileSidebarOff"
+                  >
                     <span class="sr-only">Close sidebar</span>
                     <XMarkIcon class="h-6 w-6 text-white" aria-hidden="true" />
                   </button>
                 </div>
               </TransitionChild>
-
               <!-- Sidebar component, swap this element with another sidebar if you like -->
               <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-primary px-6 pb-4">
                 <div class="flex h-16 shrink-0 items-center">
@@ -75,21 +87,67 @@ const sidebarOpen = ref(false)
                   />
                 </div>
                 <nav class="flex flex-1 flex-col">
-                  <ul role="list" class="-mx-2 space-y-1">
-                    <li v-for="route in routes" :key="route.name">
-                      <Button
-                        class="group flex justify-start gap-x-3 px-2 text-white/50 hover:bg-black/50 hover:text-primary-foreground aria-[current=page]:bg-black/25 aria-[current=page]:text-primary-foreground"
-                        as-child
+                  <ul role="list" class="flex flex-1 flex-col gap-y-7">
+                    <li>
+                      <ul role="list" class="-mx-2 space-y-1">
+                        <li v-for="item in navigation" :key="item.name">
+                          <a
+                            :href="item.href"
+                            :class="[
+                              item.current
+                                ? 'bg-indigo-700 text-white'
+                                : 'text-indigo-200 hover:bg-indigo-700 hover:text-white',
+                              'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
+                            ]"
+                          >
+                            <component
+                              :is="item.icon"
+                              :class="[
+                                item.current
+                                  ? 'text-white'
+                                  : 'text-indigo-200 group-hover:text-white',
+                                'h-6 w-6 shrink-0',
+                              ]"
+                              aria-hidden="true"
+                            />
+                            {{ item.name }}
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li>
+                      <div class="text-xs font-semibold leading-6 text-indigo-200">Your teams</div>
+                      <ul role="list" class="-mx-2 mt-2 space-y-1">
+                        <li v-for="team in teams" :key="team.name">
+                          <a
+                            :href="team.href"
+                            :class="[
+                              team.current
+                                ? 'bg-indigo-700 text-white'
+                                : 'text-indigo-200 hover:bg-indigo-700 hover:text-white',
+                              'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
+                            ]"
+                          >
+                            <span
+                              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-indigo-400 bg-indigo-500 text-[0.625rem] font-medium text-white"
+                              >{{ team.initial }}</span
+                            >
+                            <span class="truncate">{{ team.name }}</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </li>
+                    <li class="mt-auto">
+                      <a
+                        href="#"
+                        class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white"
                       >
-                        <RouterLink :to="route.href">
-                          <Icon
-                            :icon="route.icon"
-                            class="size-6 shrink-0 text-current group-hover:text-primary-foreground"
-                            aria-hidden="true"
-                          />
-                          {{ route.name }}
-                        </RouterLink>
-                      </Button>
+                        <Cog6ToothIcon
+                          class="h-6 w-6 shrink-0 text-indigo-200 group-hover:text-white"
+                          aria-hidden="true"
+                        />
+                        Settings
+                      </a>
                     </li>
                   </ul>
                 </nav>
@@ -112,21 +170,65 @@ const sidebarOpen = ref(false)
           />
         </div>
         <nav class="flex flex-1 flex-col">
-          <ul role="list" class="-mx-2 space-y-1">
-            <li v-for="route in routes" :key="route.name">
-              <Button
-                as-child
-                class="group flex justify-start gap-x-3 px-2 text-white/50 hover:bg-black/50 hover:text-primary-foreground aria-[current=page]:bg-black/25 aria-[current=page]:text-primary-foreground"
+          <ul role="list" class="flex flex-1 flex-col gap-y-7">
+            <li>
+              <ul role="list" class="-mx-2 space-y-1">
+                <li v-for="item in navigation" :key="item.name">
+                  <a
+                    :href="item.href"
+                    :class="[
+                      item.current
+                        ? 'bg-indigo-700 text-white'
+                        : 'text-indigo-200 hover:bg-indigo-700 hover:text-white',
+                      'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
+                    ]"
+                  >
+                    <component
+                      :is="item.icon"
+                      :class="[
+                        item.current ? 'text-white' : 'text-indigo-200 group-hover:text-white',
+                        'h-6 w-6 shrink-0',
+                      ]"
+                      aria-hidden="true"
+                    />
+                    {{ item.name }}
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <div class="text-xs font-semibold leading-6 text-indigo-200">Your teams</div>
+              <ul role="list" class="-mx-2 mt-2 space-y-1">
+                <li v-for="team in teams" :key="team.name">
+                  <a
+                    :href="team.href"
+                    :class="[
+                      team.current
+                        ? 'bg-indigo-700 text-white'
+                        : 'text-indigo-200 hover:bg-indigo-700 hover:text-white',
+                      'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6',
+                    ]"
+                  >
+                    <span
+                      class="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-indigo-400 bg-indigo-500 text-[0.625rem] font-medium text-white"
+                      >{{ team.initial }}</span
+                    >
+                    <span class="truncate">{{ team.name }}</span>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="mt-auto">
+              <a
+                href="#"
+                class="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-indigo-200 hover:bg-indigo-700 hover:text-white"
               >
-                <RouterLink :to="route.href">
-                  <Icon
-                    :icon="route.icon"
-                    class="size-6 shrink-0 text-current group-hover:text-primary-foreground"
-                    aria-hidden="true"
-                  />
-                  {{ route.name }}
-                </RouterLink>
-              </Button>
+                <Cog6ToothIcon
+                  class="h-6 w-6 shrink-0 text-indigo-200 group-hover:text-white"
+                  aria-hidden="true"
+                />
+                Settings
+              </a>
             </li>
           </ul>
         </nav>
@@ -134,56 +236,13 @@ const sidebarOpen = ref(false)
     </div>
 
     <div class="lg:pl-72">
-      <div
-        class="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8"
-      >
-        <Button
-          variant="ghost"
-          class="-m-2.5 p-2.5 text-black/50 lg:hidden"
-          @click="sidebarOpen = true"
-        >
-          <span class="sr-only">Open sidebar</span>
-          <Icon icon="material-symbols:menu" class="size-6" aria-hidden="true" />
-        </Button>
+      <Header />
 
-        <!-- Separator -->
-        <div class="h-6 w-px bg-gray-900/10 lg:hidden" aria-hidden="true" />
-
-        <div class="flex flex-1 justify-end gap-x-4 self-stretch lg:gap-x-6">
-          <div class="flex items-center gap-x-4 lg:gap-x-6">
-            <!-- Separator -->
-            <!-- <div class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-900/10" aria-hidden="true" /> -->
-
-            <!-- Profile dropdown -->
-            <DropdownMenu>
-              <DropdownMenuTrigger class="-m-1.5 flex items-center p-1.5">
-                <span class="sr-only">Open user menu</span>
-                <Avatar class="size-8">
-                  <AvatarImage
-                    src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    alt=""
-                  />
-                  <AvatarFallback>TC</AvatarFallback>
-                </Avatar>
-                <span class="hidden lg:flex lg:items-center">
-                  <span
-                    class="ml-4 text-sm font-semibold leading-6 text-gray-900"
-                    aria-hidden="true"
-                  >
-                    Tom Cook
-                  </span>
-                  <ChevronDownIcon class="ml-2 h-5 w-5 text-gray-400" aria-hidden="true" />
-                </span>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem class="cursor-pointer">Sign out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+      <main class="py-10">
+        <div class="px-4 sm:px-6 lg:px-8">
+          <slot />
         </div>
-      </div>
-
-      <slot />
+      </main>
     </div>
   </div>
 </template>
