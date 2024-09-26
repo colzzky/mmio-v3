@@ -43,7 +43,7 @@ withDefaults(defineProps<{ showSidebarButton?: boolean; showServicesButton?: boo
       <div class="flex items-center gap-x-4 lg:gap-x-6">
         <template v-if="showServicesButton">
           <Popover>
-            <PopoverTrigger class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
+            <PopoverTrigger class="-m-2.5 p-2.5 text-primary/50 hover:text-primary/75">
               <span class="sr-only">View notifications</span>
               <Icon icon="mingcute:dot-grid-fill" class="size-6" />
             </PopoverTrigger>
@@ -52,9 +52,11 @@ withDefaults(defineProps<{ showSidebarButton?: boolean; showServicesButton?: boo
                 v-for="service in servicesStore.services"
                 :key="service.name"
                 :to="service.href"
-                class="group flex flex-col items-center gap-y-2 rounded-lg p-2 text-center text-[0.6rem] font-medium hover:bg-foreground/5"
+                class="group flex flex-col items-center gap-y-2 rounded-lg p-2 text-center text-[0.6rem] font-medium hover:bg-primary-foreground"
               >
-                <span class="inline-flex rounded-lg bg-foreground/5 p-3 group-hover:bg-transparent">
+                <span
+                  class="inline-flex rounded-lg bg-primary-foreground p-3 text-primary group-hover:bg-transparent"
+                >
                   <Icon :icon="service.icon" class="size-8 shrink-0" aria-hidden="true" />
                 </span>
                 {{ service.name }}

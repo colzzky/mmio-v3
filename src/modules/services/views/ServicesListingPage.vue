@@ -10,7 +10,7 @@ const services = serviceStore.services
 <template>
   <Header :showSidebarButton="false" :showServicesButton="false" />
   <main
-    class="grid min-h-[calc(100svh-theme(spacing.16))] place-content-center bg-slate-100 p-8 lg:p-12 xl:p-16 2xl:p-20"
+    class="grid min-h-[calc(100svh-theme(spacing.16))] place-content-center bg-primary/5 p-8 lg:p-12 xl:p-16 2xl:p-20"
   >
     <div
       class="divide-y divide-gray-200 overflow-hidden rounded-lg bg-gray-200 shadow sm:grid sm:grid-cols-2 sm:gap-px sm:divide-y-0"
@@ -25,11 +25,11 @@ const services = serviceStore.services
           serviceIndex === services.length - 1
             ? 'rounded-bl-lg rounded-br-lg sm:rounded-bl-none'
             : '',
-          'group relative bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-slate-500',
+          'group relative bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-primary',
         ]"
       >
         <div>
-          <span class="inline-flex rounded-lg bg-slate-50 p-3 text-slate-700 ring-4 ring-white">
+          <span class="inline-flex rounded-lg bg-primary/5 p-3 text-primary ring-4 ring-white">
             <Icon :icon="service.icon" class="size-6" aria-hidden="true" />
           </span>
         </div>
@@ -47,7 +47,7 @@ const services = serviceStore.services
           </p>
         </div>
         <span
-          class="pointer-events-none absolute right-6 top-6 text-foreground/25 group-hover:text-foreground/50"
+          class="pointer-events-none absolute right-6 top-6 text-primary/25 group-hover:text-primary/50"
           aria-hidden="true"
         >
           <svg class="size-6" fill="currentColor" viewBox="0 0 24 24">
