@@ -1,7 +1,9 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+export const homeUrl = '/meta' as const
+
 export const urls = [
-  '/meta',
+  homeUrl,
   '/meta/chatbot-flow-builder',
   '/meta/comment-auto-reply',
   '/meta/import-social-media',
