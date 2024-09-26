@@ -17,7 +17,7 @@ const services = serviceStore.services
     >
       <div
         v-for="(service, serviceIndex) in services"
-        :key="service.title"
+        :key="service.name"
         :class="[
           serviceIndex === 0 ? 'rounded-tl-lg rounded-tr-lg sm:rounded-tr-none' : '',
           serviceIndex === 1 ? 'sm:rounded-tr-lg' : '',
@@ -38,7 +38,7 @@ const services = serviceStore.services
             <a :href="service.href" class="focus:outline-none">
               <!-- Extend touch target to entire panel -->
               <span class="absolute inset-0" aria-hidden="true" />
-              {{ service.title }}
+              {{ service.name }}
             </a>
           </h3>
           <p class="mt-2 text-sm text-foreground/60">

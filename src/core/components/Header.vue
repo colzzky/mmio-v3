@@ -9,8 +9,11 @@ import {
 } from '@/core/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Icon } from '@iconify/vue'
+import { Popover, PopoverContent, PopoverTrigger } from '@/core/components/ui/popover'
+import { useServicesStore } from '@/stores/servicesStore'
 
 const sidebarStore = useSidebarStore()
+const servicesStore = useServicesStore()
 
 withDefaults(defineProps<{ showSidebarButton?: boolean; showServicesButton?: boolean }>(), {
   showServicesButton: true,
@@ -39,10 +42,25 @@ withDefaults(defineProps<{ showSidebarButton?: boolean; showServicesButton?: boo
     <div class="flex flex-1 justify-end gap-x-4 lg:gap-x-6">
       <div class="flex items-center gap-x-4 lg:gap-x-6">
         <template v-if="showServicesButton">
-          <button type="button" class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
-            <span class="sr-only">View notifications</span>
-            <Icon icon="mingcute:dot-grid-fill" class="size-6" />
-          </button>
+          <Popover>
+            <PopoverTrigger class="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500">
+              <span class="sr-only">View notifications</span>
+              <Icon icon="mingcute:dot-grid-fill" class="size-6" />
+            </PopoverTrigger>
+            <PopoverContent class="grid w-80 grid-cols-3 gap-2">
+              <RouterLink
+                v-for="service in servicesStore.services"
+                :key="service.name"
+                :to="service.href"
+                class="group flex flex-col items-center gap-y-2 rounded-lg p-2 text-center text-[0.6rem] font-medium hover:bg-foreground/5"
+              >
+                <span class="inline-flex rounded-lg bg-foreground/5 p-3 group-hover:bg-transparent">
+                  <Icon :icon="service.icon" class="size-8 shrink-0" aria-hidden="true" />
+                </span>
+                {{ service.name }}
+              </RouterLink>
+            </PopoverContent>
+          </Popover>
 
           <!-- Separator -->
           <div class="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-900/10" aria-hidden="true" />
