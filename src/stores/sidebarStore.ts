@@ -1,6 +1,90 @@
+import type { urls as metaUrls } from '@/modules/meta/routes'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+const metaNavigationRoutes: Record<(typeof metaUrls)[number], { label: string; icon: string }> = {
+  '/meta': {
+    label: 'Home',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/chatbot-flow-builder': {
+    label: 'Chatbot Flow Builder',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/comment-auto-reply': {
+    label: 'Comment Auto Reply',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/import-social-media': {
+    label: 'Import Social Media',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/post-randomizer': {
+    label: 'Post Randomizer',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/livestream': {
+    label: 'Livestream',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/interest-finder': {
+    label: 'Interest Finder',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/live-chat': {
+    label: 'Live Chat',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/subscribers': {
+    label: 'Subscribers',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/growth-tools': {
+    label: 'Growth Tools',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/chat-broadcast': {
+    label: 'Chat Broadcast',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/chat-sequences': {
+    label: 'Chat Sequences',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/messenger-webview': {
+    label: 'Messenger Webview',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/persistent-menu': {
+    label: 'Persistent Menu',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/welcome-message': {
+    label: 'Welcome Message',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/ice-breakers': {
+    label: 'Ice Breakers',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/get-started': {
+    label: 'Get Started',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/keywords': {
+    label: 'Keywords',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/chatbot-defaults': {
+    label: 'Chatbot Defaults',
+    icon: 'material-symbols:home-outline',
+  },
+  '/meta/marketing-messages': {
+    label: 'Marketing Messages',
+    icon: 'material-symbols:home-outline',
+  },
+}
 
 export const useSidebarStore = defineStore('sidebar', () => {
   // TOGGLE MOBILE SIDEBAR
@@ -20,112 +104,13 @@ export const useSidebarStore = defineStore('sidebar', () => {
 
   // GET SERVICE ROUTES
   const routes = ref({
-    meta: [
-      {
-        href: '/meta',
-        name: 'Home',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/chatbot-flow-builder',
-        name: 'Chatbot Flow Builder',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/comment-auto-reply',
-        name: 'Comment Auto Reply',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/import-social-media',
-        name: 'Import Social Media',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/post-randomizer',
-        name: 'Post Randomizer',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/livestream',
-        name: 'Livestream',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/interest-finder',
-        name: 'Interest Finder',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/live-chat',
-        name: 'Live Chat',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/subscribers',
-        name: 'Subscribers',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/growth-tools',
-        name: 'Growth Tools',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/chat-broadcast',
-        name: 'Chat Broadcast',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/chat-sequences',
-        name: 'Chat Sequences',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/messenger-webview',
-        name: 'Messenger Webview',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/persistent-menu',
-        name: 'Persistent Menu',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/welcome-message',
-        name: 'Welcome Message',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/ice-breakers',
-        name: 'Ice Breakers',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/get-started',
-        name: 'Get Started',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/keywords',
-        name: 'Keywords',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/chatbot-defaults',
-        name: 'Chatbot Defaults',
-        icon: 'material-symbols:home-outline',
-      },
-      {
-        href: '/marketing-messages',
-        name: 'Marketing Messages',
-        icon: 'material-symbols:home-outline',
-      },
-    ],
+    meta: Object.entries(metaNavigationRoutes).map(([key, values]) => ({ href: key, ...values })),
   })
 
-  function getServiceRoutes(service: keyof typeof routes.value) {
-    return routes.value[service]
+  function getServiceRoutes(routePath: string) {
+    if (routePath.includes('meta')) return routes.value.meta
+
+    throw new Error('Service not found')
   }
 
   return {

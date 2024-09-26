@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useSidebarStore } from '@/stores/sidebarStore'
-import { ChevronDownIcon } from '@heroicons/vue/24/outline'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,7 +69,7 @@ withDefaults(defineProps<{ showSidebarButton?: boolean; showServicesButton?: boo
 
         <!-- Profile Dropdown -->
         <DropdownMenu>
-          <DropdownMenuTrigger class="flex items-center">
+          <DropdownMenuTrigger class="group flex items-center">
             <span class="sr-only">Open user menu</span>
             <Avatar class="size-8">
               <AvatarImage
@@ -84,7 +83,11 @@ withDefaults(defineProps<{ showSidebarButton?: boolean; showServicesButton?: boo
               <span class="ml-4 text-sm font-semibold leading-6 text-gray-900" aria-hidden="true"
                 >Tom Cook</span
               >
-              <ChevronDownIcon class="ml-2 h-5 w-5 text-gray-400" aria-hidden="true" />
+              <Icon
+                icon="ep:arrow-down-bold"
+                class="ml-2 size-4 text-primary/50 group-hover:text-primary/75"
+                aria-hidden="true"
+              />
             </span>
           </DropdownMenuTrigger>
           <DropdownMenuContent>

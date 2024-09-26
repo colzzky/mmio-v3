@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import authenticationRoutes from '@/modules/authentication/routes'
 import servicesRoutes from '@/modules/services/routes'
-import metaRoutes from '@/modules/meta/routes'
+import { routes as metaRoutes } from '@/modules/meta/routes'
 
-const routes: RouteRecordRaw[] = [
+const routes = [
   {
     path: '/',
     name: 'home',
@@ -12,7 +12,7 @@ const routes: RouteRecordRaw[] = [
   ...authenticationRoutes,
   ...servicesRoutes,
   ...metaRoutes,
-]
+] as RouteRecordRaw[]
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

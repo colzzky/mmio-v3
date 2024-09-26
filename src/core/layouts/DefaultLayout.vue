@@ -2,14 +2,14 @@
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import Header from '../components/Header.vue'
-import { useRoute } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import SidebarNavigationItem from '../components/SidebarNavigationItem.vue'
+import { useRoute } from 'vue-router'
 
 // TOGGLE MOBILE SIDEBAR
 const sidebarStore = useSidebarStore()
 const route = useRoute()
-const routes = sidebarStore.getServiceRoutes(route.name)
+const routes = sidebarStore.getServiceRoutes(route.path)
 </script>
 <template>
   <div>
@@ -71,10 +71,10 @@ const routes = sidebarStore.getServiceRoutes(route.name)
                   <ul role="list" class="flex flex-1 flex-col gap-y-7">
                     <li>
                       <ul role="list" class="-mx-2 space-y-1">
-                        <li v-for="route in routes" :key="route.name">
+                        <li v-for="route in routes" :key="route.label">
                           <SidebarNavigationItem :to="route.href">
                             <Icon :icon="route.icon" class="size-6 shrink-0" aria-hidden="true" />
-                            {{ route.name }}
+                            {{ route.label }}
                           </SidebarNavigationItem>
                         </li>
                       </ul>
@@ -113,10 +113,10 @@ const routes = sidebarStore.getServiceRoutes(route.name)
           <ul role="list" class="flex flex-1 flex-col gap-y-7">
             <li>
               <ul role="list" class="-mx-2 space-y-1">
-                <li v-for="route in routes" :key="route.name">
+                <li v-for="route in routes" :key="route.label">
                   <SidebarNavigationItem :to="route.href">
                     <Icon :icon="route.icon" class="size-6 shrink-0" aria-hidden="true" />
-                    {{ route.name }}
+                    {{ route.label }}
                   </SidebarNavigationItem>
                 </li>
               </ul>
