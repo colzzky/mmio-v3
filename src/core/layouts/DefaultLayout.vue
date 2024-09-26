@@ -10,8 +10,13 @@ import {
 } from '@/core/components/ui/dropdown-menu'
 import { Icon } from '@iconify/vue'
 import { Avatar, AvatarFallback, AvatarImage } from '@/core/components/ui/avatar'
+import { useSidebarStore } from '@/stores/sidebarStore'
+import { useRoute } from 'vue-router'
 
-const navigation = [{ name: 'Home', href: 'services', icon: 'material-symbols:home-outline' }]
+// GET SERVICE ROUTES
+const sidebarStore = useSidebarStore()
+const route = useRoute()
+const routes = sidebarStore.getServiceRoutes(route.name)
 
 const sidebarOpen = ref(false)
 </script>
@@ -71,18 +76,18 @@ const sidebarOpen = ref(false)
                 </div>
                 <nav class="flex flex-1 flex-col">
                   <ul role="list" class="-mx-2 space-y-1">
-                    <li v-for="item in navigation" :key="item.name">
+                    <li v-for="route in routes" :key="route.name">
                       <Button
                         class="group flex justify-start gap-x-3 px-2 text-white/50 hover:bg-black/50 hover:text-primary-foreground aria-[current=page]:bg-black/25 aria-[current=page]:text-primary-foreground"
                         as-child
                       >
-                        <RouterLink :to="item.href">
+                        <RouterLink :to="route.href">
                           <Icon
-                            :icon="item.icon"
+                            :icon="route.icon"
                             class="size-6 shrink-0 text-current group-hover:text-primary-foreground"
                             aria-hidden="true"
                           />
-                          {{ item.name }}
+                          {{ route.name }}
                         </RouterLink>
                       </Button>
                     </li>
@@ -108,18 +113,18 @@ const sidebarOpen = ref(false)
         </div>
         <nav class="flex flex-1 flex-col">
           <ul role="list" class="-mx-2 space-y-1">
-            <li v-for="item in navigation" :key="item.name">
+            <li v-for="route in routes" :key="route.name">
               <Button
                 as-child
                 class="group flex justify-start gap-x-3 px-2 text-white/50 hover:bg-black/50 hover:text-primary-foreground aria-[current=page]:bg-black/25 aria-[current=page]:text-primary-foreground"
               >
-                <RouterLink :to="item.href">
+                <RouterLink :to="route.href">
                   <Icon
-                    :icon="item.icon"
+                    :icon="route.icon"
                     class="size-6 shrink-0 text-current group-hover:text-primary-foreground"
                     aria-hidden="true"
                   />
-                  {{ item.name }}
+                  {{ route.name }}
                 </RouterLink>
               </Button>
             </li>
