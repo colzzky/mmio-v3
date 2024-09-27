@@ -10,79 +10,79 @@ const metaNavigationRoutes: Record<(typeof metaUrls)[number], { label: string; i
   },
   '/meta/chatbot-flow-builder': {
     label: 'Chatbot Flow Builder',
-    icon: 'material-symbols:home-outline',
+    icon: 'fluent-mdl2:flow',
   },
   '/meta/comment-auto-reply': {
     label: 'Comment Auto Reply',
-    icon: 'material-symbols:home-outline',
+    icon: 'mdi:comment-outline',
   },
   '/meta/import-social-media': {
     label: 'Import Social Media',
-    icon: 'material-symbols:home-outline',
+    icon: 'ph:plug',
   },
   '/meta/post-randomizer': {
     label: 'Post Randomizer',
-    icon: 'material-symbols:home-outline',
+    icon: 'lets-icons:sort-random-light',
   },
   '/meta/livestream': {
     label: 'Livestream',
-    icon: 'material-symbols:home-outline',
+    icon: 'mdi:video-outline',
   },
   '/meta/interest-finder': {
     label: 'Interest Finder',
-    icon: 'material-symbols:home-outline',
+    icon: 'icon-park-outline:find',
   },
   '/meta/live-chat': {
     label: 'Live Chat',
-    icon: 'material-symbols:home-outline',
+    icon: 'hugeicons:messenger',
   },
   '/meta/subscribers': {
     label: 'Subscribers',
-    icon: 'material-symbols:home-outline',
+    icon: 'ph:users',
   },
   '/meta/growth-tools': {
     label: 'Growth Tools',
-    icon: 'material-symbols:home-outline',
+    icon: 'ph:chart-line',
   },
   '/meta/chat-broadcast': {
     label: 'Chat Broadcast',
-    icon: 'material-symbols:home-outline',
+    icon: 'ph:broadcast',
   },
   '/meta/chat-sequences': {
     label: 'Chat Sequences',
-    icon: 'material-symbols:home-outline',
+    icon: 'formkit:fastforward',
   },
   '/meta/messenger-webview': {
     label: 'Messenger Webview',
-    icon: 'material-symbols:home-outline',
+    icon: 'ion:open-outline',
   },
   '/meta/persistent-menu': {
     label: 'Persistent Menu',
-    icon: 'material-symbols:home-outline',
+    icon: 'material-symbols-light:menu',
   },
   '/meta/welcome-message': {
     label: 'Welcome Message',
-    icon: 'material-symbols:home-outline',
+    icon: 'mingcute:open-door-line',
   },
   '/meta/ice-breakers': {
-    label: 'Ice Breakers',
-    icon: 'material-symbols:home-outline',
+    label: 'Ice Breakers (FAQs)',
+    icon: 'mdi:information-outline',
   },
   '/meta/get-started': {
     label: 'Get Started',
-    icon: 'material-symbols:home-outline',
+    icon: 'tabler:message',
   },
   '/meta/keywords': {
     label: 'Keywords',
-    icon: 'material-symbols:home-outline',
+    icon: 'codicon:symbol-keyword',
   },
   '/meta/chatbot-defaults': {
     label: 'Chatbot Defaults',
-    icon: 'material-symbols:home-outline',
+    icon: 'material-symbols-light:settings-outline',
   },
   '/meta/marketing-messages': {
     label: 'Marketing Messages',
-    icon: 'material-symbols:home-outline',
+    icon: 'uit:repeat',
   },
 }
 
