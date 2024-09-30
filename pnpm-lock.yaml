@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@heroicons/vue':
+        specifier: ^2.1.5
+        version: 2.1.5(vue@3.5.8(typescript@5.4.5))
       '@vueuse/core':
         specifier: ^11.1.0
         version: 11.1.0(vue@3.5.8(typescript@5.4.5))
@@ -21,7 +24,7 @@ importers:
         specifier: ^0.445.0
         version: 0.445.0(vue@3.5.8(typescript@5.4.5))
       pinia:
-        specifier: ^2.1.7
+        specifier: ^2.2.2
         version: 2.2.2(typescript@5.4.5)(vue@3.5.8(typescript@5.4.5))
       radix-vue:
         specifier: ^1.9.6
@@ -460,6 +463,11 @@ packages:
     engines: {node: '>=10'}
     peerDependencies:
       vue: ^3.2.0
+
+  '@heroicons/vue@2.1.5':
+    resolution: {integrity: sha512-IpqR72sFqFs55kyKfFS7tN+Ww6odFNeH/7UxycIOrlVYfj4WUGAdzQtLBnJspucSeqWFQsKM0g0YrgU655BEfA==}
+    peerDependencies:
+      vue: '>= 3'
 
   '@humanwhocodes/config-array@0.13.0':
     resolution: {integrity: sha512-DZLEEqFWQFiyK6h5YIeynKx7JlvCYWL0cImfSRXZ9l4Sg2efkFGTuFf6vzXjK1cq6IYkU+Eg/JizXw+TD2vRNw==}
@@ -3015,6 +3023,10 @@ snapshots:
   '@headlessui/vue@1.7.23(vue@3.5.8(typescript@5.4.5))':
     dependencies:
       '@tanstack/vue-virtual': 3.10.8(vue@3.5.8(typescript@5.4.5))
+      vue: 3.5.8(typescript@5.4.5)
+
+  '@heroicons/vue@2.1.5(vue@3.5.8(typescript@5.4.5))':
+    dependencies:
       vue: 3.5.8(typescript@5.4.5)
 
   '@humanwhocodes/config-array@0.13.0':
