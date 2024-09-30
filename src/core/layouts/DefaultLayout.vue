@@ -3,13 +3,13 @@ import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessu
 import { useSidebarStore } from '@/stores/sidebarStore'
 import Header from '../components/Header.vue'
 import { Icon } from '@iconify/vue'
-import SidebarNavigationItem from '../components/SidebarNavigationItem.vue'
+import SidebarRouteLink from '../components/SidebarRouteLink.vue'
 import { useRoute } from 'vue-router'
 
 // TOGGLE MOBILE SIDEBAR
 const sidebarStore = useSidebarStore()
 const route = useRoute()
-const routes = sidebarStore.getServiceRoutes(route.path)
+const links = sidebarStore.getServiceLinks(route.path)
 </script>
 <template>
   <div>
@@ -71,23 +71,23 @@ const routes = sidebarStore.getServiceRoutes(route.path)
                   <ul role="list" class="flex flex-1 flex-col gap-y-7">
                     <li>
                       <ul role="list" class="-mx-2 space-y-1">
-                        <li v-for="route in routes" :key="route.label">
-                          <SidebarNavigationItem :to="route.href">
-                            <Icon :icon="route.icon" class="size-6 shrink-0" aria-hidden="true" />
-                            {{ route.label }}
-                          </SidebarNavigationItem>
+                        <li v-for="link in links" :key="link.label">
+                          <SidebarRouteLink :to="link.href">
+                            <Icon :icon="link.icon" class="size-6 shrink-0" aria-hidden="true" />
+                            {{ link.label }}
+                          </SidebarRouteLink>
                         </li>
                       </ul>
                     </li>
                     <li class="mt-auto">
-                      <SidebarNavigationItem to="/settings" class-name="-mx-3 px-3">
+                      <SidebarRouteLink to="/settings" class-name="-mx-3 px-3">
                         <Icon
                           icon="material-symbols:settings-outline"
                           class="size-6 shrink-0"
                           aria-hidden="true"
                         />
                         Settings
-                      </SidebarNavigationItem>
+                      </SidebarRouteLink>
                     </li>
                   </ul>
                 </nav>
@@ -113,23 +113,23 @@ const routes = sidebarStore.getServiceRoutes(route.path)
           <ul role="list" class="flex flex-1 flex-col gap-y-7">
             <li>
               <ul role="list" class="-mx-2 space-y-1">
-                <li v-for="route in routes" :key="route.label">
-                  <SidebarNavigationItem :to="route.href">
+                <li v-for="route in links" :key="route.label">
+                  <SidebarRouteLink :to="route.href">
                     <Icon :icon="route.icon" class="size-6 shrink-0" aria-hidden="true" />
                     {{ route.label }}
-                  </SidebarNavigationItem>
+                  </SidebarRouteLink>
                 </li>
               </ul>
             </li>
             <li class="mt-auto">
-              <SidebarNavigationItem to="/settings" class-name="-mx-3 px-3">
+              <SidebarRouteLink to="/settings" class-name="-mx-3 px-3">
                 <Icon
                   icon="material-symbols:settings-outline"
                   class="size-6 shrink-0"
                   aria-hidden="true"
                 />
                 Settings
-              </SidebarNavigationItem>
+              </SidebarRouteLink>
             </li>
           </ul>
         </nav>
