@@ -14,7 +14,7 @@ const links = sidebarStore.getServiceLinks(route.path)
 <template>
   <div>
     <TransitionRoot as="template" :show="sidebarStore.isMobileSidebarOpen">
-      <Dialog class="relative z-50 lg:hidden" @close="sidebarStore.toggleMobileSidebarOff">
+      <Dialog class="relative z-50 lg:hidden" @close="sidebarStore.toggleMobileSidebar('off')">
         <TransitionChild
           as="template"
           enter="transition-opacity ease-linear duration-300"
@@ -51,7 +51,7 @@ const links = sidebarStore.getServiceLinks(route.path)
                   <button
                     type="button"
                     class="-m-2.5 p-2.5"
-                    @click="sidebarStore.toggleMobileSidebarOff"
+                    @click="sidebarStore.toggleMobileSidebar('off')"
                   >
                     <span class="sr-only">Close sidebar</span>
                     <Icon icon="iconoir:xmark" class="size-6 text-background" aria-hidden="true" />

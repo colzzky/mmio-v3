@@ -28,7 +28,7 @@ withDefaults(defineProps<{ showSidebarButton?: boolean; showServicesButton?: boo
       <button
         type="button"
         class="-m-2.5 p-2.5 text-gray-700 lg:hidden"
-        @click="sidebarStore.toggleMobileSidebarOn"
+        @click="sidebarStore.toggleMobileSidebar('on')"
       >
         <span class="sr-only">Open sidebar</span>
         <Icon icon="material-symbols:menu" class="size-6" />

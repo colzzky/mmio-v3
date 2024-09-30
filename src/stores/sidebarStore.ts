@@ -6,11 +6,8 @@ import { useRouter } from 'vue-router'
 export const useSidebarStore = defineStore('sidebar', () => {
   // TOGGLE MOBILE SIDEBAR
   const isMobileSidebarOpen = ref(false)
-  function toggleMobileSidebarOn() {
-    isMobileSidebarOpen.value = true
-  }
-  function toggleMobileSidebarOff() {
-    isMobileSidebarOpen.value = false
+  function toggleMobileSidebar(value: 'on' | 'off') {
+    isMobileSidebarOpen.value = value === 'on' ? true : false
   }
 
   // LOGOUT USER
@@ -32,8 +29,7 @@ export const useSidebarStore = defineStore('sidebar', () => {
 
   return {
     isMobileSidebarOpen,
-    toggleMobileSidebarOn,
-    toggleMobileSidebarOff,
+    toggleMobileSidebar,
     logoutUser,
     links,
     getServiceLinks,
