@@ -1,120 +1,105 @@
 <script setup lang="ts">
 import { Button } from '@/core/components/ui/button'
-import { Label } from '@/core/components/ui/label'
-import { Input } from '@/core/components/ui/input'
-import { Checkbox } from '@/core/components/ui/checkbox'
-import { useRouter } from 'vue-router'
-import { reactive } from 'vue'
 import { Icon } from '@iconify/vue'
+import { reactive, ref } from 'vue'
+import { Input } from '@/core/components/ui/input'
+import { Label } from '@/core/components/ui/label'
 
-const router = useRouter()
+// USER SIGNIN WITH EMAIL AND PASSWORD
+const isSignInCredentialsFormVisible = ref(false)
+function toggleSignInCredentialsForm() {
+  isSignInCredentialsFormVisible.value = !isSignInCredentialsFormVisible.value
+}
 
-// LOGIN USER
 const form = reactive({
   email: 'superadmin@mmio.com',
   password: 'password',
 })
-
-async function handleLoginUser() {
+function handleLoginUser() {
   // todo: implement authentication
-
-  router.push('/services')
+  alert(`Email: ${form.email}, Password: ${form.password}`)
 }
 </script>
 
 <template>
-  <main class="flex min-h-svh flex-1">
-    <div
-      class="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24"
-    >
-      <div class="mx-auto w-full max-w-sm lg:w-96">
-        <div>
-          <img class="h-10 w-auto" src="@/assets/logo.png" alt="marketingmaster.io logo" />
-          <h2 class="mt-8 text-2xl/9 font-bold tracking-tight">Sign in to your account</h2>
-          <p class="mt-2 text-sm/6 text-foreground/50">
-            Not a member?
-            <Button variant="link" as-child class="h-[unset] p-0">
-              <RouterLink to="/register">Create an account</RouterLink>
-            </Button>
-          </p>
+  <main
+    class="mx-auto flex w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl flex-col gap-y-8 py-[var(--gutter)] [--gutter:1rem] lg:[--gutter:2rem]"
+  >
+    <img class="h-12 w-auto self-start" src="@/assets/logo.png" alt="marketingmaster.io logo" />
+    <template v-if="!isSignInCredentialsFormVisible">
+      <section class="flex flex-col gap-y-2 text-center">
+        <h1 class="text-4xl/none font-bold">Sign in to MMIO</h1>
+        <p class="text-sm">
+          New to MMIO?
+          <Button variant="link" as-child class="h-[unset] p-0 text-blue-500">
+            <RouterLink to="/register">Create an account</RouterLink>
+          </Button>
+        </p>
+      </section>
+      <section class="flex w-[calc(100svw-2rem)] max-w-xs flex-col gap-y-2 self-center">
+        <Button variant="secondary" class="relative" @click="toggleSignInCredentialsForm">
+          <Icon icon="ic:baseline-email" class="absolute left-4 top-1/2 size-5 -translate-y-1/2" />
+          Email
+        </Button>
+        <Button variant="secondary" class="relative">
+          <Icon icon="bi:google" class="absolute left-4 top-1/2 size-5 -translate-y-1/2" />
+          Sign in with Google
+        </Button>
+        <Button variant="secondary" class="relative">
+          <Icon icon="bi:facebook" class="absolute left-4 top-1/2 size-5 -translate-y-1/2" />
+          Sign in with Facebook
+        </Button>
+      </section>
+    </template>
+    <template v-else>
+      <section class="flex flex-col gap-y-2 text-center">
+        <h1 class="text-4xl/none font-bold">Login with your Email</h1>
+        <p class="text-sm">
+          You can also use
+          <Button
+            variant="link"
+            class="h-[unset] p-0 text-blue-500"
+            @click="toggleSignInCredentialsForm"
+          >
+            Facebook or Google
+          </Button>
+          to login
+        </p>
+      </section>
+      <form
+        class="flex w-[calc(100svw-2rem)] max-w-lg flex-col gap-y-4 self-center"
+        @submit.prevent="handleLoginUser"
+      >
+        <div class="flex flex-col gap-y-2">
+          <Label for="email">Email Address</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="johndoe@gmail.com"
+            autocomplete="email"
+            required
+            v-model="form.email"
+          />
         </div>
-
-        <div class="mt-10">
-          <div>
-            <form class="space-y-6" @submit.prevent="handleLoginUser">
-              <div class="space-y-2">
-                <Label for="email">Email address</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autocomplete="email"
-                  required
-                  v-model="form.email"
-                />
-              </div>
-
-              <div class="space-y-2">
-                <Label for="password" class="block text-sm/6 font-medium text-gray-900">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autocomplete="current-password"
-                  required
-                  v-model="form.password"
-                />
-              </div>
-
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <Checkbox id="remember-me" name="remember-me" />
-                  <Label for="remember-me">Remember me</Label>
-                </div>
-
-                <Button variant="link" as-child class="h-[unset] p-0">
-                  <RouterLink to="#">Forgot password?</RouterLink>
-                </Button>
-              </div>
-
-              <div>
-                <Button class="w-full">Sign in</Button>
-              </div>
-            </form>
-          </div>
-
-          <div class="mt-10">
-            <div class="relative">
-              <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                <div class="w-full border-t border-gray-200" />
-              </div>
-              <div class="relative flex justify-center text-sm/6 font-medium">
-                <span class="bg-white px-6">Or continue with</span>
-              </div>
-            </div>
-
-            <div class="mt-6 grid grid-cols-2 gap-4">
-              <Button class="flex items-center gap-2 text-sm/6 font-semibold" variant="outline">
-                <Icon icon="bi:google" class="size-5" />
-                Google
-              </Button>
-              <Button class="flex items-center gap-2 text-sm/6 font-semibold" variant="outline">
-                <Icon icon="bi:github" class="size-5" />
-                GitHub
-              </Button>
-            </div>
-          </div>
+        <div class="grid grid-cols-2 gap-y-1">
+          <Label for="password">Password</Label>
+          <Button variant="link" as-child class="h-[unset] justify-self-end p-0 text-blue-500">
+            <RouterLink to="/forgot-password">Forgot your password?</RouterLink>
+          </Button>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="********"
+            autocomplete="password"
+            class="col-span-2"
+            required
+            v-model="form.password"
+          />
         </div>
-      </div>
-    </div>
-    <div class="relative hidden w-0 flex-1 lg:block">
-      <img
-        class="absolute inset-0 h-full w-full object-cover"
-        src="https://images.unsplash.com/photo-1496917756835-20cb06e75b4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1908&q=80"
-        alt=""
-      />
-    </div>
+        <Button type="submit">Sign in</Button>
+      </form>
+    </template>
   </main>
 </template>
