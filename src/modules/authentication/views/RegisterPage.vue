@@ -3,98 +3,99 @@ import { Button } from '@/core/components/ui/button'
 import { Label } from '@/core/components/ui/label'
 import { Input } from '@/core/components/ui/input'
 import { Checkbox } from '@/core/components/ui/checkbox'
+import { reactive } from 'vue'
 
 // REGISTER USER
+const form = reactive({
+  email: 'superadmin@mmio.com',
+  name: 'Super Admin',
+  password: 'password',
+  agreeToTermsAndCondition: false,
+})
+
 async function handleRegisterUser() {
   // todo: implement authentication
+  if (!form.agreeToTermsAndCondition) {
+    throw new Error('You must agree to the terms and conditions')
+  }
+  alert(`Email: ${form.email}, Name: ${form.name}, Password: ${form.password}, `)
 }
 </script>
 
 <template>
-  <main class="flex min-h-svh flex-1">
-    <div
-      class="flex flex-1 flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20 xl:px-24"
-    >
-      <div class="mx-auto w-full max-w-sm lg:w-96">
-        <div>
-          <img class="h-10 w-auto" src="@/assets/logo.png" alt="marketingmaster.io logo" />
-          <h2 class="mt-8 text-2xl/9 font-bold tracking-tight">Create an account</h2>
-          <p class="mt-2 text-sm/6 text-foreground/50">
-            Already a member?
-            <Button variant="link" as-child class="h-[unset] p-0">
-              <RouterLink to="/login">Sign in to your account</RouterLink>
+  <main
+    class="mx-auto grid min-h-svh w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-rows-[48px_1fr] gap-8 py-[var(--gutter)] [--gutter:1rem] lg:grid-cols-5 lg:[--gutter:2rem]"
+  >
+    <img
+      class="h-12 w-auto self-start lg:col-span-5"
+      src="@/assets/logo.png"
+      alt="marketingmaster.io logo"
+    />
+    <div class="flex flex-col gap-y-8 lg:col-span-2 lg:self-center">
+      <section class="flex flex-col gap-y-2">
+        <h1 class="text-4xl/none font-bold">Set your Username, Email and Password</h1>
+        <p class="text-sm">
+          Already have an account?
+          <Button variant="link" as-child class="h-[unset] p-0 text-blue-500">
+            <RouterLink to="/login">Email, Facebook, and Google</RouterLink>
+          </Button>
+        </p>
+      </section>
+      <form class="flex flex-col gap-y-4" @submit.prevent="handleRegisterUser">
+        <div class="flex flex-col gap-y-2">
+          <Label for="email">Email Address</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            v-model="form.email"
+            placeholder="johndoe@gmail.com"
+            required
+          />
+        </div>
+        <div class="flex flex-col gap-y-2">
+          <Label for="name">Display Name:</Label>
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            placeholder="John Doe"
+            v-model="form.name"
+            required
+          />
+        </div>
+        <div class="flex flex-col gap-y-2">
+          <Label for="password">Password</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="password"
+            placeholder="********"
+            v-model="form.password"
+            required
+          />
+        </div>
+        <div class="flex items-center">
+          <Checkbox
+            id="termsAndCondition"
+            name="termsAndCondition"
+            v-model:checked="form.agreeToTermsAndCondition"
+          />
+          <Label for="termsAndCondition">
+            I agree to
+            <Button variant="link" as-child class="h-[unset] p-0 text-blue-500">
+              <RouterLink to="#">Terms and Condition</RouterLink>
             </Button>
-          </p>
+          </Label>
         </div>
-
-        <div class="mt-10">
-          <div>
-            <form class="space-y-6" @submit.prevent="handleRegisterUser">
-              <div class="space-y-2">
-                <Label for="email">Email address</Label>
-                <Input id="email" name="email" type="email" autocomplete="email" required />
-              </div>
-
-              <div class="space-y-2">
-                <Label for="password" class="block text-sm/6 font-medium text-gray-900">
-                  Password
-                </Label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autocomplete="current-password"
-                  required
-                />
-              </div>
-
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <Checkbox id="remember-me" name="remember-me" />
-                  <Label for="remember-me">Remember me</Label>
-                </div>
-
-                <Button variant="link" as-child class="h-[unset] p-0">
-                  <RouterLink to="/forgot-password">Forgot password?</RouterLink>
-                </Button>
-              </div>
-
-              <div>
-                <Button type="button" class="w-full">Sign in</Button>
-              </div>
-            </form>
-          </div>
-
-          <div class="mt-10">
-            <div class="relative">
-              <div class="absolute inset-0 flex items-center" aria-hidden="true">
-                <div class="w-full border-t border-gray-200" />
-              </div>
-              <div class="relative flex justify-center text-sm/6 font-medium">
-                <span class="bg-white px-6">Or continue with</span>
-              </div>
-            </div>
-
-            <div class="mt-6 grid grid-cols-2 gap-4">
-              <Button class="flex items-center gap-2 text-sm/6 font-semibold" variant="outline">
-                <Icon icon="bi:google" class="size-5" />
-                Google
-              </Button>
-              <Button class="flex items-center gap-2 text-sm/6 font-semibold" variant="outline">
-                <Icon icon="bi:github" class="size-5" />
-                GitHub
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+        <Button type="submit" :disabled="!form.agreeToTermsAndCondition">Create Account</Button>
+      </form>
     </div>
-    <div class="relative hidden w-0 flex-1 lg:block">
-      <img
-        class="absolute inset-0 h-full w-full object-cover"
-        src="https://images.unsplash.com/photo-1496917756835-20cb06e75b4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1908&q=80"
-        alt=""
-      />
+    <div class="col-span-3 hidden place-content-center lg:grid">
+      <img src="@/assets/login.png" alt="" />
     </div>
   </main>
 </template>

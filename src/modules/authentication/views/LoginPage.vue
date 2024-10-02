@@ -22,7 +22,9 @@ function handleLoginUser() {
 </script>
 
 <template>
-  <main class="mx-auto flex w-[calc(100svw-2rem)] max-w-screen-lg flex-col gap-y-8 py-4 lg:py-8">
+  <main
+    class="mx-auto flex w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl flex-col gap-y-8 py-[var(--gutter)] [--gutter:1rem] lg:[--gutter:2rem]"
+  >
     <img class="h-12 w-auto self-start" src="@/assets/logo.png" alt="marketingmaster.io logo" />
     <template v-if="!isSignInCredentialsFormVisible">
       <section class="flex flex-col gap-y-2 text-center">
