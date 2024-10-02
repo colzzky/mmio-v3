@@ -76,7 +76,7 @@ const links = sidebarStore.getServiceLinks(route.path)
                       </ul>
                     </li>
                     <li class="mt-auto">
-                      <SidebarRouteLink to="/settings" class-name="-mx-3 px-3">
+                      <SidebarRouteLink to="/settings" class="-mx-3 px-3">
                         <Icon
                           icon="material-symbols:settings-outline"
                           class="size-6 shrink-0"
@@ -114,7 +114,7 @@ const links = sidebarStore.getServiceLinks(route.path)
               </ul>
             </li>
             <li class="mt-auto">
-              <SidebarRouteLink to="/settings" class-name="-mx-3 px-3">
+              <SidebarRouteLink to="/settings" class="-mx-3 px-3">
                 <Icon
                   icon="material-symbols:settings-outline"
                   class="size-6 shrink-0"
@@ -131,11 +131,7 @@ const links = sidebarStore.getServiceLinks(route.path)
     <div class="lg:pl-72">
       <Header />
 
-      <main class="py-10">
-        <div class="px-4 sm:px-6 lg:px-8">
-          <slot />
-        </div>
-      </main>
+      <slot />
     </div>
   </div>
 </template>
