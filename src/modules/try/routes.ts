@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
-import Other from './views/try.vue'
+import Other from './views/Try.vue'
 
 const routes: RouteRecordRaw[] = [
   {
