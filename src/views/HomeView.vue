@@ -1,5 +1,9 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import HomeLayout from '@/core/layouts/HomeLayout.vue'
+</script>
 
 <template>
-  <main class="bg-blue-400">hello mmio!</main>
+  <HomeLayout>
+    <main></main>
+  </HomeLayout>
 </template>
