@@ -2,7 +2,7 @@ import type { RouteRecordRaw } from 'vue-router'
 
 export const homeUrl = '/meta' as const
 
-const servicesUrl = [
+export const servicesUrl = [
   '/meta/chatbot-flow-builder',
   '/meta/comment-auto-reply',
   '/meta/import-social-media',
@@ -16,8 +16,10 @@ const servicesUrl = [
   '/meta/chat-sequences',
 ] as const
 
+type AllServicesUrl = (typeof servicesUrl)[number]
+
 const servicesFoo: Record<
-  (typeof servicesUrl)[number],
+  AllServicesUrl,
   { label: string; icon: string; description: string; pinned: boolean }
 > = {
   '/meta/chatbot-flow-builder': {
@@ -99,10 +101,9 @@ const servicesFoo: Record<
   },
 }
 
-export const servicesBar = Object.entries(servicesFoo).map(([key, values]) => ({
-  href: key,
-  ...values,
-}))
+export const servicesBaz = new Map(
+  Object.entries(servicesFoo).map(([key, values]) => [key, values]),
+)
 
 const urls = [
   homeUrl,
@@ -117,7 +118,9 @@ const urls = [
   '/meta/marketing-messages',
 ] as const
 
-const routeRecords: Record<(typeof urls)[number], Omit<RouteRecordRaw, 'path'>> = {
+type AllUrl = (typeof urls)[number]
+
+const routeRecords: Record<AllUrl, Omit<RouteRecordRaw, 'path'>> = {
   '/meta': {
     name: 'meta',
     component: () => import('./views/MetaHomePage.vue'),
@@ -201,6 +204,6 @@ const routeRecords: Record<(typeof urls)[number], Omit<RouteRecordRaw, 'path'>> 
 }
 
 export const routes = Object.entries(routeRecords).map(([key, values]) => ({
-  path: key as (typeof urls)[number],
+  path: key,
   ...values,
 }))

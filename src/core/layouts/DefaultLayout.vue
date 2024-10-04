@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import DesktopSidebar from '../components/Sidebar/desktop-sidebar.vue'
+import ServicesModal from '../components/services-modal.vue'
+import DesktopSidebar from '../components/sidebar/desktop-sidebar.vue'
 import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar'
 import { Card } from '../components/ui/card'
 import { uiHelpers } from '../utils/ui-helper'
@@ -16,13 +17,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/core/components/ui/collapsible'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/core/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +38,7 @@ const isServicesModalOpen = ref(false)
 
 const servicesStore = useServicesStore()
 const services = servicesStore.getServiceLinks(route.path)
-const pinnedServices = computed(() => services.filter((s) => s.pinned))
+const pinnedServices = computed(() => [...services].filter((service) => service[1].pinned))
 
 function toggleServicesModal() {
   isServicesModalOpen.value = !isServicesModalOpen.value
@@ -104,18 +98,18 @@ const parentRoute = breadcrumbs[0]
           </i>
         </CollapsibleTrigger>
         <CollapsibleContent as="ul" class="-mx-2">
-          <li v-for="service in pinnedServices" :key="service.href">
+          <li v-for="[key, value] in pinnedServices" :key="key">
             <RouterLink
-              :to="service.href"
+              :to="key"
               class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/5"
             >
-              <i class="material-icons text-xl">{{ service.icon }}</i>
+              <i class="material-icons text-xl">{{ value.icon }}</i>
               <span>
-                {{ service.label }}
+                {{ value.label }}
               </span>
               <button
                 class="grid place-content-center"
-                @click.prevent="servicesStore.pinService(route.path, service.href)"
+                @click.prevent="servicesStore.toggleServicePinnedStatus(route.path, key)"
               >
                 <i class="material-icons text-xl">bookmark</i>
               </button>
@@ -126,35 +120,7 @@ const parentRoute = breadcrumbs[0]
     </DesktopSidebar>
 
     <!-- services modal -->
-    <Dialog v-model:open="isServicesModalOpen">
-      <DialogContent class="pb-2">
-        <DialogHeader>
-          <DialogTitle>Choose a service</DialogTitle>
-          <DialogDescription>What we offer!</DialogDescription>
-        </DialogHeader>
-        <ul class="-mx-4 flex max-h-[50svh] flex-col overflow-y-scroll">
-          <li
-            v-for="service in services"
-            :key="service.href"
-            class="grid grid-cols-[1fr_var(--bookmark-size)] gap-x-2 rounded p-4 [--bookmark-size:48px] [&:has(a:hover)]:bg-primary/5"
-          >
-            <RouterLink :to="service.href" class="grid grid-cols-[36px_1fr] items-center gap-x-2">
-              <i class="material-icons row-span-2">{{ service.icon }}</i>
-              <h3 class="text-sm font-bold">{{ service.label }}</h3>
-              <p class="text-xs">{{ service.description }}</p>
-            </RouterLink>
-            <button
-              class="size-[var(--bookmark-size)] self-center rounded-full leading-none hover:bg-primary/5"
-              @click="servicesStore.pinService(route.path, service.href)"
-            >
-              <i class="material-icons">
-                {{ service.pinned ? 'bookmark' : 'bookmark_outline' }}
-              </i>
-            </button>
-          </li>
-        </ul>
-      </DialogContent>
-    </Dialog>
+    <ServicesModal v-model:open="isServicesModalOpen" />
 
     <div class="lg:pl-72">
       <!-- header -->

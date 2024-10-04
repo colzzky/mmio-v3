@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import DesktopSidebar from '../components/Sidebar/desktop-sidebar.vue'
-import MobileSidebar from '../components/Sidebar/mobile-sidebar.vue'
+import DesktopSidebar from '../components/sidebar/desktop-sidebar.vue'
+import MobileSidebar from '../components/sidebar/mobile-sidebar.vue'
 import CommandCenter from '@/modules/try/components/CommandCenter.vue'
 import { useSidebarStore } from '@/stores/sidebarStore'
 
