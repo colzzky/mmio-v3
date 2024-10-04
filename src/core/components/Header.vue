@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { useSidebarStore } from '@/stores/sidebarStore'
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/core/components/ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
-import { Icon } from '@iconify/vue'
 import { Popover, PopoverContent, PopoverTrigger } from '@/core/components/ui/popover'
 import { useServicesStore } from '@/stores/servicesStore'
+import { useSidebarStore } from '@/stores/sidebarStore'
+import { Icon } from '@iconify/vue'
 
 const sidebarStore = useSidebarStore()
 const servicesStore = useServicesStore()

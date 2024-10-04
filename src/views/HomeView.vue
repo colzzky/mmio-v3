@@ -4,6 +4,6 @@ import HomeLayout from '@/core/layouts/HomeLayout.vue'
 
 <template>
   <HomeLayout>
-    <main></main>
+    <main>qweqwewqewqeqw!</main>
   </HomeLayout>
 </template>

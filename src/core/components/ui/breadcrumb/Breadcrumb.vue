@@ -1,5 +1,4 @@
-<script setup lang="ts">
-import cn from '@/core/utils/cn'
+<script lang="ts" setup>
 import type { HTMLAttributes } from 'vue'
 
 const props = defineProps<{
@@ -8,7 +7,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div :class="cn('p-6 pt-0', props.class)">
+  <nav aria-label="breadcrumb" :class="props.class">
     <slot />
-  </div>
+  </nav>
 </template>

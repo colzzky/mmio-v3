@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { Button } from '@/core/components/ui/button'
-import { Icon } from '@iconify/vue'
-import { reactive, ref } from 'vue'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
+import { Icon } from '@iconify/vue'
+import { reactive, ref } from 'vue'
 
 // USER SIGNIN WITH EMAIL AND PASSWORD
 const isSignInCredentialsFormVisible = ref(false)

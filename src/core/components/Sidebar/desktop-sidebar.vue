@@ -1,4 +1,11 @@
 <script setup lang="ts">
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/core/components/ui/dropdown-menu'
+
 const configuration = [
   {
     icon: 'loyalty',
@@ -31,15 +38,21 @@ const configuration = [
 <template>
   <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
     <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-300 px-6 pb-4 pt-8">
-      <div class="flex shrink-0 items-center">
-        <div class="flex cursor-pointer items-center gap-x-1 rounded-md text-sm leading-6">
-          <i class="material-icons text-4xl" alt="Your Company">pin</i>
+      <DropdownMenu>
+        <DropdownMenuTrigger class="flex items-center gap-x-1">
+          <i class="material-icons text-4xl">pin</i>
           <span class="text-xl font-extrabold">MMIO</span>
-          <i class="material-icons text-md">arrow_drop_down</i>
-        </div>
-      </div>
+          <i class="material-icons">arrow_drop_down</i>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem>Item #1</DropdownMenuItem>
+          <DropdownMenuItem>Item #2</DropdownMenuItem>
+          <DropdownMenuItem>Item #3</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <nav class="flex flex-1 flex-col">
-        <ul role="list" class="flex flex-1 flex-col gap-y-7">
+        <ul role="list" class="flex flex-1 flex-col gap-y-4">
           <slot />
 
           <li class="-mx-2 mt-auto">

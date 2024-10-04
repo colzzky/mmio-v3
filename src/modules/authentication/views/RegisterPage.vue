@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Button } from '@/core/components/ui/button'
-import { Label } from '@/core/components/ui/label'
-import { Input } from '@/core/components/ui/input'
 import { Checkbox } from '@/core/components/ui/checkbox'
+import { Input } from '@/core/components/ui/input'
+import { Label } from '@/core/components/ui/label'
 import { reactive } from 'vue'
 
 // REGISTER USER

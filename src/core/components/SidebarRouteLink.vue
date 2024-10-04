@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, type HTMLAttributes } from 'vue'
-import { Button } from './ui/button'
-import { RouterLink } from 'vue-router'
 import cn from '../utils/cn'
+import { Button } from './ui/button'
+import { computed, type HTMLAttributes } from 'vue'
+import { RouterLink } from 'vue-router'
 
 const props = defineProps<{ to: string; class?: HTMLAttributes['class'] }>()
 

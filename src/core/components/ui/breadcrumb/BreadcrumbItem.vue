@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import cn from '@/core/utils/cn'
 import type { HTMLAttributes } from 'vue'
 
@@ -8,7 +8,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div :class="cn('p-6 pt-0', props.class)">
+  <li :class="cn('inline-flex items-center gap-1.5', props.class)">
     <slot />
-  </div>
+  </li>
 </template>

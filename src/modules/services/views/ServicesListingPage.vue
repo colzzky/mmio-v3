@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Icon } from '@iconify/vue'
 import Header from '@/core/components/Header.vue'
 import { useServicesStore } from '@/stores/servicesStore'
+import { Icon } from '@iconify/vue'
 
 const serviceStore = useServicesStore()
 const services = serviceStore.services
