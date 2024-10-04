@@ -18,11 +18,12 @@ export interface Platform {
 export interface ProjectCenterDialog {
     isOpen: boolean
     isLoading: boolean
-    activePage: 'platforms'| 'services'| 'chooseAPage'| 'projectName',
+    activePage: 'platforms'| 'services'| 'chooseAPage',
     active_platform: Platform | null,
     openProjectCenter(): void
     choosePlatform(platform: Platform): void,
-    returnToPlaforms():void
+    choosePage(): void,
+    returnToPlaforms():void,
     close(): void,
 }
 
@@ -71,6 +72,11 @@ export const useProjectCenter = defineStore('projectCenter', () => {
             this.isLoading = true
             this.active_platform = platform
             this.activePage = 'services'
+            this.isLoading = false
+        },
+        choosePage() {
+            this.isLoading = true
+            this.activePage = 'chooseAPage'
             this.isLoading = false
         },
         returnToPlaforms(){
