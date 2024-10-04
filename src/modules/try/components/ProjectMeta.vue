@@ -48,7 +48,7 @@ const { project_center_dialog: pcd, } = project_center
     </div>
 
     <div v-if="pcd.activePage === 'chooseAPage'">
-        <div class="max-h-[40vh] overflow-y-auto">
+        <div>
             <div class="grid gap-5">
                 <div class="px-2 flex flex-col gap-y-2">
                     <span class="text-sm font-semibold">Name of this Automation/Project</span>
