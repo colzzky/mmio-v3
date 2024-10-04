@@ -2,7 +2,8 @@
 import MobileSidebar from '../components/Sidebar/mobile-sidebar.vue'
 import DesktopSidebar from '../components/Sidebar/desktop-sidebar.vue'
 import { useSidebarStore } from '@/stores/sidebarStore'
-import CommandCenter from '@/modules/try/components/CommandCenter.vue'
+import ProjectCenter from '@/modules/try/components/ProjectCenter.vue'
+import { Bars3Icon } from '@heroicons/vue/24/outline';
 
 const sidebarStore = useSidebarStore()
 
@@ -62,7 +63,7 @@ const navigation = [
             <div
               class="relative -ml-px inline-flex items-center rounded-r-md bg-white px-2 py-1 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
             >
-              <CommandCenter />
+              <ProjectCenter />
             </div>
           </span>
         </div>
