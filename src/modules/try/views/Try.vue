@@ -73,61 +73,51 @@
 import  HomeLayout  from '@/core/layouts/HomeLayout.vue'
 import { Skeleton } from '@/core/components/ui/skeleton'
 import { ref } from 'vue'
-import {
-    Dialog,
-    DialogPanel,
-    TransitionChild,
-    TransitionRoot,
-} from '@headlessui/vue'
-import {
-    Bars3Icon,
-    Cog6ToothIcon,
-    XMarkIcon,
-} from '@heroicons/vue/24/outline'
-import CommandCenter from '../components/ProjectCenter.vue'
 import { uiHelpers } from '@/core/utils/ui-helper';
 
-const navigation = [
-    { name: 'All Campaigns', href: '#', icon: "grid_view", current: true },
-    { name: 'Recents', href: '#', icon: "history", current: false },
-]
-const teams = [
-    { id: 1, name: 'Heroicons', href: '#', initial: 'H', current: false },
-    { id: 2, name: 'Tailwind Labs', href: '#', initial: 'T', current: false },
-    { id: 3, name: 'Workcation', href: '#', initial: 'W', current: false },
-]
-const userNavigation = [
-    { name: 'Your profile', href: '#' },
-    { name: 'Sign out', href: '#' },
-]
 
 const campaigns = [
-    { name: 'Cellphone Page Campaign', platform: 'Meta', account: 'Cellphone Page', created: '2023-09-15T12:00:00Z', edited: '2024-10-01T12:00:00Z', status: 'active', author: "Paul Dela Vega" },
-    { name: 'Email Marketing Campaign', platform: 'Email Marketing', account: 'Cellphone Page', created: '2021-09-15T12:00:00Z', edited: '2024-09-01T12:00:00Z', status: 'active', author: "Paul Dela Vega" },
+  {
+    name: 'Cellphone Page Campaign',
+    platform: 'Meta',
+    account: 'Cellphone Page',
+    created: '2023-09-15T12:00:00Z',
+    edited: '2024-10-01T12:00:00Z',
+    status: 'active',
+    author: 'Paul Dela Vega',
+  },
+  {
+    name: 'Email Marketing Campaign',
+    platform: 'Email Marketing',
+    account: 'Cellphone Page',
+    created: '2021-09-15T12:00:00Z',
+    edited: '2024-09-01T12:00:00Z',
+    status: 'active',
+    author: 'Paul Dela Vega',
+  },
 ]
 
 interface Platforms {
-    name: string;
-    icon: string;
+  name: string
+  icon: string
 }
 
 const platforms: Platforms[] = [
-    { name: 'Meta', icon: "bxl-meta" },
-    { name: 'Email Marketing', icon: "bx-envelope" },
-    { name: 'Google My Business', icon: "bxl-google" },
-    { name: 'Whatsapp', icon: "bxl-whatsapp" },
-    { name: 'SMS Marketing', icon: "bx-message-rounded" },
-    { name: 'E-Commerce', icon: "bx-shopping-bag" },
-    { name: 'OmniChannel', icon: "bx-group" },
+  { name: 'Meta', icon: 'bxl-meta' },
+  { name: 'Email Marketing', icon: 'bx-envelope' },
+  { name: 'Google My Business', icon: 'bxl-google' },
+  { name: 'Whatsapp', icon: 'bxl-whatsapp' },
+  { name: 'SMS Marketing', icon: 'bx-message-rounded' },
+  { name: 'E-Commerce', icon: 'bx-shopping-bag' },
+  { name: 'OmniChannel', icon: 'bx-group' },
 ]
 
 const find_icon = (name: string): string | undefined => {
-
-    const platform = platforms.find(platform => platform.name === name);
-    const icon = platform ? platform.icon : undefined;
-    console.log(icon)
-    return icon
-};
+  const platform = platforms.find((platform) => platform.name === name)
+  const icon = platform ? platform.icon : undefined
+  console.log(icon)
+  return icon
+}
 
 const sidebarOpen = ref(false)
 </script>

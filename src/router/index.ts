@@ -1,8 +1,7 @@
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import authenticationRoutes from '@/modules/authentication/routes'
-import servicesRoutes from '@/modules/services/routes'
-import othersRoutes from '@/modules/try/routes'
 import { routes as metaRoutes } from '@/modules/meta/routes'
+import othersRoutes from '@/modules/try/routes'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 const routes = [
   {
@@ -11,7 +10,6 @@ const routes = [
     component: () => import('@/views/HomeView.vue'),
   },
   ...authenticationRoutes,
-  ...servicesRoutes,
   ...metaRoutes,
   ...othersRoutes,
 ] as RouteRecordRaw[]

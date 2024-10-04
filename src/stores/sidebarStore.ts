@@ -1,4 +1,3 @@
-import { links as metaLinks } from '@/modules/meta/routes'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
@@ -16,13 +15,13 @@ export const useSidebarStore = defineStore('sidebar', () => {
     router.push('/login')
   }
 
-  // GET SERVICE LINKS
-  const links = ref({
-    meta: metaLinks,
+  // GET SERVICE HEADING
+  const serviceHeading = ref({
+    meta: 'Meta Automation',
   })
 
-  function getServiceLinks(routePath: string) {
-    if (routePath.includes('meta')) return links.value.meta
+  function getServiceHeading(routePath: string) {
+    if (routePath.includes('meta')) return serviceHeading.value.meta
 
     throw new Error('Service not found')
   }
@@ -31,7 +30,6 @@ export const useSidebarStore = defineStore('sidebar', () => {
     isMobileSidebarOpen,
     toggleMobileSidebar,
     logoutUser,
-    links,
-    getServiceLinks,
+    getServiceHeading,
   }
 })

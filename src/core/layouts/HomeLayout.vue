@@ -1,15 +1,23 @@
 <script setup lang="ts">
-import MobileSidebar from '../components/Sidebar/mobile-sidebar.vue'
-import DesktopSidebar from '../components/Sidebar/desktop-sidebar.vue'
-import { useSidebarStore } from '@/stores/sidebarStore'
 import ProjectCenter from '@/modules/try/components/ProjectCenter.vue'
 import { Bars3Icon } from '@heroicons/vue/24/outline';
+import DesktopSidebar from '../components/sidebar/desktop-sidebar.vue'
+import MobileSidebar from '../components/sidebar/mobile-sidebar.vue'
+import { useSidebarStore } from '@/stores/sidebarStore'
 
 const sidebarStore = useSidebarStore()
 
 const navigation = [
-  { name: 'All Campaigns', href: '#', icon: 'grid_view', current: true },
-  { name: 'Recents', href: '#', icon: 'history', current: false },
+  {
+    icon: 'grid_view',
+    label: 'All Campaigns',
+    href: '/',
+  },
+  {
+    icon: 'history',
+    label: 'Recent',
+    href: '/recent',
+  },
 ]
 </script>
 
@@ -19,14 +27,14 @@ const navigation = [
 
     <DesktopSidebar>
       <li>
-        <ul role="list" class="-mx-2 space-y-1">
-          <li v-for="item in navigation" :key="item.name">
+        <ul role="list" class="-mx-2">
+          <li v-for="item in navigation" :key="item.href">
             <RouterLink
               :to="item.href"
-              class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/5"
+              class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/5 aria-[current=page]:bg-primary/10 aria-[current=page]:font-bold"
             >
-              <i class="material-icons text-2xl">{{ item.icon }}</i>
-              {{ item.name }}
+              <i class="material-icons text-xl">{{ item.icon }}</i>
+              {{ item.label }}
             </RouterLink>
           </li>
         </ul>
