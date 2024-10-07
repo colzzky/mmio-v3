@@ -34,7 +34,7 @@
                             <div class="col-span-1 text-sm text-gray-600">{{ campaign.author }}</div>
                             <div class="col-span-1 justify-self-end">
                                 <button type="button"
-                                    class="rounded-full p-2 text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                                    class="flex justify-center items-center rounded-full h-8 w-8 text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                                     <i class="material-icons text-md">more_vert</i>
                                 </button>
                             </div>
