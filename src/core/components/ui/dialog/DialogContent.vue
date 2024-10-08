@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import cn from '@/core/utils/cn'
-import { X } from 'lucide-vue-next'
 import {
-  DialogClose,
   DialogContent,
   type DialogContentEmits,
   type DialogContentProps,

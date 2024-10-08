@@ -24,7 +24,7 @@ export const servicesUrl = [
   '/meta/chat-sequences',
 ] as const
 
-const servicesFoo: Record<AllServicesUrl, Service> = {
+const servicesRecord: Record<AllServicesUrl, Service> = {
   '/meta/chatbot-flow-builder': {
     label: 'Chatbot Flow Builder',
     icon: 'bx-network-chart',
@@ -44,7 +44,7 @@ const servicesFoo: Record<AllServicesUrl, Service> = {
     icon: 'bx-message-dots',
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
-    pinned: false,
+    pinned: true,
   },
   '/meta/livestream': {
     label: 'Livestream',
@@ -97,8 +97,8 @@ const servicesFoo: Record<AllServicesUrl, Service> = {
   },
 }
 
-export const servicesBaz = new Map(
-  Object.entries(servicesFoo).map(([key, values]) => [key, values]),
+export const servicesMap = new Map(
+  Object.entries(servicesRecord).map(([key, values]) => [key, values]),
 )
 
 const urls = [
@@ -131,7 +131,7 @@ const routeRecords: Record<AllUrl, Omit<RouteRecordRaw, 'path'>> = {
   },
   '/meta/post-randomizer': {
     name: 'post-randomizer',
-    component: () => import('./views/MetaHomePage.vue'),
+    component: () => import('./views/PostRandomizer.vue'),
   },
   '/meta/livestream': {
     name: 'livestream',

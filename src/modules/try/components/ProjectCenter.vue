@@ -9,8 +9,6 @@ import {
   DialogTitle,
 } from '@/core/components/ui/dialog'
 import { useProjectCenter } from '@/stores/projectCenter'
-import { storeToRefs } from 'pinia'
-import { reactive, ref } from 'vue'
 
 const project_center = useProjectCenter()
 const { project_center_dialog: pcd, platforms } = project_center

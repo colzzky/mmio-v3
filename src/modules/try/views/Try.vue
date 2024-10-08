@@ -121,6 +121,4 @@ const find_icon = (name: string): string | undefined => {
   console.log(icon)
   return icon
 }
-
-const sidebarOpen = ref(false)
 </script>

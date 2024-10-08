@@ -1,10 +1,10 @@
-import { servicesBaz } from '@/modules/meta/routes'
+import { servicesMap } from '@/modules/meta/routes'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useServicesStore = defineStore('services', () => {
   const services = ref({
-    meta: servicesBaz,
+    meta: servicesMap,
   })
   function getServiceLinks(routePath: string) {
     if (routePath.startsWith('/meta')) return services.value.meta
