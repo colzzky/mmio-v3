@@ -131,7 +131,7 @@ const routeRecords: Record<AllUrl, Omit<RouteRecordRaw, 'path'>> = {
   },
   '/meta/post-randomizer': {
     name: 'post-randomizer',
-    component: () => import('./views/PostRandomizer.vue'),
+    component: () => import('./views/PostRandomizerPage.vue'),
   },
   '/meta/livestream': {
     name: 'livestream',
