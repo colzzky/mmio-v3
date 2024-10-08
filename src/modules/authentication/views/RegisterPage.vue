@@ -3,10 +3,19 @@ import { Button } from '@/core/components/ui/button'
 import { Checkbox } from '@/core/components/ui/checkbox'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
-import { createUserWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
 import { auth } from '@/core/utils/firebase-client'
+import { createUserWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth'
 import { reactive } from 'vue'
-const {APP_FIREBASE_APIKEY,APP_FIREBASE_AUTHDOMAIN,APP_FIREBASE_PROJECTID,APP_FIREBASE_STORAGEBUCKET,APP_FIREBASE_MESSAGINGSENDERID,APP_FIREBASE_APPID,APP_FIREBASE_MEASUREMENTID} = import.meta.env;
+
+const {
+  APP_FIREBASE_APIKEY,
+  APP_FIREBASE_AUTHDOMAIN,
+  APP_FIREBASE_PROJECTID,
+  APP_FIREBASE_STORAGEBUCKET,
+  APP_FIREBASE_MESSAGINGSENDERID,
+  APP_FIREBASE_APPID,
+  APP_FIREBASE_MEASUREMENTID,
+} = import.meta.env
 console.log(APP_FIREBASE_APIKEY)
 // REGISTER USER
 const form = reactive({
@@ -33,17 +42,19 @@ const emailRegisterUser = async (email: string, password: string): Promise<void>
     })
     .catch((error) => {
       console.log(error)
-    });
-
-};
-
-
+    })
+}
 </script>
 
 <template>
   <main
-    class="mx-auto grid min-h-svh w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-rows-[48px_1fr] gap-8 py-[var(--gutter)] [--gutter:1rem] lg:grid-cols-5 lg:[--gutter:2rem]">
-    <img class="h-12 w-auto self-start lg:col-span-5" src="@/assets/logo.png" alt="marketingmaster.io logo" />
+    class="mx-auto grid min-h-svh w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-rows-[48px_1fr] gap-8 py-[var(--gutter)] [--gutter:1rem] lg:grid-cols-5 lg:[--gutter:2rem]"
+  >
+    <img
+      class="h-12 w-auto self-start lg:col-span-5"
+      src="@/assets/logo.png"
+      alt="marketingmaster.io logo"
+    />
     <div class="flex flex-col gap-y-8 lg:col-span-2 lg:self-center">
       <section class="flex flex-col gap-y-2">
         <h1 class="text-4xl/none font-bold">Set your Username, Email and Password</h1>
@@ -57,21 +68,46 @@ const emailRegisterUser = async (email: string, password: string): Promise<void>
       <form class="flex flex-col gap-y-4" @submit.prevent="handleRegisterUser">
         <div class="flex flex-col gap-y-2">
           <Label for="email">Email Address</Label>
-          <Input id="email" name="email" type="email" autocomplete="email" v-model="form.email"
-            placeholder="johndoe@gmail.com" required />
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            v-model="form.email"
+            placeholder="johndoe@gmail.com"
+            required
+          />
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="name">Display Name:</Label>
-          <Input id="name" name="name" type="text" autocomplete="name" placeholder="John Doe" v-model="form.name"
-            required />
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            placeholder="John Doe"
+            v-model="form.name"
+            required
+          />
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="password">Password</Label>
-          <Input id="password" name="password" type="password" autocomplete="password" placeholder="********"
-            v-model="form.password" required />
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="password"
+            placeholder="********"
+            v-model="form.password"
+            required
+          />
         </div>
         <div class="flex items-center">
-          <Checkbox id="termsAndCondition" name="termsAndCondition" v-model:checked="form.agreeToTermsAndCondition" />
+          <Checkbox
+            id="termsAndCondition"
+            name="termsAndCondition"
+            v-model:checked="form.agreeToTermsAndCondition"
+          />
           <Label for="termsAndCondition">
             I agree to
             <Button variant="link" as-child class="h-[unset] p-0 text-blue-500">

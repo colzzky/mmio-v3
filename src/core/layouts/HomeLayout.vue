@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import ProjectCenter from '@/modules/try/components/ProjectCenter.vue'
-import { Bars3Icon } from '@heroicons/vue/24/outline';
 import DesktopSidebar from '../components/sidebar/desktop-sidebar.vue'
 import MobileSidebar from '../components/sidebar/mobile-sidebar.vue'
+import ProjectCenter from '@/modules/try/components/ProjectCenter.vue'
 import { useSidebarStore } from '@/stores/sidebarStore'
+import { Bars3Icon } from '@heroicons/vue/24/outline'
 
 const sidebarStore = useSidebarStore()
 

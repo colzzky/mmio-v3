@@ -1,11 +1,19 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+type AllServicesUrl = (typeof servicesUrl)[number]
+
+export interface Service {
+  label: string
+  icon: string
+  description: string
+  pinned: boolean
+}
+
 export const homeUrl = '/meta' as const
 
 export const servicesUrl = [
   '/meta/chatbot-flow-builder',
   '/meta/comment-auto-reply',
-  '/meta/import-social-media',
   '/meta/post-randomizer',
   '/meta/livestream',
   '/meta/interest-finder',
@@ -16,85 +24,73 @@ export const servicesUrl = [
   '/meta/chat-sequences',
 ] as const
 
-type AllServicesUrl = (typeof servicesUrl)[number]
-
-const servicesFoo: Record<
-  AllServicesUrl,
-  { label: string; icon: string; description: string; pinned: boolean }
-> = {
+const servicesFoo: Record<AllServicesUrl, Service> = {
   '/meta/chatbot-flow-builder': {
     label: 'Chatbot Flow Builder',
-    icon: 'polyline',
+    icon: 'bx-network-chart',
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
     pinned: true,
   },
   '/meta/comment-auto-reply': {
     label: 'Comment Auto Reply',
-    icon: 'comment',
-    description:
-      'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
-    pinned: true,
-  },
-  '/meta/import-social-media': {
-    label: 'Import Social Media',
-    icon: 'power',
+    icon: 'bx-conversation',
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
     pinned: true,
   },
   '/meta/post-randomizer': {
     label: 'Post Randomizer',
-    icon: 'shuffle',
+    icon: 'bx-message-dots',
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
     pinned: false,
   },
   '/meta/livestream': {
     label: 'Livestream',
-    icon: 'videocam',
+    icon: 'bx-video',
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
     pinned: false,
   },
   '/meta/interest-finder': {
     label: 'Interest Finder',
-    icon: 'search',
+    icon: 'bx-file-find',
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
     pinned: false,
   },
   '/meta/live-chat': {
     label: 'Live Chat',
-    icon: 'forum',
+    icon: 'bx-message-dots',
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
     pinned: false,
   },
   '/meta/subscribers': {
     label: 'Subscribers',
-    icon: 'group',
+    icon: 'bx-group',
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
     pinned: false,
   },
   '/meta/growth-tools': {
     label: 'Growth Tools',
-    icon: 'show_chart',
+    icon: 'bx-chart',
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
     pinned: false,
   },
   '/meta/chat-broadcast': {
     label: 'Chat Broadcast',
-    icon: 'podcasts',
+    icon: 'bx-broadcast',
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
     pinned: false,
   },
   '/meta/chat-sequences': {
     label: 'Chat Sequences',
-    icon: 'fast_forward',
+    icon: 'bx-comment-add',
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
     pinned: false,
@@ -131,10 +127,6 @@ const routeRecords: Record<AllUrl, Omit<RouteRecordRaw, 'path'>> = {
   },
   '/meta/comment-auto-reply': {
     name: 'comment-auto-reply',
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  '/meta/import-social-media': {
-    name: 'import-social-media',
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/post-randomizer': {

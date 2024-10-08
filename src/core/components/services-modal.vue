@@ -27,8 +27,15 @@ const services = servicesStore.getServiceLinks(route.path)
           :key="key"
           class="grid grid-cols-[1fr_var(--bookmark-size)] gap-x-2 rounded p-4 [--bookmark-size:48px] [&:has(a:hover)]:bg-primary/5"
         >
-          <RouterLink :to="key" class="grid grid-cols-[36px_1fr] items-center gap-x-2">
-            <i class="material-icons row-span-2">{{ service.icon }}</i>
+          <RouterLink
+            :to="key"
+            class="grid grid-cols-[var(--icon-size)_1fr] gap-x-4 [--icon-size:36px]"
+          >
+            <div
+              class="row-span-2 grid size-[var(--icon-size)] place-content-center self-center rounded-full bg-black text-white"
+            >
+              <i :class="['bx text-xl', service.icon]" />
+            </div>
             <h3 class="text-sm font-bold">{{ service.label }}</h3>
             <p class="text-xs">{{ service.description }}</p>
           </RouterLink>

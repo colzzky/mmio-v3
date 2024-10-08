@@ -1,80 +1,83 @@
 <template>
-    <HomeLayout>
-        <main class="py-2">
-            <div class="px-4 sm:px-6 lg:px-8">
-                <div class="w-full py-2 px-2">
-                    <div class="py-2 px-2 rounded-xl">
-                        <div class="grid grid-cols-12 items-center">
-                            <div class="col-span-5 text-xs font-light">Name</div>
-                            <div class="col-span-2 text-xs font-light">Created</div>
-                            <div class="col-span-2 text-xs font-light">Updated</div>
-                            <div class="col-span-1 text-xs font-light">Status</div>
-                            <div class="col-span-1 text-xs font-light">Last Updated</div>
-                            <div class="col-span-1 text-xs font-light"></div>
-                        </div>
-                    </div>
-
-                    <div v-for="campaign in campaigns" :key="campaign.name"
-                        class="py-2 hover:bg-gray-300 transition-all duration-100 px-2 rounded-xl">
-                        <div class="grid grid-cols-12 items-center">
-                            <div class="col-span-5">
-                                <div class="flex items-center gap-x-3">
-                                    <i class='bx text-2xl' :class="find_icon(campaign.platform)"></i>
-                                    <div class="grid gap-0">
-                                        <span class="text-sm">{{ campaign.name }}</span>
-                                        <span class="text-xs">{{ campaign.account }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-span-2 text-sm text-gray-600">{{
-                                uiHelpers.formatDateTimeAgo(campaign.created) }}</div>
-                            <div class="col-span-2 text-sm text-gray-600">{{
-                                uiHelpers.formatDateTimeAgo(campaign.edited) }}</div>
-                            <div class="col-span-1 text-sm text-gray-600">{{ campaign.status }}</div>
-                            <div class="col-span-1 text-sm text-gray-600">{{ campaign.author }}</div>
-                            <div class="col-span-1 justify-self-end">
-                                <button type="button"
-                                    class="flex justify-center items-center rounded-full h-8 w-8 text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                                    <i class="material-icons text-md">more_vert</i>
-                                </button>
-                            </div>
-
-                        </div>
-
-
-                    </div>
-
-                    <div class="py-4 px-2 rounded-xl">
-                        <div class="grid grid-cols-12 items-center">
-                            <div class="col-span-5">
-                                <Skeleton class="w-[300px] h-3 rounded-full bg-gray-300" />
-                            </div>
-                            <div class="col-span-2">
-                                <Skeleton class="w-[200px] h-3 rounded-full bg-gray-300" />
-                            </div>
-                            <div class="col-span-2">
-                                <Skeleton class="w-[200px] h-3 rounded-full bg-gray-300" />
-                            </div>
-                            <div class="col-span-1">
-                                <Skeleton class="w-[100px] h-3 rounded-full bg-gray-300" />
-                            </div>
-                            <div class="col-span-1">
-                                <Skeleton class="w-[100px] h-3 rounded-full bg-gray-300" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <HomeLayout>
+    <main class="py-2">
+      <div class="px-4 sm:px-6 lg:px-8">
+        <div class="w-full px-2 py-2">
+          <div class="rounded-xl px-2 py-2">
+            <div class="grid grid-cols-12 items-center">
+              <div class="col-span-5 text-xs font-light">Name</div>
+              <div class="col-span-2 text-xs font-light">Created</div>
+              <div class="col-span-2 text-xs font-light">Updated</div>
+              <div class="col-span-1 text-xs font-light">Status</div>
+              <div class="col-span-1 text-xs font-light">Last Updated</div>
+              <div class="col-span-1 text-xs font-light"></div>
             </div>
-        </main>
-    </HomeLayout>
+          </div>
+
+          <div
+            v-for="campaign in campaigns"
+            :key="campaign.name"
+            class="rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
+          >
+            <div class="grid grid-cols-12 items-center">
+              <div class="col-span-5">
+                <div class="flex items-center gap-x-3">
+                  <i class="bx text-2xl" :class="find_icon(campaign.platform)"></i>
+                  <div class="grid gap-0">
+                    <span class="text-sm">{{ campaign.name }}</span>
+                    <span class="text-xs">{{ campaign.account }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-span-2 text-sm text-gray-600">
+                {{ uiHelpers.formatDateTimeAgo(campaign.created) }}
+              </div>
+              <div class="col-span-2 text-sm text-gray-600">
+                {{ uiHelpers.formatDateTimeAgo(campaign.edited) }}
+              </div>
+              <div class="col-span-1 text-sm text-gray-600">{{ campaign.status }}</div>
+              <div class="col-span-1 text-sm text-gray-600">{{ campaign.author }}</div>
+              <div class="col-span-1 justify-self-end">
+                <button
+                  type="button"
+                  class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
+                  <i class="material-icons text-md">more_vert</i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-xl px-2 py-4">
+            <div class="grid grid-cols-12 items-center">
+              <div class="col-span-5">
+                <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
+              </div>
+              <div class="col-span-2">
+                <Skeleton class="h-3 w-[200px] rounded-full bg-gray-300" />
+              </div>
+              <div class="col-span-2">
+                <Skeleton class="h-3 w-[200px] rounded-full bg-gray-300" />
+              </div>
+              <div class="col-span-1">
+                <Skeleton class="h-3 w-[100px] rounded-full bg-gray-300" />
+              </div>
+              <div class="col-span-1">
+                <Skeleton class="h-3 w-[100px] rounded-full bg-gray-300" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </HomeLayout>
 </template>
 
 <script setup lang="ts">
-import  HomeLayout  from '@/core/layouts/HomeLayout.vue'
 import { Skeleton } from '@/core/components/ui/skeleton'
+import HomeLayout from '@/core/layouts/HomeLayout.vue'
+import { uiHelpers } from '@/core/utils/ui-helper'
 import { ref } from 'vue'
-import { uiHelpers } from '@/core/utils/ui-helper';
-
 
 const campaigns = [
   {

@@ -103,7 +103,7 @@ const parentRoute = breadcrumbs[0]
               :to="key"
               class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/5"
             >
-              <i class="material-icons text-xl">{{ value.icon }}</i>
+              <i :class="['bx text-xl', value.icon]"></i>
               <span>
                 {{ value.label }}
               </span>
