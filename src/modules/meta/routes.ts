@@ -1,7 +1,5 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-type AllServicesUrl = (typeof servicesUrl)[number]
-
 export interface Service {
   label: string
   icon: string
@@ -23,6 +21,8 @@ export const servicesUrl = [
   '/meta/chat-broadcast',
   '/meta/chat-sequences',
 ] as const
+
+type AllServicesUrl = (typeof servicesUrl)[number]
 
 const servicesRecord: Record<AllServicesUrl, Service> = {
   '/meta/chatbot-flow-builder': {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Badge from '@/core/components/ui/badge/Badge.vue'
 import { Button } from '@/core/components/ui/button'
+import DatePicker from '@/core/components/ui/date-picker.vue'
 import {
   Dialog,
   DialogContent,
@@ -15,6 +16,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/core/components/ui/dropdown-menu'
+import { Input } from '@/core/components/ui/input'
+import { Label } from '@/core/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/core/components/ui/select'
 import {
   Table,
   TableBody,
@@ -31,15 +42,15 @@ import { reactive, ref } from 'vue'
 interface Campaign {
   id: number
   name: string
-  source: string | null
+  mediaSource?: string
   publishedTo: {
-    users: string | null
-    pages: string | null
-    groups: string | null
+    users?: string
+    pages?: string
+    groups?: string
   }
   duration: {
-    start: Date | null
-    end: Date | null
+    start?: Date
+    end?: Date
   }
   createdAt: Date
   status: 'disabled' | 'live'
@@ -59,16 +70,8 @@ const campaigns = ref(
       4,
       {
         name: 'MMIO Posts',
-        source: null,
-        publishedTo: {
-          users: null,
-          pages: null,
-          groups: null,
-        },
-        duration: {
-          start: null,
-          end: null,
-        },
+        publishedTo: {},
+        duration: {},
         createdAt: new Date(),
         status: 'disabled',
       },
@@ -77,16 +80,8 @@ const campaigns = ref(
       146,
       {
         name: 'ASDASD',
-        source: null,
-        publishedTo: {
-          users: null,
-          pages: null,
-          groups: null,
-        },
-        duration: {
-          start: null,
-          end: null,
-        },
+        publishedTo: {},
+        duration: {},
         createdAt: new Date(),
         status: 'disabled',
       },
@@ -95,16 +90,9 @@ const campaigns = ref(
       712,
       {
         name: 'Post Randomizer Test',
-        source: 'Post Randomizer Test',
-        publishedTo: {
-          users: null,
-          pages: 'Filhomes',
-          groups: null,
-        },
-        duration: {
-          start: new Date('August 11, 2022'),
-          end: new Date(),
-        },
+        mediaSource: 'Post Randomizer Test',
+        publishedTo: { pages: 'Filhomes' },
+        duration: {},
         createdAt: new Date(),
         status: 'live',
       },
@@ -112,13 +100,53 @@ const campaigns = ref(
   ]),
 )
 
-interface ConfirmDeleteModal extends Omit<Modal, 'open'> {
+// CREATE CAMPAIGN
+interface CreateCampaignModal extends Modal {
+  form: Omit<Campaign, 'id' | 'createdAt'>
+  createCampaign(): void
+}
+
+const createCampaignModal = reactive<CreateCampaignModal>({
+  isOpen: false,
+  form: {
+    name: '',
+    publishedTo: {},
+    duration: {},
+    status: 'disabled',
+  },
+  initialState() {
+    this.isOpen = false
+    this.form = {
+      name: '',
+      publishedTo: {},
+      duration: {},
+      status: 'disabled',
+    }
+  },
+  open() {
+    this.isOpen = true
+  },
+  close() {
+    this.initialState()
+  },
+  createCampaign() {
+    campaigns.value.set(new Date().getSeconds(), {
+      ...this.form,
+      createdAt: new Date(),
+    })
+
+    this.close()
+  },
+})
+
+// DELETE CAMPAIGN
+interface DeleteCampaignModal extends Omit<Modal, 'open'> {
   campaignId: Campaign['id'] | null
   open(campaignId: Campaign['id']): void
   deleteCampaign(): void
 }
 
-const confirmDeleteModal = reactive<ConfirmDeleteModal>({
+const deleteCampaignModal = reactive<DeleteCampaignModal>({
   isOpen: false,
   campaignId: null,
   initialState() {
@@ -148,6 +176,13 @@ const confirmDeleteModal = reactive<ConfirmDeleteModal>({
 <template>
   <DefaultLayout>
     <main class="flex flex-col gap-y-4 p-4">
+      <Button
+        class="flex items-center justify-center gap-x-2 self-end"
+        @click="createCampaignModal.open()"
+      >
+        <i class="bx bx-plus text-xl" />
+        Create Campaign
+      </Button>
       <Table>
         <TableHeader>
           <TableRow>
@@ -163,7 +198,7 @@ const confirmDeleteModal = reactive<ConfirmDeleteModal>({
         <TableBody>
           <TableRow v-for="[id, campaign] in campaigns" :key="id">
             <TableCell>{{ campaign.name }}</TableCell>
-            <TableCell>{{ campaign.source }}</TableCell>
+            <TableCell>{{ campaign.mediaSource }}</TableCell>
             <TableCell>
               <dl class="grid grid-cols-2 gap-x-2 gap-y-0.5 whitespace-nowrap [&>dt]:font-bold">
                 <dt>Users:</dt>
@@ -181,15 +216,15 @@ const confirmDeleteModal = reactive<ConfirmDeleteModal>({
                   {{ campaign.duration.start?.toLocaleDateString() ?? 'As soon as possible' }}
                 </div>
                 <div>
-                  <strong>End: </strong> {{ campaign.duration.end?.toDateString() ?? 'Continuous' }}
+                  <strong>End: </strong>
+                  {{ campaign.duration.end?.toLocaleDateString() ?? 'Continuous' }}
                 </div>
               </div>
             </TableCell>
-            <TableCell>{{ campaign.createdAt.toDateString() }}</TableCell>
+            <TableCell>{{ campaign.createdAt.toLocaleDateString() }}</TableCell>
             <!-- @temporary: can be changed to a `<Switch />` component -->
             <TableCell>
               <Badge>{{ uiHelpers.toTitleCase(campaign.status) }}</Badge>
-              {{ confirmDeleteModal }}
             </TableCell>
             <TableCell>
               <div class="grid place-content-center">
@@ -206,7 +241,7 @@ const confirmDeleteModal = reactive<ConfirmDeleteModal>({
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="flex gap-x-2" @click="confirmDeleteModal.open(id)">
+                    <DropdownMenuItem class="flex gap-x-2" @click="deleteCampaignModal.open(id)">
                       <i class="bx bx-trash text-xl" />
                       Delete
                     </DropdownMenuItem>
@@ -219,8 +254,114 @@ const confirmDeleteModal = reactive<ConfirmDeleteModal>({
       </Table>
     </main>
 
+    <!-- Create Campaign Modal -->
+    <Dialog v-model:open="createCampaignModal.isOpen">
+      <DialogContent class="gap-y-8">
+        <DialogHeader>
+          <DialogTitle>Create Campaign</DialogTitle>
+          <DialogDescription
+            >Enter the campaign details to create a new campaign.</DialogDescription
+          >
+        </DialogHeader>
+        <form
+          id="createCampaign"
+          class="flex flex-col gap-y-4"
+          @submit.prevent="createCampaignModal.createCampaign()"
+        >
+          <div class="flex flex-col gap-y-2">
+            <Label for="mediaSource">Media Source</Label>
+            <Select id="mediaSource" v-model="createCampaignModal.form.mediaSource">
+              <SelectTrigger>
+                <SelectValue placeholder="Select Source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="Source Foo">Source Foo</SelectItem>
+                  <SelectItem value="Source Bar">Source Bar</SelectItem>
+                  <SelectItem value="Source Baz">Source Baz</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="flex flex-col gap-y-2">
+            <Label for="name">Name</Label>
+            <Input
+              type="text"
+              id="name"
+              v-model="createCampaignModal.form.name"
+              name="name"
+              placeholder="Input Name"
+              required
+            />
+          </div>
+          <div class="flex flex-col gap-y-2">
+            <Label for="users">Instagram Business</Label>
+            <Select id="users" v-model="createCampaignModal.form.publishedTo.users">
+              <SelectTrigger>
+                <SelectValue placeholder="Select Instagram Business" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="User Foo">User Foo</SelectItem>
+                  <SelectItem value="User Bar">User Bar</SelectItem>
+                  <SelectItem value="User Baz">User Baz</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="flex flex-col gap-y-2">
+            <Label for="pages">Pages</Label>
+            <Select id="pages" v-model="createCampaignModal.form.publishedTo.pages">
+              <SelectTrigger>
+                <SelectValue placeholder="Select Pages" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="Page Foo">Page Foo</SelectItem>
+                  <SelectItem value="Page Bar">Page Bar</SelectItem>
+                  <SelectItem value="Page Baz">Page Baz</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="flex flex-col gap-y-2">
+            <Label for="groups">Groups</Label>
+            <Select id="groups" v-model="createCampaignModal.form.publishedTo.groups">
+              <SelectTrigger>
+                <SelectValue placeholder="Select Groups" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="Group Foo">Group Foo</SelectItem>
+                  <SelectItem value="Group Bar">Group Bar</SelectItem>
+                  <SelectItem value="Group Baz">Group Baz</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+          <div class="grid grid-cols-2 gap-x-4">
+            <div class="flex flex-col gap-y-2">
+              <Label as="span">Start Date</Label>
+              <DatePicker @update:model-value="createCampaignModal.form.duration.start = $event" />
+            </div>
+            <div class="flex flex-col gap-y-2">
+              <Label as="span">End Date</Label>
+              <DatePicker
+                v-model="createCampaignModal.form.duration.end"
+                @update:model-value="createCampaignModal.form.duration.end = $event"
+              />
+            </div>
+          </div>
+        </form>
+        <DialogFooter>
+          <Button variant="secondary" @click="createCampaignModal.close()">Cancel</Button>
+          <Button type="submit" form="createCampaign">Create</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+
     <!-- Confirm Delete Modal -->
-    <Dialog v-model:open="confirmDeleteModal.isOpen">
+    <Dialog v-model:open="deleteCampaignModal.isOpen">
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Campaign?</DialogTitle>
@@ -230,8 +371,8 @@ const confirmDeleteModal = reactive<ConfirmDeleteModal>({
         </DialogHeader>
 
         <DialogFooter>
-          <Button variant="secondary" @click="confirmDeleteModal.close()">Cancel</Button>
-          <Button variant="destructive" @click="confirmDeleteModal.deleteCampaign()">
+          <Button variant="secondary" @click="deleteCampaignModal.close()">Cancel</Button>
+          <Button variant="destructive" @click="deleteCampaignModal.deleteCampaign()">
             Delete
           </Button>
         </DialogFooter>
