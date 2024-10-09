@@ -3,11 +3,18 @@ import { Button } from '@/core/components/ui/button'
 import { Calendar } from '@/core/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/core/components/ui/popover'
 import cn from '@/core/utils/cn'
-import { DateFormatter, getLocalTimeZone, type DateValue } from '@internationalized/date'
+import { CalendarDate, DateFormatter, getLocalTimeZone } from '@internationalized/date'
 import { ref } from 'vue'
 
-const value = ref<DateValue>()
+const props = defineProps<{ initialValue?: Date }>()
 const emit = defineEmits(['update:modelValue'])
+
+const date = props.initialValue ?? new Date()
+const year = date.getFullYear()
+const month = date.getMonth() + 1 // index-based
+const day = date.getDate()
+
+const value = ref(new CalendarDate(year, month, day))
 
 const df = new DateFormatter('en-US', { dateStyle: 'long' })
 </script>

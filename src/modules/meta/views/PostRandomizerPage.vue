@@ -101,41 +101,67 @@ const campaigns = ref(
 )
 
 // CREATE CAMPAIGN
-interface CreateCampaignModal extends Modal {
-  form: Omit<Campaign, 'id' | 'createdAt'>
+interface CreateOrEditCampaignModal extends Omit<Modal, 'open'> {
+  open(args: { intent: 'create' } | { intent: 'edit'; campaignId: Campaign['id'] }): void
+
+  editCampaignId: Campaign['id'] | null
+  intent: 'create' | 'edit' | null
+  form: Omit<Campaign, 'id'>
+  submitForm(): void
   createCampaign(): void
+  editCampaign(): void
 }
 
-const createCampaignModal = reactive<CreateCampaignModal>({
+const createOrEditCampaignModal = reactive<CreateOrEditCampaignModal>({
   isOpen: false,
+  intent: null,
+  editCampaignId: null,
   form: {
     name: '',
     publishedTo: {},
     duration: {},
     status: 'disabled',
+    createdAt: new Date(),
   },
   initialState() {
     this.isOpen = false
+    this.intent = null
+    this.editCampaignId = null
     this.form = {
       name: '',
       publishedTo: {},
       duration: {},
       status: 'disabled',
+      createdAt: new Date(),
     }
   },
-  open() {
+  open(args) {
+    this.intent = args.intent
+
+    if (args.intent === 'edit') {
+      const campaign = campaigns.value.get(args.campaignId)
+      if (!campaign) throw new Error('Campaign not found')
+
+      this.editCampaignId = args.campaignId
+      this.form = { ...campaign }
+    }
+
     this.isOpen = true
   },
   close() {
     this.initialState()
   },
-  createCampaign() {
-    campaigns.value.set(new Date().getSeconds(), {
-      ...this.form,
-      createdAt: new Date(),
-    })
-
+  submitForm() {
+    this.intent === 'create' ? this.createCampaign() : this.editCampaign()
     this.close()
+  },
+  createCampaign() {
+    campaigns.value.set(new Date().getMilliseconds(), { ...this.form })
+  },
+  editCampaign() {
+    if (!this.editCampaignId) throw new Error('No Campaign ID value')
+
+    campaigns.value.set(this.editCampaignId, { ...this.form })
   },
 })
 
@@ -164,7 +190,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
     this.isOpen = false
     this.campaignId = null
   },
-  open(campaignId: Campaign['id']) {
+  open(campaignId) {
     this.isOpen = true
     this.campaignId = campaignId
   },
@@ -189,7 +215,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
     <main class="flex flex-col gap-y-4 p-4">
       <Button
         class="flex items-center justify-center gap-x-2 self-end"
-        @click="createCampaignModal.open()"
+        @click="createOrEditCampaignModal.open({ intent: 'create' })"
       >
         <i class="bx bx-plus text-xl" />
         Create Campaign
@@ -211,14 +237,13 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
             <TableCell>{{ campaign.name }}</TableCell>
             <TableCell>{{ campaign.mediaSource }}</TableCell>
             <TableCell>
-              <dl class="grid grid-cols-2 gap-x-2 gap-y-0.5 whitespace-nowrap [&>dt]:font-bold">
-                <dt>Users:</dt>
-                <dd>{{ campaign.publishedTo?.users ?? 'No Target' }}</dd>
-                <dt>Pages:</dt>
-                <dd>{{ campaign.publishedTo.pages ?? 'No Target' }}</dd>
-                <dt>Groups:</dt>
-                <dd>{{ campaign.publishedTo?.groups ?? 'No Target' }}</dd>
-              </dl>
+              <div class="5 flex flex-col gap-y-0">
+                <div><strong>Users: </strong>{{ campaign.publishedTo?.users ?? 'No Target' }}</div>
+                <div><strong>Pages: </strong>{{ campaign.publishedTo.pages ?? 'No Target' }}</div>
+                <div>
+                  <strong>Groups: </strong>{{ campaign.publishedTo?.groups ?? 'No Target' }}
+                </div>
+              </div>
             </TableCell>
             <TableCell>
               <div class="flex flex-col gap-y-0.5">
@@ -232,7 +257,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
                 </div>
               </div>
             </TableCell>
-            <TableCell>{{ campaign.createdAt.toLocaleDateString() }}</TableCell>
+            <TableCell>{{ campaign.createdAt }}</TableCell>
             <!-- @temporary: can be changed to a `<Switch />` component -->
             <TableCell>
               <Badge>{{ uiHelpers.toTitleCase(campaign.status) }}</Badge>
@@ -257,7 +282,10 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
                       <i class="bx bxs-report text-xl" />
                       View Report
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="flex gap-x-2">
+                    <DropdownMenuItem
+                      class="flex gap-x-2"
+                      @click="createOrEditCampaignModal.open({ intent: 'edit', campaignId: id })"
+                    >
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
@@ -274,23 +302,34 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
       </Table>
     </main>
 
-    <!-- Create Campaign Modal -->
-    <Dialog v-model:open="createCampaignModal.isOpen">
+    <!-- Create/Edit Campaign Modal -->
+    <Dialog
+      v-model:open="createOrEditCampaignModal.isOpen"
+      @update:open="createOrEditCampaignModal.close()"
+    >
       <DialogContent class="gap-y-8">
         <DialogHeader>
-          <DialogTitle>Create Campaign</DialogTitle>
-          <DialogDescription
-            >Enter the campaign details to create a new campaign.</DialogDescription
-          >
+          <DialogTitle v-if="createOrEditCampaignModal.intent === 'create'">
+            Create Campaign
+          </DialogTitle>
+          <DialogTitle v-else-if="createOrEditCampaignModal.intent === 'edit'">
+            Edit Campaign
+          </DialogTitle>
+          <DialogDescription v-if="createOrEditCampaignModal.intent === 'create'">
+            Enter the campaign details to create a new campaign.
+          </DialogDescription>
+          <DialogDescription v-else-if="createOrEditCampaignModal.intent === 'edit'">
+            Enter the campaign details to edit this campaign.
+          </DialogDescription>
         </DialogHeader>
         <form
-          id="createCampaign"
+          id="campaignForm"
           class="flex flex-col gap-y-4"
-          @submit.prevent="createCampaignModal.createCampaign()"
+          @submit.prevent="createOrEditCampaignModal.submitForm()"
         >
           <div class="flex flex-col gap-y-2">
             <Label for="mediaSource">Media Source</Label>
-            <Select id="mediaSource" v-model="createCampaignModal.form.mediaSource">
+            <Select id="mediaSource" v-model="createOrEditCampaignModal.form.mediaSource">
               <SelectTrigger>
                 <SelectValue placeholder="Select Source" />
               </SelectTrigger>
@@ -308,7 +347,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
             <Input
               type="text"
               id="name"
-              v-model="createCampaignModal.form.name"
+              v-model="createOrEditCampaignModal.form.name"
               name="name"
               placeholder="Input Name"
               required
@@ -316,7 +355,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
           </div>
           <div class="flex flex-col gap-y-2">
             <Label for="users">Instagram Business</Label>
-            <Select id="users" v-model="createCampaignModal.form.publishedTo.users">
+            <Select id="users" v-model="createOrEditCampaignModal.form.publishedTo.users">
               <SelectTrigger>
                 <SelectValue placeholder="Select Instagram Business" />
               </SelectTrigger>
@@ -331,7 +370,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
           </div>
           <div class="flex flex-col gap-y-2">
             <Label for="pages">Pages</Label>
-            <Select id="pages" v-model="createCampaignModal.form.publishedTo.pages">
+            <Select id="pages" v-model="createOrEditCampaignModal.form.publishedTo.pages">
               <SelectTrigger>
                 <SelectValue placeholder="Select Pages" />
               </SelectTrigger>
@@ -346,7 +385,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
           </div>
           <div class="flex flex-col gap-y-2">
             <Label for="groups">Groups</Label>
-            <Select id="groups" v-model="createCampaignModal.form.publishedTo.groups">
+            <Select id="groups" v-model="createOrEditCampaignModal.form.publishedTo.groups">
               <SelectTrigger>
                 <SelectValue placeholder="Select Groups" />
               </SelectTrigger>
@@ -362,26 +401,42 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
           <div class="grid grid-cols-2 gap-x-4">
             <div class="flex flex-col gap-y-2">
               <Label as="span">Start Date</Label>
-              <DatePicker @update:model-value="createCampaignModal.form.duration.start = $event" />
+              <DatePicker
+                :initialValue="createOrEditCampaignModal.form.duration.start"
+                @update:model-value="createOrEditCampaignModal.form.duration.start = $event"
+              />
             </div>
             <div class="flex flex-col gap-y-2">
               <Label as="span">End Date</Label>
               <DatePicker
-                v-model="createCampaignModal.form.duration.end"
-                @update:model-value="createCampaignModal.form.duration.end = $event"
+                :initial-value="createOrEditCampaignModal.form.duration.end"
+                @update:model-value="createOrEditCampaignModal.form.duration.end = $event"
               />
             </div>
           </div>
         </form>
         <DialogFooter>
-          <Button variant="secondary" @click="createCampaignModal.close()">Cancel</Button>
-          <Button type="submit" form="createCampaign">Create</Button>
+          <Button variant="secondary" @click="createOrEditCampaignModal.close()">Cancel</Button>
+          <Button
+            v-if="createOrEditCampaignModal.intent === 'create'"
+            type="submit"
+            form="campaignForm"
+          >
+            Create
+          </Button>
+          <Button
+            v-else-if="createOrEditCampaignModal.intent === 'edit'"
+            type="submit"
+            form="campaignForm"
+          >
+            Edit
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
 
     <!-- Confirm Delete Modal -->
-    <Dialog v-model:open="deleteCampaignModal.isOpen">
+    <Dialog v-model:open="deleteCampaignModal.isOpen" @update:open="deleteCampaignModal.close()">
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Campaign?</DialogTitle>
