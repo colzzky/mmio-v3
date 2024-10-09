@@ -4,6 +4,7 @@ import MobileSidebar from '../components/sidebar/mobile-sidebar.vue'
 import ProjectCenter from '@/modules/try/components/ProjectCenter.vue'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { Bars3Icon } from '@heroicons/vue/24/outline'
+import {Toaster} from '@/core/components/ui/toast'
 
 const sidebarStore = useSidebarStore()
 
