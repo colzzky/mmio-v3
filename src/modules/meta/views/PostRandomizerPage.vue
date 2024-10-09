@@ -139,6 +139,17 @@ const createCampaignModal = reactive<CreateCampaignModal>({
   },
 })
 
+// TOGGLE CAMPAIGN STATUS
+function handleToggleCampaignStatus(campaignId: Campaign['id']) {
+  const campaign = campaigns.value.get(campaignId)
+  if (!campaign) throw new Error('Campaign not found')
+
+  campaigns.value.set(campaignId, {
+    ...campaign,
+    status: campaign.status === 'live' ? 'disabled' : 'live',
+  })
+}
+
 // DELETE CAMPAIGN
 interface DeleteCampaignModal extends Omit<Modal, 'open'> {
   campaignId: Campaign['id'] | null
@@ -233,6 +244,15 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
                     <i class="material-icons text-md">more_vert</i>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
+                    <DropdownMenuItem class="flex gap-x-2" @click="handleToggleCampaignStatus(id)">
+                      <i
+                        :class="[
+                          'bx text-xl',
+                          campaign.status === 'live' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                        ]"
+                      />
+                      Toggle Status
+                    </DropdownMenuItem>
                     <DropdownMenuItem class="flex gap-x-2">
                       <i class="bx bxs-report text-xl" />
                       View Report
