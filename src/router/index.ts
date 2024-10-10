@@ -1,10 +1,9 @@
 import authenticationRoutes from '@/modules/authentication/routes'
 import { routes as metaRoutes } from '@/modules/meta/routes'
+import { routes as settingsRoutes } from '@/modules/settings/routes'
 import othersRoutes from '@/modules/try/routes'
 import { useAuthStore } from '@/stores/authStore'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-
-
 
 const routes = [
   {
@@ -18,6 +17,7 @@ const routes = [
   },
   ...authenticationRoutes,
   ...metaRoutes,
+  ...settingsRoutes,
   ...othersRoutes,
 ] as RouteRecordRaw[]
 
@@ -29,20 +29,21 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
   const { user_auth } = authStore
-  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
-  const nonAuth = to.matched.some(record => record.meta.nonAuth);
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const nonAuth = to.matched.some((record) => record.meta.nonAuth)
 
   if (requiresAuth) {
     const checkUser = user_auth.checkUser()
-    if (!checkUser) return next({ name: 'login' });
+    if (!checkUser) return next({ name: 'login' })
     return next()
-  } if (nonAuth) {
+  }
+  if (nonAuth) {
     const checkUser = user_auth.checkUser()
-    if (checkUser) return next({ name: 'home' });
+    if (checkUser) return next({ name: 'home' })
     return next()
   } else {
     return next()
   }
-});
+})
 
 export default router
