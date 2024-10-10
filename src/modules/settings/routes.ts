@@ -51,26 +51,44 @@ export const links = Object.entries(urlLinks).map(([key, value]) => ({ ...value,
 const routeRecords: Record<AllUrl, Omit<RouteRecordRaw, 'path'>> = {
   '/settings/account': {
     name: 'settings-account',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/AccountPage.vue'),
   },
   '/settings/profile': {
     name: 'settings-profile',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/ProfilePage.vue'),
   },
   '/settings/payments-and-billings': {
     name: 'settings-payments-and-billings',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/AccountPage.vue'),
   },
   '/settings/api-integration': {
     name: 'settings-api-integrations',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/AccountPage.vue'),
   },
   '/settings/team': {
     name: 'settings-team',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/AccountPage.vue'),
   },
   '/settings/project-management': {
     name: 'settings-project-management',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/AccountPage.vue'),
   },
 }

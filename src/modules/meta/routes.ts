@@ -119,78 +119,135 @@ type AllUrl = (typeof urls)[number]
 const routeRecords: Record<AllUrl, Omit<RouteRecordRaw, 'path'>> = {
   '/meta': {
     name: 'meta',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/chatbot-flow-builder': {
     name: 'chatbot-flow-builder',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/ChatbotFlowBuilder.vue'),
   },
   '/meta/comment-auto-reply': {
     name: 'comment-auto-reply',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/post-randomizer': {
     name: 'post-randomizer',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/PostRandomizerPage.vue'),
   },
   '/meta/livestream': {
     name: 'livestream',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/interest-finder': {
     name: 'interest-finder',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/live-chat': {
     name: 'live-chat',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/subscribers': {
     name: 'subscribers',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/growth-tools': {
     name: 'growth-tools',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/chat-broadcast': {
     name: 'chat-broadcast',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/chat-sequences': {
     name: 'chat-sequences',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/messenger-webview': {
     name: 'messenger-webview',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/persistent-menu': {
     name: 'persistent-menu',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/welcome-message': {
     name: 'welcome-message',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/ice-breakers': {
     name: 'ice-breakers',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/get-started': {
     name: 'get-started',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/keywords': {
     name: 'keywords',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/chatbot-defaults': {
     name: 'chatbot-defaults',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
   '/meta/marketing-messages': {
     name: 'marketing-messages',
+    meta: {
+      requiresAuth: true,
+    },
     component: () => import('./views/MetaHomePage.vue'),
   },
 }
