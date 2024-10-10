@@ -1,10 +1,7 @@
-import { useServicesStore } from './servicesStore'
-import type { Service } from '@/modules/meta/routes'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { auth } from '@/core/utils/firebase-client';
-
 
 export const useAuthStore = defineStore('authStore', () => {
     const user_auth = reactive({

@@ -5,8 +5,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/core/components/ui/dropdown-menu'
-import router from '@/router';
+import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
+
 const authStore = useAuthStore()
 const { user_auth } = authStore
 
@@ -45,10 +46,8 @@ const configuration = [
 
 const signOut = async () => {
   await user_auth.signOut()
-  router.push({name:"login"})
+  router.push({ name: 'login' })
 }
-
-
 </script>
 
 <template>
@@ -75,15 +74,19 @@ const signOut = async () => {
             <ul class="grid">
               <li v-for="item in configuration" :key="item.name">
                 <div v-if="item.name === 'Logout'">
-                  <div @click="signOut()"
-                    class="group flex items-center gap-x-3 rounded-md px-2 py-1 text-xs font-semibold leading-6 hover:bg-primary/5 cursor-pointer">
+                  <div
+                    @click="signOut()"
+                    class="group flex cursor-pointer items-center gap-x-3 rounded-md px-2 py-1 text-xs font-semibold leading-6 hover:bg-primary/5"
+                  >
                     <i class="material-icons text-sm">{{ item.icon }}</i>
                     {{ item.name }}
                   </div>
                 </div>
                 <div v-else>
-                  <RouterLink :to="item.href"
-                    class="group flex items-center gap-x-3 rounded-md px-2 py-1 text-xs font-semibold leading-6 hover:bg-primary/5">
+                  <RouterLink
+                    :to="item.href"
+                    class="group flex items-center gap-x-3 rounded-md px-2 py-1 text-xs font-semibold leading-6 hover:bg-primary/5"
+                  >
                     <i class="material-icons text-sm">{{ item.icon }}</i>
                     {{ item.name }}
                   </RouterLink>

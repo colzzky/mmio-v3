@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { Icon } from '@iconify/vue'
 import { browserLocalPersistence, setPersistence, signInWithEmailAndPassword } from 'firebase/auth'
 import { reactive, ref } from 'vue'
+
 const authStore = useAuthStore()
 const { user_auth } = authStore
 const { toast } = useToast()
@@ -23,7 +24,7 @@ const form = reactive({
   email: 'superadmin@mmio.com',
   password: 'password',
 })
-async function handleLoginUser(){
+async function handleLoginUser() {
   // todo: implement authentication
   await loginUser(form.email, form.password)
 }
@@ -37,27 +38,26 @@ const loginUser = async (email: string, password: string): Promise<void> => {
           toast({
             title: 'MMIO v3 Registration',
             description: 'You have successfully Logged in.',
-            variant: "success"
+            variant: 'success',
           })
-          router.push({name:"home"})
+          router.push({ name: 'home' })
         }
       })
       .catch((error) => {
         toast({
           title: 'Registration error',
           description: error,
-          variant: "destructive"
+          variant: 'destructive',
         })
       })
   })
 }
-
-
 </script>
 
 <template>
   <main
-    class="mx-auto flex w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl flex-col gap-y-8 py-[var(--gutter)] [--gutter:1rem] lg:[--gutter:2rem]">
+    class="mx-auto flex w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl flex-col gap-y-8 py-[var(--gutter)] [--gutter:1rem] lg:[--gutter:2rem]"
+  >
     <img class="h-12 w-auto self-start" src="@/assets/logo.png" alt="marketingmaster.io logo" />
     <template v-if="!isSignInCredentialsFormVisible">
       <section class="flex flex-col gap-y-2 text-center">
@@ -89,25 +89,47 @@ const loginUser = async (email: string, password: string): Promise<void> => {
         <h1 class="text-4xl/none font-bold">Login with your Email</h1>
         <p class="text-sm">
           You can also use
-          <Button variant="link" class="h-[unset] p-0 text-blue-500" @click="toggleSignInCredentialsForm">
+          <Button
+            variant="link"
+            class="h-[unset] p-0 text-blue-500"
+            @click="toggleSignInCredentialsForm"
+          >
             Facebook or Google
           </Button>
           to login
         </p>
       </section>
-      <form class="flex w-[calc(100svw-2rem)] max-w-lg flex-col gap-y-4 self-center" @submit.prevent="handleLoginUser">
+      <form
+        class="flex w-[calc(100svw-2rem)] max-w-lg flex-col gap-y-4 self-center"
+        @submit.prevent="handleLoginUser"
+      >
         <div class="flex flex-col gap-y-2">
           <Label for="email">Email Address</Label>
-          <Input id="email" name="email" type="email" placeholder="johndoe@gmail.com" autocomplete="email" required
-            v-model="form.email" />
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="johndoe@gmail.com"
+            autocomplete="email"
+            required
+            v-model="form.email"
+          />
         </div>
         <div class="grid grid-cols-2 gap-y-1">
           <Label for="password">Password</Label>
           <Button variant="link" as-child class="h-[unset] justify-self-end p-0 text-blue-500">
             <RouterLink to="/forgot-password">Forgot your password?</RouterLink>
           </Button>
-          <Input id="password" name="password" type="password" placeholder="********" autocomplete="password"
-            class="col-span-2" required v-model="form.password" />
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="********"
+            autocomplete="password"
+            class="col-span-2"
+            required
+            v-model="form.password"
+          />
         </div>
         <Button type="submit">Sign in</Button>
       </form>

@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { type HTMLAttributes, computed } from 'vue'
-import { ToastViewport, type ToastViewportProps } from 'radix-vue'
 import cn from '@/core/utils/cn'
+import { ToastViewport, type ToastViewportProps } from 'radix-vue'
+import { type HTMLAttributes, computed } from 'vue'
 
 const props = defineProps<ToastViewportProps & { class?: HTMLAttributes['class'] }>()
 
 const delegatedProps = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { class: _, ...delegated } = props
 
   return delegated
@@ -13,7 +14,14 @@ const delegatedProps = computed(() => {
 </script>
 
 <template>
-  <ToastViewport v-bind="delegatedProps" :class="cn('fixed top-0 left-[50%] z-[100] flex max-h-screen w-full translate-x-[-50%] flex-col-reverse p-4 sm:right-0 sm:flex-col md:max-w-[420px]', props.class)" />
+  <ToastViewport
+    v-bind="delegatedProps"
+    :class="
+      cn(
+        'fixed left-[50%] top-0 z-[100] flex max-h-screen w-full translate-x-[-50%] flex-col-reverse p-4 sm:right-0 sm:flex-col md:max-w-[420px]',
+        props.class,
+      )
+    "
+  />
   <!-- fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:top-auto sm:bottom-0 sm:right-0 sm:flex-col md:max-w-[420px] -->
-  
 </template>

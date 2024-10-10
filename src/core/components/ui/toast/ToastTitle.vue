@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { type HTMLAttributes, computed } from 'vue'
-import { ToastTitle, type ToastTitleProps } from 'radix-vue'
 import cn from '@/core/utils/cn'
+import { ToastTitle, type ToastTitleProps } from 'radix-vue'
+import { type HTMLAttributes, computed } from 'vue'
 
 const props = defineProps<ToastTitleProps & { class?: HTMLAttributes['class'] }>()
 
 const delegatedProps = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { class: _, ...delegated } = props
 
   return delegated

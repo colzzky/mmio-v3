@@ -5,7 +5,7 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'login',
     meta: {
-      nonAuth: true
+      nonAuth: true,
     },
     component: () => import('./views/LoginPage.vue'),
   },
@@ -13,7 +13,7 @@ const routes: RouteRecordRaw[] = [
     path: '/register',
     name: 'register',
     meta: {
-      nonAuth: true
+      nonAuth: true,
     },
     component: () => import('./views/RegisterPage.vue'),
   },

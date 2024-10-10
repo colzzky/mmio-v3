@@ -77,7 +77,6 @@
 import { Skeleton } from '@/core/components/ui/skeleton'
 import HomeLayout from '@/core/layouts/HomeLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { ref } from 'vue'
 
 const campaigns = [
   {
