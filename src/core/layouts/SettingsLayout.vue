@@ -11,14 +11,16 @@ const linksBySection = new Map(
 
 <template>
   <div
-    class="mx-auto grid w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-cols-[minmax(250px,300px)_1fr] gap-4 py-[var(--gutter)] [--gutter:theme(spacing.4)] xl:gap-x-8 2xl:gap-x-12"
+    class="mx-auto grid w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-cols-[minmax(250px,300px)_1fr] gap-8 py-[var(--gutter)] [--gutter:theme(spacing.4)]"
   >
-    <header class="col-span-3 flex items-center justify-between border-b pb-2">
+    <header class="col-span-3 flex items-center justify-between border-b py-2">
       <span class="flex items-center gap-x-2 text-xl font-bold">
         <i class="material-icons text-5xl">pin</i>
         Settings
       </span>
-      <Button variant="secondary">Return</Button>
+      <Button variant="secondary" as-child>
+        <RouterLink to="/">Return</RouterLink>
+      </Button>
     </header>
     <aside class="col-span-1 flex flex-col gap-y-4">
       <section

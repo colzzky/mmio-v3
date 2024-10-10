@@ -30,7 +30,7 @@ const configuration = [
   {
     icon: 'api',
     name: 'API Integration',
-    href: '#',
+    href: '/settings/api-integration',
   },
   {
     icon: 'logout',
@@ -40,7 +40,7 @@ const configuration = [
   {
     icon: 'settings',
     name: 'Settings',
-    href: '#',
+    href: '/settings/account',
   },
 ]
 

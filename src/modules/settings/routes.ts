@@ -6,7 +6,7 @@ const urls = [
   '/settings/account',
   '/settings/profile',
   '/settings/payments-and-billings',
-  '/settings/api-integrations',
+  '/settings/api-integration',
   '/settings/team',
   '/settings/project-management',
 ] as const
@@ -29,7 +29,7 @@ const urlLinks: Record<AllUrl, { label: string; icon: string; section: Section }
     icon: 'bxs-credit-card',
     section: 'personal',
   },
-  '/settings/api-integrations': {
+  '/settings/api-integration': {
     label: 'API Integrations',
     icon: 'bxs-plug',
     section: 'personal',
@@ -55,13 +55,13 @@ const routeRecords: Record<AllUrl, Omit<RouteRecordRaw, 'path'>> = {
   },
   '/settings/profile': {
     name: 'settings-profile',
-    component: () => import('./views/AccountPage.vue'),
+    component: () => import('./views/ProfilePage.vue'),
   },
   '/settings/payments-and-billings': {
     name: 'settings-payments-and-billings',
     component: () => import('./views/AccountPage.vue'),
   },
-  '/settings/api-integrations': {
+  '/settings/api-integration': {
     name: 'settings-api-integrations',
     component: () => import('./views/AccountPage.vue'),
   },
