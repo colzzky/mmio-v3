@@ -35,11 +35,6 @@ const loginUser = async (email: string, password: string): Promise<void> => {
       .then(() => {
         if (auth.currentUser) {
           user_auth.setUser(auth.currentUser)
-          toast({
-            title: 'MMIO v3 Registration',
-            description: 'You have successfully Logged in.',
-            variant: 'success',
-          })
           router.push({ name: 'home' })
         }
       })

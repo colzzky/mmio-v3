@@ -5,6 +5,7 @@ import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
 import { Switch } from '@/core/components/ui/switch'
 import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
+import UpdateAccountName from '../components/AccountSettings/UpdateDisplayName.vue'
 </script>
 
 <template>
@@ -12,10 +13,7 @@ import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
     <main class="grid grid-cols-[minmax(350px,1fr)_1fr] gap-x-4 xl:gap-x-12 2xl:gap-x-16">
       <section class="flex flex-col gap-y-8 divide-y">
         <div class="flex flex-col gap-y-6">
-          <div class="flex flex-col gap-y-2">
-            <Label for="name">Display Name</Label>
-            <Input type="text" name="name" id="name" placeholder="John Doe" />
-          </div>
+          <UpdateAccountName />
           <div class="flex flex-col gap-y-2">
             <Label for="email">Email Address</Label>
             <!-- <Input type="email" name="email" id="email" placeholder="johndoe@gmail.com" /> -->
@@ -36,9 +34,7 @@ import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
         <div class="flex flex-col gap-y-4 py-8">
           <h2 class="text-lg font-bold">Newsletter</h2>
           <div class="flex items-center justify-between">
-            <Label for="newsletter" class="text-xs"
-              >I want to get a newsletter from the company</Label
-            >
+            <Label for="newsletter" class="text-xs">I want to get a newsletter from the company</Label>
             <Switch id="newsletter" />
           </div>
         </div>
@@ -56,4 +52,6 @@ import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
       </section>
     </main>
   </SettingsLayout>
+
+
 </template>
