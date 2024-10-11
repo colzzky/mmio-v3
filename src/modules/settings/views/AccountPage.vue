@@ -9,7 +9,7 @@ import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
 
 <template>
   <SettingsLayout>
-    <main class="grid grid-cols-[minmax(350px,1fr)_1fr] gap-x-4">
+    <main class="grid grid-cols-[minmax(350px,1fr)_1fr] gap-x-4 xl:gap-x-12 2xl:gap-x-16">
       <section class="flex flex-col gap-y-8 divide-y">
         <div class="flex flex-col gap-y-6">
           <div class="flex flex-col gap-y-2">
