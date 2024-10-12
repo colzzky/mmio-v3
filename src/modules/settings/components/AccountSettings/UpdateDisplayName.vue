@@ -44,11 +44,14 @@ const componentLoad = ref<boolean>(true)
 const schema = z.object({
     displayName: z.string().min(1, { message: "Display name is required" }),
 });
+//Set default using shallow copy instead of referencing the reactive value
+//defaultInputField.dataInput = { ...this.dataInput };
 
+
+//This is the peak form design!!!!! lol
 const defaultInputField = <DefaultInputField>{
     dataInput: {}
 }
-
 const inputField = reactive<InputField>({
     dataInput: {
         displayName: 'test@example.com',
@@ -59,7 +62,7 @@ const inputField = reactive<InputField>({
     validated: false,
     isLoading: false,
     confirmationModal: false,
-    initializeValue() {
+    initializeValue():void {
         //Get initial value
         if (user_auth.data && user_auth.data.displayName) {
             inputField.dataInput.displayName = user_auth.data.displayName
@@ -67,7 +70,7 @@ const inputField = reactive<InputField>({
             inputField.dataInput.displayName = ''
         }
         //get the default
-        defaultInputField.dataInput = this.dataInput
+        defaultInputField.dataInput = { ...this.dataInput };
     },
     validateSingleField(field: keyof DataInput): void {
         const value = this.dataInput[field]
@@ -83,7 +86,7 @@ const inputField = reactive<InputField>({
             const field = key as keyof DataInput;
             this.errors[field] = '';
         });
-        
+
         const result = schema.safeParse(this.dataInput);
 
         // Set the validation result
@@ -95,7 +98,7 @@ const inputField = reactive<InputField>({
                 this.errors[field] = err.message;
             });
         }
-        
+
         if (this.validated) {
             this.openCloseConfirmation();
         }
@@ -103,7 +106,7 @@ const inputField = reactive<InputField>({
     openCloseConfirmation(): void {
         this.confirmationModal = !this.confirmationModal;
     },
-    async updateDisplayName() {
+    async updateDisplayName(): Promise<void> {
         this.isLoading = true
         user_auth.checkUser()
         if (user_auth.data) {
@@ -113,8 +116,7 @@ const inputField = reactive<InputField>({
                 description: 'You have succssfully updated your display name',
                 variant: 'success',
             })
-            //Set default
-            defaultInputField.dataInput = this.dataInput
+            defaultInputField.dataInput = { ...this.dataInput };
         } else {
             toast({
                 title: 'Display Name update error',
@@ -136,6 +138,7 @@ onMounted(() => {
 </script>
 
 <template>
+    <Toaster />
     <div v-if="!componentLoad" class="flex flex-col gap-y-2">
         <Label for="name" class="text-xs">Display Name</Label>
         <div class="flex gap-2 items-center">
@@ -148,6 +151,7 @@ onMounted(() => {
             {{ inputField.errors.displayName }}
         </div>
     </div>
+
     <div v-else class="flex flex-col gap-y-2">
         <Skeleton class="h-2 w-[100px] rounded-full bg-gray-300" />
         <div class="flex gap-2 items-center">
@@ -155,8 +159,8 @@ onMounted(() => {
         </div>
         <Skeleton class="h-3 w-[300px] bg-gray-300" />
     </div>
+
     <!-- Modal For Confirming Display name  -->
-    <Toaster />
     <Dialog v-model:open="inputField.confirmationModal">
         <DialogContent @interact-outside="(e) => e.preventDefault()">
             <div class="relative">
@@ -189,6 +193,4 @@ onMounted(() => {
             </div>
         </DialogContent>
     </Dialog>
-
-
 </template>
