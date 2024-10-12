@@ -34,7 +34,10 @@ interface InputField {
     validateDataInput: () => Promise<void>;
     validateSingleField: (field: keyof DataInput) => void;
 }
-type DefaultInputField = Pick<InputField, 'dataInput'>;
+//type DefaultInputField = Pick<InputField, 'dataInput'>;
+type DefaultInputField = {
+    dataInput: Partial<DataInput>;
+};
 
 const componentLoad = ref<boolean>(true)
 
