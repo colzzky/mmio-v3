@@ -66,14 +66,7 @@ const inputField = reactive<InputField>({
         //get the default
         defaultInputField.dataInput = this.dataInput
     },
-    openCloseConfirmation() {
-        if (this.confirmationModal) {
-            this.confirmationModal = false
-        } else {
-            this.confirmationModal = true
-        }
-    },
-    validateSingleField(field): void {
+    validateSingleField(field: keyof DataInput): void {
         const value = this.dataInput[field]
         this.errors[field] = ''
         const result = schema.shape[field].safeParse(value);
@@ -82,13 +75,15 @@ const inputField = reactive<InputField>({
             this.errors[field] = result.error.errors[0].message;
         }
     },
-    async validateDataInput() {
+    async validateDataInput(): Promise<void> {
+        Object.keys(this.errors).forEach((key) => {
+            const field = key as keyof DataInput;
+            this.errors[field] = '';
+        });
+        
         const result = schema.safeParse(this.dataInput);
 
-        Object.keys(this.errors as DataInput).forEach((key) => {
-            const index = key as keyof DataInput
-            this.errors[index] = ''
-        });
+        // Set the validation result
         this.validated = result.success;
 
         if (!result.success) {
@@ -97,10 +92,13 @@ const inputField = reactive<InputField>({
                 this.errors[field] = err.message;
             });
         }
-
+        
         if (this.validated) {
-            this.openCloseConfirmation()
+            this.openCloseConfirmation();
         }
+    },
+    openCloseConfirmation(): void {
+        this.confirmationModal = !this.confirmationModal;
     },
     async updateDisplayName() {
         this.isLoading = true
@@ -126,8 +124,6 @@ const inputField = reactive<InputField>({
         this.openCloseConfirmation()
     },
 });
-
-
 
 onMounted(() => {
     componentLoad.value = true
