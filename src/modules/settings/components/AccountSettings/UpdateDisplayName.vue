@@ -10,6 +10,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/core/components/ui/dialog'
+import { Skeleton } from '@/core/components/ui/skeleton'
 import { onMounted, reactive, ref } from 'vue'
 import { useToast, Toaster } from '@/core/components/ui/toast'
 import { useAuthStore } from '@/stores/authStore';
@@ -22,24 +23,28 @@ interface DataInput {
     displayName: string
 }
 interface InputField {
-    dataInput: DataInput
-    errors: DataInput
-    validated: boolean
-    isLoading: boolean
-    confirmationModal: boolean
-    openCloseConfirmation: () => void
-    updateDisplayName: () => Promise<void>
+    dataInput: DataInput;
+    errors: DataInput;
+    validated: boolean;
+    isLoading: boolean;
+    confirmationModal: boolean;
+    initializeValue: () => void;
+    openCloseConfirmation: () => void;
+    updateDisplayName: () => Promise<void>;
+    validateDataInput: () => Promise<void>;
+    validateSingleField: (field: keyof DataInput) => void;
 }
-type ValidationInputField = Pick<InputField, 'dataInput' | 'errors' | 'validated'>;
+type DefaultInputField = Pick<InputField, 'dataInput'>;
 
-onMounted(() => {
-    //get the date from firebase first the displayname
-    if (user_auth.data && user_auth.data.displayName) {
-        inputField.dataInput.displayName = user_auth.data.displayName
-    }else{
-        inputField.dataInput.displayName = ''
-    }
-})
+const componentLoad = ref<boolean>(true)
+
+const schema = z.object({
+    displayName: z.string().min(1, { message: "Display name is required" }),
+});
+
+const defaultInputField = <DefaultInputField>{
+    dataInput: {}
+}
 
 const inputField = reactive<InputField>({
     dataInput: {
@@ -51,11 +56,50 @@ const inputField = reactive<InputField>({
     validated: false,
     isLoading: false,
     confirmationModal: false,
+    initializeValue() {
+        //Get initial value
+        if (user_auth.data && user_auth.data.displayName) {
+            inputField.dataInput.displayName = user_auth.data.displayName
+        } else {
+            inputField.dataInput.displayName = ''
+        }
+        //get the default
+        defaultInputField.dataInput = this.dataInput
+    },
     openCloseConfirmation() {
         if (this.confirmationModal) {
             this.confirmationModal = false
         } else {
             this.confirmationModal = true
+        }
+    },
+    validateSingleField(field): void {
+        const value = this.dataInput[field]
+        this.errors[field] = ''
+        const result = schema.shape[field].safeParse(value);
+        if (!result.success) {
+            console.log(result.error.errors[0])
+            this.errors[field] = result.error.errors[0].message;
+        }
+    },
+    async validateDataInput() {
+        const result = schema.safeParse(this.dataInput);
+
+        Object.keys(this.errors as DataInput).forEach((key) => {
+            const index = key as keyof DataInput
+            this.errors[index] = ''
+        });
+        this.validated = result.success;
+
+        if (!result.success) {
+            result.error.errors.forEach(err => {
+                const field = err.path[0] as keyof DataInput;
+                this.errors[field] = err.message;
+            });
+        }
+
+        if (this.validated) {
+            this.openCloseConfirmation()
         }
     },
     async updateDisplayName() {
@@ -68,71 +112,49 @@ const inputField = reactive<InputField>({
                 description: 'You have succssfully updated your display name',
                 variant: 'success',
             })
+            //Set default
+            defaultInputField.dataInput = this.dataInput
         } else {
             toast({
                 title: 'Display Name update error',
                 description: 'Something went wrong please try again',
                 variant: 'destructive',
             })
+            //Option to return to default value when needed.
         }
         this.isLoading = false
         this.openCloseConfirmation()
-    }
+    },
 });
 
-const schema = z.object({
-    displayName: z.string().min(1, { message: "Display name is required" }),
-});
 
-function validateInputField() {
-    const result = schema.safeParse(inputField.dataInput);
 
-    Object.keys(inputField.errors as DataInput).forEach((key) => {
-        const index = key as keyof DataInput
-        inputField.errors[index] = ''
-    });
-    inputField.validated = result.success;
-
-    if (!result.success) {
-        result.error.errors.forEach(err => {
-            const field = err.path[0] as keyof DataInput;
-            inputField.errors[field] = err.message;
-        });
-    }
-
-    if (inputField.validated) {
-        inputField.openCloseConfirmation()
-    }
-}
-
-function validateSingleField(field: keyof DataInput): void {
-    const value = inputField.dataInput[field]
-    inputField.errors[field] = ''
-    const result = schema.shape[field].safeParse(value);
-    if (!result.success) {
-        console.log(result.error.errors[0])
-        inputField.errors[field] = result.error.errors[0].message;
-    }
-}
-
-const confirmationModal = ref<boolean>(false)
-const openCloseModal = () => {
-
-}
+onMounted(() => {
+    componentLoad.value = true
+    inputField.initializeValue()
+    componentLoad.value = false
+})
 </script>
 
 <template>
-    <div class="flex flex-col gap-y-2">
+    <div v-if="!componentLoad" class="flex flex-col gap-y-2">
         <Label for="name" class="text-xs">Display Name</Label>
         <div class="flex gap-2 items-center">
             <Input v-model="inputField.dataInput.displayName" type="text" name="name" id="name" placeholder="John Doe"
-                class="h-7 text-xs" @blur="validateSingleField('displayName')" />
-            <Button size="xs" class="text-xs" @click="validateInputField()">Update</Button>
+                class="h-7 text-xs" @blur="inputField.validateSingleField('displayName')" />
+            <Button size="xs" class="text-xs" @click="inputField.validateDataInput()">Update</Button>
         </div>
         <div v-if="inputField.errors.displayName" for="name" class="text-xs text-red-500 flex items-center gap-1">
             <i class="material-icons text-sm">error</i>
             {{ inputField.errors.displayName }}
         </div>
+    </div>
+    <div v-else class="flex flex-col gap-y-2">
+        <Skeleton class="h-2 w-[100px] rounded-full bg-gray-300" />
+        <div class="flex gap-2 items-center">
+            <Skeleton class="h-3 w-full rounded-full bg-gray-300" />
+        </div>
+        <Skeleton class="h-3 w-[300px] bg-gray-300" />
     </div>
     <!-- Modal For Confirming Display name  -->
     <Toaster />
