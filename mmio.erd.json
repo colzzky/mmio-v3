@@ -351,7 +351,7 @@
           "CtJS3PN6RHLcgWxfc0jgJ"
         ],
         "ui": {
-          "x": 18.4022,
+          "x": 17.4022,
           "y": 1.2375,
           "zIndex": 331,
           "widthName": 76,
@@ -359,7 +359,7 @@
           "color": ""
         },
         "meta": {
-          "updateAt": 1728641612751,
+          "updateAt": 1728894794837,
           "createAt": 1728641333775
         }
       }
@@ -2346,7 +2346,7 @@
           "columnIds": [
             "5H3mD6adiJU0G9QCGhNbK"
           ],
-          "x": 273.4022,
+          "x": 272.4022,
           "y": 173.2375,
           "direction": 2
         },

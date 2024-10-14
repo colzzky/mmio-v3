@@ -12,11 +12,12 @@ import {
   browserLocalPersistence,
   createUserWithEmailAndPassword,
   setPersistence,
+  updateProfile,
 } from 'firebase/auth'
 import { reactive } from 'vue'
 
 const authStore = useAuthStore()
-const { user_auth } = authStore
+const { user_auth,createUserProfile } = authStore
 const { toast } = useToast()
 
 // REGISTER USER
@@ -34,16 +35,18 @@ async function handleRegisterUser() {
   if (!form.agreeToTermsAndCondition) {
     throw new Error('You must agree to the terms and conditions')
   }
-  await emailRegisterUser(form.email, form.password)
+  await emailRegisterUser(form.email, form.password, form.name)
 }
 
-const emailRegisterUser = async (email: string, password: string): Promise<void> => {
+const emailRegisterUser = async (email: string, password: string, name:string): Promise<void> => {
   await setPersistence(auth, browserLocalPersistence).then(async () => {
-    await createUserWithEmailAndPassword(auth, email, password)
-      .then(() => {
+  await createUserWithEmailAndPassword(auth, email, password)
+      .then(async () => {
         if (auth.currentUser) {
           //Add to collection
+          await updateProfile(auth.currentUser, { displayName: name});
           user_auth.setUser(auth.currentUser)
+          await createUserProfile(auth.currentUser.uid)
           router.replace({ name: 'home' })
         }
       })
