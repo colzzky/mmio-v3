@@ -5,6 +5,7 @@ type Section = 'personal' | 'group'
 const urls = [
   '/settings/account',
   '/settings/profile',
+  '/settings/plans',
   '/settings/payments-and-billings',
   '/settings/api-integration',
   '/settings/team',
@@ -22,6 +23,11 @@ const urlLinks: Record<AllUrl, { label: string; icon: string; section: Section }
   '/settings/profile': {
     label: 'Profile',
     icon: 'bxs-user-circle',
+    section: 'personal',
+  },
+  '/settings/plans': {
+    label: 'Plans',
+    icon: 'bxs-tag',
     section: 'personal',
   },
   '/settings/payments-and-billings': {
@@ -62,6 +68,13 @@ const routeRecords: Record<AllUrl, Omit<RouteRecordRaw, 'path'>> = {
       requiresAuth: true,
     },
     component: () => import('./views/ProfilePage.vue'),
+  },
+  '/settings/plans': {
+    name: 'settings-tag',
+    meta: {
+      requiresAuth: true,
+    },
+    component: () => import('./views/PlansPage.vue'),
   },
   '/settings/payments-and-billings': {
     name: 'settings-payments-and-billings',
