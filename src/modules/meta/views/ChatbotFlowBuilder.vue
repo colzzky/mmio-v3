@@ -2,6 +2,14 @@
 import { Badge } from '@/core/components/ui/badge'
 import { Button } from '@/core/components/ui/button'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/core/components/ui/dialog'
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -16,8 +24,9 @@ import {
   TableRow,
 } from '@/core/components/ui/table'
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
+import type { Modal } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
 type Flow = {
   id: number
@@ -76,6 +85,7 @@ const sortedFlows = computed(() =>
   ),
 )
 
+// CLONE FLOW
 function handleCloneFlow(flowId: Flow['id']) {
   const flow = flows.value.get(flowId)
   if (!flow) throw new Error('Flow not found')
@@ -89,6 +99,7 @@ function handleCloneFlow(flowId: Flow['id']) {
   })
 }
 
+// TOGGLE FLOW STATUS
 function handleToggleFlowStatus(flowId: Flow['id']) {
   const flow = flows.value.get(flowId)
   if (!flow) throw new Error('Flow not found')
@@ -98,6 +109,38 @@ function handleToggleFlowStatus(flowId: Flow['id']) {
     status: flow.status === 'published' ? 'disabled' : 'published',
   })
 }
+
+// DELETE FLOW
+interface DeleteFlowModal extends Omit<Modal, 'open'> {
+  flowId: Flow['id'] | null
+  open(flowId: Flow['id']): void
+  deleteFlow(): void
+}
+
+const deleteFlowModal = reactive<DeleteFlowModal>({
+  isOpen: false,
+  flowId: null,
+  initialState() {
+    this.isOpen = false
+    this.flowId = null
+  },
+  open(flowId) {
+    this.isOpen = true
+    this.flowId = flowId
+  },
+  close() {
+    this.initialState()
+  },
+  deleteFlow() {
+    if (!this.flowId) throw new Error('No Flow ID provided')
+
+    const flow = flows.value.get(this.flowId)
+    if (!flow) throw new Error('Flow not found')
+
+    flows.value.delete(this.flowId)
+    this.close()
+  },
+})
 </script>
 
 <template>
@@ -159,7 +202,7 @@ function handleToggleFlowStatus(flowId: Flow['id']) {
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3">
+                    <DropdownMenuItem class="gap-x-3" @click="deleteFlowModal.open(id)">
                       <i class="bx bx-trash text-xl" />
                       Delete
                     </DropdownMenuItem>
@@ -170,6 +213,23 @@ function handleToggleFlowStatus(flowId: Flow['id']) {
           </TableRow>
         </TableBody>
       </Table>
+
+      <!-- Confirm Delete Modal -->
+      <Dialog v-model:open="deleteFlowModal.isOpen" @update:open="deleteFlowModal.close()">
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Flow?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this flow? This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter>
+            <Button variant="secondary" @click="deleteFlowModal.close()">Cancel</Button>
+            <Button variant="destructive" @click="deleteFlowModal.deleteFlow()"> Delete </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   </DefaultLayout>
 </template>
