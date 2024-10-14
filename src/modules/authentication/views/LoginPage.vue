@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { Icon } from '@iconify/vue'
 import { browserLocalPersistence, setPersistence, signInWithEmailAndPassword } from 'firebase/auth'
 import { reactive, ref } from 'vue'
+import { Toaster } from '@/core/components/ui/toast'
 
 const authStore = useAuthStore()
 const { user_auth } = authStore
@@ -35,7 +36,7 @@ const loginUser = async (email: string, password: string): Promise<void> => {
       .then(() => {
         if (auth.currentUser) {
           user_auth.setUser(auth.currentUser)
-          router.push({ name: 'home' })
+          router.replace({ name: 'home' })
         }
       })
       .catch((error) => {
@@ -50,6 +51,7 @@ const loginUser = async (email: string, password: string): Promise<void> => {
 </script>
 
 <template>
+  <Toaster/>
   <main
     class="mx-auto flex w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl flex-col gap-y-8 py-[var(--gutter)] [--gutter:1rem] lg:[--gutter:2rem]"
   >

@@ -17,6 +17,11 @@ const routes: RouteRecordRaw[] = [
     },
     component: () => import('./views/RegisterPage.vue'),
   },
+  {
+    path: '/verifications',
+    name: 'verifications',
+    component: () => import('./views/VerificationsPage.vue'),
+  },
 ]
 
 export default routes

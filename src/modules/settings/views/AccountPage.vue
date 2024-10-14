@@ -6,6 +6,7 @@ import { Label } from '@/core/components/ui/label'
 import { Switch } from '@/core/components/ui/switch'
 import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
 import UpdateAccountName from '../components/AccountSettings/UpdateDisplayName.vue'
+import UpdateEmail from '../components/AccountSettings/VerifyEmail.vue'
 </script>
 
 <template>
@@ -14,14 +15,7 @@ import UpdateAccountName from '../components/AccountSettings/UpdateDisplayName.v
       <section class="flex flex-col gap-y-8 divide-y">
         <div class="flex flex-col gap-y-6">
           <UpdateAccountName />
-          <div class="flex flex-col gap-y-2">
-            <Label for="email">Email Address</Label>
-            <!-- <Input type="email" name="email" id="email" placeholder="johndoe@gmail.com" /> -->
-            <div class="flex items-center justify-between text-sm">
-              <span class="font-medium underline">johndoe@gmail.com</span>
-              <Button variant="link" class="h-[unset] p-0 text-blue-500">Change Email</Button>
-            </div>
-          </div>
+          <UpdateEmail/>
           <div class="flex flex-col gap-y-2">
             <Label for="password">Password</Label>
             <!-- <Input type="password" name="password" id="password" placeholder="johndoe@gmail.com" /> -->

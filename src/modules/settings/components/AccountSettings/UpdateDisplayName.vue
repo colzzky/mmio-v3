@@ -18,13 +18,14 @@ import { updateProfile } from 'firebase/auth';
 const { toast } = useToast()
 const useAuth = useAuthStore()
 const { user_auth } = useAuth
+const componentLoad = ref<boolean>(true)
 
-interface DataInput {
+interface InputStructure {
     displayName: string
 }
 interface InputField {
-    dataInput: DataInput;
-    errors: DataInput;
+    dataInput: InputStructure;
+    errors: InputStructure;
     validated: boolean;
     isLoading: boolean;
     confirmationModal: boolean;
@@ -32,14 +33,14 @@ interface InputField {
     openCloseConfirmation: () => void;
     updateDisplayName: () => Promise<void>;
     validateDataInput: () => Promise<void>;
-    validateSingleField: (field: keyof DataInput) => void;
+    validateSingleField: (field: keyof InputStructure) => void;
 }
 //type DefaultInputField = Pick<InputField, 'dataInput'>;
 type DefaultInputField = {
-    dataInput: Partial<DataInput>;
+    dataInput: Partial<InputStructure>;
 };
 
-const componentLoad = ref<boolean>(true)
+
 
 const schema = z.object({
     displayName: z.string().min(1, { message: "Display name is required" }),
@@ -47,18 +48,17 @@ const schema = z.object({
 //Set default using shallow copy instead of referencing the reactive value
 //defaultInputField.dataInput = { ...this.dataInput };
 
+const inputStructure = <InputStructure>{
+    displayName: '',
+}
 
 //This is the peak form design!!!!! lol
 const defaultInputField = <DefaultInputField>{
     dataInput: {}
 }
 const inputField = reactive<InputField>({
-    dataInput: {
-        displayName: 'test@example.com',
-    },
-    errors: {
-        displayName: '',
-    },
+    dataInput: {...inputStructure},
+    errors: {...inputStructure},
     validated: false,
     isLoading: false,
     confirmationModal: false,
@@ -72,7 +72,7 @@ const inputField = reactive<InputField>({
         //get the default
         defaultInputField.dataInput = { ...this.dataInput };
     },
-    validateSingleField(field: keyof DataInput): void {
+    validateSingleField(field: keyof InputStructure): void {
         const value = this.dataInput[field]
         this.errors[field] = ''
         const result = schema.shape[field].safeParse(value);
@@ -83,7 +83,7 @@ const inputField = reactive<InputField>({
     },
     async validateDataInput(): Promise<void> {
         Object.keys(this.errors).forEach((key) => {
-            const field = key as keyof DataInput;
+            const field = key as keyof InputStructure;
             this.errors[field] = '';
         });
 
@@ -94,7 +94,7 @@ const inputField = reactive<InputField>({
 
         if (!result.success) {
             result.error.errors.forEach(err => {
-                const field = err.path[0] as keyof DataInput;
+                const field = err.path[0] as keyof InputStructure;
                 this.errors[field] = err.message;
             });
         }

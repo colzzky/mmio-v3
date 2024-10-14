@@ -44,7 +44,7 @@ const emailRegisterUser = async (email: string, password: string): Promise<void>
         if (auth.currentUser) {
           //Add to collection
           user_auth.setUser(auth.currentUser)
-          router.push({ name: 'home' })
+          router.replace({ name: 'home' })
         }
       })
       .catch((error) => {
