@@ -218,7 +218,6 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ID</TableHead>
             <TableHead>Flow Name</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Date Created</TableHead>
@@ -227,7 +226,6 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
         </TableHeader>
         <TableBody>
           <TableRow v-for="[id, flow] in sortedFlows" :key="id">
-            <TableCell>{{ id }}</TableCell>
             <TableCell>{{ flow.name }}</TableCell>
             <TableCell>
               <Badge>

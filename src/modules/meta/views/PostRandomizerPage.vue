@@ -93,7 +93,7 @@ const campaigns = ref(
   ]),
 )
 
-// CREATE CAMPAIGN
+// CREATE/EDIT CAMPAIGN
 interface CreateOrEditCampaignModal extends Omit<Modal, 'open'> {
   open(args: { intent: 'create' } | { intent: 'edit'; campaignId: Campaign['id'] }): void
 
@@ -149,7 +149,9 @@ const createOrEditCampaignModal = reactive<CreateOrEditCampaignModal>({
     this.close()
   },
   createCampaign() {
-    campaigns.value.set(new Date().getMilliseconds(), { ...this.form })
+    // @temporary: get the highest campaign id and increment it by 1
+    const newCampaignId = Math.max(...Array.from(campaigns.value.keys())) + 1
+    campaigns.value.set(newCampaignId, { ...this.form, createdAt: new Date() })
   },
   editCampaign() {
     if (!this.editCampaignId) throw new Error('No Campaign ID value')
