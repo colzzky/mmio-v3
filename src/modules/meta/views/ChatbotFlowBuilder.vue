@@ -15,6 +15,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/core/components/ui/dropdown-menu'
+import { Input } from '@/core/components/ui/input'
+import { Label } from '@/core/components/ui/label'
 import {
   Table,
   TableBody,
@@ -85,6 +87,80 @@ const sortedFlows = computed(() =>
   ),
 )
 
+// CREATE/EDIT FLOW
+interface CreateOrEditFlowModal extends Omit<Modal, 'open'> {
+  open(args: { intent: 'create' } | { intent: 'edit'; flowId: Flow['id'] }): void
+
+  editFlowId: Flow['id'] | null
+  intent: 'create' | 'edit' | null
+  form: Omit<Flow, 'id'>
+  submitForm(): void
+  createFlow(): void
+  editFlow(): void
+}
+
+const createOrEditFlowModal = reactive<CreateOrEditFlowModal>({
+  isOpen: false,
+  intent: null,
+  editFlowId: null,
+  form: {
+    name: '',
+    status: 'disabled',
+    createdAt: new Date(),
+  },
+  initialState() {
+    this.isOpen = false
+    this.intent = null
+    this.editFlowId = null
+    this.form = {
+      name: '',
+      status: 'disabled',
+      createdAt: new Date(),
+    }
+  },
+  open(args) {
+    this.intent = args.intent
+
+    if (args.intent === 'edit') {
+      const flow = flows.value.get(args.flowId)
+      if (!flow) throw new Error('Flow not found')
+
+      this.editFlowId = args.flowId
+      this.form = { ...flow }
+    }
+
+    this.isOpen = true
+  },
+  close() {
+    this.initialState()
+  },
+  submitForm() {
+    this.intent === 'create' ? this.createFlow() : this.editFlow()
+    this.close()
+  },
+  createFlow() {
+    // @temporary: get the highest flow id and increment it by 1
+    const newFlowId = Math.max(...Array.from(flows.value.keys())) + 1
+    flows.value.set(newFlowId, { ...this.form, createdAt: new Date() })
+  },
+  editFlow() {
+    if (!this.editFlowId) throw new Error('No Flow ID value')
+
+    flows.value.set(this.editFlowId, { ...this.form })
+  },
+})
+
+// TOGGLE FLOW STATUS
+function handleToggleFlowStatus(flowId: Flow['id']) {
+  const flow = flows.value.get(flowId)
+  if (!flow) throw new Error('Flow not found')
+
+  flows.value.set(flowId, {
+    ...flow,
+    status: flow.status === 'published' ? 'disabled' : 'published',
+  })
+}
+
 // CLONE FLOW
 function handleCloneFlow(flowId: Flow['id']) {
   const flow = flows.value.get(flowId)
@@ -96,17 +172,6 @@ function handleCloneFlow(flowId: Flow['id']) {
     name: `${flow.name} Clone`,
     status: flow.status,
     createdAt: new Date(),
-  })
-}
-
-// TOGGLE FLOW STATUS
-function handleToggleFlowStatus(flowId: Flow['id']) {
-  const flow = flows.value.get(flowId)
-  if (!flow) throw new Error('Flow not found')
-
-  flows.value.set(flowId, {
-    ...flow,
-    status: flow.status === 'published' ? 'disabled' : 'published',
   })
 }
 
@@ -146,7 +211,7 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
 <template>
   <DefaultLayout>
     <main class="flex flex-col gap-y-4 p-4">
-      <Button class="gap-x-2 self-end">
+      <Button class="gap-x-2 self-end" @click="createOrEditFlowModal.open({ intent: 'create' })">
         <i class="bx bx-plus text-xl" />
         Create Messenger Flow
       </Button>
@@ -198,7 +263,10 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
                       <i class="bx bx-share-alt text-xl" />
                       Share
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3">
+                    <DropdownMenuItem
+                      class="gap-x-3"
+                      @click="createOrEditFlowModal.open({ intent: 'edit', flowId: id })"
+                    >
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
@@ -213,6 +281,59 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
           </TableRow>
         </TableBody>
       </Table>
+
+      <!-- CREATE/EDIT FLOW MODAL -->
+      <Dialog
+        v-model:open="createOrEditFlowModal.isOpen"
+        @update:open="createOrEditFlowModal.close()"
+      >
+        <DialogContent class="gap-y-8">
+          <DialogHeader>
+            <DialogTitle v-if="createOrEditFlowModal.intent === 'create'">
+              Create Flow
+            </DialogTitle>
+            <DialogTitle v-else-if="createOrEditFlowModal.intent === 'edit'">
+              Edit Flow
+            </DialogTitle>
+            <DialogDescription v-if="createOrEditFlowModal.intent === 'create'">
+              Enter the flow details to create a new flow.
+            </DialogDescription>
+            <DialogDescription v-else-if="createOrEditFlowModal.intent === 'edit'">
+              Enter the flow details to edit this flow.
+            </DialogDescription>
+          </DialogHeader>
+          <form
+            id="flowForm"
+            class="flex flex-col gap-y-4"
+            @submit.prevent="createOrEditFlowModal.submitForm()"
+          >
+            <div class="flex flex-col gap-y-2">
+              <Label for="name">Name</Label>
+              <Input
+                type="text"
+                id="name"
+                v-model="createOrEditFlowModal.form.name"
+                name="name"
+                placeholder="Input Name"
+                required
+              />
+            </div>
+          </form>
+          <DialogFooter>
+            <Button variant="secondary" @click="createOrEditFlowModal.close()">Cancel</Button>
+            <Button v-if="createOrEditFlowModal.intent === 'create'" type="submit" form="flowForm">
+              Create
+            </Button>
+            <Button
+              v-else-if="createOrEditFlowModal.intent === 'edit'"
+              type="submit"
+              form="flowForm"
+            >
+              Edit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <!-- Confirm Delete Modal -->
       <Dialog v-model:open="deleteFlowModal.isOpen" @update:open="deleteFlowModal.close()">
