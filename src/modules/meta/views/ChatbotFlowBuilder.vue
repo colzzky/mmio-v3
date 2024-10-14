@@ -17,7 +17,7 @@ import {
 } from '@/core/components/ui/table'
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 type Flow = {
   id: number
@@ -33,7 +33,7 @@ const flows = ref(
       {
         name: 'Coupon Code Generator Demo',
         status: 'published',
-        createdAt: new Date(),
+        createdAt: new Date('2024-05-08'),
       },
     ],
     [
@@ -41,7 +41,7 @@ const flows = ref(
       {
         name: 'Chatbot AI Article Generator',
         status: 'published',
-        createdAt: new Date(),
+        createdAt: new Date('2024-02-19'),
       },
     ],
     [
@@ -49,7 +49,7 @@ const flows = ref(
       {
         name: 'Makati Event Ads',
         status: 'published',
-        createdAt: new Date(),
+        createdAt: new Date('2024-02-14'),
       },
     ],
     [
@@ -57,7 +57,7 @@ const flows = ref(
       {
         name: 'Timegap Test 2024',
         status: 'published',
-        createdAt: new Date(),
+        createdAt: new Date('2024-01-06'),
       },
     ],
     [
@@ -65,11 +65,29 @@ const flows = ref(
       {
         name: 'Food Ordering Bot',
         status: 'published',
-        createdAt: new Date(),
+        createdAt: new Date('2023-10-08'),
       },
     ],
   ]),
 )
+const sortedFlows = computed(() =>
+  Array.from(flows.value.entries()).sort(
+    ([, a], [, b]) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  ),
+)
+
+function handleCloneFlow(flowId: Flow['id']) {
+  const flow = flows.value.get(flowId)
+  if (!flow) throw new Error('Flow not found')
+
+  // @temporary: get the highest flow id and increment it by 1
+  const newFlowId = Math.max(...Array.from(flows.value.keys())) + 1
+  flows.value.set(newFlowId, {
+    name: `${flow.name} Clone`,
+    status: flow.status,
+    createdAt: new Date(),
+  })
+}
 
 function handleToggleFlowStatus(flowId: Flow['id']) {
   const flow = flows.value.get(flowId)
@@ -100,7 +118,7 @@ function handleToggleFlowStatus(flowId: Flow['id']) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="[id, flow] in flows" :key="id">
+          <TableRow v-for="[id, flow] in sortedFlows" :key="id">
             <TableCell>{{ id }}</TableCell>
             <TableCell>{{ flow.name }}</TableCell>
             <TableCell>
@@ -129,7 +147,7 @@ function handleToggleFlowStatus(flowId: Flow['id']) {
                       />
                       Toggle Status
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3">
+                    <DropdownMenuItem class="gap-x-3" @click="handleCloneFlow(id)">
                       <i class="bx bx-copy text-xl" />
                       Clone
                     </DropdownMenuItem>
