@@ -35,6 +35,7 @@ import {
   TableRow,
 } from '@/core/components/ui/table'
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
+import type { Modal } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { reactive, ref } from 'vue'
 
@@ -54,14 +55,6 @@ interface Campaign {
   }
   createdAt: Date
   status: 'disabled' | 'live'
-}
-
-// @temporary: can be extracted to another file
-interface Modal {
-  isOpen: boolean
-  initialState(): void
-  open(): void
-  close(): void
 }
 
 const campaigns = ref(
@@ -100,7 +93,7 @@ const campaigns = ref(
   ]),
 )
 
-// CREATE CAMPAIGN
+// CREATE/EDIT CAMPAIGN
 interface CreateOrEditCampaignModal extends Omit<Modal, 'open'> {
   open(args: { intent: 'create' } | { intent: 'edit'; campaignId: Campaign['id'] }): void
 
@@ -156,7 +149,9 @@ const createOrEditCampaignModal = reactive<CreateOrEditCampaignModal>({
     this.close()
   },
   createCampaign() {
-    campaigns.value.set(new Date().getMilliseconds(), { ...this.form })
+    // @temporary: get the highest campaign id and increment it by 1
+    const newCampaignId = Math.max(...Array.from(campaigns.value.keys())) + 1
+    campaigns.value.set(newCampaignId, { ...this.form, createdAt: new Date() })
   },
   editCampaign() {
     if (!this.editCampaignId) throw new Error('No Campaign ID value')
@@ -214,7 +209,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
   <DefaultLayout>
     <main class="flex flex-col gap-y-4 p-4">
       <Button
-        class="flex items-center justify-center gap-x-2 self-end"
+        class="gap-x-2 self-end"
         @click="createOrEditCampaignModal.open({ intent: 'create' })"
       >
         <i class="bx bx-plus text-xl" />
@@ -269,7 +264,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
                     <i class="material-icons text-md">more_vert</i>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem class="flex gap-x-2" @click="handleToggleCampaignStatus(id)">
+                    <DropdownMenuItem class="gap-x-3" @click="handleToggleCampaignStatus(id)">
                       <i
                         :class="[
                           'bx text-xl',
@@ -278,18 +273,18 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
                       />
                       Toggle Status
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="flex gap-x-2">
+                    <DropdownMenuItem class="gap-x-3">
                       <i class="bx bxs-report text-xl" />
                       View Report
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      class="flex gap-x-2"
+                      class="gap-x-3"
                       @click="createOrEditCampaignModal.open({ intent: 'edit', campaignId: id })"
                     >
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="flex gap-x-2" @click="deleteCampaignModal.open(id)">
+                    <DropdownMenuItem class="gap-x-3" @click="deleteCampaignModal.open(id)">
                       <i class="bx bx-trash text-xl" />
                       Delete
                     </DropdownMenuItem>
