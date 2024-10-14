@@ -48,14 +48,11 @@ const schema = z.object({
 //Set default using shallow copy instead of referencing the reactive value
 //defaultInputField.dataInput = { ...this.dataInput };
 
-const inputStructure = <InputStructure>{
+//Default Value
+let inputStructure = <InputStructure>{
     displayName: '',
 }
 
-//This is the peak form design!!!!! lol
-const defaultInputField = <DefaultInputField>{
-    dataInput: {}
-}
 const inputField = reactive<InputField>({
     dataInput: {...inputStructure},
     errors: {...inputStructure},
@@ -70,7 +67,7 @@ const inputField = reactive<InputField>({
             inputField.dataInput.displayName = ''
         }
         //get the default
-        defaultInputField.dataInput = { ...this.dataInput };
+        inputStructure = { ...this.dataInput };
     },
     validateSingleField(field: keyof InputStructure): void {
         const value = this.dataInput[field]
@@ -98,7 +95,6 @@ const inputField = reactive<InputField>({
                 this.errors[field] = err.message;
             });
         }
-
         if (this.validated) {
             this.openCloseConfirmation();
         }
@@ -116,7 +112,7 @@ const inputField = reactive<InputField>({
                 description: 'You have succssfully updated your display name',
                 variant: 'success',
             })
-            defaultInputField.dataInput = { ...this.dataInput };
+            inputStructure = { ...this.dataInput };
         } else {
             toast({
                 title: 'Display Name update error',

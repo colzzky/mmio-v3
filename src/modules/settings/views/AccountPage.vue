@@ -7,23 +7,17 @@ import { Switch } from '@/core/components/ui/switch'
 import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
 import UpdateAccountName from '../components/AccountSettings/UpdateDisplayName.vue'
 import UpdateEmail from '../components/AccountSettings/VerifyEmail.vue'
+import ChangePassword from '../components/AccountSettings/changePassword.vue'
 </script>
 
 <template>
   <SettingsLayout>
     <main class="grid grid-cols-[minmax(350px,1fr)_1fr] gap-x-4 xl:gap-x-12 2xl:gap-x-16">
       <section class="flex flex-col gap-y-8 divide-y">
-        <div class="flex flex-col gap-y-6">
+        <div class="flex flex-col gap-y-3">
           <UpdateAccountName />
           <UpdateEmail/>
-          <div class="flex flex-col gap-y-2">
-            <Label for="password">Password</Label>
-            <!-- <Input type="password" name="password" id="password" placeholder="johndoe@gmail.com" /> -->
-            <div class="flex items-center justify-between text-sm">
-              <span class="font-medium">********</span>
-              <Button variant="link" class="h-[unset] p-0 text-blue-500">Change Password</Button>
-            </div>
-          </div>
+          <ChangePassword/>
         </div>
         <div class="flex flex-col gap-y-4 py-8">
           <h2 class="text-lg font-bold">Newsletter</h2>
