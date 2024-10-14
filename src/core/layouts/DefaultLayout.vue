@@ -64,7 +64,7 @@ const parentRoute = breadcrumbs[0]
           <li>
             <RouterLink
               :to="{ name: parentRoute }"
-              class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/5"
+              class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
             >
               <i class="material-icons text-xl">grid_view</i>
               Dashboard
@@ -72,7 +72,7 @@ const parentRoute = breadcrumbs[0]
           </li>
           <li>
             <button
-              class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/5"
+              class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
               @click="toggleServicesModal"
             >
               <i class="material-icons text-xl">bookmark_border</i>
@@ -101,7 +101,7 @@ const parentRoute = breadcrumbs[0]
           <li v-for="[key, value] in pinnedServices" :key="key">
             <RouterLink
               :to="key"
-              class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/5"
+              class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
             >
               <i :class="['bx text-xl', value.icon]"></i>
               <span>
@@ -154,9 +154,9 @@ const parentRoute = breadcrumbs[0]
               </BreadcrumbList>
             </Breadcrumb>
           </div>
-          <button class="grid place-content-center">
+          <RouterLink to="/" class="grid place-content-center">
             <i class="material-icons text-3xl">keyboard_return</i>
-          </button>
+          </RouterLink>
           <button class="grid place-content-center">
             <i class="material-icons text-3xl">notifications</i>
           </button>
