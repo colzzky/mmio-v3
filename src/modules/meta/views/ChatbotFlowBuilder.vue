@@ -70,6 +70,16 @@ const flows = ref(
     ],
   ]),
 )
+
+function handleToggleFlowStatus(flowId: Flow['id']) {
+  const flow = flows.value.get(flowId)
+  if (!flow) throw new Error('Flow not found')
+
+  flows.value.set(flowId, {
+    ...flow,
+    status: flow.status === 'published' ? 'disabled' : 'published',
+  })
+}
 </script>
 
 <template>
@@ -82,6 +92,7 @@ const flows = ref(
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>ID</TableHead>
             <TableHead>Flow Name</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Date Created</TableHead>
@@ -90,6 +101,7 @@ const flows = ref(
         </TableHeader>
         <TableBody>
           <TableRow v-for="[id, flow] in flows" :key="id">
+            <TableCell>{{ id }}</TableCell>
             <TableCell>{{ flow.name }}</TableCell>
             <TableCell>
               <Badge>
@@ -108,7 +120,7 @@ const flows = ref(
                       <i class="bx bxs-error text-xl" />
                       View Error Logs
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3">
+                    <DropdownMenuItem class="gap-x-3" @click="handleToggleFlowStatus(id)">
                       <i
                         :class="[
                           'bx text-xl',
