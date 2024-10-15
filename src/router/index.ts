@@ -26,24 +26,22 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   const authStore = useAuthStore()
   const { user_auth } = authStore
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const nonAuth = to.matched.some((record) => record.meta.nonAuth)
-
   if (requiresAuth) {
     const checkUser = user_auth.checkUser()
-    if (!checkUser) return next({ name: 'login' })
-    return next()
+    if (!checkUser) return ({ name: 'login' })
+   
   }
   if (nonAuth) {
     const checkUser = user_auth.checkUser()
-    if (checkUser) return next({ name: 'home' })
-    return next()
-  } else {
-    return next()
+    if (checkUser) return({ name: 'home' })
+   
   }
+  return true
 })
 
 export default router

@@ -7,7 +7,7 @@ import { Switch } from '@/core/components/ui/switch'
 import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
 import UpdateAccountName from '../components/AccountSettings/UpdateDisplayName.vue'
 import UpdateEmail from '../components/AccountSettings/VerifyEmail.vue'
-import ChangePassword from '../components/AccountSettings/changePassword.vue'
+import ChangePassword from '../components/AccountSettings/ChangePassword.vue'
 </script>
 
 <template>

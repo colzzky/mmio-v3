@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { postCollection } from '@/core/utils/firebase-collections';
+import { postCollection, getCollection, getCollectionByField } from '@/core/utils/firebase-collections';
 import { auth } from '@/core/utils/firebase-client';
+import type { DocumentData } from 'firebase/firestore';
+
 
 
 interface Timestamp {
@@ -29,18 +31,32 @@ interface UserProfileData {
 type Nullable<T> = {
     [P in keyof T]: T[P] | null;
 };
+// Add a new key "id" while preserving original keys
 type PickAnyKey<T> = {
-    // Allows any key from the original interface
+    // Original keys from UserProfileData
     [K in keyof T]?: T[K];
 };
 
+
 interface UserProfile {
-    data: UserProfileData | null
-    getUserProfile: () => void
-    setUserProfile: (data: PickAnyKey<UserProfileData> | null, type:'find'|'new') => Promise<void>
-    updateAddress: (data: Address) => void
-    updateProfile: () => void
+    data: PickAnyKey<UserProfileData> | null
+    isInitialized: boolean
+    get: (id: string) => Promise<void>
+    getWhere: (fieldName: keyof UserProfileData, operator: '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in', fieldValue: any) => Promise<UserProfileReturn>
+    set: (data: PickAnyKey<UserProfileData>) => void
+    setNew: (data: PickAnyKey<UserProfileData> | null, type: 'update' | 'new') => Promise<void>
+    update: () => Promise<FirebaseReturn>
 }
+
+interface FirebaseReturn {
+    status: boolean;
+    data: DocumentData | undefined;
+    error: string;
+}
+
+type UserProfileReturn = Omit<FirebaseReturn, 'data'> & {
+    data: PickAnyKey<UserProfileData>[]; // Add the new data type
+};
 
 
 
@@ -53,9 +69,9 @@ export const useAuthStore = defineStore('authStore', () => {
         checkUser(): boolean {
             onAuthStateChanged(auth, (user: User | null) => {
                 if (user) {
-                    this.data = user
+                    this.setUser(user)
                 } else {
-                    this.data = null
+                    this.setUser(null)
                 }
             });
             if (this.data) return true
@@ -68,37 +84,81 @@ export const useAuthStore = defineStore('authStore', () => {
     })
     const user_profile = reactive<UserProfile>({
         data: null,
-        getUserProfile() {
-            //
+        isInitialized: false,
+        async get(id: string) {
+            if (!this.isInitialized) {
+                const get = await getCollection('user_profile', 'up_id', id);
+                if (get.status) {
+                    this.data = get.data as PickAnyKey<UserProfileData>
+                    this.isInitialized = true
+                } else {
+                    this.data = null
+                }
+            } else {
+                console.log(this.data)
+            }
         },
-        async setUserProfile(data, type): Promise<void> {
+        //Call for custom statement
+        async getWhere(fieldName, operator, fieldValue) {
+            const get = await getCollectionByField('user_profile', 'up_id', fieldName, operator, fieldValue);
+            return {
+                status: get.status,
+                data: get.data as PickAnyKey<UserProfileData>[],
+                error: get.error
+            }
+        },
+        
+        //Set Manually
+        set(data){
+            this.data = data
+            this.isInitialized = true
+            console.log(this.data)
+        },
+        //For creating new data in firestore
+        async setNew(data, type): Promise<void> {
             if (user_auth.data) {
-                await postCollection('user_profile', user_auth.data?.uid, data, type)
+                const id = crypto.randomUUID();
+                if(data) data.up_id = id
+                console.log(data)
+                const post = await postCollection('user_profile', 'up_id', id, data, type)
+                if (post.status) {
+                    this.data = post.data as PickAnyKey<UserProfileData>
+                    this.isInitialized = true
+                }
             }
         },
-        updateAddress(data: Address): void {
-            if (this.data) {
-                this.data.address = data
+        //For updating basic Information
+        async update(): Promise<FirebaseReturn> {
+            console.log(this.data)
+            if (this.data && this.data.up_id) {
+                const post = await postCollection('user_profile', 'up_id', this.data.up_id, this.data, 'update')
+                return post
+            } else {
+                return {
+                    status: false,
+                    error: 'Something went wrong please try again',
+                    data: undefined
+                }
             }
         },
-        updateProfile() {
-            if (this.data) {
-                //Call firebase to save profile only
-            }
-        }
     })
 
     //Called during initiali Registration
-    async function createUserProfile(uid: string) {
+    async function createNewUserProfile(uid: string) {
         const data: Pick<UserProfileData, "uid"> = {
             uid: uid,
         }
-        await user_profile.setUserProfile(data,'new')
+        await user_profile.setNew(data, 'new')
     }
 
     return {
-        createUserProfile,
+        createNewUserProfile,
+        user_profile,
         user_auth
     }
 },
-    { persist: true })
+    {
+        persist: {
+            pick: ['user_auth']  // Only persist user_profile
+        }
+    })

@@ -57,7 +57,7 @@ onMounted(() => {
         <Label for="email">Email Address</Label>
         <!-- <Input type="email" name="email" id="email" placeholder="johndoe@gmail.com" /> -->
         <div class="flex items-center justify-between text-sm">
-            <span class="font-medium underline">johndoe@gmail.com</span>
+            <span class="font-medium underline">{{ user_auth.data?.email }}</span>
             <div v-if="!user_auth.data?.emailVerified" class="flex items-center gap-1"><i class="material-icons text-red-500">error</i>
                 <Button  variant="link" class="h-[unset] p-0 text-red-500" @click="sendEmailVerificationLink()"> Verify Email</Button>
             </div>

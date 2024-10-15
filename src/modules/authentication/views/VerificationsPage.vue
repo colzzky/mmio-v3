@@ -1,7 +1,7 @@
-<script setup lang="ts">
+<script lang="ts" setup>
 import { computed } from 'vue';
 import { useRoute } from 'vue-router'
-import EmailVerification from '../components/emailVerification.vue';
+import EmailVerification from '../components/EmailVerification.vue';
 const route = useRoute()
 
 const mode = computed(() => route.query.mode)

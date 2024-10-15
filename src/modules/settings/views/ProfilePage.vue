@@ -4,28 +4,28 @@ import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
 import { Switch } from '@/core/components/ui/switch'
 import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
+import { onMounted } from 'vue'
+import { useAuthStore } from '@/stores/authStore'
+import BasicInformation from '../components/ProfileSettings/BasicInformation.vue'
+
+const useAuth = useAuthStore()
+const { user_auth, user_profile } = useAuth
+onMounted(async () => {
+  if (!user_profile.isInitialized) {
+    console.log('initializing...')
+    const profile = await user_profile.getWhere('uid', '==', user_auth.data?.uid)
+    const data = profile.data[0]
+    user_profile.set(data)
+  }
+})
+
 </script>
 
 <template>
   <SettingsLayout>
     <main class="grid grid-cols-2 gap-x-8 xl:gap-x-12 2xl:gap-x-16">
       <section class="flex flex-col gap-y-8">
-        <form class="flex flex-col gap-y-4">
-          <h2 class="text-sm font-bold">Basic Information</h2>
-          <div class="flex flex-col gap-y-2">
-            <Label for="lastName">Last Name</Label>
-            <Input type="text" name="lastName" id="lastName" placeholder="Doe" />
-          </div>
-          <div class="flex flex-col gap-y-2">
-            <Label for="firstName">First Name</Label>
-            <Input type="text" name="firstName" id="firstName" placeholder="John" />
-          </div>
-          <div class="flex flex-col gap-y-2">
-            <Label for="email">Contact Email:</Label>
-            <Input type="email" name="email" id="email" placeholder="johndoe@work.com" />
-          </div>
-          <Button class="self-end">Update</Button>
-        </form>
+        <BasicInformation />
         <form class="flex flex-col gap-y-4">
           <h2 class="text-sm font-bold">Address</h2>
           <div class="flex flex-col gap-y-2">
@@ -63,7 +63,7 @@ import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
         </div>
         <div class="flex flex-col gap-y-2">
           <h2 class="text-lg font-bold">Ipsum</h2>
-          <div class="flex items-center justify-between">
+          postCollection<div class="flex items-center justify-between">
             <Label for="ipsum" class="text-xs">Lorem ipsum dolor sit amet.</Label>
             <Switch id="ipsum" />
           </div>
