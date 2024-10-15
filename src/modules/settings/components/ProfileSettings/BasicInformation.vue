@@ -147,7 +147,6 @@ const componentDataLoaded = computed<boolean>(() => {
             <h2 class="text-sm font-bold">Basic Information</h2>
             <div class="flex flex-col gap-y-2">
                 <Label for="lastName" class="text-xs">Last Name</Label>
-                {{inputField.dataInput.lastName}}
                 <Input v-model="inputField.dataInput.lastName" @blur="inputField.validateSingleField('lastName')"  type="text" name="lastName" id="lastName"
                     placeholder="Doe" class="h-7 text-xs" />
                 <div v-if="inputField.errors.lastName" for="name" class="text-xs text-red-500 flex items-center gap-1">

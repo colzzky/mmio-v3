@@ -5,8 +5,6 @@ import { postCollection, getCollection, getCollectionByField } from '@/core/util
 import { auth } from '@/core/utils/firebase-client';
 import type { DocumentData } from 'firebase/firestore';
 
-
-
 interface Timestamp {
     seconds: number;      // The number of seconds
     nanoseconds: number;  // The number of nanoseconds
@@ -41,10 +39,11 @@ type PickAnyKey<T> = {
 interface UserProfile {
     data: PickAnyKey<UserProfileData> | null
     isInitialized: boolean
+    initialize: () => void,
     get: (id: string) => Promise<void>
     getWhere: (fieldName: keyof UserProfileData, operator: '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in', fieldValue: any) => Promise<UserProfileReturn>
     set: (data: PickAnyKey<UserProfileData>) => void
-    setNew: (data: PickAnyKey<UserProfileData> | null, type: 'update' | 'new') => Promise<void>
+    createInitial: (data: PickAnyKey<UserProfileData> | null, type: 'update' | 'new') => Promise<void>
     update: () => Promise<FirebaseReturn>
 }
 
@@ -85,6 +84,24 @@ export const useAuthStore = defineStore('authStore', () => {
     const user_profile = reactive<UserProfile>({
         data: null,
         isInitialized: false,
+        initialize() {
+            this.data = {
+                up_id: '',
+                uid: '',
+                firstName: '',
+                lastName: '',
+                contactEmail: '',
+                address: {
+                    city: '',
+                    state: '',
+                    country: '',
+                    street: '',
+                    zipCode: '',
+                },
+                createdAt: '',
+                updatedAt: '',
+            }
+        },
         async get(id: string) {
             if (!this.isInitialized) {
                 const get = await getCollection('user_profile', 'up_id', id);
@@ -107,20 +124,23 @@ export const useAuthStore = defineStore('authStore', () => {
                 error: get.error
             }
         },
-        
         //Set Manually
-        set(data){
+        set(data) {
             this.data = data
             this.isInitialized = true
             console.log(this.data)
         },
         //For creating new data in firestore
-        async setNew(data, type): Promise<void> {
+        async createInitial(data, type): Promise<void> {
             if (user_auth.data) {
                 const id = crypto.randomUUID();
-                if(data) data.up_id = id
-                console.log(data)
-                const post = await postCollection('user_profile', 'up_id', id, data, type)
+                this.initialize()
+                if (data && this.data) {
+                    this.data.up_id = id
+                    this.data.uid = data.uid
+                }
+
+                const post = await postCollection('user_profile', 'up_id', id, this.data, type)
                 if (post.status) {
                     this.data = post.data as PickAnyKey<UserProfileData>
                     this.isInitialized = true
@@ -148,7 +168,7 @@ export const useAuthStore = defineStore('authStore', () => {
         const data: Pick<UserProfileData, "uid"> = {
             uid: uid,
         }
-        await user_profile.setNew(data, 'new')
+        await user_profile.createInitial(data, 'new')
     }
 
     return {
