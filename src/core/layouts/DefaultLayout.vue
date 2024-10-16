@@ -27,6 +27,7 @@ import { useServicesStore } from '@/stores/servicesStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import Toaster from '../components/ui/toast/Toaster.vue'
 
 const sidebarStore = useSidebarStore()
 const route = useRoute()
@@ -49,6 +50,7 @@ const parentRoute = breadcrumbs[0]
 </script>
 
 <template>
+  <Toaster/>
   <div>
     <!-- <MobileSidebar /> -->
 

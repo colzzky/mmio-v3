@@ -15,7 +15,6 @@ onMounted(async () => {
   if (!user_profile.isInitialized) {
     console.log('initializing...')
     const profile = await user_profile.getWhere('uid', '==', user_auth.data?.uid)
-    console.log(profile)
     const data = profile.data[0]
     user_profile.set(data)
   }
