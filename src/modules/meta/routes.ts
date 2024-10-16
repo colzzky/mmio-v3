@@ -129,14 +129,14 @@ const routeRecords: Record<AllUrl, Omit<RouteRecordRaw, 'path'>> = {
     meta: {
       requiresAuth: true,
     },
-    component: () => import('./views/ChatbotFlowBuilder.vue'),
+    component: () => import('./views/ChatbotFlowBuilderPage.vue'),
   },
   '/meta/comment-auto-reply': {
     name: 'comment-auto-reply',
     meta: {
       requiresAuth: true,
     },
-    component: () => import('./views/MetaHomePage.vue'),
+    component: () => import('./views/CommentAutoReplyPage.vue'),
   },
   '/meta/post-randomizer': {
     name: 'post-randomizer',
