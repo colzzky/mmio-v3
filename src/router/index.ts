@@ -4,6 +4,7 @@ import { routes as settingsRoutes } from '@/modules/settings/routes'
 import othersRoutes from '@/modules/try/routes'
 import { useAuthStore } from '@/stores/authStore'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import HomeView from '@/views/HomeView.vue'
 
 const routes = [
   {
@@ -21,13 +22,16 @@ const routes = [
     meta: {
       requiresAuth: true,
     },
-    component: () => import('@/views/HomeView.vue'),
+    component: () => HomeView,
   },
   {
     path: '/project/:id',
     name: 'project-overview',
     meta: {
       requiresAuth: true,
+    },
+    component: () => {
+      return HomeView
     },
   },
   

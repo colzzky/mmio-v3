@@ -25,7 +25,7 @@ import {
 } from '@/core/components/ui/dropdown-menu'
 import { useServicesStore } from '@/stores/servicesStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import Toaster from '../components/ui/toast/Toaster.vue'
 
@@ -47,6 +47,10 @@ function toggleServicesModal() {
 
 const breadcrumbs = route.path.split('/').filter(Boolean)
 const parentRoute = breadcrumbs[0]
+
+onMounted(()=>{
+  console.log(route.name)
+})
 </script>
 
 <template>
@@ -140,7 +144,7 @@ const parentRoute = breadcrumbs[0]
                 <DropdownMenuItem>Item #3</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <Breadcrumb>
+            <!-- <Breadcrumb>
               <BreadcrumbList class="text-xs/4">
                 <BreadcrumbItem v-for="breadcrumb in breadcrumbs" :key="breadcrumb">
                   <BreadcrumbLink v-if="breadcrumb !== route.name" as-child>
@@ -154,7 +158,7 @@ const parentRoute = breadcrumbs[0]
                   <BreadcrumbSeparator v-if="breadcrumb !== breadcrumbs[breadcrumbs.length - 1]" />
                 </BreadcrumbItem>
               </BreadcrumbList>
-            </Breadcrumb>
+            </Breadcrumb> -->
           </div>
           <RouterLink to="/" class="grid place-content-center">
             <i class="material-icons text-3xl">keyboard_return</i>
