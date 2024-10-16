@@ -3,15 +3,7 @@ import ServicesModal from '../components/services-modal.vue'
 import DesktopSidebar from '../components/sidebar/desktop-sidebar.vue'
 import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar'
 import { Card } from '../components/ui/card'
-import { uiHelpers } from '../utils/ui-helper'
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/core/components/ui/breadcrumb'
+import Toaster from '../components/ui/toast/Toaster.vue'
 import {
   Collapsible,
   CollapsibleContent,
@@ -25,9 +17,8 @@ import {
 } from '@/core/components/ui/dropdown-menu'
 import { useServicesStore } from '@/stores/servicesStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import Toaster from '../components/ui/toast/Toaster.vue'
 
 const sidebarStore = useSidebarStore()
 const route = useRoute()
@@ -39,22 +30,20 @@ const isServicesModalOpen = ref(false)
 
 const servicesStore = useServicesStore()
 const services = servicesStore.getServiceLinks(route.path)
-const pinnedServices = computed(() => [...services].filter((service) => service[1].pinned))
+const pinnedServices = computed(() => [...services].filter(([, service]) => service.pinned))
 
 function toggleServicesModal() {
   isServicesModalOpen.value = !isServicesModalOpen.value
 }
 
-const breadcrumbs = route.path.split('/').filter(Boolean)
+const breadcrumbs = route.path.split('/').slice(3)
 const parentRoute = breadcrumbs[0]
 
-onMounted(()=>{
-  console.log(route.name)
-})
+const pj_id = route.params.pj_id
 </script>
 
 <template>
-  <Toaster/>
+  <Toaster />
   <div>
     <!-- <MobileSidebar /> -->
 
@@ -69,7 +58,7 @@ onMounted(()=>{
         <ul role="list" class="-mx-2">
           <li>
             <RouterLink
-              :to="{ name: parentRoute }"
+              :to="{ name: parentRoute, params: { pj_id } }"
               class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
             >
               <i class="material-icons text-xl">grid_view</i>
@@ -104,18 +93,18 @@ onMounted(()=>{
           </i>
         </CollapsibleTrigger>
         <CollapsibleContent as="ul" class="-mx-2">
-          <li v-for="[key, value] in pinnedServices" :key="key">
+          <li v-for="[name, service] in pinnedServices" :key="name">
             <RouterLink
-              :to="key"
+              :to="{ name, params: { pj_id } }"
               class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
             >
-              <i :class="['bx text-xl', value.icon]"></i>
+              <i :class="['bx text-xl', service.icon]"></i>
               <span>
-                {{ value.label }}
+                {{ service.label }}
               </span>
               <button
                 class="grid place-content-center"
-                @click.prevent="servicesStore.toggleServicePinnedStatus(route.path, key)"
+                @click.prevent="servicesStore.toggleServicePinnedStatus(route.path, name)"
               >
                 <i class="material-icons text-xl">bookmark</i>
               </button>

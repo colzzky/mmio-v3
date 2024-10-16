@@ -1,14 +1,12 @@
-import { servicesMap } from '@/modules/meta/routes'
+import { services as metaServices } from '@/modules/meta/routes'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useProjectStore } from './projectStore'
 
 export const useServicesStore = defineStore('services', () => {
   const services = ref({
-    meta: servicesMap,
+    meta: metaServices,
   })
   function getServiceLinks(routePath: string) {
-    console.log(routePath)
     if (routePath.startsWith('/project') && routePath.includes('/meta')) return services.value.meta
 
     throw new Error('Platform not found')

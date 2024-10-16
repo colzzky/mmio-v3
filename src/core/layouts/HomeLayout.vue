@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import DesktopSidebar from '../components/sidebar/desktop-sidebar.vue'
-import MobileSidebar from '../components/sidebar/mobile-sidebar.vue'
+// import MobileSidebar from '../components/sidebar/mobile-sidebar.vue'
 import { Toaster } from '@/core/components/ui/toast'
 import ProjectCenter from '@/modules/try/components/ProjectCenter.vue'
 import { useSidebarStore } from '@/stores/sidebarStore'
@@ -25,7 +25,7 @@ const navigation = [
 <template>
   <Toaster />
   <div>
-    <MobileSidebar />
+    <!-- <MobileSidebar /> -->
 
     <DesktopSidebar>
       <li>
