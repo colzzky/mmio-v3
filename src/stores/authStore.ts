@@ -26,9 +26,9 @@ interface UserProfileData {
     createdAt: Timestamp | string
     updatedAt: Timestamp | string
 }
-type Nullable<T> = {
-    [P in keyof T]: T[P] | null;
-};
+// type Nullable<T> = {
+//     [P in keyof T]: T[P] | null;
+// };
 // Add a new key "id" while preserving original keys
 type PickAnyKey<T> = {
     // Original keys from UserProfileData

@@ -1,13 +1,12 @@
 <script setup lang="ts">
+import Address from '../components/ProfileSettings/Address.vue'
+import BasicInformation from '../components/ProfileSettings/BasicInformation.vue'
 import { Button } from '@/core/components/ui/button'
-import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
 import { Switch } from '@/core/components/ui/switch'
 import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
-import { onMounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
-import BasicInformation from '../components/ProfileSettings/BasicInformation.vue'
-import Address from '../components/ProfileSettings/Address.vue'
+import { onMounted } from 'vue'
 
 const useAuth = useAuthStore()
 const { user_auth, user_profile } = useAuth
@@ -19,7 +18,6 @@ onMounted(async () => {
     user_profile.set(data)
   }
 })
-
 </script>
 
 <template>
@@ -27,7 +25,7 @@ onMounted(async () => {
     <main class="grid grid-cols-2 gap-x-8 xl:gap-x-12 2xl:gap-x-16">
       <section class="flex flex-col gap-y-8">
         <BasicInformation />
-        <Address/>
+        <Address />
       </section>
       <section class="flex flex-col gap-y-8">
         <div class="flex flex-col gap-y-2">
@@ -39,7 +37,8 @@ onMounted(async () => {
         </div>
         <div class="flex flex-col gap-y-2">
           <h2 class="text-lg font-bold">Ipsum</h2>
-          postCollection<div class="flex items-center justify-between">
+          postCollection
+          <div class="flex items-center justify-between">
             <Label for="ipsum" class="text-xs">Lorem ipsum dolor sit amet.</Label>
             <Switch id="ipsum" />
           </div>

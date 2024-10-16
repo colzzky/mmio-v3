@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import HomeLayout from '@/core/layouts/HomeLayout.vue'
 import { Skeleton } from '@/core/components/ui/skeleton'
+import HomeLayout from '@/core/layouts/HomeLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import router from '@/router';
+import router from '@/router'
 
 const campaigns = [
   {
@@ -47,8 +47,8 @@ const find_icon = (name: string): string | undefined => {
   return icon
 }
 
-const navigateTo = () =>{
-  router.push({name:"meta"})
+const navigateTo = () => {
+  router.push({ name: 'meta' })
 }
 </script>
 
@@ -68,8 +68,11 @@ const navigateTo = () =>{
             </div>
           </div>
 
-          <div v-for="campaign in campaigns" :key="campaign.name"
-            class="rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300 cursor-pointer">
+          <div
+            v-for="campaign in campaigns"
+            :key="campaign.name"
+            class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
+          >
             <div class="grid grid-cols-12 items-center">
               <div class="col-span-5" @click="navigateTo()">
                 <div class="flex items-center gap-x-3">
@@ -89,8 +92,10 @@ const navigateTo = () =>{
               <div class="col-span-1 text-sm text-gray-600">{{ campaign.status }}</div>
               <div class="col-span-1 text-sm text-gray-600">{{ campaign.author }}</div>
               <div class="col-span-1 justify-self-end">
-                <button type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                <button
+                  type="button"
+                  class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                >
                   <i class="material-icons text-md">more_vert</i>
                 </button>
               </div>

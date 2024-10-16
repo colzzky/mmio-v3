@@ -1,16 +1,33 @@
-import { firestore, auth } from './firebase-client'
-import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, serverTimestamp, setDoc, updateDoc, where, type DocumentData } from 'firebase/firestore'
+import { firestore } from './firebase-client'
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+  type DocumentData,
+} from 'firebase/firestore'
 
 type Collections = {
-  'user_profile': 'up_id',
-  'settings': 's_id',
-  'projects': 'pj_id',
-};
+  user_profile: 'up_id'
+  settings: 's_id'
+  projects: 'pj_id'
+}
 
-export async function postCollection<T extends keyof Collections>($col: T, $id: Collections[T], id: string = '', data: any, type: 'update' | 'new' = 'update'): Promise<{
-  status: boolean;
-  data: DocumentData | undefined;
-  error: string;
+export async function postCollection<T extends keyof Collections>(
+  $col: T,
+  $id: Collections[T],
+  id: string = '',
+  data: any,
+  type: 'update' | 'new' = 'update',
+): Promise<{
+  status: boolean
+  data: DocumentData | undefined
+  error: string
 }> {
   const userDocRef = doc(firestore, $col, id)
   try {
@@ -20,116 +37,128 @@ export async function postCollection<T extends keyof Collections>($col: T, $id: 
       const postData = {
         ...data,
         createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       }
-      await updateDoc(userDocRef, {...postData})
+      await updateDoc(userDocRef, { ...postData })
       return {
         status: true,
         data: { ...postData },
-        error: ''
+        error: '',
       }
     } else {
       if (type === 'new') {
         const postData = {
           ...data,
           createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp()
+          updatedAt: serverTimestamp(),
         }
-        await setDoc(userDocRef, {...postData})
-
+        await setDoc(userDocRef, { ...postData })
 
         return {
           status: true,
           data: { ...postData },
-          error: ''
+          error: '',
         }
       }
       return {
         status: false,
         error: `No data found with that id ${$col}.`,
-        data: undefined
+        data: undefined,
       }
-
     }
   } catch (error) {
     return {
       status: false,
       error: `No data found with that id ${$col}.`,
-      data: undefined
+      data: undefined,
     }
   }
-
 }
 
-export async function getCollection<T extends keyof Collections>($col: T, $id: Collections[T], id: string): Promise<{
-  status: boolean;
-  data: DocumentData | undefined;
-  error: string;
+export async function getCollection<T extends keyof Collections>(
+  $col: T,
+  $id: Collections[T],
+  id: string,
+): Promise<{
+  status: boolean
+  data: DocumentData | undefined
+  error: string
 }> {
   try {
-    const collectionRef = collection(firestore, $col);
-    const q = query(collectionRef, where(`${$id}`, '==', id));
+    const collectionRef = collection(firestore, $col)
+    const q = query(collectionRef, where(`${$id}`, '==', id))
 
     const querySnapshot = await getDocs(q) // Fetch the document
     if (!querySnapshot.empty) {
-      const data = querySnapshot.docs.map(doc => ({ ...doc.data() })); // Get the document data
+      const data = querySnapshot.docs.map((doc) => ({ ...doc.data() })) // Get the document data
       return {
         status: true,
         data: data,
-        error: ''
-      };
+        error: '',
+      }
     } else {
       return {
         status: false,
         error: `No data found.`,
-        data: undefined
-      };
+        data: undefined,
+      }
     }
-
   } catch (error) {
     return {
       status: false,
       error: `No data found with that id ${$col}.`,
-      data: undefined
+      data: undefined,
     }
   }
 }
 
-export async function getCollectionByField<T extends keyof Collections>($col: T, $id: Collections[T],
+export async function getCollectionByField<T extends keyof Collections>(
+  $col: T,
+  $id: Collections[T],
   fieldName: string,
-  operator: '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in',
-  fieldValue: any // Use 'any' to accommodate different types of values
+  operator:
+    | '=='
+    | '!='
+    | '<'
+    | '<='
+    | '>'
+    | '>='
+    | 'array-contains'
+    | 'array-contains-any'
+    | 'in'
+    | 'not-in',
+  fieldValue: any, // Use 'any' to accommodate different types of values
 ): Promise<{
-  status: boolean;
-  data: DocumentData | undefined;
-  error: string;
+  status: boolean
+  data: DocumentData | undefined
+  error: string
 }> {
-  const collectionRef = collection(firestore, $col);
+  const collectionRef = collection(firestore, $col)
 
   // Create a query based on the specified field, operator, and value
-  const q = query(collectionRef, where(fieldName, operator, fieldValue));
+  const q = query(collectionRef, where(fieldName, operator, fieldValue))
 
   try {
-    const querySnapshot = await getDocs(q); // Fetch the documents
+    const querySnapshot = await getDocs(q) // Fetch the documents
     if (!querySnapshot.empty) {
-      const data = querySnapshot.docs.map(doc => ({ ...doc.data() })); // Get the document data
+      const data = querySnapshot.docs.map((doc) => ({ ...doc.data() })) // Get the document data
       return {
         status: true,
         data: data,
-        error: ''
-      };
+        error: '',
+      }
     } else {
       return {
         status: false,
         error: `No data found.`,
-        data: undefined
-      };
+        data: undefined,
+      }
     }
   } catch (error) {
     return {
       status: false,
       error: `Error fetching data.`,
-      data: undefined
-    };
+      data: undefined,
+    }
   }
 }

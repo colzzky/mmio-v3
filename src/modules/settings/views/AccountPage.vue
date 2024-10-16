@@ -1,13 +1,12 @@
 <script setup lang="ts">
+import ChangePassword from '../components/AccountSettings/ChangePassword.vue'
+import UpdateAccountName from '../components/AccountSettings/UpdateDisplayName.vue'
+import UpdateEmail from '../components/AccountSettings/VerifyEmail.vue'
 import { Avatar, AvatarFallback, AvatarImage } from '@/core/components/ui/avatar'
 import { Button } from '@/core/components/ui/button'
-import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
 import { Switch } from '@/core/components/ui/switch'
 import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
-import UpdateAccountName from '../components/AccountSettings/UpdateDisplayName.vue'
-import UpdateEmail from '../components/AccountSettings/VerifyEmail.vue'
-import ChangePassword from '../components/AccountSettings/ChangePassword.vue'
 </script>
 
 <template>
@@ -16,13 +15,15 @@ import ChangePassword from '../components/AccountSettings/ChangePassword.vue'
       <section class="flex flex-col gap-y-8 divide-y">
         <div class="flex flex-col gap-y-3">
           <UpdateAccountName />
-          <UpdateEmail/>
-          <ChangePassword/>
+          <UpdateEmail />
+          <ChangePassword />
         </div>
         <div class="flex flex-col gap-y-4 py-8">
           <h2 class="text-lg font-bold">Newsletter</h2>
           <div class="flex items-center justify-between">
-            <Label for="newsletter" class="text-xs">I want to get a newsletter from the company</Label>
+            <Label for="newsletter" class="text-xs"
+              >I want to get a newsletter from the company</Label
+            >
             <Switch id="newsletter" />
           </div>
         </div>
@@ -40,6 +41,4 @@ import ChangePassword from '../components/AccountSettings/ChangePassword.vue'
       </section>
     </main>
   </SettingsLayout>
-
-
 </template>
