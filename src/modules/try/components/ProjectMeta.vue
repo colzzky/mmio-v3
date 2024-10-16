@@ -123,6 +123,7 @@ const inputField = reactive<InputField>({
       project_data.data.name = inputField.dataInput.name
       project_data.data.account = inputField.dataInput.account
       project_data.data.uid = user_auth.data ? user_auth.data.uid : ''
+      project_data.data.platform = 'META'
     }
     const update = await project_data.createUpdate("new")
     if (update.status) {
