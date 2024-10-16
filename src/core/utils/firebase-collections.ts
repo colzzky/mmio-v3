@@ -16,29 +16,31 @@ export async function postCollection<T extends keyof Collections>($col: T, $id: 
   try {
     const userSnapshot = await getDoc(userDocRef) // Fetch the document
     if (userSnapshot.exists()) {
-       // Get the document data
-      await updateDoc(userDocRef, {
+      // Get the document data
+      const postData = {
         ...data,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
-      })
-      const returnData = userSnapshot.data()
+      }
+      await updateDoc(userDocRef, {...postData})
       return {
         status: true,
-        data: returnData,
+        data: { ...postData },
         error: ''
       }
     } else {
-      if(type === 'new'){
-        await setDoc(userDocRef, {
+      if (type === 'new') {
+        const postData = {
           ...data,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
-        })
-        const returnData = userSnapshot.data()
+        }
+        await setDoc(userDocRef, {...postData})
+
+
         return {
           status: true,
-          data: returnData,
+          data: { ...postData },
           error: ''
         }
       }
@@ -110,7 +112,7 @@ export async function getCollectionByField<T extends keyof Collections>($col: T,
   try {
     const querySnapshot = await getDocs(q); // Fetch the documents
     if (!querySnapshot.empty) {
-      const data = querySnapshot.docs.map(doc => ({...doc.data() })); // Get the document data
+      const data = querySnapshot.docs.map(doc => ({ ...doc.data() })); // Get the document data
       return {
         status: true,
         data: data,

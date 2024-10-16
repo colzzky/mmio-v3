@@ -117,8 +117,6 @@ const inputField = reactive<InputField>({
   async createProject(): Promise<void> {
     this.isLoading = true
     project_data.initialize()
-    console.log(project_data.data)
-    console.log(project_data.isInitialized)
     if (project_data.data && project_data.isInitialized) {
       project_data.data.name = inputField.dataInput.name
       project_data.data.account = inputField.dataInput.account
@@ -127,7 +125,6 @@ const inputField = reactive<InputField>({
     }
     const update = await project_data.createUpdate("new")
     if (update.status) {
-      //Set the data before router push
       project_data.set(update.data)
       toast({
         title: 'New Project Created',
