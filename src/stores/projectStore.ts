@@ -31,7 +31,7 @@ interface Project {
     get: (id: string) => Promise<ProjectReturnData>
     getWhere: (fieldName: keyof ProjectData, operator: '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in', fieldValue: any) => Promise<ProjectReturnList>
     createUpdate: (type: 'new' | 'update') => Promise<ProjectReturnData>
-    set: (data: ProjectData) => void
+    set: (data: ProjectData) => ProjectData
 }
 
 interface FirebaseReturn {
@@ -96,10 +96,10 @@ export const useProjectStore = defineStore('projectStore', () => {
             }
         },
         async createUpdate(type) {
-            console.log(this.data)
             const id = type === 'new' ? crypto.randomUUID() : this.data ? this.data.pj_id : '';
             if (this.data) this.data.pj_id = id
             const post = await postCollection('projects', 'pj_id', id, this.data, type)
+            console.log(post)
             return {
                 status: post.status,
                 data: post.data as ProjectData,

@@ -16,7 +16,9 @@ onMounted(async()=>{
   const pj_id = route.params.pj_id
   if(pj_id){
     if(!project_data.data || !project_data.isInitialized){
+      console.log(pj_id)
       const get = await project_data.get(pj_id as string)
+      console.log(get)
       if(get.status){
         project_data.set(get.data)
         console.log(project_data.data)
@@ -41,7 +43,14 @@ onMounted(async()=>{
 
 <template>
   <DefaultLayout>
-    <main v-if="!pageLoad">this is meta home page</main>
+    <main v-if="!pageLoad" class="container mx-auto">
+      this is meta home page
+      <div>Data</div>
+      <div>
+        {{project_data.data}}
+      </div>
+    
+    </main>
     <main v-else>Loading.....</main>
   </DefaultLayout>
 </template>
