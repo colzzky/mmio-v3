@@ -8,6 +8,7 @@ export const useServicesStore = defineStore('services', () => {
     meta: servicesMap,
   })
   function getServiceLinks(routePath: string) {
+    console.log(routePath)
     if (routePath.startsWith('/project') && routePath.includes('/meta')) return services.value.meta
 
     throw new Error('Platform not found')

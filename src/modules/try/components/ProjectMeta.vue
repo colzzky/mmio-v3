@@ -19,7 +19,7 @@ import {
 import Input from '@/core/components/ui/input/Input.vue'
 import { z } from 'zod';
 import { Skeleton } from '@/core/components/ui/skeleton'
-import {onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useToast, Toaster } from '@/core/components/ui/toast'
 import { useProjectStore } from '@/stores/projectStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -134,10 +134,12 @@ const inputField = reactive<InputField>({
         description: 'You have succssfully created a new project!',
         variant: 'success',
       })
+      router.push({
+        name: "meta", params: {
+          pj_id: update.data.pj_id
+        }
+      })
       pcd.close()
-      router.push({ name: "meta", params:{
-        pj_id:update.data.pj_id
-      } })
     } else {
       toast({
         title: 'New Project Creation Error',
@@ -225,16 +227,16 @@ onMounted(() => {
         </div>
       </div>
       <DialogFooter class="pt-4">
-          <div v-if="!inputField.isLoading" class="flex items-center justify-end gap-2">
-            <Button variant="outline" @click="pcd.returnToPlaforms()" size=xs> Back </Button>
-            <Button variant="outline" size=xs @click="inputField.validateDataInput()">Create </Button>
-          </div>
-          <div v-else class="flex items-center justify-end gap-2">
-            <Button variant="outline" size="xs" disabled class="flex gap-2 items-center">
-              <i class="material-icons text-sm animate-spin">donut_large</i>Loading....
-            </Button>
-          </div>
-      
+        <div v-if="!inputField.isLoading" class="flex items-center justify-end gap-2">
+          <Button variant="outline" @click="pcd.returnToPlaforms()" size=xs> Back </Button>
+          <Button variant="outline" size=xs @click="inputField.validateDataInput()">Create </Button>
+        </div>
+        <div v-else class="flex items-center justify-end gap-2">
+          <Button variant="outline" size="xs" disabled class="flex gap-2 items-center">
+            <i class="material-icons text-sm animate-spin">donut_large</i>Loading....
+          </Button>
+        </div>
+
       </DialogFooter>
     </div>
   </div>
