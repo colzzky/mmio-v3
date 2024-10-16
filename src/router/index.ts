@@ -15,6 +15,22 @@ const routes = [
     component: () => import('@/views/HomeView.vue'),
     //add children here
   },
+  {
+    path: '/project',
+    name: 'project',
+    meta: {
+      requiresAuth: true,
+    },
+    component: () => import('@/views/HomeView.vue'),
+  },
+  {
+    path: '/project/:id',
+    name: 'project-overview',
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  
   ...authenticationRoutes,
   ...metaRoutes,
   ...settingsRoutes,

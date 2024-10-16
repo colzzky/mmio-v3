@@ -127,6 +127,7 @@ const inputField = reactive<InputField>({
     }
     const update = await project_data.createUpdate("new")
     if (update.status) {
+      //Set the data before router push
       project_data.set(update.data)
       toast({
         title: 'New Project Created',
@@ -134,7 +135,9 @@ const inputField = reactive<InputField>({
         variant: 'success',
       })
       pcd.close()
-      router.push({ name: "meta" })
+      router.push({ name: "meta", params:{
+        pj_id:update.data.pj_id
+      } })
     } else {
       toast({
         title: 'New Project Creation Error',
