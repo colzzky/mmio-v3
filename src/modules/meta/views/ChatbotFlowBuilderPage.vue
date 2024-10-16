@@ -222,7 +222,7 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
           <TableRow>
             <TableHead>Flow Name</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Date Created</TableHead>
+            <TableHead>Created</TableHead>
             <TableHead class="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -234,7 +234,9 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
                 {{ uiHelpers.toTitleCase(flow.status) }}
               </Badge>
             </TableCell>
-            <TableCell>{{ flow.createdAt }}</TableCell>
+            <TableCell class="whitespace-nowrap">{{
+              uiHelpers.formatDateTimeAgo(flow.createdAt.toDateString())
+            }}</TableCell>
             <TableCell>
               <div class="grid place-content-center">
                 <DropdownMenu>

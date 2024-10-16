@@ -224,7 +224,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
             <TableHead>Source Name</TableHead>
             <TableHead>Published To</TableHead>
             <TableHead>Duration</TableHead>
-            <TableHead>Date Created</TableHead>
+            <TableHead>Created</TableHead>
             <TableHead>Status</TableHead>
             <TableHead class="text-center">Actions</TableHead>
           </TableRow>
@@ -254,7 +254,9 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
                 </div>
               </div>
             </TableCell>
-            <TableCell>{{ campaign.createdAt }}</TableCell>
+            <TableCell class="whitespace-nowrap">{{
+              uiHelpers.formatDateTimeAgo(campaign.createdAt.toDateString())
+            }}</TableCell>
             <!-- @temporary: can be changed to a `<Switch />` component -->
             <TableCell>
               <Badge>{{ uiHelpers.toTitleCase(campaign.status) }}</Badge>
