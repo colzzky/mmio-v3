@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { Avatar, AvatarImage, AvatarFallback } from '@/core/components/ui/avatar'
+import { AspectRatio } from '@/core/components/ui/aspect-ratio'
+import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/core/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,13 +27,22 @@ import {
 } from '@/core/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs'
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
+import type { Modal } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 
 type FacebookPost = {
   id: number
+  user: {
+    name: string
+    image: string
+  }
   description: string
   created: Date
+  image?: string
+  likes: number
+  comments: number
+  shares: number
   autoReplies: number
 }
 
@@ -34,32 +51,77 @@ const facebookPosts = ref(
     [
       1,
       {
-        description:
-          'Lorem ipsum odor amet, consectetuer adipiscing elit. Malesuada a libero fames ultricies parturient litora penatibus maecenas? Varius ligula tristique donec quis eget scelerisque eros erat. Sagittis placerat fusce platea adipiscing taciti phasellus nec porta. Rutrum etiam cubilia quis maximus maecenas. Finibus imperdiet viverra elit phasellus nec tempor eu tincidunt nibh. Ac feugiat felis placerat tempus quis dis elit eget. Vel dis ultricies lobortis amet dui. Fusce torquent ipsum justo nam aliquam faucibus varius fusce nullam.',
-        created: new Date('April 22, 2024'),
+        user: {
+          name: 'Alice Johnson',
+          image: 'https://randomuser.me/api/portraits/women/1.jpg',
+        },
+        description: 'Had an amazing time hiking up the mountains! 🏞️ #NatureLover #Adventure',
+        created: new Date('2023-10-15'),
+        image: 'https://picsum.photos/600/400?random=1',
+        likes: 120,
+        comments: 2,
+        shares: 15,
         autoReplies: 5,
       },
     ],
     [
       2,
       {
+        user: {
+          name: 'Bob Smith',
+          image: 'https://randomuser.me/api/portraits/men/1.jpg',
+        },
         description:
-          'Lacinia finibus penatibus ornare laoreet ipsum commodo netus. Taciti feugiat torquent auctor libero lectus. Vivamus eleifend arcu rhoncus, eleifend lobortis pulvinar. Gravida dis donec laoreet congue laoreet pharetra scelerisque fames lacus. Proin natoque duis hendrerit sollicitudin consectetur vel hendrerit fermentum. Sollicitudin phasellus magna elementum platea pretium nulla ultricies. Ut vehicula fusce ac vehicula velit. Quis id natoque velit vivamus eros efficitur platea. Pellentesque vehicula tempor gravida non pulvinar proin sem ex.',
-        created: new Date('April 07, 2024'),
+          'Just finished baking these delicious cookies 🍪 Who wants some? 😋 #BakingLove',
+        created: new Date('2023-10-14'),
+        image: 'https://picsum.photos/600/400?random=2',
+        likes: 85,
+        comments: 1,
+        shares: 8,
         autoReplies: 5,
       },
     ],
     [
       3,
       {
+        user: {
+          name: 'Charlie Green',
+          image: 'https://randomuser.me/api/portraits/men/2.jpg',
+        },
         description:
-          'Potenti ornare mauris risus lobortis pharetra nullam ipsum. Vestibulum quam a aliquam ex magnis. Donec vel maecenas facilisi; proin accumsan torquent. Maximus dolor tincidunt, ut accumsan consectetur posuere egestas hac cubilia. Cras bibendum adipiscing vulputate rhoncus vel nascetur laoreet? Primis vel vel tempor vulputate; nibh sem nisl amet? Aliquet mus aptent magnis curabitur urna taciti nascetur. Libero sociosqu gravida penatibus est mollis interdum enim auctor donec. Tellus imperdiet conubia eleifend quam porta. Nunc curabitur ligula sagittis mauris mollis ac ligula ante eleifend.',
-        created: new Date('August 24, 2024'),
+          "Throwback to last summer at the beach. Can't wait to go back! 🏖️ #SummerVibes",
+        created: new Date('2023-10-13'),
+        image: 'https://picsum.photos/600/400?random=3',
+        likes: 200,
+        comments: 1,
+        shares: 10,
         autoReplies: 5,
       },
     ],
   ]),
 )
+
+// VIEW POST MODAL
+interface ViewPostModal extends Omit<Modal, 'open'> {
+  post: FacebookPost | null
+  open(post: FacebookPost): void
+}
+
+const viewPostModal = reactive<ViewPostModal>({
+  isOpen: false,
+  post: null,
+  initialState() {
+    this.isOpen = false
+    this.post = null
+  },
+  open(post) {
+    this.isOpen = true
+    this.post = post
+  },
+  close() {
+    this.initialState()
+  },
+})
 </script>
 
 <template>
@@ -87,7 +149,7 @@ const facebookPosts = ref(
                 <TableCell>
                   <div class="flex items-center justify-center gap-x-2">
                     <Avatar class="size-9">
-                      <AvatarImage :src="`https://picsum.photos/id/${id}/200/300`" />
+                      <AvatarImage :src="post.user.image" />
                     </Avatar>
                     <a
                       :href="`http://example.com/${id}`"
@@ -114,7 +176,10 @@ const facebookPosts = ref(
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuLabel>Post</DropdownMenuLabel>
-                        <DropdownMenuItem class="gap-x-3">
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="viewPostModal.open({ id, ...post })"
+                        >
                           <i class="bx bx-show text-xl"></i>
                           View
                         </DropdownMenuItem>
@@ -147,5 +212,43 @@ const facebookPosts = ref(
         <TabsContent value="autoReplies"> autoReplies </TabsContent>
       </Tabs>
     </Main>
+
+    <Dialog v-model:open="viewPostModal.isOpen" @update:open="viewPostModal.close()">
+      <DialogContent v-if="viewPostModal.post" class="max-w-md">
+        <DialogHeader class="flex flex-col gap-y-2">
+          <DialogTitle>View Post</DialogTitle>
+          <DialogDescription
+            class="grid grid-cols-[var(--avatar-size),1fr] items-center gap-x-2 text-xs [--avatar-size:theme(spacing.8)]"
+          >
+            <Avatar class="row-span-2 size-[var(--avatar-size)]">
+              <AvatarImage :src="viewPostModal.post.user.image"></AvatarImage>
+            </Avatar>
+            <span>{{ viewPostModal.post.user.name }}</span>
+            <a
+              :href="`http://example.com/${viewPostModal.post.id}`"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="self-start text-blue-500 hover:underline"
+            >
+              Post ID: {{ viewPostModal.post.id }}
+            </a>
+          </DialogDescription>
+        </DialogHeader>
+        <section class="flex flex-col gap-y-4 text-sm">
+          <p class="text-pretty">{{ viewPostModal.post.description }}</p>
+          <AspectRatio :ratio="16 / 9">
+            <img :src="viewPostModal.post.image" class="h-full w-full rounded-md object-cover" />
+          </AspectRatio>
+          <div class="flex items-center gap-x-4 text-muted-foreground">
+            <span>{{ viewPostModal.post.likes }} Likes</span>
+            <span>{{ viewPostModal.post.comments }} Comment</span>
+            <span>{{ viewPostModal.post.shares }} Shares</span>
+            <span class="grow text-end">
+              {{ viewPostModal.post.created.toLocaleDateString() }}
+            </span>
+          </div>
+        </section>
+      </DialogContent>
+    </Dialog>
   </DefaultLayout>
 </template>
