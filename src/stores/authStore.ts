@@ -40,8 +40,8 @@ interface UserProfile {
     data: PickAnyKey<UserProfileData> | null
     isInitialized: boolean
     initialize: () => void,
-    get: (id: string) => Promise<void>
-    getWhere: (fieldName: keyof UserProfileData, operator: '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in', fieldValue: any) => Promise<UserProfileReturn>
+    get: (id: string) => Promise<UserProfileReturnData>
+    getWhere: (fieldName: keyof UserProfileData, operator: '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in', fieldValue: any) => Promise<UserProfileReturnList>
     set: (data: PickAnyKey<UserProfileData>) => void
     createInitial: (data: PickAnyKey<UserProfileData> | null, type: 'update' | 'new') => Promise<void>
     update: () => Promise<FirebaseReturn>
@@ -52,11 +52,14 @@ interface FirebaseReturn {
     data: DocumentData | undefined;
     error: string;
 }
-
-type UserProfileReturn = Omit<FirebaseReturn, 'data'> & {
-    data: PickAnyKey<UserProfileData>[]; // Add the new data type
+// Create a base type that omits 'data'
+type FirebaseReturnBase = Omit<FirebaseReturn, 'data'>;
+type UserProfileReturnList = FirebaseReturnBase & {
+    data: PickAnyKey<UserProfileData>[];
 };
-
+type UserProfileReturnData = FirebaseReturnBase & {
+    data: UserProfileData;
+};
 
 
 export const useAuthStore = defineStore('authStore', () => {
@@ -103,16 +106,11 @@ export const useAuthStore = defineStore('authStore', () => {
             }
         },
         async get(id: string) {
-            if (!this.isInitialized) {
-                const get = await getCollection('user_profile', 'up_id', id);
-                if (get.status) {
-                    this.data = get.data as PickAnyKey<UserProfileData>
-                    this.isInitialized = true
-                } else {
-                    this.data = null
-                }
-            } else {
-                console.log(this.data)
+            const get = await getCollection('user_profile', 'up_id', id);
+            return {
+                status: get.status,
+                data: get.data as UserProfileData,
+                error: get.error
             }
         },
         //Call for custom statement
@@ -170,7 +168,6 @@ export const useAuthStore = defineStore('authStore', () => {
         }
         await user_profile.createInitial(data, 'new')
     }
-
     return {
         createNewUserProfile,
         user_profile,

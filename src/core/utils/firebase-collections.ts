@@ -3,7 +3,8 @@ import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, serverTi
 
 type Collections = {
   'user_profile': 'up_id',
-  'settings': 's_id'
+  'settings': 's_id',
+  'projects': 'pj_id',
 };
 
 export async function postCollection<T extends keyof Collections>($col: T, $id: Collections[T], id: string = '', data: any, type: 'update' | 'new' = 'update'): Promise<{
