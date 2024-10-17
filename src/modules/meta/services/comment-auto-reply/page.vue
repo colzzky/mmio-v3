@@ -2,6 +2,7 @@
 import ViewPostCommentAutoRepliesModal from './components/view-post-comment-auto-replies-modal.vue'
 import ViewPostModal from './components/view-post-modal.vue'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
+import { Badge } from '@/core/components/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +24,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/t
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import type { Modal } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
 // @temporary: can be extracted to another file
 type AutoReply = {
@@ -189,10 +190,23 @@ const facebookPosts = ref(
   ]),
 )
 
+const allAutoReplies = computed(
+  () =>
+    new Map(
+      Array.from(facebookPosts.value.entries()).flatMap(
+        ([facebookPostId, { autoReplies, ...facebookPostRest }]) =>
+          Array.from(autoReplies.entries()).map(([autoReplyId, autoReply]) => [
+            autoReplyId,
+            { ...autoReply, post: { ...facebookPostRest, id: facebookPostId } },
+          ]),
+      ),
+    ),
+)
+
 // VIEW POST MODAL
 interface ViewPostModalInterface extends Omit<Modal, 'open'> {
-  post: FacebookPost | null
-  open(post: FacebookPost): void
+  post: Omit<FacebookPost, 'autoReplies'> | null
+  open(post: Omit<FacebookPost, 'autoReplies'>): void
 }
 const viewPostModal = reactive<ViewPostModalInterface>({
   isOpen: false,
@@ -211,7 +225,10 @@ const viewPostModal = reactive<ViewPostModalInterface>({
 })
 
 // VIEW POST COMMENT AUTO REPLY
-interface ViewPostCommentAutoRepliesModalInterface extends ViewPostModalInterface {}
+interface ViewPostCommentAutoRepliesModalInterface extends Omit<Modal, 'open'> {
+  post: FacebookPost | null
+  open(post: FacebookPost): void
+}
 const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModalInterface>({
   isOpen: false,
   post: null,
@@ -251,7 +268,7 @@ const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModal
             </TableHeader>
             <TableBody>
               <TableRow v-for="[id, post] in facebookPosts" :key="id">
-                <TableCell>
+                <TableCell class="whitespace-nowrap">
                   <div class="flex items-center justify-center gap-x-2">
                     <Avatar class="size-9">
                       <AvatarImage :src="post.user.image" />
@@ -262,7 +279,7 @@ const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModal
                       rel="noopener noreferrer"
                       class="text-blue-500 hover:underline"
                     >
-                      #{{ id }}
+                      Post ID: {{ id }}
                     </a>
                   </div>
                 </TableCell>
@@ -317,7 +334,83 @@ const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModal
             </TableBody>
           </Table>
         </TabsContent>
-        <TabsContent value="autoReplies"> autoReplies </TabsContent>
+        <TabsContent value="autoReplies">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Campaign Name</TableHead>
+                <TableHead>Post ID</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead>Updated</TableHead>
+                <TableHead class="text-center">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow v-for="[id, autoReply] in allAutoReplies" :key="id">
+                <TableCell>{{ autoReply.name }}</TableCell>
+                <TableCell class="whitespace-nowrap">
+                  <div class="flex items-center gap-x-2">
+                    <Avatar class="size-9">
+                      <AvatarImage :src="autoReply.post.user.image" />
+                    </Avatar>
+                    <a
+                      :href="`http://example.com/${autoReply.post.id}`"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-blue-500 hover:underline"
+                    >
+                      Post ID: {{ id }}
+                    </a>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge>{{ uiHelpers.toTitleCase(autoReply.status) }}</Badge>
+                </TableCell>
+                <TableCell class="whitespace-nowrap">
+                  {{ uiHelpers.formatDateTimeAgo(autoReply.created.toDateString()) }}
+                </TableCell>
+                <TableCell class="whitespace-nowrap">
+                  {{ uiHelpers.formatDateTimeAgo(autoReply.updated.toDateString()) }}
+                </TableCell>
+                <TableCell>
+                  <div class="grid place-content-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger>
+                        <i class="material-icons text-md">more_vert</i>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
+                        <DropdownMenuItem class="gap-x-3" disabled>
+                          <i
+                            :class="[
+                              'bx text-xl',
+                              autoReply.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                            ]"
+                          />
+                          Toggle Status
+                        </DropdownMenuItem>
+                        <DropdownMenuItem class="gap-x-3" disabled>
+                          <i class="bx bx-edit text-xl" />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Post</DropdownMenuLabel>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="viewPostModal.open(autoReply.post)"
+                        >
+                          <i class="bx bx-show text-xl"></i>
+                          View
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TabsContent>
       </Tabs>
     </Main>
 
