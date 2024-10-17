@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { Button } from '@/core/components/ui/button'
+import Combobox from '@/core/components/ui/combobox.vue'
 import {
   DialogDescription,
   DialogFooter,
@@ -27,6 +28,20 @@ const project_center = useProjectCenter()
 const { project_center_dialog: pcd } = project_center
 
 const samplePage_id = ['1232', '1332', '14323']
+const sampleOptions = [
+  {
+    label: '1232',
+    value: '1232',
+  },
+  {
+    label: '1332',
+    value: '1332',
+  },
+  {
+    label: '14323',
+    value: '14323',
+  },
+]
 
 interface InputStructure {
   name: string
@@ -228,13 +243,14 @@ onMounted(() => {
                 pages first</span
               >
             </div>
-            <Input
+            <Combobox model="page" :options="sampleOptions" @select="console.log($event)" />
+            <!-- <Input
               v-model="inputField.dataInput.account"
               @blur="inputField.validateSingleField('account')"
               type="text"
               placeholder="Page name"
               class="h-7 text-xs"
-            />
+            /> -->
             <div
               v-if="inputField.errors.account"
               for="page_id"
