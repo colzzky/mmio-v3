@@ -213,15 +213,15 @@ export const services = new Map(
   Object.entries(servicesRecord).map(([key, values]) => [
     key,
     {
+      ...values,
       name: key,
       href: urls[key],
-      ...values,
     },
   ]),
 )
 
 export const routes = Object.entries(routeRecords).map(([key, values]) => ({
+  ...values,
   path: urls[key],
   name: key,
-  ...values,
 }))
