@@ -11,7 +11,7 @@ import {
 } from '@/core/components/ui/dialog'
 import { useForwardPropsEmits, type DialogRootEmits, type DialogRootProps } from 'radix-vue'
 
-const props = defineProps<DialogRootProps & { post: FacebookPost | null }>()
+const props = defineProps<DialogRootProps & { post: Omit<FacebookPost, 'autoReplies'> | null }>()
 const emits = defineEmits<DialogRootEmits>()
 
 const forwarded = useForwardPropsEmits(props, emits)
