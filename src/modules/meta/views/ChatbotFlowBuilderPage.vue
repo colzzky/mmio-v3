@@ -244,7 +244,7 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
                     <i class="material-icons text-md">more_vert</i>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem class="gap-x-3">
+                    <DropdownMenuItem class="gap-x-3" disabled>
                       <i class="bx bxs-error text-xl" />
                       View Error Logs
                     </DropdownMenuItem>
@@ -261,7 +261,7 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
                       <i class="bx bx-copy text-xl" />
                       Clone
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3">
+                    <DropdownMenuItem class="gap-x-3" disabled>
                       <i class="bx bx-share-alt text-xl" />
                       Share
                     </DropdownMenuItem>

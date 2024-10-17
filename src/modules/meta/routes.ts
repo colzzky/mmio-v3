@@ -144,7 +144,7 @@ const routeRecords:RouteRecord = {
   },
   'meta-comment-auto-reply': {
     meta: { requiresAuth: true },
-    component: () => import('./views/CommentAutoReplyPage.vue'),
+    component: () => import('./services/comment-auto-reply/page.vue'),
   },
   'meta-post-randomizer': {
     meta: { requiresAuth: true },
