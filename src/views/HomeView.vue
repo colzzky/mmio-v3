@@ -1,29 +1,59 @@
 <script setup lang="ts">
-import HomeLayout from '@/core/layouts/HomeLayout.vue'
+import Button from '@/core/components/ui/button/Button.vue';
 import { Skeleton } from '@/core/components/ui/skeleton'
+import HomeLayout from '@/core/layouts/HomeLayout.vue'
+import type { ProjectData } from '@/core/types/ProjectTypes';
+import type { Timestamp } from '@/core/types/UniTypes';
 import { uiHelpers } from '@/core/utils/ui-helper'
-import router from '@/router';
+import { useAuthStore } from '@/stores/authStore';
+import { useProjectStore } from '@/stores/projectStore';
+import type { DocumentSnapshot } from 'firebase/firestore';
+import { onMounted, reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+const useAuth = useAuthStore()
+const useProject = useProjectStore()
+const { project_data } = useProject
+const { user_auth } = useAuth
+const router = useRouter()
+const pageLoad = ref<boolean>(true)
 
-const campaigns = [
-  {
-    name: 'Cellphone Page Campaign',
-    platform: 'Meta',
-    account: 'Cellphone Page',
-    created: '2023-09-15T12:00:00Z',
-    edited: '2024-10-01T12:00:00Z',
-    status: 'active',
-    author: 'Paul Dela Vega',
-  },
-  {
-    name: 'Email Marketing Campaign',
-    platform: 'Email Marketing',
-    account: 'Cellphone Page',
-    created: '2021-09-15T12:00:00Z',
-    edited: '2024-09-01T12:00:00Z',
-    status: 'active',
-    author: 'Paul Dela Vega',
-  },
-]
+const project_list = reactive({
+  data: <ProjectData[]>[],
+  isLoading: <boolean>false,
+  lastSnapshot: <any>''
+})
+
+onMounted(async () => {
+  pageLoad.value = true
+  await loadMoreProjects()
+  pageLoad.value = false
+})
+
+const loadMoreProjects = async () => {
+  project_list.isLoading = true
+  const get_projects = await project_data.getWhere([
+    { fieldName: 'uid', operator: '==', value: user_auth.data?.uid }
+  ], 2, [], project_list.lastSnapshot)
+  if (get_projects.status) {
+    if (get_projects.data.length > 0) {
+      project_list.lastSnapshot = get_projects.data[get_projects.data.length - 1].pj_id;
+    }
+    get_projects.data.forEach(project => {
+      project_list.data.push({
+        name: project.name,
+        platform: project.platform,
+        account: project.account,
+        status: project.status,
+        pj_id: project.pj_id,
+        uid: project.uid,
+        createdAt: uiHelpers.timestampToDateTimeAgo(project.createdAt as Timestamp),
+        updatedAt: uiHelpers.timestampToDateTimeAgo(project.updatedAt as Timestamp),
+      });
+    });
+  }
+  project_list.isLoading = false
+};
+
 
 interface Platforms {
   name: string
@@ -31,7 +61,7 @@ interface Platforms {
 }
 
 const platforms: Platforms[] = [
-  { name: 'Meta', icon: 'bxl-meta' },
+  { name: 'META', icon: 'bxl-meta' },
   { name: 'Email Marketing', icon: 'bx-envelope' },
   { name: 'Google My Business', icon: 'bxl-google' },
   { name: 'Whatsapp', icon: 'bxl-whatsapp' },
@@ -47,8 +77,8 @@ const find_icon = (name: string): string | undefined => {
   return icon
 }
 
-const navigateTo = () =>{
-  router.push({name:"meta"})
+const navigateTo = (pj_id: string) => {
+  router.push({ name: 'meta', params: { pj_id: pj_id } })
 }
 </script>
 
@@ -68,36 +98,44 @@ const navigateTo = () =>{
             </div>
           </div>
 
-          <div v-for="campaign in campaigns" :key="campaign.name"
-            class="rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300 cursor-pointer">
-            <div class="grid grid-cols-12 items-center">
-              <div class="col-span-5" @click="navigateTo()">
-                <div class="flex items-center gap-x-3">
-                  <i class="bx text-2xl" :class="find_icon(campaign.platform)"></i>
-                  <div class="grid gap-0">
-                    <span class="text-sm">{{ campaign.name }}</span>
-                    <span class="text-xs">{{ campaign.account }}</span>
+
+          <div v-if="!pageLoad">
+            <div v-if="project_list.data.length">
+              <div v-for="project in project_list.data" :key="project.name"
+                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300">
+                <div class="grid grid-cols-12 items-center">
+                  <div class="col-span-5" @click="navigateTo(project.pj_id)">
+                    <div class="flex items-center gap-x-3">
+                      <i class="bx text-2xl" :class="find_icon(project.platform)"></i>
+                      <div class="grid gap-0">
+                        <span class="text-sm">{{ project.name }} - {{ project.account }}</span>
+                        <span class="text-xs">{{ project.pj_id }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-span-2 text-sm text-gray-600">
+                    {{ project.createdAt }}
+                  </div>
+                  <div class="col-span-2 text-sm text-gray-600">
+                    {{ project.updatedAt }}
+                  </div>
+                  <div class="col-span-1 text-sm text-gray-600">{{ project.status }}</div>
+                  <div class="col-span-1 text-sm text-gray-600">Owner</div>
+                  <div class="col-span-1 justify-self-end">
+                    <button type="button"
+                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                      <i class="material-icons text-md">more_vert</i>
+                    </button>
                   </div>
                 </div>
               </div>
-              <div class="col-span-2 text-sm text-gray-600">
-                {{ uiHelpers.formatDateTimeAgo(campaign.created) }}
-              </div>
-              <div class="col-span-2 text-sm text-gray-600">
-                {{ uiHelpers.formatDateTimeAgo(campaign.edited) }}
-              </div>
-              <div class="col-span-1 text-sm text-gray-600">{{ campaign.status }}</div>
-              <div class="col-span-1 text-sm text-gray-600">{{ campaign.author }}</div>
-              <div class="col-span-1 justify-self-end">
-                <button type="button"
-                  class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
-                  <i class="material-icons text-md">more_vert</i>
-                </button>
-              </div>
+            </div>
+            <div v-else>
+              No Data found
             </div>
           </div>
 
-          <div class="rounded-xl px-2 py-4">
+          <div v-if="pageLoad || project_list.isLoading" class="rounded-xl px-2 py-4">
             <div class="grid grid-cols-12 items-center">
               <div class="col-span-5">
                 <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
@@ -115,6 +153,12 @@ const navigateTo = () =>{
                 <Skeleton class="h-3 w-[100px] rounded-full bg-gray-300" />
               </div>
             </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2">
+            <Button variant="outline" size="xs" @click="loadMoreProjects()">
+              Sample Load More
+            </Button>
           </div>
         </div>
       </div>

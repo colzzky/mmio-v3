@@ -1,34 +1,17 @@
+import type { UserProfileData,Address } from '@/core/types/AuthUserTypes'
+import type { Timestamp } from '@/core/types/UniTypes'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
+import type{FirebaseOperators, FirebaseWhereCondition, FirebaseOrderCondition} from '@/core/utils/firebase-collections'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { postCollection, getCollection, getCollectionByField } from '@/core/utils/firebase-collections';
 import { auth } from '@/core/utils/firebase-client';
 import type { DocumentData } from 'firebase/firestore';
 
-interface Timestamp {
-    seconds: number;      // The number of seconds
-    nanoseconds: number;  // The number of nanoseconds
-}
-interface Address {
-    street: string;
-    city: string;
-    state: string;
-    country: string;
-    zipCode: string;
-}
-interface UserProfileData {
-    up_id: string
-    uid: string
-    firstName: string
-    lastName: string
-    contactEmail: string
-    address: Address
-    createdAt: Timestamp | string
-    updatedAt: Timestamp | string
-}
-type Nullable<T> = {
-    [P in keyof T]: T[P] | null;
-};
+
+// type Nullable<T> = {
+//     [P in keyof T]: T[P] | null;
+// };
 // Add a new key "id" while preserving original keys
 type PickAnyKey<T> = {
     // Original keys from UserProfileData
@@ -41,7 +24,7 @@ interface UserProfile {
     isInitialized: boolean
     initialize: () => void,
     get: (id: string) => Promise<UserProfileReturnData>
-    getWhere: (fieldName: keyof UserProfileData, operator: '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in', fieldValue: any) => Promise<UserProfileReturnList>
+    getWhere: (where:FirebaseWhereCondition<'user_profile'>[]) => Promise<UserProfileReturnList>
     set: (data: PickAnyKey<UserProfileData>) => void
     createInitial: (data: PickAnyKey<UserProfileData> | null, type: 'update' | 'new') => Promise<void>
     update: () => Promise<FirebaseReturn>
@@ -114,8 +97,9 @@ export const useAuthStore = defineStore('authStore', () => {
             }
         },
         //Call for custom statement
-        async getWhere(fieldName, operator, fieldValue) {
-            const get = await getCollectionByField('user_profile', 'up_id', fieldName, operator, fieldValue);
+        async getWhere(where) {
+              // Make sure to pass the correct parameters
+              const get = await getCollectionByField('user_profile', 'up_id', where);
             return {
                 status: get.status,
                 data: get.data as PickAnyKey<UserProfileData>[],

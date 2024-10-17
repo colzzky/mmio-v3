@@ -45,7 +45,7 @@ const configuration = [
 ]
 
 const signOut = async () => {
-  await user_auth.signOut().then(()=>{
+  await user_auth.signOut().then(() => {
     router.replace({ name: 'login' })
   })
 }

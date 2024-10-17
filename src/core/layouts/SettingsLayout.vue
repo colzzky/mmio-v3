@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
 import { Button } from '../components/ui/button'
 import { uiHelpers } from '../utils/ui-helper'
 import { links, links as sidebarLinks } from '@/modules/settings/routes'

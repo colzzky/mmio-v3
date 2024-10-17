@@ -3,8 +3,8 @@ import { routes as metaRoutes } from '@/modules/meta/routes'
 import { routes as settingsRoutes } from '@/modules/settings/routes'
 import othersRoutes from '@/modules/try/routes'
 import { useAuthStore } from '@/stores/authStore'
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 const routes = [
   {
@@ -34,7 +34,7 @@ const routes = [
       return HomeView
     },
   },
-  
+
   ...authenticationRoutes,
   ...metaRoutes,
   ...settingsRoutes,
@@ -46,20 +46,18 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach((to, from) => {
+router.beforeEach((to) => {
   const authStore = useAuthStore()
   const { user_auth } = authStore
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const nonAuth = to.matched.some((record) => record.meta.nonAuth)
   if (requiresAuth) {
     const checkUser = user_auth.checkUser()
-    if (!checkUser) return ({ name: 'login' })
-   
+    if (!checkUser) return { name: 'login' }
   }
   if (nonAuth) {
     const checkUser = user_auth.checkUser()
-    if (checkUser) return({ name: 'home' })
-   
+    if (checkUser) return { name: 'home' }
   }
   return true
 })

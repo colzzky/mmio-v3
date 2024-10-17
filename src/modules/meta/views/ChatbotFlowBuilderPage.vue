@@ -17,6 +17,7 @@ import {
 } from '@/core/components/ui/dropdown-menu'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
+import Main from '@/core/components/ui/main.vue'
 import {
   Table,
   TableBody,
@@ -210,7 +211,8 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
 
 <template>
   <DefaultLayout>
-    <main class="flex flex-col gap-y-4 p-4">
+    <Main class="flex flex-col gap-y-4">
+      <template #heading>Chatbot Flow Builder</template>
       <Button class="gap-x-2 self-end" @click="createOrEditFlowModal.open({ intent: 'create' })">
         <i class="bx bx-plus text-xl" />
         Create Messenger Flow
@@ -220,7 +222,7 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
           <TableRow>
             <TableHead>Flow Name</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Date Created</TableHead>
+            <TableHead>Created</TableHead>
             <TableHead class="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -232,7 +234,9 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
                 {{ uiHelpers.toTitleCase(flow.status) }}
               </Badge>
             </TableCell>
-            <TableCell>{{ flow.createdAt }}</TableCell>
+            <TableCell class="whitespace-nowrap">{{
+              uiHelpers.formatDateTimeAgo(flow.createdAt.toDateString())
+            }}</TableCell>
             <TableCell>
               <div class="grid place-content-center">
                 <DropdownMenu>
@@ -279,76 +283,68 @@ const deleteFlowModal = reactive<DeleteFlowModal>({
           </TableRow>
         </TableBody>
       </Table>
+    </Main>
 
-      <!-- CREATE/EDIT FLOW MODAL -->
-      <Dialog
-        v-model:open="createOrEditFlowModal.isOpen"
-        @update:open="createOrEditFlowModal.close()"
-      >
-        <DialogContent class="gap-y-8">
-          <DialogHeader>
-            <DialogTitle v-if="createOrEditFlowModal.intent === 'create'">
-              Create Flow
-            </DialogTitle>
-            <DialogTitle v-else-if="createOrEditFlowModal.intent === 'edit'">
-              Edit Flow
-            </DialogTitle>
-            <DialogDescription v-if="createOrEditFlowModal.intent === 'create'">
-              Enter the flow details to create a new flow.
-            </DialogDescription>
-            <DialogDescription v-else-if="createOrEditFlowModal.intent === 'edit'">
-              Enter the flow details to edit this flow.
-            </DialogDescription>
-          </DialogHeader>
-          <form
-            id="flowForm"
-            class="flex flex-col gap-y-4"
-            @submit.prevent="createOrEditFlowModal.submitForm()"
-          >
-            <div class="flex flex-col gap-y-2">
-              <Label for="name">Name</Label>
-              <Input
-                type="text"
-                id="name"
-                v-model="createOrEditFlowModal.form.name"
-                name="name"
-                placeholder="Input Name"
-                required
-              />
-            </div>
-          </form>
-          <DialogFooter>
-            <Button variant="secondary" @click="createOrEditFlowModal.close()">Cancel</Button>
-            <Button v-if="createOrEditFlowModal.intent === 'create'" type="submit" form="flowForm">
-              Create
-            </Button>
-            <Button
-              v-else-if="createOrEditFlowModal.intent === 'edit'"
-              type="submit"
-              form="flowForm"
-            >
-              Edit
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+    <!-- CREATE/EDIT FLOW MODAL -->
+    <Dialog
+      v-model:open="createOrEditFlowModal.isOpen"
+      @update:open="createOrEditFlowModal.close()"
+    >
+      <DialogContent class="gap-y-8">
+        <DialogHeader>
+          <DialogTitle v-if="createOrEditFlowModal.intent === 'create'"> Create Flow </DialogTitle>
+          <DialogTitle v-else-if="createOrEditFlowModal.intent === 'edit'"> Edit Flow </DialogTitle>
+          <DialogDescription v-if="createOrEditFlowModal.intent === 'create'">
+            Enter the flow details to create a new flow.
+          </DialogDescription>
+          <DialogDescription v-else-if="createOrEditFlowModal.intent === 'edit'">
+            Enter the flow details to edit this flow.
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          id="flowForm"
+          class="flex flex-col gap-y-4"
+          @submit.prevent="createOrEditFlowModal.submitForm()"
+        >
+          <div class="flex flex-col gap-y-2">
+            <Label for="name">Name</Label>
+            <Input
+              type="text"
+              id="name"
+              v-model="createOrEditFlowModal.form.name"
+              name="name"
+              placeholder="Input Name"
+              required
+            />
+          </div>
+        </form>
+        <DialogFooter>
+          <Button variant="secondary" @click="createOrEditFlowModal.close()">Cancel</Button>
+          <Button v-if="createOrEditFlowModal.intent === 'create'" type="submit" form="flowForm">
+            Create
+          </Button>
+          <Button v-else-if="createOrEditFlowModal.intent === 'edit'" type="submit" form="flowForm">
+            Edit
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
 
-      <!-- Confirm Delete Modal -->
-      <Dialog v-model:open="deleteFlowModal.isOpen" @update:open="deleteFlowModal.close()">
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete Flow?</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to delete this flow? This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
+    <!-- Confirm Delete Modal -->
+    <Dialog v-model:open="deleteFlowModal.isOpen" @update:open="deleteFlowModal.close()">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Flow?</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete this flow? This cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
 
-          <DialogFooter>
-            <Button variant="secondary" @click="deleteFlowModal.close()">Cancel</Button>
-            <Button variant="destructive" @click="deleteFlowModal.deleteFlow()"> Delete </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </main>
+        <DialogFooter>
+          <Button variant="secondary" @click="deleteFlowModal.close()">Cancel</Button>
+          <Button variant="destructive" @click="deleteFlowModal.deleteFlow()"> Delete </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   </DefaultLayout>
 </template>

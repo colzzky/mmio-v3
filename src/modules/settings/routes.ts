@@ -2,111 +2,100 @@ import type { RouteRecordRaw } from 'vue-router'
 
 type Section = 'personal' | 'group'
 
-const urls = [
-  '/settings/account',
-  '/settings/profile',
-  '/settings/plans',
-  '/settings/payments-and-billings',
-  '/settings/api-integration',
-  '/settings/team',
-  '/settings/project-management',
+const names = [
+  'settings-account',
+  'settings-profile',
+  'settings-plans',
+  'settings-payments-and-billings',
+  'settings-api-integrations',
+  'settings-team',
+  'settings-project-management',
 ] as const
 
-type AllUrl = (typeof urls)[number]
-
-const urlLinks: Record<AllUrl, { label: string; icon: string; section: Section }> = {
-  '/settings/account': {
-    label: 'Account',
-    icon: 'bxs-user-account',
-    section: 'personal',
-  },
-  '/settings/profile': {
-    label: 'Profile',
-    icon: 'bxs-user-circle',
-    section: 'personal',
-  },
-  '/settings/plans': {
-    label: 'Plans',
-    icon: 'bxs-tag',
-    section: 'personal',
-  },
-  '/settings/payments-and-billings': {
-    label: 'Payments and Billings',
-    icon: 'bxs-credit-card',
-    section: 'personal',
-  },
-  '/settings/api-integration': {
-    label: 'API Integrations',
-    icon: 'bxs-plug',
-    section: 'personal',
-  },
-  '/settings/team': {
-    label: 'Team',
-    icon: 'bxs-group',
-    section: 'group',
-  },
-  '/settings/project-management': {
-    label: 'Project Management',
-    icon: 'bxs-folder',
-    section: 'group',
-  },
+const urls: Record<typeof names[number], string> = {
+  'settings-account': '/settings/account',
+  'settings-profile': '/settings/profile',
+  'settings-plans': '/settings/plans',
+  'settings-payments-and-billings': '/settings/payments-and-billings',
+  'settings-api-integrations': '/settings/api-integrations',
+  'settings-team': '/settings/team',
+  'settings-project-management': '/settings/project-management',
 }
 
-export const links = Object.entries(urlLinks).map(([key, value]) => ({ ...value, href: key }))
+const linkRecords: Record<typeof names[number], { label: string; icon: string; section: Section }> = {
+  "settings-account": {
+    label: "Account",
+    icon: "bxs-user-account",
+    section: "personal"
+  },
+  "settings-profile": {
+    label: "Profile",
+    icon: "bxs-user-circle",
+    section: "personal"
+  },
+  "settings-plans": {
+    label: "Plans",
+    icon: "bxs-tag",
+    section: "personal"
+  },
+  "settings-payments-and-billings": {
+    label: "Payments and Billings",
+    icon: "bxs-credit-card",
+    section: "personal"
+  },
+  "settings-api-integrations": {
+    label: "API Integrations",
+    icon: "bxs-plug",
+    section: "personal"
+  },
+  "settings-team": {
+    label: "Team",
+    icon: "bxs-group",
+    section: "group"
+  },
+  "settings-project-management": {
+    label: "Project Management",
+    icon: "bxs-folder",
+    section: "group"
+  }
+}
 
-const routeRecords: Record<AllUrl, Omit<RouteRecordRaw, 'path'>> = {
-  '/settings/account': {
-    name: 'settings-account',
-    meta: {
-      requiresAuth: true,
-    },
+const routeRecords: Record<typeof names[number], Omit<RouteRecordRaw, 'path' | 'name'>> = {
+  "settings-account": {
+    meta: { requiresAuth: true },
     component: () => import('./views/AccountPage.vue'),
   },
-  '/settings/profile': {
-    name: 'settings-profile',
-    meta: {
-      requiresAuth: true,
-    },
+  "settings-profile": {
+    meta: { requiresAuth: true },
     component: () => import('./views/ProfilePage.vue'),
   },
-  '/settings/plans': {
-    name: 'settings-tag',
-    meta: {
-      requiresAuth: true,
-    },
+  "settings-plans": {
+    meta: { requiresAuth: true },
     component: () => import('./views/PlansPage.vue'),
   },
-  '/settings/payments-and-billings': {
-    name: 'settings-payments-and-billings',
-    meta: {
-      requiresAuth: true,
-    },
+  "settings-payments-and-billings": {
+    meta: { requiresAuth: true },
     component: () => import('./views/AccountPage.vue'),
   },
-  '/settings/api-integration': {
-    name: 'settings-api-integrations',
-    meta: {
-      requiresAuth: true,
-    },
+  "settings-api-integrations": {
+    meta: { requiresAuth: true },
     component: () => import('./views/AccountPage.vue'),
   },
-  '/settings/team': {
-    name: 'settings-team',
-    meta: {
-      requiresAuth: true,
-    },
+  "settings-team": {
+    meta: { requiresAuth: true },
     component: () => import('./views/AccountPage.vue'),
   },
-  '/settings/project-management': {
-    name: 'settings-project-management',
-    meta: {
-      requiresAuth: true,
-    },
+  "settings-project-management": {
+    meta: { requiresAuth: true },
     component: () => import('./views/AccountPage.vue'),
   },
 }
 
+export const links = Object.entries(linkRecords).map(([key, value]) => ({ ...value, href: urls[key] }))
+
 export const routes = Object.entries(routeRecords).map(([key, values]) => ({
-  path: key,
   ...values,
+  name: key,
+  path: urls[key],
 }))
+

@@ -18,6 +18,7 @@ import {
 } from '@/core/components/ui/dropdown-menu'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
+import Main from '@/core/components/ui/main.vue'
 import {
   Select,
   SelectContent,
@@ -207,7 +208,8 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
 
 <template>
   <DefaultLayout>
-    <main class="flex flex-col gap-y-4 p-4">
+    <Main class="flex flex-col gap-y-4">
+      <template #heading>Post Randomizer</template>
       <Button
         class="gap-x-2 self-end"
         @click="createOrEditCampaignModal.open({ intent: 'create' })"
@@ -222,7 +224,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
             <TableHead>Source Name</TableHead>
             <TableHead>Published To</TableHead>
             <TableHead>Duration</TableHead>
-            <TableHead>Date Created</TableHead>
+            <TableHead>Created</TableHead>
             <TableHead>Status</TableHead>
             <TableHead class="text-center">Actions</TableHead>
           </TableRow>
@@ -252,7 +254,9 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
                 </div>
               </div>
             </TableCell>
-            <TableCell>{{ campaign.createdAt }}</TableCell>
+            <TableCell class="whitespace-nowrap">{{
+              uiHelpers.formatDateTimeAgo(campaign.createdAt.toDateString())
+            }}</TableCell>
             <!-- @temporary: can be changed to a `<Switch />` component -->
             <TableCell>
               <Badge>{{ uiHelpers.toTitleCase(campaign.status) }}</Badge>
@@ -295,7 +299,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
           </TableRow>
         </TableBody>
       </Table>
-    </main>
+    </Main>
 
     <!-- Create/Edit Campaign Modal -->
     <Dialog

@@ -3,13 +3,13 @@ import { Button } from '@/core/components/ui/button'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
 import { useToast } from '@/core/components/ui/toast'
+import { Toaster } from '@/core/components/ui/toast'
 import { auth } from '@/core/utils/firebase-client'
 import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { Icon } from '@iconify/vue'
 import { browserLocalPersistence, setPersistence, signInWithEmailAndPassword } from 'firebase/auth'
 import { reactive, ref } from 'vue'
-import { Toaster } from '@/core/components/ui/toast'
 
 const authStore = useAuthStore()
 const { user_auth } = authStore
@@ -51,7 +51,7 @@ const loginUser = async (email: string, password: string): Promise<void> => {
 </script>
 
 <template>
-  <Toaster/>
+  <Toaster />
   <main
     class="mx-auto flex w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl flex-col gap-y-8 py-[var(--gutter)] [--gutter:1rem] lg:[--gutter:2rem]"
   >

@@ -4,3 +4,5 @@ export interface Modal {
   open(): void
   close(): void
 }
+export type { UserProfileData } from '../types/AuthUserTypes';
+export type { ProjectData } from '../types/ProjectTypes';
