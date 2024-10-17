@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { AspectRatio } from '@/core/components/ui/aspect-ratio'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
+import { Badge } from '@/core/components/ui/badge'
+import { Button } from '@/core/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -31,6 +33,14 @@ import type { Modal } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { reactive, ref } from 'vue'
 
+type AutoReply = {
+  id: number
+  name: string
+  status: 'active' | 'inactive'
+  created: Date
+  updated: Date
+}
+
 type FacebookPost = {
   id: number
   user: {
@@ -43,7 +53,7 @@ type FacebookPost = {
   likes: number
   comments: number
   shares: number
-  autoReplies: number
+  autoReplies: Map<AutoReply['id'], Omit<AutoReply, 'id'>>
 }
 
 const facebookPosts = ref(
@@ -61,7 +71,35 @@ const facebookPosts = ref(
         likes: 120,
         comments: 2,
         shares: 15,
-        autoReplies: 5,
+        autoReplies: new Map([
+          [
+            1,
+            {
+              name: 'Auto Reply #1 for Alice Johnson',
+              status: 'active',
+              created: new Date('2023-10-16'),
+              updated: new Date('2023-10-16'),
+            },
+          ],
+          [
+            2,
+            {
+              name: 'Auto Reply #2 for Alice Johnson',
+              status: 'active',
+              created: new Date('2023-10-17'),
+              updated: new Date('2023-10-17'),
+            },
+          ],
+          [
+            3,
+            {
+              name: 'Auto Reply #3 for Alice Johnson',
+              status: 'inactive',
+              created: new Date('2023-10-18'),
+              updated: new Date('2023-10-18'),
+            },
+          ],
+        ]),
       },
     ],
     [
@@ -78,7 +116,35 @@ const facebookPosts = ref(
         likes: 85,
         comments: 1,
         shares: 8,
-        autoReplies: 5,
+        autoReplies: new Map([
+          [
+            4,
+            {
+              name: 'Auto Reply #1 for Bob Smith',
+              status: 'active',
+              created: new Date('2023-10-15'),
+              updated: new Date('2023-10-15'),
+            },
+          ],
+          [
+            5,
+            {
+              name: 'Auto Reply #2 for Bob Smith',
+              status: 'active',
+              created: new Date('2023-10-16'),
+              updated: new Date('2023-10-16'),
+            },
+          ],
+          [
+            6,
+            {
+              name: 'Auto Reply #3 for Bob Smith',
+              status: 'inactive',
+              created: new Date('2023-10-17'),
+              updated: new Date('2023-10-17'),
+            },
+          ],
+        ]),
       },
     ],
     [
@@ -95,7 +161,35 @@ const facebookPosts = ref(
         likes: 200,
         comments: 1,
         shares: 10,
-        autoReplies: 5,
+        autoReplies: new Map([
+          [
+            7,
+            {
+              name: 'Auto Reply #1 for Charlie Green',
+              status: 'active',
+              created: new Date('2023-10-14'),
+              updated: new Date('2023-10-14'),
+            },
+          ],
+          [
+            8,
+            {
+              name: 'Auto Reply #2 for Charlie Green',
+              status: 'active',
+              created: new Date('2023-10-15'),
+              updated: new Date('2023-10-15'),
+            },
+          ],
+          [
+            9,
+            {
+              name: 'Auto Reply #3 for Charlie Green',
+              status: 'inactive',
+              created: new Date('2023-10-16'),
+              updated: new Date('2023-10-16'),
+            },
+          ],
+        ]),
       },
     ],
   ]),
@@ -108,6 +202,25 @@ interface ViewPostModal extends Omit<Modal, 'open'> {
 }
 
 const viewPostModal = reactive<ViewPostModal>({
+  isOpen: false,
+  post: null,
+  initialState() {
+    this.isOpen = false
+    this.post = null
+  },
+  open(post) {
+    this.isOpen = true
+    this.post = post
+  },
+  close() {
+    this.initialState()
+  },
+})
+
+// VIEW POST COMMENT AUTO REPLY
+interface ViewPostCommentAutoReplyModal extends ViewPostModal {}
+
+const viewPostCommentAutoReplyModal = reactive<ViewPostCommentAutoReplyModal>({
   isOpen: false,
   post: null,
   initialState() {
@@ -167,7 +280,7 @@ const viewPostModal = reactive<ViewPostModal>({
                 <TableCell class="whitespace-nowrap">
                   {{ uiHelpers.formatDateTimeAgo(post.created.toDateString()) }}
                 </TableCell>
-                <TableCell>{{ post.autoReplies }}</TableCell>
+                <TableCell>{{ post.autoReplies.size }}</TableCell>
                 <TableCell>
                   <div class="grid place-content-center">
                     <DropdownMenu>
@@ -185,7 +298,10 @@ const viewPostModal = reactive<ViewPostModal>({
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
-                        <DropdownMenuItem class="gap-x-3">
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="viewPostCommentAutoReplyModal.open({ id, ...post })"
+                        >
                           <i class="bx bx-list-ul text-xl"></i>
                           View All
                         </DropdownMenuItem>
@@ -213,38 +329,151 @@ const viewPostModal = reactive<ViewPostModal>({
       </Tabs>
     </Main>
 
+    <!-- VIEW POST COMMENT AUTO REPLY MODAL -->
+    <Dialog
+      v-model:open="viewPostCommentAutoReplyModal.isOpen"
+      @update:open="viewPostCommentAutoReplyModal.close()"
+    >
+      <DialogContent class="flex max-w-screen-xl flex-col">
+        <DialogHeader class="flex flex-col gap-y-2">
+          <DialogTitle>View Post Comment Auto Replies</DialogTitle>
+          <DialogDescription class="flex items-center justify-between">
+            <div
+              class="grid grid-cols-[var(--avatar-size),1fr] items-center gap-x-2 text-xs [--avatar-size:theme(spacing.8)]"
+            >
+              <Avatar class="row-span-2 size-[var(--avatar-size)]">
+                <AvatarImage
+                  :src="viewPostCommentAutoReplyModal.post?.user.image ?? ''"
+                ></AvatarImage>
+              </Avatar>
+              <span>{{ viewPostCommentAutoReplyModal.post?.user.name }}</span>
+              <a
+                :href="`http://example.com/${viewPostCommentAutoReplyModal.post?.id}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="self-start text-blue-500 hover:underline"
+              >
+                Post ID: {{ viewPostCommentAutoReplyModal.post?.id }}
+              </a>
+            </div>
+            <Button class="gap-x-2 self-end" size="sm">
+              <i class="bx bx-plus text-xl" />
+              Add Comment Auto Reply
+            </Button>
+          </DialogDescription>
+        </DialogHeader>
+
+        <section class="grid grid-cols-[33%_1fr] gap-x-4">
+          <div class="flex flex-col gap-y-4 rounded-md border p-6 text-sm">
+            <p class="text-pretty">{{ viewPostCommentAutoReplyModal.post?.description }}</p>
+            <AspectRatio :ratio="16 / 9">
+              <img
+                :src="viewPostCommentAutoReplyModal.post?.image"
+                class="h-full w-full rounded-md object-cover"
+              />
+            </AspectRatio>
+            <div class="flex items-center gap-x-4 text-muted-foreground">
+              <span>{{ viewPostCommentAutoReplyModal.post?.likes }} Likes</span>
+              <span>{{ viewPostCommentAutoReplyModal.post?.comments }} Comment</span>
+              <span>{{ viewPostCommentAutoReplyModal.post?.shares }} Shares</span>
+              <span class="grow text-end">
+                {{ viewPostCommentAutoReplyModal.post?.created.toLocaleDateString() }}
+              </span>
+            </div>
+          </div>
+          <div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Campaign Name</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created</TableHead>
+                  <TableHead>Updated</TableHead>
+                  <TableHead class="text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow
+                  v-for="[id, autoReply] in viewPostCommentAutoReplyModal.post?.autoReplies"
+                  :key="id"
+                >
+                  <TableCell>{{ autoReply.name }}</TableCell>
+                  <TableCell>
+                    <Badge>{{ uiHelpers.toTitleCase(autoReply.status) }}</Badge>
+                  </TableCell>
+                  <TableCell class="whitespace-nowrap">
+                    {{ uiHelpers.formatDateTimeAgo(autoReply.created.toDateString()) }}
+                  </TableCell>
+                  <TableCell class="whitespace-nowrap">
+                    {{ uiHelpers.formatDateTimeAgo(autoReply.updated.toDateString()) }}
+                  </TableCell>
+                  <TableCell>
+                    <div class="grid place-content-center">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger>
+                          <i class="material-icons text-md">more_vert</i>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent>
+                          <DropdownMenuItem class="gap-x-3">
+                            <i
+                              :class="[
+                                'bx text-xl',
+                                autoReply.status === 'active'
+                                  ? 'bx-toggle-left'
+                                  : 'bxs-toggle-right',
+                              ]"
+                            />
+                            Toggle Status
+                          </DropdownMenuItem>
+                          <DropdownMenuItem class="gap-x-3">
+                            <i class="bx bx-edit text-xl" />
+                            Edit
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+        </section>
+      </DialogContent>
+    </Dialog>
+
+    <!-- VIEW POST MODAL -->
     <Dialog v-model:open="viewPostModal.isOpen" @update:open="viewPostModal.close()">
-      <DialogContent v-if="viewPostModal.post" class="max-w-md">
+      <DialogContent class="max-w-md">
         <DialogHeader class="flex flex-col gap-y-2">
           <DialogTitle>View Post</DialogTitle>
           <DialogDescription
             class="grid grid-cols-[var(--avatar-size),1fr] items-center gap-x-2 text-xs [--avatar-size:theme(spacing.8)]"
           >
             <Avatar class="row-span-2 size-[var(--avatar-size)]">
-              <AvatarImage :src="viewPostModal.post.user.image"></AvatarImage>
+              <AvatarImage :src="viewPostModal.post?.user.image ?? ''"></AvatarImage>
             </Avatar>
-            <span>{{ viewPostModal.post.user.name }}</span>
+            <span>{{ viewPostModal.post?.user.name }}</span>
             <a
-              :href="`http://example.com/${viewPostModal.post.id}`"
+              :href="`http://example.com/${viewPostModal.post?.id}`"
               target="_blank"
               rel="noopener noreferrer"
               class="self-start text-blue-500 hover:underline"
             >
-              Post ID: {{ viewPostModal.post.id }}
+              Post ID: {{ viewPostModal.post?.id }}
             </a>
           </DialogDescription>
         </DialogHeader>
         <section class="flex flex-col gap-y-4 text-sm">
-          <p class="text-pretty">{{ viewPostModal.post.description }}</p>
+          <p class="text-pretty">{{ viewPostModal.post?.description }}</p>
           <AspectRatio :ratio="16 / 9">
-            <img :src="viewPostModal.post.image" class="h-full w-full rounded-md object-cover" />
+            <img :src="viewPostModal.post?.image" class="h-full w-full rounded-md object-cover" />
           </AspectRatio>
           <div class="flex items-center gap-x-4 text-muted-foreground">
-            <span>{{ viewPostModal.post.likes }} Likes</span>
-            <span>{{ viewPostModal.post.comments }} Comment</span>
-            <span>{{ viewPostModal.post.shares }} Shares</span>
+            <span>{{ viewPostModal.post?.likes }} Likes</span>
+            <span>{{ viewPostModal.post?.comments }} Comment</span>
+            <span>{{ viewPostModal.post?.shares }} Shares</span>
             <span class="grow text-end">
-              {{ viewPostModal.post.created.toLocaleDateString() }}
+              {{ viewPostModal.post?.created.toLocaleDateString() }}
             </span>
           </div>
         </section>
