@@ -277,7 +277,7 @@ const deleteCampaignModal = reactive<DeleteCampaignModal>({
                       />
                       Toggle Status
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3">
+                    <DropdownMenuItem class="gap-x-3" disabled>
                       <i class="bx bxs-report text-xl" />
                       View Report
                     </DropdownMenuItem>
