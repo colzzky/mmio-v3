@@ -15,7 +15,7 @@ onMounted(async () => {
   if (!user_profile.isInitialized) {
     console.log('initializing...')
     const profile = await user_profile.getWhere([
-      {fieldName:'up_id',operator:'==',value:user_auth.data?.uid}
+      {fieldName:'uid',operator:'==',value:user_auth.data?.uid}
     ])
     const data = profile.data[0]
     user_profile.set(data)

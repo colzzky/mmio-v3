@@ -166,15 +166,12 @@ export async function postCollection<T extends keyof Collections>( $col: T, $id:
 
 export async function getCollection<T extends keyof Collections>($col: T, $id: Collections[T], id: string): Promise<FirebaseReturn> {
   try {
-    const collectionRef = collection(firestore, $col)
-    const q = query(collectionRef, where(`${$id}`, '==', id))
-
-    const querySnapshot = await getDocs(q) // Fetch the document
-    if (!querySnapshot.empty) {
-      const data = querySnapshot.docs.map((doc) => ({ ...doc.data() })) // Get the document data
+    const userDocRef = doc(firestore, $col, id)
+    const userSnapshot = await getDoc(userDocRef)
+    if (userSnapshot.exists()) {
       return {
         status: true,
-        data: data,
+        data: { id: userSnapshot.id, ...userSnapshot.data() },
         error: '',
       }
     } else {

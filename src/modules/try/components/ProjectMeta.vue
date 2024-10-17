@@ -140,17 +140,14 @@ const inputField = reactive<InputField>({
     const update = await project_data.createUpdate('new')
     if (update.status) {
       project_data.set(update.data)
+      console.log(project_data)
       toast({
         title: 'New Project Created',
         description: 'You have succssfully created a new project!',
         variant: 'success',
       })
-      router.push({
-        name: 'meta',
-        params: {
-          pj_id: update.data.pj_id,
-        },
-      })
+      
+      router.push({name: 'meta', params: {pj_id: update.data.pj_id,}})
       pcd.close()
     } else {
       toast({
@@ -164,6 +161,11 @@ const inputField = reactive<InputField>({
     this.isLoading = false
   },
 })
+
+function customSelectionAccount(event:string){
+  inputField.dataInput.account = event
+  inputField.validateSingleField('account') 
+}
 
 onMounted(() => {
   componentLoad.value = true
@@ -253,14 +255,7 @@ onMounted(() => {
                 pages first</span
               >
             </div>
-            <Combobox model="page" :options="sampleOptions" @select="console.log($event)" />
-            <!-- <Input
-              v-model="inputField.dataInput.account"
-              @blur="inputField.validateSingleField('account')"
-              type="text"
-              placeholder="Page name"
-              class="h-7 text-xs"
-            /> -->
+            <Combobox model="page" :options="sampleOptions" @select="customSelectionAccount($event)"/>
             <div
               v-if="inputField.errors.account"
               for="page_id"

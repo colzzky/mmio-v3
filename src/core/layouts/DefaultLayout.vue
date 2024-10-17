@@ -47,48 +47,42 @@ const parentRoute = breadcrumbs[0]
 const project_id = ref<string>('')
 
 onMounted(async () => {
+  console.log('mounting layoutLoad...')
   layoutLoad.value = true
   //Get the Project Id
-  const pj_id = route.params.pj_id
-  //Check PJ Id if null if null return to home page
+  const pj_id = route.params.pj_id as string
+  const validate_project = await project_validation(pj_id)
+  if (!validate_project) {
+    toast({
+      title: 'Project does not exist',
+      description: 'Please choose a project first before proceeding',
+      variant: 'destructive',
+    })
+    router.push({ name: 'home' })
+  } else {
+    if (project_data.data){
+      project_id.value = project_data.data.pj_id
+    }
+
+  }
+
+  layoutLoad.value = false
+
+})
+
+async function project_validation(pj_id: string): Promise<boolean> {
   if (pj_id) {
-    //Check first if Project which is created already exist or initialized. If not fetch the project from firestore
     if (!project_data.data || !project_data.isInitialized) {
       const get = await project_data.get(pj_id as string)
-      //Check the statue of firestore get is a success or if the is an existing data
-      if (get.status) {
-        project_data.set(get.data)
-        project_id.value = get.data.pj_id
-
-        /** 
-        ---->This is where we check if the project is META/ EMAIL MARKETING ETC.<---
-        */
-
-      } else {
-        toast({
-          title: 'Project does not exist',
-          description: 'Please choose a project first before proceeding',
-          variant: 'success',
-        })
-        router.push({ name: 'home' })
-      }
-    } else {
-      //Check if the one initilized matched from the PJ
-      if (pj_id != project_data.data.pj_id) {
-        toast({
-          title: 'Project does not exist',
-          description: 'Please choose a project first before proceeding',
-          variant: 'success',
-        })
-        router.replace({ name: 'home' })
-      }
+      console.log(get.data)
+      if (!get.status) return false
+      project_data.set(get.data)
     }
-  } else {
-    console.log('Page does not exist')
-    router.replace({ name: 'home' })
-  }
-  layoutLoad.value = false
-})
+    console.log(project_data)
+    if (pj_id != project_data.data?.pj_id) return false
+    return true
+  } else return false
+}
 
 
 </script>

@@ -98,9 +98,16 @@ export const useProjectStore = defineStore('projectStore', () => {
       this.isInitialized = true
       return this.data
     },
+ 
+  })
+  const project_list = reactive({
+    data: <ProjectData[]>[],
+    isLoading: <boolean>false,
+    lastSnapshot: <any>''
   })
 
   return {
+    project_list,
     project_data,
   }
 })
