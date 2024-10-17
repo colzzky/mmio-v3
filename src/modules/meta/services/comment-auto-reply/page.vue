@@ -297,15 +297,15 @@ const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModal
                           <i class="bx bx-list-ul text-xl"></i>
                           View All
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3">
+                        <DropdownMenuItem class="gap-x-3" disabled>
                           <i class="bx bx-message-square-add text-xl"></i>
                           Create
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3">
+                        <DropdownMenuItem class="gap-x-3" disabled>
                           <i class="bx bx-play-circle text-xl"></i>
                           Activate All
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3">
+                        <DropdownMenuItem class="gap-x-3" disabled>
                           <i class="bx bx-pause-circle text-xl"></i>
                           Deactivate All
                         </DropdownMenuItem>

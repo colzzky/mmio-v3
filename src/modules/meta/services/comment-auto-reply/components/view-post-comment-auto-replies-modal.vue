@@ -2,6 +2,7 @@
 import type { FacebookPost } from '../page.vue'
 import { AspectRatio } from '@/core/components/ui/aspect-ratio'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
+import { Badge } from '@/core/components/ui/badge'
 import { Button } from '@/core/components/ui/button'
 import {
   Dialog,
@@ -55,7 +56,7 @@ const forwarded = useForwardPropsEmits(props, emits)
               Post ID: {{ post?.id }}
             </a>
           </div>
-          <Button class="gap-x-2 self-end" size="sm">
+          <Button class="gap-x-2 self-end" size="sm" disabled>
             <i class="bx bx-plus text-xl" />
             Add Comment Auto Reply
           </Button>
@@ -107,7 +108,7 @@ const forwarded = useForwardPropsEmits(props, emits)
                         <i class="material-icons text-md">more_vert</i>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem class="gap-x-3">
+                        <DropdownMenuItem class="gap-x-3" disabled>
                           <i
                             :class="[
                               'bx text-xl',
@@ -116,7 +117,7 @@ const forwarded = useForwardPropsEmits(props, emits)
                           />
                           Toggle Status
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3">
+                        <DropdownMenuItem class="gap-x-3" disabled>
                           <i class="bx bx-edit text-xl" />
                           Edit
                         </DropdownMenuItem>
