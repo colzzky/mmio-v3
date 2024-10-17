@@ -12,16 +12,12 @@ import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 const useAuth = useAuthStore()
 const useProject = useProjectStore()
-const { project_data } = useProject
+const { project_data,project_list } = useProject
 const { user_auth } = useAuth
 const router = useRouter()
 const pageLoad = ref<boolean>(true)
 
-const project_list = reactive({
-  data: <ProjectData[]>[],
-  isLoading: <boolean>false,
-  lastSnapshot: <any>''
-})
+
 
 onMounted(async () => {
   pageLoad.value = true
