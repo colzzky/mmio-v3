@@ -1,15 +1,7 @@
 <script setup lang="ts">
-import { AspectRatio } from '@/core/components/ui/aspect-ratio'
+import ViewPostCommentAutoRepliesModal from './components/view-post-comment-auto-replies-modal.vue'
+import ViewPostModal from './components/view-post-modal.vue'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
-import { Badge } from '@/core/components/ui/badge'
-import { Button } from '@/core/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/core/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +25,7 @@ import type { Modal } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { reactive, ref } from 'vue'
 
+// @temporary: can be extracted to another file
 type AutoReply = {
   id: number
   name: string
@@ -41,7 +34,8 @@ type AutoReply = {
   updated: Date
 }
 
-type FacebookPost = {
+// @temporary: can be extracted to another file
+export type FacebookPost = {
   id: number
   user: {
     name: string
@@ -196,12 +190,11 @@ const facebookPosts = ref(
 )
 
 // VIEW POST MODAL
-interface ViewPostModal extends Omit<Modal, 'open'> {
+interface ViewPostModalInterface extends Omit<Modal, 'open'> {
   post: FacebookPost | null
   open(post: FacebookPost): void
 }
-
-const viewPostModal = reactive<ViewPostModal>({
+const viewPostModal = reactive<ViewPostModalInterface>({
   isOpen: false,
   post: null,
   initialState() {
@@ -218,9 +211,8 @@ const viewPostModal = reactive<ViewPostModal>({
 })
 
 // VIEW POST COMMENT AUTO REPLY
-interface ViewPostCommentAutoReplyModal extends ViewPostModal {}
-
-const viewPostCommentAutoReplyModal = reactive<ViewPostCommentAutoReplyModal>({
+interface ViewPostCommentAutoRepliesModalInterface extends ViewPostModalInterface {}
+const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModalInterface>({
   isOpen: false,
   post: null,
   initialState() {
@@ -300,7 +292,7 @@ const viewPostCommentAutoReplyModal = reactive<ViewPostCommentAutoReplyModal>({
                         <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
                         <DropdownMenuItem
                           class="gap-x-3"
-                          @click="viewPostCommentAutoReplyModal.open({ id, ...post })"
+                          @click="viewPostCommentAutoRepliesModal.open({ id, ...post })"
                         >
                           <i class="bx bx-list-ul text-xl"></i>
                           View All
@@ -330,154 +322,17 @@ const viewPostCommentAutoReplyModal = reactive<ViewPostCommentAutoReplyModal>({
     </Main>
 
     <!-- VIEW POST COMMENT AUTO REPLY MODAL -->
-    <Dialog
-      v-model:open="viewPostCommentAutoReplyModal.isOpen"
-      @update:open="viewPostCommentAutoReplyModal.close()"
-    >
-      <DialogContent class="flex max-w-screen-xl flex-col">
-        <DialogHeader class="flex flex-col gap-y-2">
-          <DialogTitle>View Post Comment Auto Replies</DialogTitle>
-          <DialogDescription class="flex items-center justify-between">
-            <div
-              class="grid grid-cols-[var(--avatar-size),1fr] items-center gap-x-2 text-xs [--avatar-size:theme(spacing.8)]"
-            >
-              <Avatar class="row-span-2 size-[var(--avatar-size)]">
-                <AvatarImage
-                  :src="viewPostCommentAutoReplyModal.post?.user.image ?? ''"
-                ></AvatarImage>
-              </Avatar>
-              <span>{{ viewPostCommentAutoReplyModal.post?.user.name }}</span>
-              <a
-                :href="`http://example.com/${viewPostCommentAutoReplyModal.post?.id}`"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="self-start text-blue-500 hover:underline"
-              >
-                Post ID: {{ viewPostCommentAutoReplyModal.post?.id }}
-              </a>
-            </div>
-            <Button class="gap-x-2 self-end" size="sm">
-              <i class="bx bx-plus text-xl" />
-              Add Comment Auto Reply
-            </Button>
-          </DialogDescription>
-        </DialogHeader>
-
-        <section class="grid grid-cols-[33%_1fr] gap-x-4">
-          <div class="flex flex-col gap-y-4 rounded-md border p-6 text-sm">
-            <p class="text-pretty">{{ viewPostCommentAutoReplyModal.post?.description }}</p>
-            <AspectRatio :ratio="16 / 9">
-              <img
-                :src="viewPostCommentAutoReplyModal.post?.image"
-                class="h-full w-full rounded-md object-cover"
-              />
-            </AspectRatio>
-            <div class="flex items-center gap-x-4 text-muted-foreground">
-              <span>{{ viewPostCommentAutoReplyModal.post?.likes }} Likes</span>
-              <span>{{ viewPostCommentAutoReplyModal.post?.comments }} Comment</span>
-              <span>{{ viewPostCommentAutoReplyModal.post?.shares }} Shares</span>
-              <span class="grow text-end">
-                {{ viewPostCommentAutoReplyModal.post?.created.toLocaleDateString() }}
-              </span>
-            </div>
-          </div>
-          <div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Campaign Name</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Updated</TableHead>
-                  <TableHead class="text-center">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow
-                  v-for="[id, autoReply] in viewPostCommentAutoReplyModal.post?.autoReplies"
-                  :key="id"
-                >
-                  <TableCell>{{ autoReply.name }}</TableCell>
-                  <TableCell>
-                    <Badge>{{ uiHelpers.toTitleCase(autoReply.status) }}</Badge>
-                  </TableCell>
-                  <TableCell class="whitespace-nowrap">
-                    {{ uiHelpers.formatDateTimeAgo(autoReply.created.toDateString()) }}
-                  </TableCell>
-                  <TableCell class="whitespace-nowrap">
-                    {{ uiHelpers.formatDateTimeAgo(autoReply.updated.toDateString()) }}
-                  </TableCell>
-                  <TableCell>
-                    <div class="grid place-content-center">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger>
-                          <i class="material-icons text-md">more_vert</i>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem class="gap-x-3">
-                            <i
-                              :class="[
-                                'bx text-xl',
-                                autoReply.status === 'active'
-                                  ? 'bx-toggle-left'
-                                  : 'bxs-toggle-right',
-                              ]"
-                            />
-                            Toggle Status
-                          </DropdownMenuItem>
-                          <DropdownMenuItem class="gap-x-3">
-                            <i class="bx bx-edit text-xl" />
-                            Edit
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </section>
-      </DialogContent>
-    </Dialog>
+    <ViewPostCommentAutoRepliesModal
+      v-model:open="viewPostCommentAutoRepliesModal.isOpen"
+      @update:open="viewPostCommentAutoRepliesModal.close()"
+      :post="viewPostCommentAutoRepliesModal.post"
+    />
 
     <!-- VIEW POST MODAL -->
-    <Dialog v-model:open="viewPostModal.isOpen" @update:open="viewPostModal.close()">
-      <DialogContent class="max-w-md">
-        <DialogHeader class="flex flex-col gap-y-2">
-          <DialogTitle>View Post</DialogTitle>
-          <DialogDescription
-            class="grid grid-cols-[var(--avatar-size),1fr] items-center gap-x-2 text-xs [--avatar-size:theme(spacing.8)]"
-          >
-            <Avatar class="row-span-2 size-[var(--avatar-size)]">
-              <AvatarImage :src="viewPostModal.post?.user.image ?? ''"></AvatarImage>
-            </Avatar>
-            <span>{{ viewPostModal.post?.user.name }}</span>
-            <a
-              :href="`http://example.com/${viewPostModal.post?.id}`"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="self-start text-blue-500 hover:underline"
-            >
-              Post ID: {{ viewPostModal.post?.id }}
-            </a>
-          </DialogDescription>
-        </DialogHeader>
-        <section class="flex flex-col gap-y-4 text-sm">
-          <p class="text-pretty">{{ viewPostModal.post?.description }}</p>
-          <AspectRatio :ratio="16 / 9">
-            <img :src="viewPostModal.post?.image" class="h-full w-full rounded-md object-cover" />
-          </AspectRatio>
-          <div class="flex items-center gap-x-4 text-muted-foreground">
-            <span>{{ viewPostModal.post?.likes }} Likes</span>
-            <span>{{ viewPostModal.post?.comments }} Comment</span>
-            <span>{{ viewPostModal.post?.shares }} Shares</span>
-            <span class="grow text-end">
-              {{ viewPostModal.post?.created.toLocaleDateString() }}
-            </span>
-          </div>
-        </section>
-      </DialogContent>
-    </Dialog>
+    <ViewPostModal
+      v-model:open="viewPostModal.isOpen"
+      @update:open="viewPostModal.close()"
+      :post="viewPostModal.post"
+    />
   </DefaultLayout>
 </template>
