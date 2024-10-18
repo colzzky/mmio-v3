@@ -12,13 +12,13 @@ import { reactive } from 'vue'
 
 interface Project {
   data: ProjectData | null
-  list: ProjectData[]
   isInitialized: boolean
   initialize: () => void
   get: (id: string) => Promise<ProjectReturnData>
   getWhere: (where:FirebaseWhereCondition<'projects'>[], limit?:number,orderBy?:FirebaseOrderCondition<'projects'>[], startAfterDoc?: string)=> Promise<ProjectReturnList>
   createUpdate: (type: 'new' | 'update') => Promise<ProjectReturnData>
   set: (data: ProjectData) => ProjectData
+  resetData: () => void
 }
 
 interface FirebaseReturn {
@@ -47,7 +47,6 @@ type ProjectReturnData = FirebaseReturnBase & {
 export const useProjectStore = defineStore('projectStore', () => {
   const project_data = reactive<Project>({
     data: null,
-    list: [],
     isInitialized: false,
     initialize() {
       if (!this.isInitialized) {
@@ -98,7 +97,10 @@ export const useProjectStore = defineStore('projectStore', () => {
       this.isInitialized = true
       return this.data
     },
- 
+    resetData(){
+      this.data = null
+      this.isInitialized = false
+    }
   })
   const project_list = reactive({
     data: <ProjectData[]>[],

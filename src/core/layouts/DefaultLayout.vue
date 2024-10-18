@@ -21,6 +21,7 @@ import { useSidebarStore } from '@/stores/sidebarStore'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from '../components/ui/toast'
+import Button from '../components/ui/button/Button.vue'
 const useProject = useProjectStore()
 const { project_data } = useProject
 const router = useRouter()
@@ -60,7 +61,7 @@ onMounted(async () => {
     })
     router.push({ name: 'home' })
   } else {
-    if (project_data.data){
+    if (project_data.data) {
       project_id.value = project_data.data.pj_id
     }
 
@@ -82,6 +83,12 @@ async function project_validation(pj_id: string): Promise<boolean> {
   } else return false
 }
 
+async function returnToProjects(): Promise<void> {
+  project_data.resetData()
+  console.log(project_data)
+  router.push({ name: 'home' })
+}
+
 
 </script>
 
@@ -99,21 +106,32 @@ async function project_validation(pj_id: string): Promise<boolean> {
       <!-- navigation routes -->
       <li>
         <ul role="list" class="-mx-2">
-          <li>
-            <RouterLink :to="{ name: parentRoute, params: { pj_id: project_id } }"
-              class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
-              <i class="material-icons text-xl">grid_view</i>
-              Dashboard
-            </RouterLink>
-          </li>
-          <li>
-            <button
-              class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
-              @click="toggleServicesModal">
-              <i class="material-icons text-xl">bookmark_border</i>
-              Manage Services
-            </button>
-          </li>
+          <div class="flex flex-col gap-y-1">
+            <li>
+              <RouterLink :to="{ name: parentRoute, params: { pj_id: project_id } }"
+                class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
+                <i class="material-icons text-xl">grid_view</i>
+                Dashboard
+              </RouterLink>
+            </li>
+
+            <li>
+              <button
+                class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
+                @click="toggleServicesModal">
+                <i class="material-icons text-xl">bookmark_border</i>
+                Manage Services
+              </button>
+            </li>
+            <li>
+              <!-- Opens modal for this project -->
+              <button
+                class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25">
+                <i class="material-icons text-xl">settings_accessibility</i>
+                Project Settings
+              </button>
+            </li>
+          </div>
         </ul>
       </li>
 
@@ -130,19 +148,21 @@ async function project_validation(pj_id: string): Promise<boolean> {
           </i>
         </CollapsibleTrigger>
         <CollapsibleContent as="ul" class="-mx-2">
-          <li v-for="[name, service] in pinnedServices" :key="name">
-            <RouterLink :to="{ name, params: { pj_id: project_id } }"
-              class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
-              <i :class="['bx text-xl', service.icon]"></i>
-              <span>
-                {{ service.label }}
-              </span>
-              <button class="grid place-content-center"
-                @click.prevent="servicesStore.toggleServicePinnedStatus(route.path, name)">
-                <i class="material-icons text-xl">bookmark</i>
-              </button>
-            </RouterLink>
-          </li>
+          <div class="flex flex-col gap-y-1">
+            <li v-for="[name, service] in pinnedServices" :key="name">
+              <RouterLink :to="{ name, params: { pj_id: project_id } }"
+                class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
+                <i :class="['bx text-xl', service.icon]"></i>
+                <span>
+                  {{ service.label }}
+                </span>
+                <button class="grid place-content-center"
+                  @click.prevent="servicesStore.toggleServicePinnedStatus(route.path, name)">
+                  <i class="material-icons text-xl">bookmark</i>
+                </button>
+              </RouterLink>
+            </li>
+          </div>
         </CollapsibleContent>
       </Collapsible>
     </DesktopSidebar>
@@ -182,11 +202,11 @@ async function project_validation(pj_id: string): Promise<boolean> {
               </BreadcrumbList>
             </Breadcrumb> -->
           </div>
-          <RouterLink to="/" class="grid place-content-center">
-            <i class="material-icons text-3xl">keyboard_return</i>
-          </RouterLink>
+          <Button @click="returnToProjects()" size="xs" variant="ghost">
+            <i class="material-icons text-md">keyboard_return</i>
+          </Button>
           <button class="grid place-content-center">
-            <i class="material-icons text-3xl">notifications</i>
+            <i class="material-icons text-md">notifications</i>
           </button>
           <Avatar>
             <AvatarImage src="https://placehold.co/48" />
