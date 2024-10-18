@@ -12,14 +12,21 @@ import {
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
 import type { Modal } from '@/core/utils/types'
-import { reactive } from 'vue'
+import { inject, reactive } from 'vue'
+
+const posts = inject('posts')
 
 interface ModalInterface extends Omit<Modal, 'open'> {
-  open(args: { intent: 'create'; post: Omit<Post, 'id'> }): void
+  open(
+    args:
+      | { intent: 'create'; postId: Post['id'] }
+      | { intent: 'edit'; postId: Post['id']; autoReplyId: AutoReply['id'] },
+  ): void
 
   intent: 'create' | 'edit' | null
   form: Pick<AutoReply, 'name'>
-  post: Omit<Post, 'id'> | null
+  postId: Post['id'] | undefined
+  autoReplyId: AutoReply['id'] | undefined
   submitForm(): void
   createAutoReply(): void
   editAutoReply(): void
@@ -30,29 +37,31 @@ const modal = reactive<ModalInterface>({
   form: {
     name: '',
   },
-  post: null,
+  postId: undefined,
+  autoReplyId: undefined,
   initialState() {
     this.isOpen = false
     this.intent = null
     this.form = {
       name: '',
     }
-    this.post = null
   },
   open(args) {
     this.intent = args.intent
 
     if (args.intent === 'create') {
-      this.post = args.post
+      this.postId = args.postId
+    } else if (args.intent === 'edit') {
+      this.postId = args.postId
+      this.autoReplyId = args.autoReplyId
+
+      const autoReply = posts.value.get(this.postId)?.autoReplies.get(this.autoReplyId)
+      if (!autoReply) throw new Error('Auto reply not found')
+
+      this.form = {
+        name: autoReply.name,
+      }
     }
-
-    // if (args.intent === 'edit') {
-    //   const flow = flows.value.get(args.autoReplyId)
-    //   if (!flow) throw new Error('Flow not found')
-
-    //   this.editAutoReplyId = args.autoReplyId
-    //   this.form = { ...flow }
-    // }
 
     this.isOpen = true
   },
@@ -64,8 +73,8 @@ const modal = reactive<ModalInterface>({
     this.close()
   },
   createAutoReply() {
-    const post = this.post
-    if (!post) throw new Error('Facebook post not found')
+    const post = posts.value.get(this.postId)
+    if (!post) throw new Error('Post not found')
 
     // @temporary: get the highest auto reply id and increment it by 1
     const newAutoReplyId = Math.max(...Array.from(post.autoReplies.keys())) + 1
@@ -76,7 +85,18 @@ const modal = reactive<ModalInterface>({
       updatedAt: new Date(),
     })
   },
-  editAutoReply() {},
+  editAutoReply() {
+    const post = posts.value.get(this.postId)
+    if (!post) throw new Error('Post not found')
+
+    const autoReply = post.autoReplies.get(this.autoReplyId)
+    if (!autoReply) throw new Error('Auto reply not found')
+
+    post.autoReplies.set(this.autoReplyId, {
+      ...autoReply,
+      name: this.form.name,
+    })
+  },
 })
 
 defineExpose({

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Post, ToggleAutoReplyStatusArgs } from '../page.vue'
+import type { AutoReply, Post, ToggleAutoReplyStatusArgs } from '../page.vue'
 import { AspectRatio } from '@/core/components/ui/aspect-ratio'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
 import { Badge } from '@/core/components/ui/badge'
@@ -51,7 +51,11 @@ const modal = reactive<ModalInterface>({
   },
 })
 
-const emits = defineEmits<{ toggleButtonClick: [ToggleAutoReplyStatusArgs] }>()
+const emits = defineEmits<{
+  toggleButtonClick: [ToggleAutoReplyStatusArgs]
+  addAutoReplyClick: [postId: Post['id']]
+  editAutoReplyClick: [{ postId: Post['id']; autoReplyId: AutoReply['id'] }]
+}>()
 
 defineExpose({
   modal,
@@ -81,15 +85,20 @@ defineExpose({
               Post ID: {{ modal.post?.id }}
             </a>
           </div>
-          <Button class="gap-x-2 self-end" size="sm" disabled>
+          <Button
+            v-if="modal.post"
+            class="gap-x-2 self-end"
+            size="sm"
+            @click="emits('addAutoReplyClick', modal.post.id)"
+          >
             <i class="bx bx-plus text-xl" />
             Add Comment Auto Reply
           </Button>
         </DialogDescription>
       </DialogHeader>
 
-      <section class="grid grid-cols-[33%_1fr] gap-x-4">
-        <div class="flex flex-col gap-y-4 rounded-md border p-6 text-sm">
+      <section class="grid grid-cols-[33%_1fr] gap-x-8">
+        <div class="flex flex-col gap-y-4 self-start rounded-md border p-6 text-sm">
           <p class="text-pretty">{{ modal.post?.description }}</p>
           <AspectRatio :ratio="16 / 9">
             <img :src="modal.post?.image" class="h-full w-full rounded-md object-cover" />
@@ -148,7 +157,13 @@ defineExpose({
                           />
                           Toggle Status
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          v-if="modal.post"
+                          class="gap-x-3"
+                          @click="
+                            emits('editAutoReplyClick', { postId: modal.post.id, autoReplyId: id })
+                          "
+                        >
                           <i class="bx bx-edit text-xl" />
                           Edit
                         </DropdownMenuItem>

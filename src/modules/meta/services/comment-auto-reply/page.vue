@@ -24,7 +24,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs'
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, provide, ref, useTemplateRef } from 'vue'
 
 // @temporary: can be extracted to another file
 export type AutoReply = {
@@ -189,6 +189,7 @@ const posts = ref(
     ],
   ]),
 )
+provide('posts', posts)
 
 const allAutoReplies = computed(
   () =>
@@ -315,7 +316,7 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                           @click="
                             createEditAutoReplyModalRef?.modal.open({
                               intent: 'create',
-                              post,
+                              postId: id,
                             })
                           "
                         >
@@ -416,7 +417,16 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                           />
                           Toggle Status
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="
+                            createEditAutoReplyModalRef?.modal.open({
+                              intent: 'edit',
+                              postId: autoReply.post.id,
+                              autoReplyId: id,
+                            })
+                          "
+                        >
                           <i class="bx bx-edit text-xl" />
                           Edit
                         </DropdownMenuItem>
@@ -441,10 +451,18 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
     </Main>
 
     <ViewPostModal ref="viewPostModal" />
+
     <ViewPostCommentAutoRepliesModal
       ref="viewPostCommentAutoRepliesModal"
       @toggle-button-click="toggleAutoReplyStatus($event)"
+      @add-auto-reply-click="
+        createEditAutoReplyModalRef?.modal.open({ intent: 'create', postId: $event })
+      "
+      @edit-auto-reply-click="
+        createEditAutoReplyModalRef?.modal.open({ intent: 'edit', ...$event })
+      "
     />
+
     <CreateEditAutoReplyModal ref="createEditAutoReplyModal" />
   </DefaultLayout>
 </template>
