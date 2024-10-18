@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AutoReply, FacebookPost } from '../page.vue'
+import type { AutoReply, Post } from '../page.vue'
 import { Button } from '@/core/components/ui/button'
 import {
   Dialog,
@@ -15,11 +15,11 @@ import type { Modal } from '@/core/utils/types'
 import { reactive } from 'vue'
 
 interface ModalInterface extends Omit<Modal, 'open'> {
-  open(args: { intent: 'create'; facebookPost: Omit<FacebookPost, 'id'> }): void
+  open(args: { intent: 'create'; post: Omit<Post, 'id'> }): void
 
   intent: 'create' | 'edit' | null
   form: Pick<AutoReply, 'name'>
-  facebookPost: Omit<FacebookPost, 'id'> | null
+  post: Omit<Post, 'id'> | null
   submitForm(): void
   createAutoReply(): void
   editAutoReply(): void
@@ -30,20 +30,20 @@ const modal = reactive<ModalInterface>({
   form: {
     name: '',
   },
-  facebookPost: null,
+  post: null,
   initialState() {
     this.isOpen = false
     this.intent = null
     this.form = {
       name: '',
     }
-    this.facebookPost = null
+    this.post = null
   },
   open(args) {
     this.intent = args.intent
 
     if (args.intent === 'create') {
-      this.facebookPost = args.facebookPost
+      this.post = args.post
     }
 
     // if (args.intent === 'edit') {
@@ -64,12 +64,12 @@ const modal = reactive<ModalInterface>({
     this.close()
   },
   createAutoReply() {
-    const facebookPost = this.facebookPost
-    if (!facebookPost) throw new Error('Facebook post not found')
+    const post = this.post
+    if (!post) throw new Error('Facebook post not found')
 
     // @temporary: get the highest auto reply id and increment it by 1
-    const newAutoReplyId = Math.max(...Array.from(facebookPost.autoReplies.keys())) + 1
-    facebookPost.autoReplies.set(newAutoReplyId, {
+    const newAutoReplyId = Math.max(...Array.from(post.autoReplies.keys())) + 1
+    post.autoReplies.set(newAutoReplyId, {
       ...this.form,
       status: 'inactive',
       createdAt: new Date(),

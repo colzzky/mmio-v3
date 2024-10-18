@@ -23,9 +23,8 @@ import {
 } from '@/core/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs'
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
-import type { Modal } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { computed, reactive, ref, useTemplateRef } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 
 // @temporary: can be extracted to another file
 export type AutoReply = {
@@ -37,7 +36,7 @@ export type AutoReply = {
 }
 
 // @temporary: can be extracted to another file
-export type FacebookPost = {
+export type Post = {
   id: number
   user: {
     name: string
@@ -52,8 +51,8 @@ export type FacebookPost = {
   autoReplies: Map<AutoReply['id'], Omit<AutoReply, 'id'>>
 }
 
-const facebookPosts = ref(
-  new Map<FacebookPost['id'], Omit<FacebookPost, 'id'>>([
+const posts = ref(
+  new Map<Post['id'], Omit<Post, 'id'>>([
     [
       1,
       {
@@ -194,97 +193,52 @@ const facebookPosts = ref(
 const allAutoReplies = computed(
   () =>
     new Map(
-      Array.from(facebookPosts.value.entries()).flatMap(
-        ([facebookPostId, { autoReplies, ...facebookPostRest }]) =>
-          Array.from(autoReplies.entries()).map(([autoReplyId, autoReply]) => [
-            autoReplyId,
-            { ...autoReply, post: { ...facebookPostRest, id: facebookPostId } },
-          ]),
+      Array.from(posts.value.entries()).flatMap(([postId, { autoReplies, ...postRest }]) =>
+        Array.from(autoReplies.entries()).map(([autoReplyId, autoReply]) => [
+          autoReplyId,
+          { ...autoReply, post: { ...postRest, id: postId } },
+        ]),
       ),
     ),
 )
 
-// VIEW POST MODAL
-interface ViewPostModalInterface extends Omit<Modal, 'open'> {
-  post: Omit<FacebookPost, 'autoReplies'> | null
-  open(post: Omit<FacebookPost, 'autoReplies'>): void
-}
-const viewPostModal = reactive<ViewPostModalInterface>({
-  isOpen: false,
-  post: null,
-  initialState() {
-    this.isOpen = false
-    this.post = null
-  },
-  open(post) {
-    this.isOpen = true
-    this.post = post
-  },
-  close() {
-    this.initialState()
-  },
-})
-
-// VIEW POST COMMENT AUTO REPLY
-interface ViewPostCommentAutoRepliesModalInterface extends Omit<Modal, 'open'> {
-  post: FacebookPost | null
-  open(post: FacebookPost): void
-}
-const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModalInterface>({
-  isOpen: false,
-  post: null,
-  initialState() {
-    this.isOpen = false
-    this.post = null
-  },
-  open(post) {
-    this.isOpen = true
-    this.post = post
-  },
-  close() {
-    this.initialState()
-  },
-})
-
 // TOGGLE AUTO REPLY STATUS
-function handleToggleAutoReplyStatus({
-  facebookPostId = 0,
-  autoReplyId,
-}: {
-  facebookPostId?: FacebookPost['id']
+export type ToggleAutoReplyStatusArgs = {
+  postId: Post['id']
   autoReplyId: AutoReply['id']
-}) {
-  const facebookPost = facebookPosts.value.get(facebookPostId)
-  if (!facebookPost) throw new Error('Facebook post not found')
+}
+function toggleAutoReplyStatus({ postId, autoReplyId }: ToggleAutoReplyStatusArgs) {
+  const post = posts.value.get(postId)
+  if (!post) throw new Error('Post not found')
 
-  const autoReply = facebookPost.autoReplies.get(autoReplyId)
+  const autoReply = post.autoReplies.get(autoReplyId)
   if (!autoReply) throw new Error('Auto reply not found')
 
-  facebookPost.autoReplies.set(autoReplyId, {
+  post.autoReplies.set(autoReplyId, {
     ...autoReply,
     status: autoReply.status === 'active' ? 'inactive' : 'active',
   })
 }
 
-// ACTIVATE ALL AUTO REPLIES
-function handleToggleAllAutoRepliesStatus({
-  facebookPostId,
-  intent,
-}: {
-  facebookPostId: FacebookPost['id']
+// ACTIVATE/DEACTIVATE ALL AUTO REPLIES
+type ToggleAllAutoRepliesStatusArgs = {
+  postId: Post['id']
   intent: 'activate' | 'deactivate'
-}) {
-  const facebookPost = facebookPosts.value.get(facebookPostId)
-  if (!facebookPost) throw new Error('Facebook post not found')
+}
+function toggleAllAutoRepliesStatus({ postId, intent }: ToggleAllAutoRepliesStatusArgs) {
+  const post = posts.value.get(postId)
+  if (!post) throw new Error('Post not found')
 
-  facebookPost.autoReplies.forEach((autoReply, key) => {
-    facebookPost.autoReplies.set(key, {
+  post.autoReplies.forEach((autoReply, key) => {
+    post.autoReplies.set(key, {
       ...autoReply,
       status: intent === 'activate' ? 'active' : 'inactive',
     })
   })
 }
 
+const viewPostModalRef = useTemplateRef('viewPostModal')
+const viewPostCommentAutoRepliesModalRef = useTemplateRef('viewPostCommentAutoRepliesModal')
 const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
 </script>
 
@@ -309,7 +263,7 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow v-for="[id, post] in facebookPosts" :key="id">
+              <TableRow v-for="[id, post] in posts" :key="id">
                 <TableCell class="whitespace-nowrap">
                   <div class="flex items-center justify-center gap-x-2">
                     <Avatar class="size-9">
@@ -342,7 +296,7 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                         <DropdownMenuLabel>Post</DropdownMenuLabel>
                         <DropdownMenuItem
                           class="gap-x-3"
-                          @click="viewPostModal.open({ id, ...post })"
+                          @click="viewPostModalRef?.modal.open({ id, ...post })"
                         >
                           <i class="bx bx-show text-xl"></i>
                           View
@@ -351,7 +305,7 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                         <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
                         <DropdownMenuItem
                           class="gap-x-3"
-                          @click="viewPostCommentAutoRepliesModal.open({ id, ...post })"
+                          @click="viewPostCommentAutoRepliesModalRef?.modal.open({ id, ...post })"
                         >
                           <i class="bx bx-list-ul text-xl"></i>
                           View All
@@ -361,7 +315,7 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                           @click="
                             createEditAutoReplyModalRef?.modal.open({
                               intent: 'create',
-                              facebookPost: post,
+                              post,
                             })
                           "
                         >
@@ -371,8 +325,8 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                         <DropdownMenuItem
                           class="gap-x-3"
                           @click="
-                            handleToggleAllAutoRepliesStatus({
-                              facebookPostId: id,
+                            toggleAllAutoRepliesStatus({
+                              postId: id,
                               intent: 'activate',
                             })
                           "
@@ -383,8 +337,8 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                         <DropdownMenuItem
                           class="gap-x-3"
                           @click="
-                            handleToggleAllAutoRepliesStatus({
-                              facebookPostId: id,
+                            toggleAllAutoRepliesStatus({
+                              postId: id,
                               intent: 'deactivate',
                             })
                           "
@@ -451,10 +405,7 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                         <DropdownMenuItem
                           class="gap-x-3"
                           @click="
-                            handleToggleAutoReplyStatus({
-                              facebookPostId: autoReply.post.id,
-                              autoReplyId: id,
-                            })
+                            toggleAutoReplyStatus({ postId: autoReply.post.id, autoReplyId: id })
                           "
                         >
                           <i
@@ -473,7 +424,7 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                         <DropdownMenuLabel>Post</DropdownMenuLabel>
                         <DropdownMenuItem
                           class="gap-x-3"
-                          @click="viewPostModal.open(autoReply.post)"
+                          @click="viewPostModalRef?.modal.open(autoReply.post)"
                         >
                           <i class="bx bx-show text-xl"></i>
                           View
@@ -489,21 +440,11 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
       </Tabs>
     </Main>
 
-    <!-- VIEW POST COMMENT AUTO REPLY MODAL -->
+    <ViewPostModal ref="viewPostModal" />
     <ViewPostCommentAutoRepliesModal
-      v-model:open="viewPostCommentAutoRepliesModal.isOpen"
-      :post="viewPostCommentAutoRepliesModal.post"
-      @update:open="viewPostCommentAutoRepliesModal.close()"
-      @toggle-dropdown-click="handleToggleAutoReplyStatus($event)"
+      ref="viewPostCommentAutoRepliesModal"
+      @toggle-button-click="toggleAutoReplyStatus($event)"
     />
-
-    <!-- VIEW POST MODAL -->
-    <ViewPostModal
-      v-model:open="viewPostModal.isOpen"
-      @update:open="viewPostModal.close()"
-      :post="viewPostModal.post"
-    />
-
     <CreateEditAutoReplyModal ref="createEditAutoReplyModal" />
   </DefaultLayout>
 </template>
