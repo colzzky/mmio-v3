@@ -1,0 +1,144 @@
+<script setup lang="ts">
+import type { AutoReply, Post } from '../page.vue'
+import { Button } from '@/core/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/core/components/ui/dialog'
+import { Input } from '@/core/components/ui/input'
+import { Label } from '@/core/components/ui/label'
+import type { Modal } from '@/core/utils/types'
+import { inject, reactive } from 'vue'
+
+const posts = inject('posts')
+
+interface ModalInterface extends Omit<Modal, 'open'> {
+  open(
+    args:
+      | { intent: 'create'; postId: Post['id'] }
+      | { intent: 'edit'; postId: Post['id']; autoReplyId: AutoReply['id'] },
+  ): void
+
+  intent: 'create' | 'edit' | null
+  form: Pick<AutoReply, 'name'>
+  postId: Post['id'] | undefined
+  autoReplyId: AutoReply['id'] | undefined
+  submitForm(): void
+  createAutoReply(): void
+  editAutoReply(): void
+}
+const modal = reactive<ModalInterface>({
+  isOpen: false,
+  intent: null,
+  form: {
+    name: '',
+  },
+  postId: undefined,
+  autoReplyId: undefined,
+  initialState() {
+    this.isOpen = false
+    this.intent = null
+    this.form = {
+      name: '',
+    }
+  },
+  open(args) {
+    this.intent = args.intent
+
+    if (args.intent === 'create') {
+      this.postId = args.postId
+    } else if (args.intent === 'edit') {
+      this.postId = args.postId
+      this.autoReplyId = args.autoReplyId
+
+      const autoReply = posts.value.get(this.postId)?.autoReplies.get(this.autoReplyId)
+      if (!autoReply) throw new Error('Auto reply not found')
+
+      this.form = {
+        name: autoReply.name,
+      }
+    }
+
+    this.isOpen = true
+  },
+  close() {
+    this.initialState()
+  },
+  submitForm() {
+    this.intent === 'create' ? this.createAutoReply() : this.editAutoReply()
+    this.close()
+  },
+  createAutoReply() {
+    const post = posts.value.get(this.postId)
+    if (!post) throw new Error('Post not found')
+
+    // @temporary: get the highest auto reply id and increment it by 1
+    const newAutoReplyId = Math.max(...Array.from(post.autoReplies.keys())) + 1
+    post.autoReplies.set(newAutoReplyId, {
+      ...this.form,
+      status: 'inactive',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })
+  },
+  editAutoReply() {
+    const post = posts.value.get(this.postId)
+    if (!post) throw new Error('Post not found')
+
+    const autoReply = post.autoReplies.get(this.autoReplyId)
+    if (!autoReply) throw new Error('Auto reply not found')
+
+    post.autoReplies.set(this.autoReplyId, {
+      ...autoReply,
+      name: this.form.name,
+    })
+  },
+})
+
+defineExpose({
+  modal,
+})
+</script>
+
+<template>
+  <Dialog v-model:open="modal.isOpen" @update:open="modal.close()">
+    <DialogContent>
+      <DialogHeader>
+        <template v-if="modal.intent === 'create'">
+          <DialogTitle>Create Auto Reply</DialogTitle>
+          <DialogDescription> Enter the details to create a new auto reply </DialogDescription>
+        </template>
+        <template v-else>
+          <DialogTitle>Edit Auto Reply</DialogTitle>
+          <DialogDescription> Enter the details to edit this auto reply </DialogDescription>
+        </template>
+      </DialogHeader>
+      <form id="autoReplyForm" class="flex flex-col gap-y-4" @submit.prevent="modal.submitForm()">
+        <div class="flex flex-col gap-y-2">
+          <Label for="name">Name</Label>
+          <Input
+            type="text"
+            id="name"
+            v-model="modal.form.name"
+            name="name"
+            placeholder="Input Name"
+            required
+          />
+        </div>
+      </form>
+      <DialogFooter>
+        <Button variant="secondary" @click="modal.close()">Cancel</Button>
+        <Button v-if="modal.intent === 'create'" type="submit" form="autoReplyForm">
+          Create
+        </Button>
+        <Button v-else-if="modal.intent === 'edit'" type="submit" form="autoReplyForm">
+          Edit
+        </Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+</template>

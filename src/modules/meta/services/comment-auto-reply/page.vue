@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CreateEditAutoReplyModal from './components/create-edit-auto-reply-modal.vue'
 import ViewPostCommentAutoRepliesModal from './components/view-post-comment-auto-replies-modal.vue'
 import ViewPostModal from './components/view-post-modal.vue'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
@@ -22,28 +23,27 @@ import {
 } from '@/core/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs'
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
-import type { Modal } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { computed, reactive, ref } from 'vue'
+import { computed, provide, ref, useTemplateRef } from 'vue'
 
 // @temporary: can be extracted to another file
 export type AutoReply = {
   id: number
   name: string
   status: 'active' | 'inactive'
-  created: Date
-  updated: Date
+  createdAt: Date
+  updatedAt: Date
 }
 
 // @temporary: can be extracted to another file
-export type FacebookPost = {
+export type Post = {
   id: number
   user: {
     name: string
     image: string
   }
   description: string
-  created: Date
+  createdAt: Date
   image?: string
   likes: number
   comments: number
@@ -51,8 +51,8 @@ export type FacebookPost = {
   autoReplies: Map<AutoReply['id'], Omit<AutoReply, 'id'>>
 }
 
-const facebookPosts = ref(
-  new Map<FacebookPost['id'], Omit<FacebookPost, 'id'>>([
+const posts = ref(
+  new Map<Post['id'], Omit<Post, 'id'>>([
     [
       1,
       {
@@ -61,37 +61,37 @@ const facebookPosts = ref(
           image: 'https://randomuser.me/api/portraits/women/1.jpg',
         },
         description: 'Had an amazing time hiking up the mountains! 🏞️ #NatureLover #Adventure',
-        created: new Date('2023-10-15'),
+        createdAt: new Date('2023-10-15'),
         image: 'https://picsum.photos/600/400?random=1',
         likes: 120,
         comments: 2,
         shares: 15,
         autoReplies: new Map([
           [
-            1,
+            101,
             {
               name: 'Auto Reply #1 for Alice Johnson',
               status: 'active',
-              created: new Date('2023-10-16'),
-              updated: new Date('2023-10-16'),
+              createdAt: new Date('2023-10-16'),
+              updatedAt: new Date('2023-10-16'),
             },
           ],
           [
-            2,
+            102,
             {
               name: 'Auto Reply #2 for Alice Johnson',
               status: 'active',
-              created: new Date('2023-10-17'),
-              updated: new Date('2023-10-17'),
+              createdAt: new Date('2023-10-17'),
+              updatedAt: new Date('2023-10-17'),
             },
           ],
           [
-            3,
+            103,
             {
               name: 'Auto Reply #3 for Alice Johnson',
               status: 'inactive',
-              created: new Date('2023-10-18'),
-              updated: new Date('2023-10-18'),
+              createdAt: new Date('2023-10-18'),
+              updatedAt: new Date('2023-10-18'),
             },
           ],
         ]),
@@ -106,37 +106,37 @@ const facebookPosts = ref(
         },
         description:
           'Just finished baking these delicious cookies 🍪 Who wants some? 😋 #BakingLove',
-        created: new Date('2023-10-14'),
+        createdAt: new Date('2023-10-14'),
         image: 'https://picsum.photos/600/400?random=2',
         likes: 85,
         comments: 1,
         shares: 8,
         autoReplies: new Map([
           [
-            4,
+            201,
             {
               name: 'Auto Reply #1 for Bob Smith',
               status: 'active',
-              created: new Date('2023-10-15'),
-              updated: new Date('2023-10-15'),
+              createdAt: new Date('2023-10-15'),
+              updatedAt: new Date('2023-10-15'),
             },
           ],
           [
-            5,
+            202,
             {
               name: 'Auto Reply #2 for Bob Smith',
               status: 'active',
-              created: new Date('2023-10-16'),
-              updated: new Date('2023-10-16'),
+              createdAt: new Date('2023-10-16'),
+              updatedAt: new Date('2023-10-16'),
             },
           ],
           [
-            6,
+            203,
             {
               name: 'Auto Reply #3 for Bob Smith',
               status: 'inactive',
-              created: new Date('2023-10-17'),
-              updated: new Date('2023-10-17'),
+              createdAt: new Date('2023-10-17'),
+              updatedAt: new Date('2023-10-17'),
             },
           ],
         ]),
@@ -151,37 +151,37 @@ const facebookPosts = ref(
         },
         description:
           "Throwback to last summer at the beach. Can't wait to go back! 🏖️ #SummerVibes",
-        created: new Date('2023-10-13'),
+        createdAt: new Date('2023-10-13'),
         image: 'https://picsum.photos/600/400?random=3',
         likes: 200,
         comments: 1,
         shares: 10,
         autoReplies: new Map([
           [
-            7,
+            301,
             {
               name: 'Auto Reply #1 for Charlie Green',
               status: 'active',
-              created: new Date('2023-10-14'),
-              updated: new Date('2023-10-14'),
+              createdAt: new Date('2023-10-14'),
+              updatedAt: new Date('2023-10-14'),
             },
           ],
           [
-            8,
+            302,
             {
               name: 'Auto Reply #2 for Charlie Green',
               status: 'active',
-              created: new Date('2023-10-15'),
-              updated: new Date('2023-10-15'),
+              createdAt: new Date('2023-10-15'),
+              updatedAt: new Date('2023-10-15'),
             },
           ],
           [
-            9,
+            303,
             {
               name: 'Auto Reply #3 for Charlie Green',
               status: 'inactive',
-              created: new Date('2023-10-16'),
-              updated: new Date('2023-10-16'),
+              createdAt: new Date('2023-10-16'),
+              updatedAt: new Date('2023-10-16'),
             },
           ],
         ]),
@@ -189,100 +189,58 @@ const facebookPosts = ref(
     ],
   ]),
 )
+provide('posts', posts)
 
 const allAutoReplies = computed(
   () =>
     new Map(
-      Array.from(facebookPosts.value.entries()).flatMap(
-        ([facebookPostId, { autoReplies, ...facebookPostRest }]) =>
-          Array.from(autoReplies.entries()).map(([autoReplyId, autoReply]) => [
-            autoReplyId,
-            { ...autoReply, post: { ...facebookPostRest, id: facebookPostId } },
-          ]),
+      Array.from(posts.value.entries()).flatMap(([postId, { autoReplies, ...postRest }]) =>
+        Array.from(autoReplies.entries()).map(([autoReplyId, autoReply]) => [
+          autoReplyId,
+          { ...autoReply, post: { ...postRest, id: postId } },
+        ]),
       ),
     ),
 )
 
-// VIEW POST MODAL
-interface ViewPostModalInterface extends Omit<Modal, 'open'> {
-  post: Omit<FacebookPost, 'autoReplies'> | null
-  open(post: Omit<FacebookPost, 'autoReplies'>): void
-}
-const viewPostModal = reactive<ViewPostModalInterface>({
-  isOpen: false,
-  post: null,
-  initialState() {
-    this.isOpen = false
-    this.post = null
-  },
-  open(post) {
-    this.isOpen = true
-    this.post = post
-  },
-  close() {
-    this.initialState()
-  },
-})
-
-// VIEW POST COMMENT AUTO REPLY
-interface ViewPostCommentAutoRepliesModalInterface extends Omit<Modal, 'open'> {
-  post: FacebookPost | null
-  open(post: FacebookPost): void
-}
-const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModalInterface>({
-  isOpen: false,
-  post: null,
-  initialState() {
-    this.isOpen = false
-    this.post = null
-  },
-  open(post) {
-    this.isOpen = true
-    this.post = post
-  },
-  close() {
-    this.initialState()
-  },
-})
-
 // TOGGLE AUTO REPLY STATUS
-function handleToggleAutoReplyStatus({
-  facebookPostId = 0,
-  autoReplyId,
-}: {
-  facebookPostId?: FacebookPost['id']
+export type ToggleAutoReplyStatusArgs = {
+  postId: Post['id']
   autoReplyId: AutoReply['id']
-}) {
-  const facebookPost = facebookPosts.value.get(facebookPostId)
-  if (!facebookPost) throw new Error('Facebook post not found')
+}
+function toggleAutoReplyStatus({ postId, autoReplyId }: ToggleAutoReplyStatusArgs) {
+  const post = posts.value.get(postId)
+  if (!post) throw new Error('Post not found')
 
-  const autoReply = facebookPost.autoReplies.get(autoReplyId)
+  const autoReply = post.autoReplies.get(autoReplyId)
   if (!autoReply) throw new Error('Auto reply not found')
 
-  facebookPost.autoReplies.set(autoReplyId, {
+  post.autoReplies.set(autoReplyId, {
     ...autoReply,
     status: autoReply.status === 'active' ? 'inactive' : 'active',
   })
 }
 
-// ACTIVATE ALL AUTO REPLIES
-function handleToggleAllAutoRepliesStatus({
-  facebookPostId,
-  intent,
-}: {
-  facebookPostId: FacebookPost['id']
+// ACTIVATE/DEACTIVATE ALL AUTO REPLIES
+type ToggleAllAutoRepliesStatusArgs = {
+  postId: Post['id']
   intent: 'activate' | 'deactivate'
-}) {
-  const facebookPost = facebookPosts.value.get(facebookPostId)
-  if (!facebookPost) throw new Error('Facebook post not found')
+}
+function toggleAllAutoRepliesStatus({ postId, intent }: ToggleAllAutoRepliesStatusArgs) {
+  const post = posts.value.get(postId)
+  if (!post) throw new Error('Post not found')
 
-  facebookPost.autoReplies.forEach((autoReply, key) => {
-    facebookPost.autoReplies.set(key, {
+  post.autoReplies.forEach((autoReply, key) => {
+    post.autoReplies.set(key, {
       ...autoReply,
       status: intent === 'activate' ? 'active' : 'inactive',
     })
   })
 }
+
+const viewPostModalRef = useTemplateRef('viewPostModal')
+const viewPostCommentAutoRepliesModalRef = useTemplateRef('viewPostCommentAutoRepliesModal')
+const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
 </script>
 
 <template>
@@ -306,7 +264,7 @@ function handleToggleAllAutoRepliesStatus({
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow v-for="[id, post] in facebookPosts" :key="id">
+              <TableRow v-for="[id, post] in posts" :key="id">
                 <TableCell class="whitespace-nowrap">
                   <div class="flex items-center justify-center gap-x-2">
                     <Avatar class="size-9">
@@ -326,7 +284,7 @@ function handleToggleAllAutoRepliesStatus({
                   {{ post.description }}
                 </TableCell>
                 <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(post.created.toDateString()) }}
+                  {{ uiHelpers.formatDateTimeAgo(post.createdAt.toDateString()) }}
                 </TableCell>
                 <TableCell>{{ post.autoReplies.size }}</TableCell>
                 <TableCell>
@@ -339,7 +297,7 @@ function handleToggleAllAutoRepliesStatus({
                         <DropdownMenuLabel>Post</DropdownMenuLabel>
                         <DropdownMenuItem
                           class="gap-x-3"
-                          @click="viewPostModal.open({ id, ...post })"
+                          @click="viewPostModalRef?.modal.open({ id, ...post })"
                         >
                           <i class="bx bx-show text-xl"></i>
                           View
@@ -348,20 +306,28 @@ function handleToggleAllAutoRepliesStatus({
                         <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
                         <DropdownMenuItem
                           class="gap-x-3"
-                          @click="viewPostCommentAutoRepliesModal.open({ id, ...post })"
+                          @click="viewPostCommentAutoRepliesModalRef?.modal.open({ id, ...post })"
                         >
                           <i class="bx bx-list-ul text-xl"></i>
                           View All
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="
+                            createEditAutoReplyModalRef?.modal.open({
+                              intent: 'create',
+                              postId: id,
+                            })
+                          "
+                        >
                           <i class="bx bx-message-square-add text-xl"></i>
                           Create
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           class="gap-x-3"
                           @click="
-                            handleToggleAllAutoRepliesStatus({
-                              facebookPostId: id,
+                            toggleAllAutoRepliesStatus({
+                              postId: id,
                               intent: 'activate',
                             })
                           "
@@ -372,8 +338,8 @@ function handleToggleAllAutoRepliesStatus({
                         <DropdownMenuItem
                           class="gap-x-3"
                           @click="
-                            handleToggleAllAutoRepliesStatus({
-                              facebookPostId: id,
+                            toggleAllAutoRepliesStatus({
+                              postId: id,
                               intent: 'deactivate',
                             })
                           "
@@ -403,6 +369,7 @@ function handleToggleAllAutoRepliesStatus({
             </TableHeader>
             <TableBody>
               <TableRow v-for="[id, autoReply] in allAutoReplies" :key="id">
+                <TableCell>{{ id }}</TableCell>
                 <TableCell>{{ autoReply.name }}</TableCell>
                 <TableCell class="whitespace-nowrap">
                   <div class="flex items-center gap-x-2">
@@ -415,7 +382,7 @@ function handleToggleAllAutoRepliesStatus({
                       rel="noopener noreferrer"
                       class="text-blue-500 hover:underline"
                     >
-                      Post ID: {{ id }}
+                      Post ID: {{ autoReply.post.id }}
                     </a>
                   </div>
                 </TableCell>
@@ -423,10 +390,10 @@ function handleToggleAllAutoRepliesStatus({
                   <Badge>{{ uiHelpers.toTitleCase(autoReply.status) }}</Badge>
                 </TableCell>
                 <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(autoReply.created.toDateString()) }}
+                  {{ uiHelpers.formatDateTimeAgo(autoReply.createdAt.toDateString()) }}
                 </TableCell>
                 <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(autoReply.updated.toDateString()) }}
+                  {{ uiHelpers.formatDateTimeAgo(autoReply.updatedAt.toDateString()) }}
                 </TableCell>
                 <TableCell>
                   <div class="grid place-content-center">
@@ -439,10 +406,7 @@ function handleToggleAllAutoRepliesStatus({
                         <DropdownMenuItem
                           class="gap-x-3"
                           @click="
-                            handleToggleAutoReplyStatus({
-                              facebookPostId: autoReply.post.id,
-                              autoReplyId: id,
-                            })
+                            toggleAutoReplyStatus({ postId: autoReply.post.id, autoReplyId: id })
                           "
                         >
                           <i
@@ -453,7 +417,16 @@ function handleToggleAllAutoRepliesStatus({
                           />
                           Toggle Status
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="
+                            createEditAutoReplyModalRef?.modal.open({
+                              intent: 'edit',
+                              postId: autoReply.post.id,
+                              autoReplyId: id,
+                            })
+                          "
+                        >
                           <i class="bx bx-edit text-xl" />
                           Edit
                         </DropdownMenuItem>
@@ -461,7 +434,7 @@ function handleToggleAllAutoRepliesStatus({
                         <DropdownMenuLabel>Post</DropdownMenuLabel>
                         <DropdownMenuItem
                           class="gap-x-3"
-                          @click="viewPostModal.open(autoReply.post)"
+                          @click="viewPostModalRef?.modal.open(autoReply.post)"
                         >
                           <i class="bx bx-show text-xl"></i>
                           View
@@ -477,19 +450,19 @@ function handleToggleAllAutoRepliesStatus({
       </Tabs>
     </Main>
 
-    <!-- VIEW POST COMMENT AUTO REPLY MODAL -->
+    <ViewPostModal ref="viewPostModal" />
+
     <ViewPostCommentAutoRepliesModal
-      v-model:open="viewPostCommentAutoRepliesModal.isOpen"
-      :post="viewPostCommentAutoRepliesModal.post"
-      @update:open="viewPostCommentAutoRepliesModal.close()"
-      @toggle-dropdown-click="handleToggleAutoReplyStatus($event)"
+      ref="viewPostCommentAutoRepliesModal"
+      @toggle-button-click="toggleAutoReplyStatus($event)"
+      @add-auto-reply-click="
+        createEditAutoReplyModalRef?.modal.open({ intent: 'create', postId: $event })
+      "
+      @edit-auto-reply-click="
+        createEditAutoReplyModalRef?.modal.open({ intent: 'edit', ...$event })
+      "
     />
 
-    <!-- VIEW POST MODAL -->
-    <ViewPostModal
-      v-model:open="viewPostModal.isOpen"
-      @update:open="viewPostModal.close()"
-      :post="viewPostModal.post"
-    />
+    <CreateEditAutoReplyModal ref="createEditAutoReplyModal" />
   </DefaultLayout>
 </template>

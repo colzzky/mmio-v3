@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AutoReply, FacebookPost } from '../page.vue'
+import type { AutoReply, Post, ToggleAutoReplyStatusArgs } from '../page.vue'
 import { AspectRatio } from '@/core/components/ui/aspect-ratio'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
 import { Badge } from '@/core/components/ui/badge'
@@ -25,55 +25,90 @@ import {
   TableHeader,
   TableRow,
 } from '@/core/components/ui/table'
+import type { Modal } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
+import { reactive } from 'vue'
 
-defineProps<{ post: FacebookPost | null }>()
+interface ModalInterface extends Omit<Modal, 'open'> {
+  open(post: Post): void
+
+  post: Post | undefined
+}
+
+const modal = reactive<ModalInterface>({
+  isOpen: false,
+  post: undefined,
+  initialState() {
+    this.isOpen = false
+    this.post = undefined
+  },
+  open(post) {
+    this.isOpen = true
+    this.post = post
+  },
+  close() {
+    this.initialState()
+  },
+})
+
 const emits = defineEmits<{
-  toggleDropdownClick: [{ facebookPostId?: FacebookPost['id']; autoReplyId: AutoReply['id'] }]
+  toggleButtonClick: [ToggleAutoReplyStatusArgs]
+  addAutoReplyClick: [postId: Post['id']]
+  editAutoReplyClick: [{ postId: Post['id']; autoReplyId: AutoReply['id'] }]
 }>()
+
+defineExpose({
+  modal,
+})
 </script>
 
 <template>
-  <Dialog>
+  <Dialog v-model:open="modal.isOpen" @update:open="modal.close()">
     <DialogContent class="flex max-w-screen-xl flex-col">
       <DialogHeader class="flex flex-col gap-y-2">
         <DialogTitle>View Post Comment Auto Replies</DialogTitle>
+
         <DialogDescription class="flex items-center justify-between">
           <div
             class="grid grid-cols-[var(--avatar-size),1fr] items-center gap-x-2 text-xs [--avatar-size:theme(spacing.8)]"
           >
             <Avatar class="row-span-2 size-[var(--avatar-size)]">
-              <AvatarImage :src="post?.user.image ?? ''"></AvatarImage>
+              <AvatarImage :src="modal.post?.user.image ?? ''"></AvatarImage>
             </Avatar>
-            <span>{{ post?.user.name }}</span>
+            <span>{{ modal.post?.user.name }}</span>
             <a
-              :href="`http://example.com/${post?.id}`"
+              :href="`http://example.com/${modal.post?.id}`"
               target="_blank"
               rel="noopener noreferrer"
               class="self-start text-blue-500 hover:underline"
             >
-              Post ID: {{ post?.id }}
+              Post ID: {{ modal.post?.id }}
             </a>
           </div>
-          <Button class="gap-x-2 self-end" size="sm" disabled>
+          <Button
+            v-if="modal.post"
+            class="gap-x-2 self-end"
+            size="sm"
+            @click="emits('addAutoReplyClick', modal.post.id)"
+          >
             <i class="bx bx-plus text-xl" />
             Add Comment Auto Reply
           </Button>
         </DialogDescription>
       </DialogHeader>
 
-      <section class="grid grid-cols-[33%_1fr] gap-x-4">
-        <div class="flex flex-col gap-y-4 rounded-md border p-6 text-sm">
-          <p class="text-pretty">{{ post?.description }}</p>
+      <section class="grid grid-cols-[33%_1fr] gap-x-8">
+        <div class="flex flex-col gap-y-4 self-start rounded-md border p-6 text-sm">
+          <p class="text-pretty">{{ modal.post?.description }}</p>
           <AspectRatio :ratio="16 / 9">
-            <img :src="post?.image" class="h-full w-full rounded-md object-cover" />
+            <img :src="modal.post?.image" class="h-full w-full rounded-md object-cover" />
           </AspectRatio>
           <div class="flex items-center gap-x-4 text-muted-foreground">
-            <span>{{ post?.likes }} Likes</span>
-            <span>{{ post?.comments }} Comment</span>
-            <span>{{ post?.shares }} Shares</span>
+            <span>{{ modal.post?.likes }} Likes</span>
+            <span>{{ modal.post?.comments }} Comment</span>
+            <span>{{ modal.post?.shares }} Shares</span>
             <span class="grow text-end">
-              {{ post?.created.toLocaleDateString() }}
+              {{ modal.post?.createdAt.toLocaleDateString() }}
             </span>
           </div>
         </div>
@@ -89,16 +124,16 @@ const emits = defineEmits<{
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow v-for="[id, autoReply] in post?.autoReplies" :key="id">
+              <TableRow v-for="[id, autoReply] in modal.post?.autoReplies" :key="id">
                 <TableCell>{{ autoReply.name }}</TableCell>
                 <TableCell>
                   <Badge>{{ uiHelpers.toTitleCase(autoReply.status) }}</Badge>
                 </TableCell>
                 <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(autoReply.created.toDateString()) }}
+                  {{ uiHelpers.formatDateTimeAgo(autoReply.createdAt.toDateString()) }}
                 </TableCell>
                 <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(autoReply.updated.toDateString()) }}
+                  {{ uiHelpers.formatDateTimeAgo(autoReply.updatedAt.toDateString()) }}
                 </TableCell>
                 <TableCell>
                   <div class="grid place-content-center">
@@ -108,12 +143,10 @@ const emits = defineEmits<{
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuItem
+                          v-if="modal.post"
                           class="gap-x-3"
                           @click="
-                            emits('toggleDropdownClick', {
-                              facebookPostId: post?.id,
-                              autoReplyId: id,
-                            })
+                            emits('toggleButtonClick', { postId: modal.post.id, autoReplyId: id })
                           "
                         >
                           <i
@@ -124,7 +157,13 @@ const emits = defineEmits<{
                           />
                           Toggle Status
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          v-if="modal.post"
+                          class="gap-x-3"
+                          @click="
+                            emits('editAutoReplyClick', { postId: modal.post.id, autoReplyId: id })
+                          "
+                        >
                           <i class="bx bx-edit text-xl" />
                           Edit
                         </DropdownMenuItem>
