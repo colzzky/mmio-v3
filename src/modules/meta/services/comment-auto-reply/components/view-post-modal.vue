@@ -45,7 +45,7 @@ defineProps<{ post: Omit<FacebookPost, 'autoReplies'> | null }>()
           <span>{{ post?.comments }} Comment</span>
           <span>{{ post?.shares }} Shares</span>
           <span class="grow text-end">
-            {{ post?.created.toLocaleDateString() }}
+            {{ post?.createdAt.toLocaleDateString() }}
           </span>
         </div>
       </section>

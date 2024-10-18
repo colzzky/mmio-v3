@@ -73,7 +73,7 @@ const emits = defineEmits<{
             <span>{{ post?.comments }} Comment</span>
             <span>{{ post?.shares }} Shares</span>
             <span class="grow text-end">
-              {{ post?.created.toLocaleDateString() }}
+              {{ post?.createdAt.toLocaleDateString() }}
             </span>
           </div>
         </div>
@@ -95,10 +95,10 @@ const emits = defineEmits<{
                   <Badge>{{ uiHelpers.toTitleCase(autoReply.status) }}</Badge>
                 </TableCell>
                 <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(autoReply.created.toDateString()) }}
+                  {{ uiHelpers.formatDateTimeAgo(autoReply.createdAt.toDateString()) }}
                 </TableCell>
                 <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(autoReply.updated.toDateString()) }}
+                  {{ uiHelpers.formatDateTimeAgo(autoReply.updatedAt.toDateString()) }}
                 </TableCell>
                 <TableCell>
                   <div class="grid place-content-center">

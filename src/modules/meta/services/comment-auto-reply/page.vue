@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CreateEditAutoReplyModal from './components/create-edit-auto-reply-modal.vue'
 import ViewPostCommentAutoRepliesModal from './components/view-post-comment-auto-replies-modal.vue'
 import ViewPostModal from './components/view-post-modal.vue'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
@@ -24,15 +25,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/t
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import type { Modal } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, useTemplateRef } from 'vue'
 
 // @temporary: can be extracted to another file
 export type AutoReply = {
   id: number
   name: string
   status: 'active' | 'inactive'
-  created: Date
-  updated: Date
+  createdAt: Date
+  updatedAt: Date
 }
 
 // @temporary: can be extracted to another file
@@ -43,7 +44,7 @@ export type FacebookPost = {
     image: string
   }
   description: string
-  created: Date
+  createdAt: Date
   image?: string
   likes: number
   comments: number
@@ -61,37 +62,37 @@ const facebookPosts = ref(
           image: 'https://randomuser.me/api/portraits/women/1.jpg',
         },
         description: 'Had an amazing time hiking up the mountains! 🏞️ #NatureLover #Adventure',
-        created: new Date('2023-10-15'),
+        createdAt: new Date('2023-10-15'),
         image: 'https://picsum.photos/600/400?random=1',
         likes: 120,
         comments: 2,
         shares: 15,
         autoReplies: new Map([
           [
-            1,
+            101,
             {
               name: 'Auto Reply #1 for Alice Johnson',
               status: 'active',
-              created: new Date('2023-10-16'),
-              updated: new Date('2023-10-16'),
+              createdAt: new Date('2023-10-16'),
+              updatedAt: new Date('2023-10-16'),
             },
           ],
           [
-            2,
+            102,
             {
               name: 'Auto Reply #2 for Alice Johnson',
               status: 'active',
-              created: new Date('2023-10-17'),
-              updated: new Date('2023-10-17'),
+              createdAt: new Date('2023-10-17'),
+              updatedAt: new Date('2023-10-17'),
             },
           ],
           [
-            3,
+            103,
             {
               name: 'Auto Reply #3 for Alice Johnson',
               status: 'inactive',
-              created: new Date('2023-10-18'),
-              updated: new Date('2023-10-18'),
+              createdAt: new Date('2023-10-18'),
+              updatedAt: new Date('2023-10-18'),
             },
           ],
         ]),
@@ -106,37 +107,37 @@ const facebookPosts = ref(
         },
         description:
           'Just finished baking these delicious cookies 🍪 Who wants some? 😋 #BakingLove',
-        created: new Date('2023-10-14'),
+        createdAt: new Date('2023-10-14'),
         image: 'https://picsum.photos/600/400?random=2',
         likes: 85,
         comments: 1,
         shares: 8,
         autoReplies: new Map([
           [
-            4,
+            201,
             {
               name: 'Auto Reply #1 for Bob Smith',
               status: 'active',
-              created: new Date('2023-10-15'),
-              updated: new Date('2023-10-15'),
+              createdAt: new Date('2023-10-15'),
+              updatedAt: new Date('2023-10-15'),
             },
           ],
           [
-            5,
+            202,
             {
               name: 'Auto Reply #2 for Bob Smith',
               status: 'active',
-              created: new Date('2023-10-16'),
-              updated: new Date('2023-10-16'),
+              createdAt: new Date('2023-10-16'),
+              updatedAt: new Date('2023-10-16'),
             },
           ],
           [
-            6,
+            203,
             {
               name: 'Auto Reply #3 for Bob Smith',
               status: 'inactive',
-              created: new Date('2023-10-17'),
-              updated: new Date('2023-10-17'),
+              createdAt: new Date('2023-10-17'),
+              updatedAt: new Date('2023-10-17'),
             },
           ],
         ]),
@@ -151,37 +152,37 @@ const facebookPosts = ref(
         },
         description:
           "Throwback to last summer at the beach. Can't wait to go back! 🏖️ #SummerVibes",
-        created: new Date('2023-10-13'),
+        createdAt: new Date('2023-10-13'),
         image: 'https://picsum.photos/600/400?random=3',
         likes: 200,
         comments: 1,
         shares: 10,
         autoReplies: new Map([
           [
-            7,
+            301,
             {
               name: 'Auto Reply #1 for Charlie Green',
               status: 'active',
-              created: new Date('2023-10-14'),
-              updated: new Date('2023-10-14'),
+              createdAt: new Date('2023-10-14'),
+              updatedAt: new Date('2023-10-14'),
             },
           ],
           [
-            8,
+            302,
             {
               name: 'Auto Reply #2 for Charlie Green',
               status: 'active',
-              created: new Date('2023-10-15'),
-              updated: new Date('2023-10-15'),
+              createdAt: new Date('2023-10-15'),
+              updatedAt: new Date('2023-10-15'),
             },
           ],
           [
-            9,
+            303,
             {
               name: 'Auto Reply #3 for Charlie Green',
               status: 'inactive',
-              created: new Date('2023-10-16'),
-              updated: new Date('2023-10-16'),
+              createdAt: new Date('2023-10-16'),
+              updatedAt: new Date('2023-10-16'),
             },
           ],
         ]),
@@ -283,6 +284,8 @@ function handleToggleAllAutoRepliesStatus({
     })
   })
 }
+
+const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
 </script>
 
 <template>
@@ -326,7 +329,7 @@ function handleToggleAllAutoRepliesStatus({
                   {{ post.description }}
                 </TableCell>
                 <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(post.created.toDateString()) }}
+                  {{ uiHelpers.formatDateTimeAgo(post.createdAt.toDateString()) }}
                 </TableCell>
                 <TableCell>{{ post.autoReplies.size }}</TableCell>
                 <TableCell>
@@ -353,7 +356,15 @@ function handleToggleAllAutoRepliesStatus({
                           <i class="bx bx-list-ul text-xl"></i>
                           View All
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="
+                            createEditAutoReplyModalRef?.modal.open({
+                              intent: 'create',
+                              facebookPost: post,
+                            })
+                          "
+                        >
                           <i class="bx bx-message-square-add text-xl"></i>
                           Create
                         </DropdownMenuItem>
@@ -403,6 +414,7 @@ function handleToggleAllAutoRepliesStatus({
             </TableHeader>
             <TableBody>
               <TableRow v-for="[id, autoReply] in allAutoReplies" :key="id">
+                <TableCell>{{ id }}</TableCell>
                 <TableCell>{{ autoReply.name }}</TableCell>
                 <TableCell class="whitespace-nowrap">
                   <div class="flex items-center gap-x-2">
@@ -415,7 +427,7 @@ function handleToggleAllAutoRepliesStatus({
                       rel="noopener noreferrer"
                       class="text-blue-500 hover:underline"
                     >
-                      Post ID: {{ id }}
+                      Post ID: {{ autoReply.post.id }}
                     </a>
                   </div>
                 </TableCell>
@@ -423,10 +435,10 @@ function handleToggleAllAutoRepliesStatus({
                   <Badge>{{ uiHelpers.toTitleCase(autoReply.status) }}</Badge>
                 </TableCell>
                 <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(autoReply.created.toDateString()) }}
+                  {{ uiHelpers.formatDateTimeAgo(autoReply.createdAt.toDateString()) }}
                 </TableCell>
                 <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(autoReply.updated.toDateString()) }}
+                  {{ uiHelpers.formatDateTimeAgo(autoReply.updatedAt.toDateString()) }}
                 </TableCell>
                 <TableCell>
                   <div class="grid place-content-center">
@@ -491,5 +503,7 @@ function handleToggleAllAutoRepliesStatus({
       @update:open="viewPostModal.close()"
       :post="viewPostModal.post"
     />
+
+    <CreateEditAutoReplyModal ref="createEditAutoReplyModal" />
   </DefaultLayout>
 </template>
