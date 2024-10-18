@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import Button from '@/core/components/ui/button/Button.vue';
 import { Skeleton } from '@/core/components/ui/skeleton'
+import { toast } from '@/core/components/ui/toast';
 import HomeLayout from '@/core/layouts/HomeLayout.vue'
-import type { ProjectData } from '@/core/types/ProjectTypes';
+import type { Platforms, ProjectData } from '@/core/types/ProjectTypes';
 import type { Timestamp } from '@/core/types/UniTypes';
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useAuthStore } from '@/stores/authStore';
@@ -51,17 +52,17 @@ const loadMoreProjects = async () => {
 };
 
 
-interface Platforms {
-  name: string
+interface PlatformsIcon {
+  name: Platforms
   icon: string
 }
 
-const platforms: Platforms[] = [
+const platforms: PlatformsIcon[] = [
   { name: 'META', icon: 'bxl-meta' },
-  { name: 'Email Marketing', icon: 'bx-envelope' },
-  { name: 'Google My Business', icon: 'bxl-google' },
+  { name: 'Email-Marketing', icon: 'bx-envelope' },
+  { name: 'Google-My-Business', icon: 'bxl-google' },
   { name: 'Whatsapp', icon: 'bxl-whatsapp' },
-  { name: 'SMS Marketing', icon: 'bx-message-rounded' },
+  { name: 'SMS-Marketing', icon: 'bx-message-rounded' },
   { name: 'E-Commerce', icon: 'bx-shopping-bag' },
   { name: 'OmniChannel', icon: 'bx-group' },
 ]
@@ -73,8 +74,21 @@ const find_icon = (name: string): string | undefined => {
   return icon
 }
 
-const navigateTo = (pj_id: string) => {
-  router.push({ name: 'meta', params: { pj_id: pj_id } })
+const navigateToProject = (project:ProjectData) => {
+  //We can set a validation by fetching from firebaste itself calling get
+  //For faster validation we can check based on what we fetched earlier
+  const validate = project_list.data.find(proj=>proj.pj_id===project.pj_id)
+  if(validate){
+    project_data.set(project)
+    router.push({ name: project.platform.toLowerCase() , params: { pj_id: project.pj_id } })
+  }else{
+    toast({
+      title: 'Project does not exist',
+      description: 'Please choose a project first before proceeding',
+      variant: 'destructive',
+    })
+  }
+  
 }
 </script>
 
@@ -100,7 +114,7 @@ const navigateTo = (pj_id: string) => {
               <div v-for="project in project_list.data" :key="project.name"
                 class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300">
                 <div class="grid grid-cols-12 items-center">
-                  <div class="col-span-5" @click="navigateTo(project.pj_id)">
+                  <div class="col-span-5" @click="navigateToProject(project)">
                     <div class="flex items-center gap-x-3">
                       <i class="bx text-2xl" :class="find_icon(project.platform)"></i>
                       <div class="grid gap-0">

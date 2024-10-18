@@ -65,9 +65,7 @@ onMounted(async () => {
     }
 
   }
-
   layoutLoad.value = false
-
 })
 
 async function project_validation(pj_id: string): Promise<boolean> {
