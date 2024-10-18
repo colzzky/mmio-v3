@@ -264,6 +264,25 @@ function handleToggleAutoReplyStatus({
     status: autoReply.status === 'active' ? 'inactive' : 'active',
   })
 }
+
+// ACTIVATE ALL AUTO REPLIES
+function handleToggleAllAutoRepliesStatus({
+  facebookPostId,
+  intent,
+}: {
+  facebookPostId: FacebookPost['id']
+  intent: 'activate' | 'deactivate'
+}) {
+  const facebookPost = facebookPosts.value.get(facebookPostId)
+  if (!facebookPost) throw new Error('Facebook post not found')
+
+  facebookPost.autoReplies.forEach((autoReply, key) => {
+    facebookPost.autoReplies.set(key, {
+      ...autoReply,
+      status: intent === 'activate' ? 'active' : 'inactive',
+    })
+  })
+}
 </script>
 
 <template>
@@ -338,11 +357,27 @@ function handleToggleAutoReplyStatus({
                           <i class="bx bx-message-square-add text-xl"></i>
                           Create
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="
+                            handleToggleAllAutoRepliesStatus({
+                              facebookPostId: id,
+                              intent: 'activate',
+                            })
+                          "
+                        >
                           <i class="bx bx-play-circle text-xl"></i>
                           Activate All
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="
+                            handleToggleAllAutoRepliesStatus({
+                              facebookPostId: id,
+                              intent: 'deactivate',
+                            })
+                          "
+                        >
                           <i class="bx bx-pause-circle text-xl"></i>
                           Deactivate All
                         </DropdownMenuItem>
