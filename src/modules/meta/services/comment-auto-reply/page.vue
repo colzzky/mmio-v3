@@ -27,7 +27,7 @@ import { uiHelpers } from '@/core/utils/ui-helper'
 import { computed, reactive, ref } from 'vue'
 
 // @temporary: can be extracted to another file
-type AutoReply = {
+export type AutoReply = {
   id: number
   name: string
   status: 'active' | 'inactive'
@@ -244,6 +244,45 @@ const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModal
     this.initialState()
   },
 })
+
+// TOGGLE AUTO REPLY STATUS
+function handleToggleAutoReplyStatus({
+  facebookPostId = 0,
+  autoReplyId,
+}: {
+  facebookPostId?: FacebookPost['id']
+  autoReplyId: AutoReply['id']
+}) {
+  const facebookPost = facebookPosts.value.get(facebookPostId)
+  if (!facebookPost) throw new Error('Facebook post not found')
+
+  const autoReply = facebookPost.autoReplies.get(autoReplyId)
+  if (!autoReply) throw new Error('Auto reply not found')
+
+  facebookPost.autoReplies.set(autoReplyId, {
+    ...autoReply,
+    status: autoReply.status === 'active' ? 'inactive' : 'active',
+  })
+}
+
+// ACTIVATE ALL AUTO REPLIES
+function handleToggleAllAutoRepliesStatus({
+  facebookPostId,
+  intent,
+}: {
+  facebookPostId: FacebookPost['id']
+  intent: 'activate' | 'deactivate'
+}) {
+  const facebookPost = facebookPosts.value.get(facebookPostId)
+  if (!facebookPost) throw new Error('Facebook post not found')
+
+  facebookPost.autoReplies.forEach((autoReply, key) => {
+    facebookPost.autoReplies.set(key, {
+      ...autoReply,
+      status: intent === 'activate' ? 'active' : 'inactive',
+    })
+  })
+}
 </script>
 
 <template>
@@ -318,11 +357,27 @@ const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModal
                           <i class="bx bx-message-square-add text-xl"></i>
                           Create
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="
+                            handleToggleAllAutoRepliesStatus({
+                              facebookPostId: id,
+                              intent: 'activate',
+                            })
+                          "
+                        >
                           <i class="bx bx-play-circle text-xl"></i>
                           Activate All
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="
+                            handleToggleAllAutoRepliesStatus({
+                              facebookPostId: id,
+                              intent: 'deactivate',
+                            })
+                          "
+                        >
                           <i class="bx bx-pause-circle text-xl"></i>
                           Deactivate All
                         </DropdownMenuItem>
@@ -381,7 +436,15 @@ const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModal
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="
+                            handleToggleAutoReplyStatus({
+                              facebookPostId: autoReply.post.id,
+                              autoReplyId: id,
+                            })
+                          "
+                        >
                           <i
                             :class="[
                               'bx text-xl',
@@ -417,8 +480,9 @@ const viewPostCommentAutoRepliesModal = reactive<ViewPostCommentAutoRepliesModal
     <!-- VIEW POST COMMENT AUTO REPLY MODAL -->
     <ViewPostCommentAutoRepliesModal
       v-model:open="viewPostCommentAutoRepliesModal.isOpen"
-      @update:open="viewPostCommentAutoRepliesModal.close()"
       :post="viewPostCommentAutoRepliesModal.post"
+      @update:open="viewPostCommentAutoRepliesModal.close()"
+      @toggle-dropdown-click="handleToggleAutoReplyStatus($event)"
     />
 
     <!-- VIEW POST MODAL -->

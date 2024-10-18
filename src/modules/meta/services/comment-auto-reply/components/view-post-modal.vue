@@ -9,16 +9,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/core/components/ui/dialog'
-import { useForwardPropsEmits, type DialogRootEmits, type DialogRootProps } from 'radix-vue'
 
-const props = defineProps<DialogRootProps & { post: Omit<FacebookPost, 'autoReplies'> | null }>()
-const emits = defineEmits<DialogRootEmits>()
-
-const forwarded = useForwardPropsEmits(props, emits)
+defineProps<{ post: Omit<FacebookPost, 'autoReplies'> | null }>()
 </script>
 
 <template>
-  <Dialog v-bind="forwarded">
+  <Dialog>
     <DialogContent class="max-w-md">
       <DialogHeader class="flex flex-col gap-y-2">
         <DialogTitle>View Post</DialogTitle>

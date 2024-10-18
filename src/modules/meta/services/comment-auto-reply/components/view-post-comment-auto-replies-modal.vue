@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FacebookPost } from '../page.vue'
+import type { AutoReply, FacebookPost } from '../page.vue'
 import { AspectRatio } from '@/core/components/ui/aspect-ratio'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
 import { Badge } from '@/core/components/ui/badge'
@@ -26,16 +26,15 @@ import {
   TableRow,
 } from '@/core/components/ui/table'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { useForwardPropsEmits, type DialogRootEmits, type DialogRootProps } from 'radix-vue'
 
-const props = defineProps<DialogRootProps & { post: FacebookPost | null }>()
-const emits = defineEmits<DialogRootEmits>()
-
-const forwarded = useForwardPropsEmits(props, emits)
+defineProps<{ post: FacebookPost | null }>()
+const emits = defineEmits<{
+  toggleDropdownClick: [{ facebookPostId?: FacebookPost['id']; autoReplyId: AutoReply['id'] }]
+}>()
 </script>
 
 <template>
-  <Dialog v-bind="forwarded">
+  <Dialog>
     <DialogContent class="flex max-w-screen-xl flex-col">
       <DialogHeader class="flex flex-col gap-y-2">
         <DialogTitle>View Post Comment Auto Replies</DialogTitle>
@@ -108,7 +107,15 @@ const forwarded = useForwardPropsEmits(props, emits)
                         <i class="material-icons text-md">more_vert</i>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
-                        <DropdownMenuItem class="gap-x-3" disabled>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="
+                            emits('toggleDropdownClick', {
+                              facebookPostId: post?.id,
+                              autoReplyId: id,
+                            })
+                          "
+                        >
                           <i
                             :class="[
                               'bx text-xl',
