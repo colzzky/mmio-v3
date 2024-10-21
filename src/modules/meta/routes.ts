@@ -7,7 +7,7 @@ export interface Service {
   pinned: boolean
 }
 
-type RouteRecord =  Record<(typeof names)[number], Omit<RouteRecordRaw, 'path' | 'name'>>
+type RouteRecord = Record<(typeof names)[number], Omit<RouteRecordRaw, 'path' | 'name'>>
 type ServiceRecord = Record<(typeof servicesName)[number], Service>
 
 const platformName = 'meta' as const
@@ -133,7 +133,7 @@ const servicesRecord: ServiceRecord = {
   },
 }
 
-const routeRecords:RouteRecord = {
+const routeRecords: RouteRecord = {
   meta: {
     meta: { requiresAuth: true },
     component: () => import('./views/MetaHomePage.vue'),
@@ -148,7 +148,7 @@ const routeRecords:RouteRecord = {
   },
   'meta-post-randomizer': {
     meta: { requiresAuth: true },
-    component: () => import('./views/PostRandomizerPage.vue'),
+    component: () => import('./services/post-randomizer/page.vue'),
   },
   'meta-livestream': {
     meta: { requiresAuth: true },
