@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AutoReply, Post } from '../page.vue'
+import type { AutoReply, Post, PostsMap } from '../page.vue'
 import { Button } from '@/core/components/ui/button'
 import {
   Dialog,
@@ -14,7 +14,7 @@ import { Label } from '@/core/components/ui/label'
 import type { Modal } from '@/core/utils/types'
 import { inject, reactive } from 'vue'
 
-const posts = inject('posts')
+const posts = inject('posts') as PostsMap
 
 interface ModalInterface extends Omit<Modal, 'open'> {
   open(
@@ -73,6 +73,8 @@ const modal = reactive<ModalInterface>({
     this.close()
   },
   createAutoReply() {
+    if (!this.postId) throw new Error('Post ID not initialized')
+
     const post = posts.value.get(this.postId)
     if (!post) throw new Error('Post not found')
 
@@ -86,6 +88,9 @@ const modal = reactive<ModalInterface>({
     })
   },
   editAutoReply() {
+    if (!this.postId || !this.autoReplyId)
+      throw new Error('Post ID or Auto Reply ID not initialized')
+
     const post = posts.value.get(this.postId)
     if (!post) throw new Error('Post not found')
 

@@ -189,6 +189,7 @@ const posts = ref(
     ],
   ]),
 )
+export type PostsMap = typeof posts
 provide('posts', posts)
 
 const allAutoReplies = computed(
