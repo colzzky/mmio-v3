@@ -8,12 +8,12 @@ import type { Timestamp } from '@/core/types/UniTypes';
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useAuthStore } from '@/stores/authStore';
 import { useProjectStore } from '@/stores/projectStore';
-import type { DocumentSnapshot } from 'firebase/firestore';
+import { serverTimestamp, type DocumentSnapshot } from 'firebase/firestore';
 import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 const useAuth = useAuthStore()
 const useProject = useProjectStore()
-const { project_data,project_list } = useProject
+const { project_data, project_list } = useProject
 const { user_auth } = useAuth
 const router = useRouter()
 const pageLoad = ref<boolean>(true)
@@ -22,15 +22,27 @@ const pageLoad = ref<boolean>(true)
 
 onMounted(async () => {
   pageLoad.value = true
-  await loadMoreProjects()
+
+  if (!project_list.isInitialized) {
+    await loadMoreProjects()
+    project_list.isInitialized = true
+  }
   pageLoad.value = false
 })
 
 const loadMoreProjects = async () => {
   project_list.isLoading = true
+
   const get_projects = await project_data.getWhere([
-    { fieldName: 'uid', operator: '==', value: user_auth.data?.uid }
-  ], 2, [], project_list.lastSnapshot)
+    { fieldName: 'uid', operator: '==', value: user_auth.data?.uid },
+    { fieldName: 'platform', operator: '==', value:'Meta' },
+
+  ], 5, [
+    {fieldName:'createdAt',direction:'desc'},
+  ], project_list.lastSnapshot)
+
+  console.log(get_projects)
+
   if (get_projects.status) {
     if (get_projects.data.length > 0) {
       project_list.lastSnapshot = get_projects.data[get_projects.data.length - 1].pj_id;
@@ -74,21 +86,21 @@ const find_icon = (name: string): string | undefined => {
   return icon
 }
 
-const navigateToProject = (project:ProjectData) => {
+const navigateToProject = (project: ProjectData) => {
   //We can set a validation by fetching from firebaste itself calling get
   //For faster validation we can check based on what we fetched earlier
-  const validate = project_list.data.find(proj=>proj.pj_id===project.pj_id)
-  if(validate){
+  const validate = project_list.data.find(proj => proj.pj_id === project.pj_id)
+  if (validate) {
     project_data.set(project)
-    router.push({ name: project.platform.toLowerCase() , params: { pj_id: project.pj_id } })
-  }else{
+    router.push({ name: project.platform.toLowerCase(), params: { pj_id: project.pj_id } })
+  } else {
     toast({
       title: 'Project does not exist',
       description: 'Please choose a project first before proceeding',
       variant: 'destructive',
     })
   }
-  
+
 }
 </script>
 

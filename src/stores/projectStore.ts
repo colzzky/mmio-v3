@@ -73,7 +73,7 @@ export const useProjectStore = defineStore('projectStore', () => {
       }
     },
     async getWhere(where, limit, orderBy, snapshot) {
-      const get = await getCollectionByField('projects', 'pj_id', where, limit, orderBy,snapshot)
+      const get = await getCollectionByField('projects', 'pj_id', where, limit, orderBy, snapshot)
       return {
         status: get.status,
         data: get.data as ProjectData[],
@@ -104,6 +104,7 @@ export const useProjectStore = defineStore('projectStore', () => {
   })
   const project_list = reactive({
     data: <ProjectData[]>[],
+    isInitialized: <boolean>false,
     isLoading: <boolean>false,
     lastSnapshot: <any>''
   })

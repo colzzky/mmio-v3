@@ -71,8 +71,8 @@ export async function getCollectionByField<
 
   // Apply order conditions
   if (orderConditions) {
-    for (const { fieldName, direction = 'asc' } of orderConditions) {
-      q = query(q, orderBy(fieldName as string, direction));
+    for (const condition of orderConditions) {
+      q = query(q, orderBy(condition.fieldName as string, condition.direction ? 'asc': condition.direction));
     }
   }
 
@@ -111,7 +111,7 @@ export async function getCollectionByField<
   } catch (error) {
     return {
       status: false,
-      error: `Error fetching data`, // Include error message for debugging
+      error: `Error fetching data ${error}`,
       data: undefined,
     };
   }
