@@ -11,7 +11,9 @@ import { useAuthStore } from '@/stores/authStore'
 import {
   browserLocalPersistence,
   createUserWithEmailAndPassword,
+  FacebookAuthProvider,
   setPersistence,
+  signInWithPopup,
   updateProfile,
 } from 'firebase/auth'
 import { reactive } from 'vue'
@@ -38,7 +40,8 @@ interface RegistrationField {
   initializeValue: () => void
   setDefault: () => void
   registerFirebase: () => Promise<void>
-  validateSubmit: () => Promise<void>
+  registerFacebook: () => Promise<void>
+  validateSubmit: (type: 'register' | 'meta' | 'google') => Promise<void>
   validateSingleField: (field: keyof InputStructure) => void
 }
 
@@ -77,36 +80,58 @@ const registrationField = reactive<RegistrationField>({
       this.errors[field] = result.error.errors[0].message
     }
   },
-  async validateSubmit(): Promise<void> {
+  async validateSubmit(type): Promise<void> {
     if (this.agreeToTermsAndCondition) {
-      this.isLoading = true
-      Object.keys(this.errors).forEach((key) => {
-        const field = key as keyof InputStructure
-        this.errors[field] = ''
-      })
 
-      const result = schema.safeParse(this.dataInput)
+      const typeActions: { [key in typeof type]: () => void } = {
+        'register': async () => {
+          this.isLoading = true
+          Object.keys(this.errors).forEach((key) => {
+            const field = key as keyof InputStructure
+            this.errors[field] = ''
+          })
 
-      if (!result.success) {
-        result.error.errors.forEach((err) => {
-          const field = err.path[0] as keyof InputStructure
-          this.errors[field] = err.message
-        })
+          const result = schema.safeParse(this.dataInput)
+
+          if (!result.success) {
+            result.error.errors.forEach((err) => {
+              const field = err.path[0] as keyof InputStructure
+              this.errors[field] = err.message
+            })
+          }
+
+          this.validated = result.success
+
+          if (this.validated) {
+            await this.registerFirebase()
+          }
+          this.isLoading = false
+        },
+        'google': () => {
+
+        },
+        'meta': async () => {
+          this.isLoading = true
+          await this.registerFacebook()
+          this.isLoading = false
+        },
       }
 
-      this.validated = result.success
-
-      if (this.validated) {
-        await this.registerFirebase()
-      }
-      this.isLoading = false
-    } else {
+      typeActions[type]?.();
+    }
+    else {
       toast({
         title: 'Registration error',
         description: 'You must first agree with our terms and conditions',
         variant: 'destructive',
       })
     }
+
+
+
+
+
+
   },
   async registerFirebase(): Promise<void> {
     await setPersistence(auth, browserLocalPersistence).then(async () => {
@@ -129,6 +154,22 @@ const registrationField = reactive<RegistrationField>({
           })
         })
     })
+  },
+  async registerFacebook(): Promise<void> {
+    const provider = new FacebookAuthProvider();
+    await signInWithPopup(auth, provider)
+      .then(async (result) => {
+        user_auth.setUser(result.user)
+        await createNewUserProfile(result.user.uid)
+        router.push({ name: 'home' })
+      })
+      .catch((error) => {
+        toast({
+          title: 'Registration error',
+          description: error,
+          variant: 'destructive',
+        })
+      })
   },
   setDefault() {
     this.dataInput = { ...inputStructure }
@@ -199,11 +240,23 @@ const registrationField = reactive<RegistrationField>({
             </Button>
           </Label>
         </div>
-        <Button v-if="!registrationField.isLoading" type="submit" @click="registrationField.validateSubmit()">Create
-          Account</Button>
-        <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">
-          <i class="material-icons animate-spin text-sm">donut_large</i>Loading....
-        </Button>
+        <div v-if="!registrationField.isLoading" class="flex justify-end items-center gap-x-3">
+
+          <Button type="submit" @click="registrationField.validateSubmit('google')" size="sm" class="text-xs"
+            variant="outline">
+            <i class="bx text-2xl bxl-google pr-2"></i>Register with Google</Button>
+          <Button type="submit" @click="registrationField.validateSubmit('meta')" size="sm" class="text-xs"
+            variant="outline">
+            <i class="bx text-2xl bxl-meta pr-2"></i>
+            Register with Meta</Button>
+          <Button type="submit" @click="registrationField.validateSubmit('register')" size="sm" class="text-xs">Create
+            Account</Button>
+        </div>
+        <div v-else class="flex justify-end items-center gap-x-3">
+          <Button variant="outline" size="xs" disabled class="flex items-center gap-2">
+            <i class="material-icons animate-spin text-sm">donut_large</i>Loading....
+          </Button>
+        </div>
       </div>
     </div>
     <div class="col-span-3 hidden place-content-center lg:grid">

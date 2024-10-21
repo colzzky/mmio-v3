@@ -1,8 +1,8 @@
-import type { UserProfileData,Address } from '@/core/types/AuthUserTypes'
+import type { UserProfileData, Address } from '@/core/types/AuthUserTypes'
 import type { Timestamp } from '@/core/types/UniTypes'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
-import type{FirebaseOperators, FirebaseWhereCondition, FirebaseOrderCondition} from '@/core/utils/firebase-collections'
+import type { FirebaseOperators, FirebaseWhereCondition, FirebaseOrderCondition } from '@/core/utils/firebase-collections'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { postCollection, getCollection, getCollectionByField } from '@/core/utils/firebase-collections';
 import { auth } from '@/core/utils/firebase-client';
@@ -24,7 +24,7 @@ interface UserProfile {
     isInitialized: boolean
     initialize: () => void,
     get: (id: string) => Promise<UserProfileReturnData>
-    getWhere: (where:FirebaseWhereCondition<'user_profile'>[]) => Promise<UserProfileReturnList>
+    getWhere: (where: FirebaseWhereCondition<'user_profile'>[], limit?: number, orderBy?: FirebaseOrderCondition<'user_profile'>[], startAfterDoc?: string) => Promise<UserProfileReturnList>
     set: (data: PickAnyKey<UserProfileData>) => void
     createInitial: (data: PickAnyKey<UserProfileData> | null, type: 'update' | 'new') => Promise<void>
     update: () => Promise<FirebaseReturn>
@@ -97,9 +97,9 @@ export const useAuthStore = defineStore('authStore', () => {
             }
         },
         //Call for custom statement
-        async getWhere(where) {
-              // Make sure to pass the correct parameters
-              const get = await getCollectionByField('user_profile', 'up_id', where);
+        async getWhere(where, limit, orderBy, snapshot) {
+            // Make sure to pass the correct parameters
+            const get = await getCollectionByField('user_profile', 'up_id', where, limit, orderBy, snapshot);
             return {
                 status: get.status,
                 data: get.data as PickAnyKey<UserProfileData>[],
@@ -147,10 +147,17 @@ export const useAuthStore = defineStore('authStore', () => {
 
     //Called during initiali Registration
     async function createNewUserProfile(uid: string) {
-        const data: Pick<UserProfileData, "uid"> = {
-            uid: uid,
+        //We need to check first if the user already exist in firebase
+        const checkUser = await user_profile.getWhere([
+            { fieldName: 'uid', operator: '==', value: uid }
+        ])
+        console.log(checkUser)
+        if (!checkUser.status || checkUser.data.length === 0) {
+            const data: Pick<UserProfileData, "uid"> = {
+                uid: uid,
+            }
+            await user_profile.createInitial(data, 'new')
         }
-        await user_profile.createInitial(data, 'new')
     }
     return {
         createNewUserProfile,
