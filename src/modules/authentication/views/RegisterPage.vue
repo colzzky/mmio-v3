@@ -161,7 +161,7 @@ const registrationField = reactive<RegistrationField>({
       .then(async (result) => {
         user_auth.setUser(result.user)
         await createNewUserProfile(result.user.uid)
-        router.push({ name: 'home' })
+        router.replace({ name: 'home' })
       })
       .catch((error) => {
         toast({

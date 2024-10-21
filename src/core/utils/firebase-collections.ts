@@ -27,7 +27,7 @@ type CollectionFields = {
   projects: keyof ProjectData;
 };
 
-export type FirebaseOperators =     | '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in'
+export type FirebaseOperators = '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in'
 
 interface FirebaseReturn {
   status: boolean

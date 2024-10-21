@@ -51,16 +51,24 @@ export const useAuthStore = defineStore('authStore', () => {
         setUser(currentUser: User | null) {
             this.data = currentUser
         },
-        checkUser(): boolean {
-            onAuthStateChanged(auth, (user: User | null) => {
-                if (user) {
-                    this.setUser(user)
-                } else {
-                    this.setUser(null)
-                }
+        async checkUser(): Promise<boolean> {
+
+            const authStatePromise = new Promise((resolve) => {
+                onAuthStateChanged(auth, (user: User | null) => {
+                    resolve(user)
+                });
             });
-            if (this.data) return true
-            return false
+
+            const check = await authStatePromise.then((user: any) => {
+                this.setUser(user)
+                if (this.data) {
+                    return true
+                } else {
+                    return false
+                }
+            })
+            
+            return check
         },
         async signOut() {
             await signOut(auth)
