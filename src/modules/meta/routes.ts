@@ -140,7 +140,7 @@ const routeRecords: RouteRecord = {
   },
   'meta-chatbot-flow-builder': {
     meta: { requiresAuth: true },
-    component: () => import('./views/ChatbotFlowBuilderPage.vue'),
+    component: () => import('./services/chatbot-flow-builder/page.vue'),
   },
   'meta-comment-auto-reply': {
     meta: { requiresAuth: true },
