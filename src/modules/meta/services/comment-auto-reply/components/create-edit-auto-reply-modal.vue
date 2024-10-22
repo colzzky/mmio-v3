@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AutoReply, Post, PostsMap } from '../page.vue'
+import type { AutoReply, AutoReplyMap, Post } from '../page.vue'
 import { Button } from '@/core/components/ui/button'
 import {
   Dialog,
@@ -14,13 +14,13 @@ import { Label } from '@/core/components/ui/label'
 import type { Modal } from '@/core/utils/types'
 import { inject, reactive } from 'vue'
 
-const posts = inject('posts') as PostsMap
+const autoReplies = inject('autoReplies') as AutoReplyMap
 
 interface ModalInterface extends Omit<Modal, 'open'> {
   open(
     args:
       | { intent: 'create'; postId: Post['id'] }
-      | { intent: 'edit'; postId: Post['id']; autoReplyId: AutoReply['id'] },
+      | { intent: 'edit'; autoReplyId: AutoReply['id'] },
   ): void
 
   intent: 'create' | 'edit' | null
@@ -52,10 +52,9 @@ const modal = reactive<ModalInterface>({
     if (args.intent === 'create') {
       this.postId = args.postId
     } else if (args.intent === 'edit') {
-      this.postId = args.postId
       this.autoReplyId = args.autoReplyId
 
-      const autoReply = posts.value.get(this.postId)?.autoReplies.get(this.autoReplyId)
+      const autoReply = autoReplies.value.get(this.autoReplyId)
       if (!autoReply) throw new Error('Auto reply not found')
 
       this.form = {
@@ -75,29 +74,24 @@ const modal = reactive<ModalInterface>({
   createAutoReply() {
     if (!this.postId) throw new Error('Post ID not initialized')
 
-    const post = posts.value.get(this.postId)
-    if (!post) throw new Error('Post not found')
-
     // @temporary: get the highest auto reply id and increment it by 1
-    const newAutoReplyId = Math.max(...Array.from(post.autoReplies.keys())) + 1
-    post.autoReplies.set(newAutoReplyId, {
+    const newAutoReplyId = Math.max(...Array.from(autoReplies.value.keys())) + 1
+    autoReplies.value.set(newAutoReplyId, {
       ...this.form,
+      id: newAutoReplyId,
+      postId: this.postId,
       status: 'inactive',
       createdAt: new Date(),
       updatedAt: new Date(),
     })
   },
   editAutoReply() {
-    if (!this.postId || !this.autoReplyId)
-      throw new Error('Post ID or Auto Reply ID not initialized')
+    if (!this.autoReplyId) throw new Error('Auto Reply ID not initialized')
 
-    const post = posts.value.get(this.postId)
-    if (!post) throw new Error('Post not found')
-
-    const autoReply = post.autoReplies.get(this.autoReplyId)
+    const autoReply = autoReplies.value.get(this.autoReplyId)
     if (!autoReply) throw new Error('Auto reply not found')
 
-    post.autoReplies.set(this.autoReplyId, {
+    autoReplies.value.set(this.autoReplyId, {
       ...autoReply,
       name: this.form.name,
     })
