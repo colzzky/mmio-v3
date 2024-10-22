@@ -12,6 +12,8 @@ const names = [
   'settings-project-management',
 ] as const
 
+
+
 const urls: Record<(typeof names)[number], string> = {
   'settings-account': '/settings/account',
   'settings-profile': '/settings/profile',
@@ -22,10 +24,11 @@ const urls: Record<(typeof names)[number], string> = {
   'settings-project-management': '/settings/project-management',
 }
 
-const linkRecords: Record<
+type LinkRecord = Record<
   (typeof names)[number],
   { label: string; icon: string; section: Section }
-> = {
+>
+const linkRecords: LinkRecord = {
   'settings-account': {
     label: 'Account',
     icon: 'bxs-user-account',
@@ -63,7 +66,9 @@ const linkRecords: Record<
   },
 }
 
-const routeRecords: Record<(typeof names)[number], Omit<RouteRecordRaw, 'path' | 'name'>> = {
+type RouteRecord = Record<(typeof names)[number], Omit<RouteRecordRaw, 'path' | 'name'>>
+
+const routeRecords:RouteRecord  = {
   'settings-account': {
     meta: { requiresAuth: true },
     component: () => import('./views/AccountPage.vue'),
@@ -82,7 +87,7 @@ const routeRecords: Record<(typeof names)[number], Omit<RouteRecordRaw, 'path' |
   },
   'settings-api-integrations': {
     meta: { requiresAuth: true },
-    component: () => import('./views/AccountPage.vue'),
+    component: () => import('./views/ApiIntegrationPage.vue'),
   },
   'settings-team': {
     meta: { requiresAuth: true },
@@ -96,11 +101,11 @@ const routeRecords: Record<(typeof names)[number], Omit<RouteRecordRaw, 'path' |
 
 export const links = Object.entries(linkRecords).map(([key, value]) => ({
   ...value,
-  href: urls[key],
+  href: urls[key as keyof LinkRecord],
 }))
 
 export const routes = Object.entries(routeRecords).map(([key, values]) => ({
   ...values,
   name: key,
-  path: urls[key],
+  path: urls[key as keyof RouteRecord],
 }))

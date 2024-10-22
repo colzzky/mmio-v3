@@ -35,7 +35,7 @@ const loadMoreProjects = async () => {
 
   const get_projects = await project_data.getWhere([
     { fieldName: 'uid', operator: '==', value: user_auth.data?.uid },
-    { fieldName: 'platform', operator: '==', value:'Meta' },
+    
 
   ], 5, [
     {fieldName:'createdAt',direction:'desc'},

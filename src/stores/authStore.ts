@@ -7,6 +7,7 @@ import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { postCollection, getCollection, getCollectionByField } from '@/core/utils/firebase-collections';
 import { auth } from '@/core/utils/firebase-client';
 import type { DocumentData } from 'firebase/firestore';
+import { useProjectStore } from './projectStore'
 
 
 // type Nullable<T> = {
@@ -72,7 +73,7 @@ export const useAuthStore = defineStore('authStore', () => {
         },
         async signOut() {
             await signOut(auth)
-            this.setUser(null)
+            await resetAllStore()
         }
     })
     const user_profile = reactive<UserProfile>({
@@ -166,6 +167,12 @@ export const useAuthStore = defineStore('authStore', () => {
             }
             await user_profile.createInitial(data, 'new')
         }
+    }
+
+    async function resetAllStore(){
+        const projectStore = useProjectStore()
+        useAuthStore().$reset
+        projectStore.$reset
     }
     return {
         createNewUserProfile,
