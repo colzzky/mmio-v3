@@ -1,6 +1,5 @@
 import type { UserProfileData, ProjectData,PlatformApiData, MetaPagesData} from '@/core/utils/types'
 import { firestore } from './firebase-client'
-import type { UserProfileData, ProjectData } from '@/core/utils/types'
 import {
   collection,
   doc,

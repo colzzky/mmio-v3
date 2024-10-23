@@ -173,8 +173,7 @@ export const useAuthStore = defineStore('authStore', () => {
 
     async function resetAllStore(){
         const projectStore = useProjectStore()
-        useAuthStore().$reset
-        projectStore.$reset
+        projectStore.reset_state()
     }
     return {
         createNewUserProfile,

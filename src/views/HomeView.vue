@@ -14,7 +14,6 @@ import { useRouter } from 'vue-router';
 const useAuth = useAuthStore()
 const useProject = useProjectStore()
 const { project_data, project_list } = useProject
-const { project_data, project_list } = useProject
 const { user_auth } = useAuth
 const router = useRouter()
 const pageLoad = ref<boolean>(true)
@@ -34,10 +33,9 @@ const loadMoreProjects = async () => {
 
   const get_projects = await project_data.getWhere([
     { fieldName: 'uid', operator: '==', value: user_auth.data?.uid },
-    
 
-  ], 5, [
-    {fieldName:'createdAt',direction:'desc'},
+  ], 2, [
+    { fieldName: 'createdAt', direction: 'desc' },
   ], project_list.lastSnapshot)
 
   console.log(get_projects)
@@ -85,14 +83,11 @@ const find_icon = (name: string): string | undefined => {
 }
 
 const navigateToProject = (project: ProjectData) => {
-const navigateToProject = (project: ProjectData) => {
   //We can set a validation by fetching from firebaste itself calling get
   //For faster validation we can check based on what we fetched earlier
   const validate = project_list.data.find(proj => proj.pj_id === project.pj_id)
   if (validate) {
     project_data.set(project)
-    router.push({ name: project.platform.toLowerCase(), params: { pj_id: project.pj_id } })
-  } else {
     router.push({ name: project.platform.toLowerCase(), params: { pj_id: project.pj_id } })
   } else {
     toast({
@@ -123,11 +118,8 @@ const navigateToProject = (project: ProjectData) => {
 
           <div v-if="!pageLoad">
             <div v-if="project_list.data.length">
-              <div
-                v-for="project in project_list.data"
-                :key="project.name"
-                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
-              >
+              <div v-for="project in project_list.data" :key="project.name"
+                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300">
                 <div class="grid grid-cols-12 items-center">
                   <div class="col-span-5" @click="navigateToProject(project)">
                     <div class="flex items-center gap-x-3">
@@ -147,10 +139,8 @@ const navigateToProject = (project: ProjectData) => {
                   <div class="col-span-1 text-sm text-gray-600">{{ project.status }}</div>
                   <div class="col-span-1 text-sm text-gray-600">Owner</div>
                   <div class="col-span-1 justify-self-end">
-                    <button
-                      type="button"
-                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
+                    <button type="button"
+                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                       <i class="material-icons text-md">more_vert</i>
                     </button>
                   </div>

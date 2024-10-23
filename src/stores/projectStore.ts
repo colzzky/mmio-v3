@@ -98,17 +98,29 @@ export const useProjectStore = defineStore('projectStore', () => {
     resetData() {
       this.data = null
       this.isInitialized = false
-    }
+    },
   })
   const project_list = reactive({
     data: <ProjectData[]>[],
     isInitialized: <boolean>false,
     isLoading: <boolean>false,
-    lastSnapshot: <any>''
+    lastSnapshot: <any>'',
+    resetData() {
+      this.data = []
+      this.isInitialized = false
+      this.isLoading = false
+    },
   })
+
+  const reset_state = ()=>{
+    project_list.resetData()
+    project_data.resetData()
+
+  }
 
   return {
     project_list,
     project_data,
+    reset_state
   }
 })
