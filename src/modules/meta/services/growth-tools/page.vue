@@ -18,7 +18,7 @@ import {
 } from '@/core/components/ui/table'
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { provide, ref, useTemplateRef } from 'vue'
+import { computed, provide, ref, useTemplateRef } from 'vue'
 
 type GrowthToolType =
   | 'custom-chat-plugin'
@@ -89,6 +89,26 @@ const growthTools = ref(
 export type GrowthToolMap = typeof growthTools
 provide('growthTools', growthTools)
 
+const sortedGrowthTools = computed(() =>
+  Array.from(growthTools.value.entries()).sort(
+    ([, a], [, b]) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  ),
+)
+
+function cloneGrowthTool(growthToolId: GrowthTool['id']) {
+  const growthTool = growthTools.value.get(growthToolId)
+  if (!growthTool) throw new Error('Growth tool not found')
+
+  // @temporary: get the highest growth tool id and increment it by 1
+  const newGrowthToolId = Math.max(...Array.from(growthTools.value.keys())) + 1
+  growthTools.value.set(newGrowthToolId, {
+    ...growthTool,
+    id: newGrowthToolId,
+    name: `${growthTool.name} Clone`,
+    createdAt: new Date(),
+  })
+}
+
 const deleteModalRef = useTemplateRef('deleteModal')
 </script>
 
@@ -111,7 +131,7 @@ const deleteModalRef = useTemplateRef('deleteModal')
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="[growthToolId, growthTool] in growthTools" :key="growthToolId">
+          <TableRow v-for="[growthToolId, growthTool] in sortedGrowthTools" :key="growthToolId">
             <TableCell>{{ growthTool.name }}</TableCell>
             <TableCell>{{ growthToolTypeLabels[growthTool.type] }}</TableCell>
             <TableCell>{{ growthTool.pageName }}</TableCell>
@@ -129,7 +149,7 @@ const deleteModalRef = useTemplateRef('deleteModal')
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" disabled>
+                    <DropdownMenuItem class="gap-x-3" @click="cloneGrowthTool(growthToolId)">
                       <i class="bx bx-copy text-xl" />
                       Clone
                     </DropdownMenuItem>
