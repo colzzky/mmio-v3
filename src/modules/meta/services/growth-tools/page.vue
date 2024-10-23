@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import DeleteModal from './components/delete-modal.vue'
 import { Button } from '@/core/components/ui/button'
 import {
   DropdownMenu,
@@ -17,7 +18,7 @@ import {
 } from '@/core/components/ui/table'
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { ref } from 'vue'
+import { provide, ref, useTemplateRef } from 'vue'
 
 type GrowthToolType =
   | 'custom-chat-plugin'
@@ -32,7 +33,7 @@ const growthToolTypeLabels: Record<GrowthToolType, string> = {
   'send-to-messenger-plugin': 'Send to Messenger Plugin',
 }
 
-interface GrowthTool {
+export interface GrowthTool {
   id: number
   name: string
   type: GrowthToolType
@@ -84,6 +85,11 @@ const growthTools = ref(
     ],
   ]),
 )
+
+export type GrowthToolMap = typeof growthTools
+provide('growthTools', growthTools)
+
+const deleteModalRef = useTemplateRef('deleteModal')
 </script>
 
 <template>
@@ -127,7 +133,10 @@ const growthTools = ref(
                       <i class="bx bx-copy text-xl" />
                       Clone
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" disabled>
+                    <DropdownMenuItem
+                      class="gap-x-3"
+                      @click="deleteModalRef?.modal.open(growthToolId)"
+                    >
                       <i class="bx bx-trash text-xl" />
                       Delete
                     </DropdownMenuItem>
@@ -139,5 +148,7 @@ const growthTools = ref(
         </TableBody>
       </Table>
     </Main>
+
+    <DeleteModal ref="deleteModal" />
   </DefaultLayout>
 </template>
