@@ -7,16 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/core/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/core/components/ui//select"
-
 import Input from '@/core/components/ui/input/Input.vue'
 import { Skeleton } from '@/core/components/ui/skeleton'
 import { useToast } from '@/core/components/ui/toast'
@@ -146,8 +136,8 @@ const inputField = reactive<InputField>({
         description: 'You have succssfully created a new project!',
         variant: 'success',
       })
-      
-      router.push({name: 'meta', params: {pj_id: update.data.pj_id,}})
+
+      router.push({ name: 'meta', params: { pj_id: update.data.pj_id } })
       pcd.close()
     } else {
       toast({
@@ -162,9 +152,9 @@ const inputField = reactive<InputField>({
   },
 })
 
-function customSelectionAccount(event:string){
+function customSelectionAccount(event: string) {
   inputField.dataInput.account = event
-  inputField.validateSingleField('account') 
+  inputField.validateSingleField('account')
 }
 
 onMounted(() => {
@@ -255,7 +245,11 @@ onMounted(() => {
                 pages first</span
               >
             </div>
-            <Combobox model="page" :options="sampleOptions" @select="customSelectionAccount($event)"/>
+            <Combobox
+              model="page"
+              :options="sampleOptions"
+              @select="customSelectionAccount($event)"
+            />
             <div
               v-if="inputField.errors.account"
               for="page_id"

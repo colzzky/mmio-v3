@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { AutoReply, Post, ToggleAutoReplyStatusArgs } from '../page.vue'
+import type { AutoRepliesByIdArray, AutoReply, Post } from '../page.vue'
 import { AspectRatio } from '@/core/components/ui/aspect-ratio'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
 import { Badge } from '@/core/components/ui/badge'
@@ -27,7 +27,9 @@ import {
 } from '@/core/components/ui/table'
 import type { Modal } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { reactive } from 'vue'
+import { inject, reactive } from 'vue'
+
+const autoRepliesByPostId = inject('autoRepliesByPostId') as AutoRepliesByIdArray
 
 interface ModalInterface extends Omit<Modal, 'open'> {
   open(post: Post): void
@@ -52,9 +54,9 @@ const modal = reactive<ModalInterface>({
 })
 
 const emits = defineEmits<{
-  toggleButtonClick: [ToggleAutoReplyStatusArgs]
   addAutoReplyClick: [postId: Post['id']]
-  editAutoReplyClick: [{ postId: Post['id']; autoReplyId: AutoReply['id'] }]
+  toggleButtonClick: [autoReplyId: AutoReply['id']]
+  editAutoReplyClick: [autoReplyId: AutoReply['id']]
 }>()
 
 defineExpose({
@@ -123,8 +125,11 @@ defineExpose({
                 <TableHead class="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
-              <TableRow v-for="[id, autoReply] in modal.post?.autoReplies" :key="id">
+            <TableBody v-if="modal.post">
+              <TableRow
+                v-for="autoReply in autoRepliesByPostId.get(modal.post.id)"
+                :key="autoReply.id"
+              >
                 <TableCell>{{ autoReply.name }}</TableCell>
                 <TableCell>
                   <Badge>{{ uiHelpers.toTitleCase(autoReply.status) }}</Badge>
@@ -145,9 +150,7 @@ defineExpose({
                         <DropdownMenuItem
                           v-if="modal.post"
                           class="gap-x-3"
-                          @click="
-                            emits('toggleButtonClick', { postId: modal.post.id, autoReplyId: id })
-                          "
+                          @click="emits('toggleButtonClick', autoReply.id)"
                         >
                           <i
                             :class="[
@@ -160,9 +163,7 @@ defineExpose({
                         <DropdownMenuItem
                           v-if="modal.post"
                           class="gap-x-3"
-                          @click="
-                            emits('editAutoReplyClick', { postId: modal.post.id, autoReplyId: id })
-                          "
+                          @click="emits('editAutoReplyClick', autoReply.id)"
                         >
                           <i class="bx bx-edit text-xl" />
                           Edit

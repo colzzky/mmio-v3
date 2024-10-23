@@ -1,9 +1,9 @@
 import type { UserProfileData, ProjectData,PlatformApiData, MetaPagesData} from '@/core/utils/types'
 import { firestore } from './firebase-client'
+import type { UserProfileData, ProjectData } from '@/core/utils/types'
 import {
   collection,
   doc,
-  DocumentSnapshot,
   getDoc,
   getDocs,
   limit,
@@ -40,16 +40,15 @@ interface FirebaseReturn {
 }
 
 export type FirebaseWhereCondition<T extends keyof Collections> = {
-  fieldName: CollectionFields[T]; // This will reference the fields for the collection type
-  operator: FirebaseOperators;
-  value: any;
-};
+  fieldName: CollectionFields[T] // This will reference the fields for the collection type
+  operator: FirebaseOperators
+  value: any
+}
 
 export type FirebaseOrderCondition<T extends keyof Collections> = {
-  fieldName: CollectionFields[T];
-  direction?: 'asc' | 'desc';
-};
-
+  fieldName: CollectionFields[T]
+  direction?: 'asc' | 'desc'
+}
 
 export async function getCollectionByField<
   T extends keyof Collections,
@@ -63,14 +62,14 @@ export async function getCollectionByField<
   orderConditions?: FirebaseOrderCondition<T>[],
   lastDocumentId?: string,
 ): Promise<FirebaseReturn> {
-  const collectionRef = collection(firestore, $col);
-  
+  const collectionRef = collection(firestore, $col)
+
   // Create a base query
-  let q = query(collectionRef);
+  let q = query(collectionRef)
 
   // Apply where conditions
   for (const condition of whereConditions) {
-    q = query(q, where(condition.fieldName as string, condition.operator, condition.value));
+    q = query(q, where(condition.fieldName as string, condition.operator, condition.value))
   }
 
   // Apply order conditions
@@ -82,46 +81,52 @@ export async function getCollectionByField<
 
   // Apply limit if specified
   if (limitResults) {
-    q = query(q, limit(limitResults));
+    q = query(q, limit(limitResults))
   }
 
   // Apply startAfter if a document is provided
   if (lastDocumentId) {
-    const lastDocumentSnapshot = await getDoc(doc(firestore, $col, lastDocumentId)); // Fetch last document snapshot
+    const lastDocumentSnapshot = await getDoc(doc(firestore, $col, lastDocumentId)) // Fetch last document snapshot
     if (lastDocumentSnapshot.exists()) {
-      q = query(q, startAfter(lastDocumentSnapshot)); // Use the snapshot for pagination
+      q = query(q, startAfter(lastDocumentSnapshot)) // Use the snapshot for pagination
     } else {
-      console.warn(`Document with ID ${lastDocumentId} does not exist.`);
+      console.warn(`Document with ID ${lastDocumentId} does not exist.`)
       // Optional: handle non-existing document scenario, e.g., reset to initial query
     }
   }
 
   try {
-    const querySnapshot = await getDocs(q); // Fetch the documents
+    const querySnapshot = await getDocs(q) // Fetch the documents
     if (!querySnapshot.empty) {
-      const data = querySnapshot.docs.map((doc) => ({ ...doc.data() })); // Include document ID if needed
+      const data = querySnapshot.docs.map((doc) => ({ ...doc.data() })) // Include document ID if needed
       return {
         status: true,
         data: data,
         error: '',
-      };
+      }
     } else {
       return {
         status: false,
         error: `No data found.`,
         data: undefined,
-      };
+      }
     }
   } catch (error) {
     return {
       status: false,
       error: `Error fetching data ${error}`,
       data: undefined,
-    };
+    }
   }
 }
 
-export async function postCollection<T extends keyof Collections>( $col: T, $id: Collections[T], id: string = '', data: any, type: 'update' | 'new' = 'update' ): Promise<FirebaseReturn> {
+export async function postCollection<T extends keyof Collections>(
+  $col: T,
+  $id: Collections[T],
+  id: string = '',
+  data: any,
+  type: 'update' | 'new' = 'update',
+): Promise<FirebaseReturn> {
   const userDocRef = doc(firestore, $col, id)
   try {
     const userSnapshot = await getDoc(userDocRef) // Fetch the document
@@ -168,7 +173,11 @@ export async function postCollection<T extends keyof Collections>( $col: T, $id:
   }
 }
 
-export async function getCollection<T extends keyof Collections>($col: T, $id: Collections[T], id: string): Promise<FirebaseReturn> {
+export async function getCollection<T extends keyof Collections>(
+  $col: T,
+  $id: Collections[T],
+  id: string,
+): Promise<FirebaseReturn> {
   try {
     const userDocRef = doc(firestore, $col, id)
     const userSnapshot = await getDoc(userDocRef)

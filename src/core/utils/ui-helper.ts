@@ -1,4 +1,4 @@
-import type { Timestamp } from "../types/UniTypes"
+import type { Timestamp } from '../types/UniTypes'
 
 export const uiHelpers = {
   formatDateTimeAgo(dateString: string, locale: string = 'en-US'): string {
@@ -58,11 +58,11 @@ export const uiHelpers = {
     const now = new Date();
 
     // Calculate the difference in seconds
-    const secondsAgo = Math.floor((now.getTime() - date.getTime()) / 1000);
+    const secondsAgo = Math.floor((now.getTime() - date.getTime()) / 1000)
 
     // Determine the appropriate time ago format
-    let interval: number;
-    let unit: string;
+    let interval: number
+    let unit: string
 
     if (secondsAgo < 60) {
       return `${secondsAgo} seconds ago`;

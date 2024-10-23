@@ -113,7 +113,7 @@ const servicesRecord: ServiceRecord = {
   'meta-growth-tools': {
     icon: 'bx-chart',
     label: 'Growth Tools',
-    pinned: false,
+    pinned: true,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
@@ -168,7 +168,7 @@ const routeRecords: RouteRecord = {
   },
   'meta-growth-tools': {
     meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
+    component: () => import('./services/growth-tools/page.vue'),
   },
   'meta-chat-broadcast': {
     meta: { requiresAuth: true },

@@ -37,7 +37,7 @@ export interface Campaign {
     end?: Date
   }
   createdAt: Date
-  status: 'disabled' | 'live'
+  status: 'active' | 'inactive'
 }
 
 const campaigns = ref(
@@ -49,7 +49,7 @@ const campaigns = ref(
         publishedTo: {},
         duration: {},
         createdAt: new Date(),
-        status: 'disabled',
+        status: 'inactive',
       },
     ],
     [
@@ -59,7 +59,7 @@ const campaigns = ref(
         publishedTo: {},
         duration: {},
         createdAt: new Date(),
-        status: 'disabled',
+        status: 'inactive',
       },
     ],
     [
@@ -70,7 +70,7 @@ const campaigns = ref(
         publishedTo: { pages: 'Filhomes' },
         duration: {},
         createdAt: new Date(),
-        status: 'live',
+        status: 'active',
       },
     ],
   ]),
@@ -85,7 +85,7 @@ function handleToggleCampaignStatus(campaignId: Campaign['id']) {
 
   campaigns.value.set(campaignId, {
     ...campaign,
-    status: campaign.status === 'live' ? 'disabled' : 'live',
+    status: campaign.status === 'active' ? 'inactive' : 'active',
   })
 }
 
@@ -155,19 +155,6 @@ const deleteCampaignModalRef = useTemplateRef('deleteCampaignModal')
                     <i class="material-icons text-md">more_vert</i>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem class="gap-x-3" @click="handleToggleCampaignStatus(id)">
-                      <i
-                        :class="[
-                          'bx text-xl',
-                          campaign.status === 'live' ? 'bx-toggle-left' : 'bxs-toggle-right',
-                        ]"
-                      />
-                      Toggle Status
-                    </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" disabled>
-                      <i class="bx bxs-report text-xl" />
-                      View Report
-                    </DropdownMenuItem>
                     <DropdownMenuItem
                       class="gap-x-3"
                       @click="
@@ -176,6 +163,19 @@ const deleteCampaignModalRef = useTemplateRef('deleteCampaignModal')
                     >
                       <i class="bx bx-edit text-xl" />
                       Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem class="gap-x-3" @click="handleToggleCampaignStatus(id)">
+                      <i
+                        :class="[
+                          'bx text-xl',
+                          campaign.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                        ]"
+                      />
+                      Toggle Status
+                    </DropdownMenuItem>
+                    <DropdownMenuItem class="gap-x-3" disabled>
+                      <i class="bx bxs-report text-xl" />
+                      View Report
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       class="gap-x-3"

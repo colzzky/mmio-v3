@@ -25,7 +25,7 @@ import { computed, provide, ref, useTemplateRef } from 'vue'
 export type Flow = {
   id: number
   name: string
-  status: 'disabled' | 'published'
+  status: 'inactive' | 'active'
   createdAt: Date
 }
 
@@ -35,7 +35,7 @@ const flows = ref(
       174924,
       {
         name: 'Coupon Code Generator Demo',
-        status: 'published',
+        status: 'active',
         createdAt: new Date('2024-05-08'),
       },
     ],
@@ -43,7 +43,7 @@ const flows = ref(
       173482,
       {
         name: 'Chatbot AI Article Generator',
-        status: 'published',
+        status: 'active',
         createdAt: new Date('2024-02-19'),
       },
     ],
@@ -51,7 +51,7 @@ const flows = ref(
       173406,
       {
         name: 'Makati Event Ads',
-        status: 'published',
+        status: 'active',
         createdAt: new Date('2024-02-14'),
       },
     ],
@@ -59,7 +59,7 @@ const flows = ref(
       172677,
       {
         name: 'Timegap Test 2024',
-        status: 'published',
+        status: 'active',
         createdAt: new Date('2024-01-06'),
       },
     ],
@@ -67,7 +67,7 @@ const flows = ref(
       171319,
       {
         name: 'Food Ordering Bot',
-        status: 'published',
+        status: 'active',
         createdAt: new Date('2023-10-08'),
       },
     ],
@@ -88,7 +88,7 @@ function handleToggleFlowStatus(flowId: Flow['id']) {
 
   flows.value.set(flowId, {
     ...flow,
-    status: flow.status === 'published' ? 'disabled' : 'published',
+    status: flow.status === 'active' ? 'inactive' : 'active',
   })
 }
 
@@ -148,15 +148,18 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
                     <i class="material-icons text-md">more_vert</i>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem class="gap-x-3" disabled>
-                      <i class="bx bxs-error text-xl" />
-                      View Error Logs
+                    <DropdownMenuItem
+                      class="gap-x-3"
+                      @click="createEditFlowModalRef?.modal.open({ intent: 'edit', flowId: id })"
+                    >
+                      <i class="bx bx-edit text-xl" />
+                      Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem class="gap-x-3" @click="handleToggleFlowStatus(id)">
                       <i
                         :class="[
                           'bx text-xl',
-                          flow.status === 'published' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                          flow.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
                         ]"
                       />
                       Toggle Status
@@ -169,12 +172,9 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
                       <i class="bx bx-share-alt text-xl" />
                       Share
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      class="gap-x-3"
-                      @click="createEditFlowModalRef?.modal.open({ intent: 'edit', flowId: id })"
-                    >
-                      <i class="bx bx-edit text-xl" />
-                      Edit
+                    <DropdownMenuItem class="gap-x-3" disabled>
+                      <i class="bx bxs-error text-xl" />
+                      View Error Logs
                     </DropdownMenuItem>
                     <DropdownMenuItem class="gap-x-3" @click="deleteFlowModalRef?.modal.open(id)">
                       <i class="bx bx-trash text-xl" />

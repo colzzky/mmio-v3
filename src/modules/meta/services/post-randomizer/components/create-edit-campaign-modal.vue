@@ -80,7 +80,7 @@ const modal = reactive<ModalInterface>({
   createCampaign() {
     // @temporary: get the highest campaign id and increment it by 1
     const newCampaignId = Math.max(...Array.from(campaigns.value.keys())) + 1
-    campaigns.value.set(newCampaignId, { ...this.form, status: 'disabled', createdAt: new Date() })
+    campaigns.value.set(newCampaignId, { ...this.form, status: 'inactive', createdAt: new Date() })
   },
   editCampaign() {
     if (!this.campaignId) throw new Error('No Campaign ID value')

@@ -5,7 +5,6 @@ import { Button } from '@/core/components/ui/button'
 import { Label } from '@/core/components/ui/label'
 import { Switch } from '@/core/components/ui/switch'
 import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
-import type { FirebaseWhereCondition } from '@/core/utils/firebase-collections'
 import { useAuthStore } from '@/stores/authStore'
 import { onMounted } from 'vue'
 
@@ -15,7 +14,7 @@ onMounted(async () => {
   if (!user_profile.isInitialized) {
     console.log('initializing...')
     const profile = await user_profile.getWhere([
-      {fieldName:'uid',operator:'==',value:user_auth.data?.uid}
+      { fieldName: 'uid', operator: '==', value: user_auth.data?.uid },
     ])
     const data = profile.data[0]
     user_profile.set(data)
