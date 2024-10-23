@@ -37,7 +37,7 @@ export interface Campaign {
     end?: Date
   }
   createdAt: Date
-  status: 'disabled' | 'live'
+  status: 'active' | 'inactive'
 }
 
 const campaigns = ref(
@@ -49,7 +49,7 @@ const campaigns = ref(
         publishedTo: {},
         duration: {},
         createdAt: new Date(),
-        status: 'disabled',
+        status: 'inactive',
       },
     ],
     [
@@ -59,7 +59,7 @@ const campaigns = ref(
         publishedTo: {},
         duration: {},
         createdAt: new Date(),
-        status: 'disabled',
+        status: 'inactive',
       },
     ],
     [
@@ -70,7 +70,7 @@ const campaigns = ref(
         publishedTo: { pages: 'Filhomes' },
         duration: {},
         createdAt: new Date(),
-        status: 'live',
+        status: 'active',
       },
     ],
   ]),
@@ -85,7 +85,7 @@ function handleToggleCampaignStatus(campaignId: Campaign['id']) {
 
   campaigns.value.set(campaignId, {
     ...campaign,
-    status: campaign.status === 'live' ? 'disabled' : 'live',
+    status: campaign.status === 'active' ? 'inactive' : 'active',
   })
 }
 
@@ -159,7 +159,7 @@ const deleteCampaignModalRef = useTemplateRef('deleteCampaignModal')
                       <i
                         :class="[
                           'bx text-xl',
-                          campaign.status === 'live' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                          campaign.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
                         ]"
                       />
                       Toggle Status

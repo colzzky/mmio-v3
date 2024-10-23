@@ -67,7 +67,7 @@ const modal = reactive<ModalInterface>({
     const newFlowId = Math.max(...Array.from(flows.value.keys())) + 1
     flows.value.set(newFlowId, {
       ...this.form,
-      status: 'disabled',
+      status: 'inactive',
       createdAt: new Date(),
     })
   },
