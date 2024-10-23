@@ -13,3 +13,5 @@ export interface Modal {
 }
 export type { UserProfileData } from '../types/AuthUserTypes'
 export type { ProjectData } from '../types/ProjectTypes'
+export type { PlatformApiData } from '../types/PlaformAPITypes'
+export type { MetaPagesData } from '../types/MetaTypes'

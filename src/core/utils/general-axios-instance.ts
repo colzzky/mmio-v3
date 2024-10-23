@@ -24,7 +24,7 @@ generalAxiosInstance.interceptors.request.use(
     //   config.headers['Authorization'] = `Bearer ${apiKey}`;
     // }
 
-    console.log('Request to third-party API started:', config.url);
+    //console.log('Request to third-party API started:', config.url);
     return config;
   },
   (error) => {
@@ -35,12 +35,12 @@ generalAxiosInstance.interceptors.request.use(
 // Optional: Add a response interceptor
 generalAxiosInstance.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log('Third-party API response received:', response);
+    //console.log('Third-party API response received:', response);
     return response;
   },
   (error) => {
     // Handle errors (timeouts, rate-limiting, etc.)
-    console.error('Error with third-party API:', error.response?.data || error.message);
+    //console.error('Error with third-party API:', error.response?.data || error.message);
     return Promise.reject(error);
   }
 );

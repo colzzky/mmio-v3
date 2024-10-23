@@ -1,4 +1,4 @@
-import type { UserProfileData, ProjectData} from '@/core/utils/types'
+import type { UserProfileData, ProjectData,PlatformApiData, MetaPagesData} from '@/core/utils/types'
 import { firestore } from './firebase-client'
 import {
   collection,
@@ -20,11 +20,15 @@ import {
 type Collections = {
   user_profile: 'up_id'
   projects: 'pj_id'
+  platform_api:'pa_id'
+  meta_pages:'mp_id'
 }
 
 type CollectionFields = {
   user_profile:keyof UserProfileData;
   projects: keyof ProjectData;
+  platform_api: keyof PlatformApiData;
+  meta_pages: keyof MetaPagesData;
 };
 
 export type FirebaseOperators = '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in'
@@ -125,7 +129,6 @@ export async function postCollection<T extends keyof Collections>( $col: T, $id:
       // Get the document data
       const postData = {
         ...data,
-        createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       }
       await updateDoc(userDocRef, { ...postData })
@@ -156,9 +159,10 @@ export async function postCollection<T extends keyof Collections>( $col: T, $id:
       }
     }
   } catch (error) {
+    console.log(error)
     return {
       status: false,
-      error: `No data found with that id ${$col}.`,
+      error: `No data found with that id error! ${$col}.`,
       data: undefined,
     }
   }

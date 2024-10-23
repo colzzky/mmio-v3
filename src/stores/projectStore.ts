@@ -1,10 +1,10 @@
-import type { ProjectData,Platforms } from '@/core/types/ProjectTypes'
+import type { ProjectData, Platforms } from '@/core/types/ProjectTypes'
 import {
   postCollection,
   getCollection,
   getCollectionByField,
 } from '@/core/utils/firebase-collections'
-import type{FirebaseOperators, FirebaseOrderCondition, FirebaseWhereCondition} from '@/core/utils/firebase-collections'
+import type { FirebaseOperators, FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
 import type { DocumentData, DocumentSnapshot } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
@@ -15,7 +15,7 @@ interface Project {
   isInitialized: boolean
   initialize: () => void
   get: (id: string) => Promise<ProjectReturnData>
-  getWhere: (where:FirebaseWhereCondition<'projects'>[], limit?:number,orderBy?:FirebaseOrderCondition<'projects'>[], startAfterDoc?: string)=> Promise<ProjectReturnList>
+  getWhere: (where: FirebaseWhereCondition<'projects'>[], limit?: number, orderBy?: FirebaseOrderCondition<'projects'>[], startAfterDoc?: string) => Promise<ProjectReturnList>
   createUpdate: (type: 'new' | 'update') => Promise<ProjectReturnData>
   set: (data: ProjectData) => ProjectData
   resetData: () => void
@@ -49,20 +49,18 @@ export const useProjectStore = defineStore('projectStore', () => {
     data: null,
     isInitialized: false,
     initialize() {
-      if (!this.isInitialized) {
-        this.data = {
-          pj_id: '',
-          account: '',
-          uid: '',
-          name: '',
-          platform: '',
+      this.data = {
+        pj_id: '',
+        account: '',
+        uid: '',
+        name: '',
+        platform: '',
 
-          status: '',
-          createdAt: '',
-          updatedAt: '',
-        }
-        this.isInitialized = true
+        status: '',
+        createdAt: '',
+        updatedAt: '',
       }
+      this.isInitialized = true
     },
     async get(id: string) {
       const get = await getCollection('projects', 'pj_id', id)
@@ -97,7 +95,7 @@ export const useProjectStore = defineStore('projectStore', () => {
       this.isInitialized = true
       return this.data
     },
-    resetData(){
+    resetData() {
       this.data = null
       this.isInitialized = false
     }

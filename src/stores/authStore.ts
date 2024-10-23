@@ -96,6 +96,8 @@ export const useAuthStore = defineStore('authStore', () => {
                 createdAt: '',
                 updatedAt: '',
             }
+            this.isInitialized = true
+            
         },
         async get(id: string) {
             const get = await getCollection('user_profile', 'up_id', id);
