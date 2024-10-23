@@ -1,7 +1,6 @@
 import { services as metaServices } from '@/modules/meta/routes'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useProjectStore } from './projectStore'
 
 export const useServicesStore = defineStore('services', () => {
   const services = ref({

@@ -1,24 +1,22 @@
 <script setup lang="ts">
-import Button from '@/core/components/ui/button/Button.vue';
+import Button from '@/core/components/ui/button/Button.vue'
 import { Skeleton } from '@/core/components/ui/skeleton'
-import { toast } from '@/core/components/ui/toast';
+import { toast } from '@/core/components/ui/toast'
 import HomeLayout from '@/core/layouts/HomeLayout.vue'
-import type { Platforms, ProjectData } from '@/core/types/ProjectTypes';
-import type { Timestamp } from '@/core/types/UniTypes';
+import type { Platforms, ProjectData } from '@/core/types/ProjectTypes'
+import type { Timestamp } from '@/core/types/UniTypes'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { useAuthStore } from '@/stores/authStore';
-import { useProjectStore } from '@/stores/projectStore';
-import type { DocumentSnapshot } from 'firebase/firestore';
-import { onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore'
+import { useProjectStore } from '@/stores/projectStore'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
 const useAuth = useAuthStore()
 const useProject = useProjectStore()
-const { project_data,project_list } = useProject
+const { project_data, project_list } = useProject
 const { user_auth } = useAuth
 const router = useRouter()
 const pageLoad = ref<boolean>(true)
-
-
 
 onMounted(async () => {
   pageLoad.value = true
@@ -28,14 +26,17 @@ onMounted(async () => {
 
 const loadMoreProjects = async () => {
   project_list.isLoading = true
-  const get_projects = await project_data.getWhere([
-    { fieldName: 'uid', operator: '==', value: user_auth.data?.uid }
-  ], 2, [], project_list.lastSnapshot)
+  const get_projects = await project_data.getWhere(
+    [{ fieldName: 'uid', operator: '==', value: user_auth.data?.uid }],
+    2,
+    [],
+    project_list.lastSnapshot,
+  )
   if (get_projects.status) {
     if (get_projects.data.length > 0) {
-      project_list.lastSnapshot = get_projects.data[get_projects.data.length - 1].pj_id;
+      project_list.lastSnapshot = get_projects.data[get_projects.data.length - 1].pj_id
     }
-    get_projects.data.forEach(project => {
+    get_projects.data.forEach((project) => {
       project_list.data.push({
         name: project.name,
         platform: project.platform,
@@ -45,12 +46,11 @@ const loadMoreProjects = async () => {
         uid: project.uid,
         createdAt: uiHelpers.timestampToDateTimeAgo(project.createdAt as Timestamp),
         updatedAt: uiHelpers.timestampToDateTimeAgo(project.updatedAt as Timestamp),
-      });
-    });
+      })
+    })
   }
   project_list.isLoading = false
-};
-
+}
 
 interface PlatformsIcon {
   name: Platforms
@@ -74,21 +74,20 @@ const find_icon = (name: string): string | undefined => {
   return icon
 }
 
-const navigateToProject = (project:ProjectData) => {
+const navigateToProject = (project: ProjectData) => {
   //We can set a validation by fetching from firebaste itself calling get
   //For faster validation we can check based on what we fetched earlier
-  const validate = project_list.data.find(proj=>proj.pj_id===project.pj_id)
-  if(validate){
+  const validate = project_list.data.find((proj) => proj.pj_id === project.pj_id)
+  if (validate) {
     project_data.set(project)
-    router.push({ name: project.platform.toLowerCase() , params: { pj_id: project.pj_id } })
-  }else{
+    router.push({ name: project.platform.toLowerCase(), params: { pj_id: project.pj_id } })
+  } else {
     toast({
       title: 'Project does not exist',
       description: 'Please choose a project first before proceeding',
       variant: 'destructive',
     })
   }
-  
 }
 </script>
 
@@ -108,11 +107,13 @@ const navigateToProject = (project:ProjectData) => {
             </div>
           </div>
 
-
           <div v-if="!pageLoad">
             <div v-if="project_list.data.length">
-              <div v-for="project in project_list.data" :key="project.name"
-                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300">
+              <div
+                v-for="project in project_list.data"
+                :key="project.name"
+                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
+              >
                 <div class="grid grid-cols-12 items-center">
                   <div class="col-span-5" @click="navigateToProject(project)">
                     <div class="flex items-center gap-x-3">
@@ -132,17 +133,17 @@ const navigateToProject = (project:ProjectData) => {
                   <div class="col-span-1 text-sm text-gray-600">{{ project.status }}</div>
                   <div class="col-span-1 text-sm text-gray-600">Owner</div>
                   <div class="col-span-1 justify-self-end">
-                    <button type="button"
-                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                    <button
+                      type="button"
+                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    >
                       <i class="material-icons text-md">more_vert</i>
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-            <div v-else>
-              No Data found
-            </div>
+            <div v-else>No Data found</div>
           </div>
 
           <div v-if="pageLoad || project_list.isLoading" class="rounded-xl px-2 py-4">

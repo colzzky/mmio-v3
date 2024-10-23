@@ -1,11 +1,11 @@
-import type { ProjectData,Platforms } from '@/core/types/ProjectTypes'
+import type { ProjectData } from '@/core/types/ProjectTypes'
 import {
   postCollection,
   getCollection,
   getCollectionByField,
 } from '@/core/utils/firebase-collections'
-import type{FirebaseOperators, FirebaseOrderCondition, FirebaseWhereCondition} from '@/core/utils/firebase-collections'
-import type { DocumentData, DocumentSnapshot } from 'firebase/firestore'
+import type{FirebaseOrderCondition, FirebaseWhereCondition} from '@/core/utils/firebase-collections'
+import type { DocumentData  } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 

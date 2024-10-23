@@ -30,7 +30,7 @@ interface InputStructure {
 }
 interface RegistrationField {
   dataInput: InputStructure
-  agreeToTermsAndCondition: boolean,
+  agreeToTermsAndCondition: boolean
   errors: InputStructure
   validated: boolean
   isLoading: boolean
@@ -51,11 +51,13 @@ let inputStructure = reactive<InputStructure>({
 
 //Schema structure for validation
 const schema = z.object({
-  email: z.string().email({ message: 'Invalid email format' }).min(1, { message: 'Email is required' }),
+  email: z
+    .string()
+    .email({ message: 'Invalid email format' })
+    .min(1, { message: 'Email is required' }),
   name: z.string().min(8, { message: 'Name must be at least 8 characters long' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters long' }),
-});
-
+})
 
 const registrationField = reactive<RegistrationField>({
   //Set default using shallow copy instead of referencing the reactive value
@@ -135,21 +137,21 @@ const registrationField = reactive<RegistrationField>({
     this.errors = { ...inputStructure }
   },
 })
-
-
-
-
-
-
-
 </script>
 
 <template>
   <main
-    class="mx-auto grid min-h-svh w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-rows-[48px_1fr] gap-8 py-[var(--gutter)] [--gutter:1rem] lg:grid-cols-5 lg:[--gutter:2rem]">
-    <img class="h-12 w-auto self-start lg:col-span-5" src="@/assets/logo.png" alt="marketingmaster.io logo" />
-    <div class="flex flex-col gap-y-8 lg:col-span-2 lg:self-center"
-      :class="{ 'cursor-not-allowed': registrationField.isLoading }">
+    class="mx-auto grid min-h-svh w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-rows-[48px_1fr] gap-8 py-[var(--gutter)] [--gutter:1rem] lg:grid-cols-5 lg:[--gutter:2rem]"
+  >
+    <img
+      class="h-12 w-auto self-start lg:col-span-5"
+      src="@/assets/logo.png"
+      alt="marketingmaster.io logo"
+    />
+    <div
+      class="flex flex-col gap-y-8 lg:col-span-2 lg:self-center"
+      :class="{ 'cursor-not-allowed': registrationField.isLoading }"
+    >
       <section class="flex flex-col gap-y-2">
         <h1 class="text-4xl/none font-bold">Set your Username, Email and Password</h1>
         <p class="text-sm">
@@ -162,18 +164,38 @@ const registrationField = reactive<RegistrationField>({
       <div class="flex flex-col gap-y-4">
         <div class="flex flex-col gap-y-2">
           <Label for="email">Email Address</Label>
-          <Input id="email" name="email" type="email" autocomplete="email" v-model="registrationField.dataInput.email"
-            placeholder="johndoe@gmail.com" />
-          <div v-if="registrationField.errors.email" for="name" class="flex items-center gap-1 text-xs text-red-500">
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            v-model="registrationField.dataInput.email"
+            placeholder="johndoe@gmail.com"
+          />
+          <div
+            v-if="registrationField.errors.email"
+            for="name"
+            class="flex items-center gap-1 text-xs text-red-500"
+          >
             <i class="material-icons text-sm">error</i>
             {{ registrationField.errors.email }}
           </div>
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="name">Display Name:</Label>
-          <Input id="name" name="name" type="text" autocomplete="name" placeholder="John Doe"
-            v-model="registrationField.dataInput.name" />
-          <div v-if="registrationField.errors.name" for="name" class="flex items-center gap-1 text-xs text-red-500">
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            placeholder="John Doe"
+            v-model="registrationField.dataInput.name"
+          />
+          <div
+            v-if="registrationField.errors.name"
+            for="name"
+            class="flex items-center gap-1 text-xs text-red-500"
+          >
             <i class="material-icons text-sm">error</i>
             {{ registrationField.errors.name }}
           </div>
@@ -181,17 +203,30 @@ const registrationField = reactive<RegistrationField>({
 
         <div class="flex flex-col gap-y-2">
           <Label for="password">Password</Label>
-          <Input id="password" name="password" type="password" autocomplete="password" placeholder="********"
-            v-model="registrationField.dataInput.password" />
-          <div v-if="registrationField.errors.password" for="name" class="flex items-center gap-1 text-xs text-red-500">
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="password"
+            placeholder="********"
+            v-model="registrationField.dataInput.password"
+          />
+          <div
+            v-if="registrationField.errors.password"
+            for="name"
+            class="flex items-center gap-1 text-xs text-red-500"
+          >
             <i class="material-icons text-sm">error</i>
             {{ registrationField.errors.password }}
           </div>
         </div>
 
         <div class="flex items-center">
-          <Checkbox id="termsAndCondition" name="termsAndCondition"
-            v-model:checked="registrationField.agreeToTermsAndCondition" />
+          <Checkbox
+            id="termsAndCondition"
+            name="termsAndCondition"
+            v-model:checked="registrationField.agreeToTermsAndCondition"
+          />
           <Label for="termsAndCondition">
             I agree to
             <Button variant="link" as-child class="h-[unset] p-0 text-blue-500">
@@ -199,8 +234,12 @@ const registrationField = reactive<RegistrationField>({
             </Button>
           </Label>
         </div>
-        <Button v-if="!registrationField.isLoading" type="submit" @click="registrationField.validateSubmit()">Create
-          Account</Button>
+        <Button
+          v-if="!registrationField.isLoading"
+          type="submit"
+          @click="registrationField.validateSubmit()"
+          >Create Account</Button
+        >
         <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">
           <i class="material-icons animate-spin text-sm">donut_large</i>Loading....
         </Button>

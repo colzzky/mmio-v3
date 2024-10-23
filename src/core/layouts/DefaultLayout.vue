@@ -2,7 +2,9 @@
 import ServicesModal from '../components/services-modal.vue'
 import DesktopSidebar from '../components/sidebar/desktop-sidebar.vue'
 import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar'
+import Button from '../components/ui/button/Button.vue'
 import { Card } from '../components/ui/card'
+import { toast } from '../components/ui/toast'
 import Toaster from '../components/ui/toast/Toaster.vue'
 import {
   Collapsible,
@@ -20,8 +22,7 @@ import { useServicesStore } from '@/stores/servicesStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { toast } from '../components/ui/toast'
-import Button from '../components/ui/button/Button.vue'
+
 const useProject = useProjectStore()
 const { project_data } = useProject
 const router = useRouter()
@@ -64,7 +65,6 @@ onMounted(async () => {
     if (project_data.data) {
       project_id.value = project_data.data.pj_id
     }
-
   }
   layoutLoad.value = false
 })
@@ -88,8 +88,6 @@ async function returnToProjects(): Promise<void> {
   console.log(project_data)
   router.push({ name: 'home' })
 }
-
-
 </script>
 
 <template>
@@ -108,8 +106,10 @@ async function returnToProjects(): Promise<void> {
         <ul role="list" class="-mx-2">
           <div class="flex flex-col gap-y-1">
             <li>
-              <RouterLink :to="{ name: parentRoute, params: { pj_id: project_id } }"
-                class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
+              <RouterLink
+                :to="{ name: parentRoute, params: { pj_id: project_id } }"
+                class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+              >
                 <i class="material-icons text-xl">grid_view</i>
                 Dashboard
               </RouterLink>
@@ -118,7 +118,8 @@ async function returnToProjects(): Promise<void> {
             <li>
               <button
                 class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
-                @click="toggleServicesModal">
+                @click="toggleServicesModal"
+              >
                 <i class="material-icons text-xl">bookmark_border</i>
                 Manage Services
               </button>
@@ -126,7 +127,8 @@ async function returnToProjects(): Promise<void> {
             <li>
               <!-- Opens modal for this project -->
               <button
-                class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25">
+                class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
+              >
                 <i class="material-icons text-xl">settings_accessibility</i>
                 Project Settings
               </button>
@@ -138,26 +140,33 @@ async function returnToProjects(): Promise<void> {
       <!-- pinned services -->
       <Collapsible v-model:open="isPlatformServicesCollapsibleOpen" class="flex flex-col gap-y-1">
         <CollapsibleTrigger
-          class="flex w-full items-center justify-between text-xs font-bold uppercase text-primary/75">
+          class="flex w-full items-center justify-between text-xs font-bold uppercase text-primary/75"
+        >
           Pinned Services
-          <i :class="[
-            'material-icons text-2xl transition-transform',
-            isPlatformServicesCollapsibleOpen && 'rotate-180',
-          ]">
+          <i
+            :class="[
+              'material-icons text-2xl transition-transform',
+              isPlatformServicesCollapsibleOpen && 'rotate-180',
+            ]"
+          >
             arrow_drop_down
           </i>
         </CollapsibleTrigger>
         <CollapsibleContent as="ul" class="-mx-2">
           <div class="flex flex-col gap-y-1">
             <li v-for="[name, service] in pinnedServices" :key="name">
-              <RouterLink :to="{ name, params: { pj_id: project_id } }"
-                class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
+              <RouterLink
+                :to="{ name, params: { pj_id: project_id } }"
+                class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+              >
                 <i :class="['bx text-xl', service.icon]"></i>
                 <span>
                   {{ service.label }}
                 </span>
-                <button class="grid place-content-center"
-                  @click.prevent="servicesStore.toggleServicePinnedStatus(route.path, name)">
+                <button
+                  class="grid place-content-center"
+                  @click.prevent="servicesStore.toggleServicePinnedStatus(route.path, name)"
+                >
                   <i class="material-icons text-xl">bookmark</i>
                 </button>
               </RouterLink>
@@ -219,8 +228,8 @@ async function returnToProjects(): Promise<void> {
       <slot />
     </div>
   </div>
-  <div v-else class="flex flex-col items-center justify-center h-screen bg-gray-100">
-    <div class="flex items-center gap-x-1 animate-pulse">
+  <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
+    <div class="flex animate-pulse items-center gap-x-1">
       <i class="material-icons text-4xl">pin</i>
       <span class="text-xl font-extrabold">MMIO</span>
     </div>
