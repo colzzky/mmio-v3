@@ -155,6 +155,15 @@ const deleteCampaignModalRef = useTemplateRef('deleteCampaignModal')
                     <i class="material-icons text-md">more_vert</i>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
+                    <DropdownMenuItem
+                      class="gap-x-3"
+                      @click="
+                        createEditCampaignModalRef?.modal.open({ intent: 'edit', campaignId: id })
+                      "
+                    >
+                      <i class="bx bx-edit text-xl" />
+                      Edit
+                    </DropdownMenuItem>
                     <DropdownMenuItem class="gap-x-3" @click="handleToggleCampaignStatus(id)">
                       <i
                         :class="[
@@ -167,15 +176,6 @@ const deleteCampaignModalRef = useTemplateRef('deleteCampaignModal')
                     <DropdownMenuItem class="gap-x-3" disabled>
                       <i class="bx bxs-report text-xl" />
                       View Report
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      class="gap-x-3"
-                      @click="
-                        createEditCampaignModalRef?.modal.open({ intent: 'edit', campaignId: id })
-                      "
-                    >
-                      <i class="bx bx-edit text-xl" />
-                      Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       class="gap-x-3"

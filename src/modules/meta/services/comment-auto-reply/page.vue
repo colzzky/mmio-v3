@@ -316,13 +316,6 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                         <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
                         <DropdownMenuItem
                           class="gap-x-3"
-                          @click="viewPostCommentAutoRepliesModalRef?.modal.open({ ...post, id })"
-                        >
-                          <i class="bx bx-list-ul text-xl"></i>
-                          View All
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          class="gap-x-3"
                           @click="
                             createEditAutoReplyModalRef?.modal.open({
                               intent: 'create',
@@ -333,6 +326,14 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                           <i class="bx bx-message-square-add text-xl"></i>
                           Create
                         </DropdownMenuItem>
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="viewPostCommentAutoRepliesModalRef?.modal.open({ ...post, id })"
+                        >
+                          <i class="bx bx-list-ul text-xl"></i>
+                          View All
+                        </DropdownMenuItem>
+
                         <DropdownMenuItem
                           class="gap-x-3"
                           @click="toggleAllAutoRepliesStatus({ postId: id, intent: 'activate' })"
@@ -403,15 +404,6 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                       </DropdownMenuTrigger>
                       <DropdownMenuContent>
                         <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
-                        <DropdownMenuItem class="gap-x-3" @click="toggleAutoReplyStatus(id)">
-                          <i
-                            :class="[
-                              'bx text-xl',
-                              autoReply.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
-                            ]"
-                          />
-                          Toggle Status
-                        </DropdownMenuItem>
                         <DropdownMenuItem
                           class="gap-x-3"
                           @click="
@@ -423,6 +415,15 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                         >
                           <i class="bx bx-edit text-xl" />
                           Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem class="gap-x-3" @click="toggleAutoReplyStatus(id)">
+                          <i
+                            :class="[
+                              'bx text-xl',
+                              autoReply.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                            ]"
+                          />
+                          Toggle Status
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuLabel>Post</DropdownMenuLabel>

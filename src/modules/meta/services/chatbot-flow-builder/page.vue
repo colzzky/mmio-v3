@@ -148,9 +148,12 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
                     <i class="material-icons text-md">more_vert</i>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem class="gap-x-3" disabled>
-                      <i class="bx bxs-error text-xl" />
-                      View Error Logs
+                    <DropdownMenuItem
+                      class="gap-x-3"
+                      @click="createEditFlowModalRef?.modal.open({ intent: 'edit', flowId: id })"
+                    >
+                      <i class="bx bx-edit text-xl" />
+                      Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem class="gap-x-3" @click="handleToggleFlowStatus(id)">
                       <i
@@ -169,12 +172,9 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
                       <i class="bx bx-share-alt text-xl" />
                       Share
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      class="gap-x-3"
-                      @click="createEditFlowModalRef?.modal.open({ intent: 'edit', flowId: id })"
-                    >
-                      <i class="bx bx-edit text-xl" />
-                      Edit
+                    <DropdownMenuItem class="gap-x-3" disabled>
+                      <i class="bx bxs-error text-xl" />
+                      View Error Logs
                     </DropdownMenuItem>
                     <DropdownMenuItem class="gap-x-3" @click="deleteFlowModalRef?.modal.open(id)">
                       <i class="bx bx-trash text-xl" />
