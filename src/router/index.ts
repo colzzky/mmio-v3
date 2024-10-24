@@ -46,19 +46,24 @@ const router = createRouter({
   routes,
 })
 
-router.beforeEach(async (to) => {
+router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
   const { user_auth } = authStore
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const nonAuth = to.matched.some((record) => record.meta.nonAuth)
+  if (!from.name) {
+    console.log('initializing....')
+    await user_auth.initializeUser()
+  }
+  const check_if_userexist = await user_auth.check_user_auth()
   if (requiresAuth) {
-    const checkUser = await user_auth.checkUser()
-    if (!checkUser) return { name: 'login' }
+    if (!check_if_userexist) return { name: 'login' }
   }
   if (nonAuth) {
-    const checkUser = await user_auth.checkUser()
-    if (checkUser) return { name: 'home' }
+    if (check_if_userexist) return { name: 'home' }
   }
+
+
   return true
 })
 

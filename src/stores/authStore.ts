@@ -49,11 +49,12 @@ type UserProfileReturnData = FirebaseReturnBase & {
 export const useAuthStore = defineStore('authStore', () => {
     const user_auth = reactive({
         data: <User | null>null,
+        isInitializing: <boolean>false,
         setUser(currentUser: User | null) {
             this.data = currentUser
         },
-        async checkUser(): Promise<boolean> {
-
+        async initializeUser(): Promise<boolean> {
+            this.isInitializing = true
             const authStatePromise = new Promise((resolve) => {
                 onAuthStateChanged(auth, (user: User | null) => {
                     resolve(user)
@@ -68,9 +69,21 @@ export const useAuthStore = defineStore('authStore', () => {
                     return false
                 }
             })
-            
+            this.isInitializing = false
             return check
         },
+
+        async check_user_auth(){
+            const user = auth.currentUser;
+            if(this.data && user){
+                return true
+            }else{
+                return false
+            }
+        },
+
+
+
         async signOut() {
             await signOut(auth)
             await resetAllStore()

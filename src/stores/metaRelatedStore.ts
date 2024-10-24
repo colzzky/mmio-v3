@@ -49,8 +49,11 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
                 pa_id: '',
                 page_id: '',
                 access_token: '',
+                picture: undefined,
                 category: '',
                 name: '',
+                isActive: false,
+                isOnProject: false,
                 createdAt: '',
                 updatedAt: '',
             }
@@ -107,10 +110,11 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
     })
 
     const meta_pages_integration = reactive({
-        async get_fb_pages(accessToken:string): Promise<MetaPagesReturn[]|null> {
+        async get_fb_pages(accessToken: string): Promise<MetaPagesReturn[] | null> {
             const url = `https://graph.facebook.com/me/accounts?access_token=${accessToken}`
             try {
                 const fetch_page = await generalAxiosInstance.get(url)
+                console.log(fetch_page)
                 return fetch_page.data.data as MetaPagesReturn[]
             } catch (error) {
                 return null

@@ -1,4 +1,5 @@
 import type { Timestamp } from "firebase/firestore"
+import type { MetaPictureReturn } from "./MetaTypes"
 
 export interface EmailMarketingAPIAccount {
     client_id: string
@@ -12,14 +13,7 @@ export interface MetaAPIAccount {
     client_id: string
     email: string
     name: string
-    picture?: {
-        data: {
-            is_silhouette: boolean,
-            url: string,
-            width: number,
-            height: number
-        }
-    }
+    picture?: MetaPictureReturn
     accessToken: string
     expiresIn: number
     machind_id: string

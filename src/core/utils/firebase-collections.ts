@@ -107,7 +107,7 @@ export async function getCollectionByField<
       return {
         status: false,
         error: `No data found.`,
-        data: undefined,
+        data: [],
       }
     }
   } catch (error) {

@@ -68,7 +68,7 @@ const linkRecords: LinkRecord = {
 
 type RouteRecord = Record<(typeof names)[number], Omit<RouteRecordRaw, 'path' | 'name'>>
 
-const routeRecords:RouteRecord  = {
+const routeRecords: RouteRecord = {
   'settings-account': {
     meta: { requiresAuth: true },
     component: () => import('./views/AccountPage.vue'),
@@ -88,6 +88,14 @@ const routeRecords:RouteRecord  = {
   'settings-api-integrations': {
     meta: { requiresAuth: true },
     component: () => import('./views/ApiIntegrationPage.vue'),
+    children: [
+      {
+        path: 'meta',
+        name: 'settings-api-integrations-meta',
+        component: import('./views/ApiIntegrationPage.vue'),
+        meta: { requiresAuth: true },
+      },
+    ]
   },
   'settings-team': {
     meta: { requiresAuth: true },
