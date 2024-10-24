@@ -20,7 +20,10 @@ import Label from '@/core/components/ui/label/Label.vue';
 import { useMetaRelatedStore } from '@/stores/metaRelatedStore';
 import type { MetaPagesData, MetaPagesReturn, MetaPictureReturn } from '@/core/types/MetaTypes';
 import generalAxiosInstance from '@/core/utils/general-axios-instance';
+import Toaster from '@/core/components/ui/toast/Toaster.vue';
+import { toast } from '@/core/components/ui/toast';
 const useAuth = useAuthStore()
+const { user_auth } = useAuth
 const platformApiStore = usePlatformAPIStore()
 const metaRelatedStore = useMetaRelatedStore()
 const { platformAPI, facebook_integration, platform_api_list } = platformApiStore
@@ -53,14 +56,41 @@ const facebookLogin = async (): Promise<void> => {
 //Watch during FB logged then save it to database
 watch(fb_data, async (newValue, oldValue) => {
     if (newValue && fb_data.value) {
-        const metaApi = await facebook_integration.exchangeForUserLongLivedToken(fb_data.value.authResponse.accessToken as string);
-        if (metaApi) {
-            set_fb_api(metaApi.api_account as MetaAPIAccount, metaApi)
-            await set_fb_pages()
-            await get_fb_pages()
+
+        //Add logic here and check first if it's the same facebook account with what register the firebase
+        const existingAcount = await platformAPI.getWhere([
+            { fieldName: 'uid', operator: '==', value: user_auth.data?.uid },
+            { fieldName: 'platform', operator: '==', value: 'META' }
+        ])
+        if (existingAcount.status) {
+            const account = existingAcount.data[0]
+            if (account.api_account as MetaAPIAccount && account.api_account?.client_id !== newValue.authResponse.userID) {
+                const FB = await loadFacebookSDK();
+                FB.logout((response) => {
+                    toast({
+                        title: 'Meta Login Error',
+                        description: 'It seems that are logging in to an fb account that is different from your previous registered Meta account.',
+                        variant: 'destructive',
+                    })
+                });
+                fb_api_load.value = false
+            } else {
+                await populateFbApi(newValue)
+            }
+        } else {
+            await populateFbApi(newValue)
         }
     }
 });
+
+const populateFbApi = async (fbLoginStatus: fb.StatusResponse) => {
+    const metaApi = await facebook_integration.exchangeForUserLongLivedToken(fbLoginStatus.authResponse.accessToken as string);
+    if (metaApi) {
+        set_fb_api(metaApi.api_account as MetaAPIAccount, metaApi)
+        await set_fb_pages()
+        await get_fb_pages()
+    }
+}
 
 
 const set_fb_api = (metaApi: MetaAPIAccount, fbPlatform: PlatformApiData) => {
@@ -118,7 +148,8 @@ async function processFacebookPages(fb_pages: MetaPagesReturn[] | null, platform
                 meta_page.data.access_token = page.access_token;
                 meta_page.data.category = page.category;
                 meta_page.data.name = page.name;
-                meta_page.data.voided = false;
+                meta_page.data.voided
+                    = false;
                 await meta_page.createUpdate(type);
 
                 if (type === 'new') {
@@ -169,6 +200,7 @@ watch(() => platform_api_list.isInitialized, async (newValue, oldValue) => {
 );
 </script>
 <template>
+    <Toaster />
     <div v-if="!componentLoad">
         <div class="flex flex-col gap-y-4 gap-x-4 xl:gap-x-12 2xl:gap-x-16">
             <Card>
