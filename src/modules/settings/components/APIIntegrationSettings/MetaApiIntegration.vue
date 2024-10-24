@@ -56,6 +56,8 @@ watch(fb_data, async (newValue, oldValue) => {
         const metaApi = await facebook_integration.exchangeForUserLongLivedToken(fb_data.value.authResponse.accessToken as string);
         if (metaApi) {
             set_fb_api(metaApi.api_account as MetaAPIAccount, metaApi)
+            await set_fb_pages()
+            await get_fb_pages()
         }
     }
 });
@@ -72,6 +74,7 @@ const set_fb_api = (metaApi: MetaAPIAccount, fbPlatform: PlatformApiData) => {
 const set_fb_pages = async (): Promise<void> => {
     fb_pages_load.value = true
     const pages = await meta_page.getWhere([{ fieldName: 'pa_id', operator: '==', value: fb_platform.value?.pa_id }])
+    console.log(pages)
     meta_pages_list.data = pages.data
     fb_pages_load.value = false
 }
@@ -81,46 +84,68 @@ const get_fb_pages = async () => {
     if (fb_api_information.value && fb_platform.value) {
         const fb_platform_id = fb_platform.value.pa_id
         const fb_pages = await mpi.get_fb_pages(fb_api_information.value.accessToken)
-        if (fb_pages && fb_pages.length !== 0) {
-            await processFacebookPages(fb_pages, fb_platform_id)
-        }
+        await processFacebookPages(fb_pages, fb_platform_id)
     }
     fb_pages_load.value = false
 }
 
-async function processFacebookPages(fb_pages: MetaPagesReturn[], platform_id: string) {
-    for (const page of fb_pages) {
-        const index_meta_page = meta_pages_list.data.findIndex(mp => mp.page_id === page.id)
-        let type: 'new' | 'update' = 'new'
-        if (index_meta_page !== -1) {
-            type = 'update'
-            meta_page.set(meta_pages_list.data[index_meta_page])
-        } else {
-            type = 'new'
-            meta_page.initialize();
-        }
-        if (meta_page.data) {
-            try {
-                const fetch_page_image = await generalAxiosInstance(`https://graph.facebook.com/v21.0/${page.id}?fields=picture&access_token=${page.access_token}`)
-                meta_page.data.picture = fetch_page_image.data.picture as MetaPictureReturn
-            } catch (error) {
-                console.log('something went wrong fetching image')
-            }
+async function processFacebookPages(fb_pages: MetaPagesReturn[] | null, platform_id: string) {
+    const previous_meta_pages = [...meta_pages_list.data]
+    console.log(previous_meta_pages)
+    const checked_previous_meta_pages = <string[]>[]
 
-            meta_page.data.pa_id = platform_id;
-            meta_page.data.page_id = page.id;
-            meta_page.data.access_token = page.access_token;
-            meta_page.data.category = page.category;
-            meta_page.data.name = page.name;
-            await meta_page.createUpdate(type);
-            if (type === 'new') {
-                meta_pages_list.data.push(meta_page.data)
+    if (fb_pages && fb_pages.length !== 0) {
+        for (const page of fb_pages) {
+            const index_meta_page = previous_meta_pages.findIndex(mp => mp.page_id === page.id)
+            let type: 'new' | 'update' = 'new'
+            if (index_meta_page !== -1) {
+                type = 'update'
+                meta_page.set(meta_pages_list.data[index_meta_page])
+            } else {
+                type = 'new'
+                meta_page.initialize();
             }
-            if (type === 'update') {
-                meta_pages_list.data[index_meta_page] = { ...meta_page.data }
+            if (meta_page.data) {
+                try {
+                    const fetch_page_image = await generalAxiosInstance(`https://graph.facebook.com/v21.0/${page.id}?fields=picture&access_token=${page.access_token}`)
+                    meta_page.data.picture = fetch_page_image.data.picture as MetaPictureReturn
+                } catch (error) {
+                    console.log('something went wrong fetching image')
+                }
+
+                meta_page.data.pa_id = platform_id;
+                meta_page.data.page_id = page.id;
+                meta_page.data.access_token = page.access_token;
+                meta_page.data.category = page.category;
+                meta_page.data.name = page.name;
+                meta_page.data.voided = false;
+                await meta_page.createUpdate(type);
+
+                if (type === 'new') {
+                    previous_meta_pages.push(meta_page.data)
+                }
+                if (type === 'update') {
+                    previous_meta_pages[index_meta_page] = { ...meta_page.data }
+                }
+                checked_previous_meta_pages.push(meta_page.data.mp_id)
             }
         }
     }
+    console.log(previous_meta_pages)
+    for (const mp of previous_meta_pages) {
+
+        const check_if_processed = checked_previous_meta_pages.find(id => id === mp.mp_id);
+        console.log(check_if_processed)
+        if (!check_if_processed) {
+            meta_page.set(mp);
+            if (meta_page.data) {
+                meta_page.data.voided = true; // Update the isActive property
+                await meta_page.createUpdate('update'); // Wait for the async operation to complete
+            }
+        }
+    }
+
+    meta_pages_list.data = [...previous_meta_pages]
 }
 
 

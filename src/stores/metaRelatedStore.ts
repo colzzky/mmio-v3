@@ -54,6 +54,7 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
                 name: '',
                 isActive: false,
                 isOnProject: false,
+                voided: false,
                 createdAt: '',
                 updatedAt: '',
             }

@@ -27,6 +27,7 @@ export interface MetaPagesData {
     category: string
     name: string
     isActive: boolean
+    voided: boolean
     isOnProject: boolean
     createdAt: Timestamp | string
     updatedAt: Timestamp | string
