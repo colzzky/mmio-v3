@@ -22,6 +22,7 @@ import type { MetaPagesData, MetaPagesReturn, MetaPictureReturn } from '@/core/t
 import generalAxiosInstance from '@/core/utils/general-axios-instance';
 import Toaster from '@/core/components/ui/toast/Toaster.vue';
 import { toast } from '@/core/components/ui/toast';
+import Switch from '@/core/components/ui/switch/Switch.vue';
 const useAuth = useAuthStore()
 const { user_auth } = useAuth
 const platformApiStore = usePlatformAPIStore()
@@ -190,6 +191,25 @@ async function processFacebookPages(fb_pages: MetaPagesReturn[] | null, platform
     meta_pages_list.data = [...previous_meta_pages]
 }
 
+const processing_isActive_switch = ref(false)
+
+const activate_fb_page = async (meta_page_index: number) => {
+    processing_isActive_switch.value = true
+    const metaPage = await meta_page.get(meta_pages_list.data[meta_page_index].mp_id)
+    if (metaPage.status && !metaPage.data.voided) {
+        metaPage.data.isActive = !metaPage.data.isActive
+        meta_page.set(metaPage.data)
+        await meta_page.createUpdate("update")
+    }
+    meta_pages_list.data[meta_page_index].isActive = !meta_pages_list.data[meta_page_index].isActive 
+    processing_isActive_switch.value = false
+
+    // meta_pages_list.data[meta_page_index].isActive = !meta_pages_list.data[meta_page_index].isActive
+    // meta_page.set(meta_pages_list.data[meta_page_index])
+    // await meta_page.createUpdate("update")
+}
+
+
 
 onMounted(() => {
     componentLoad.value = true
@@ -292,27 +312,34 @@ watch(() => platform_api_list.isInitialized, async (newValue, oldValue) => {
             </div>
             <div v-if="!fb_pages_load">
                 <div v-if="meta_pages_list.data.length">
-                    <Card v-for="page in meta_pages_list.data" :key="page.mp_id">
+                    <Card v-for="(page, index) in meta_pages_list.data" :key="page.mp_id">
                         <div class="grid-gap-4 py-4 px-4">
-                            <div class=" flex items-center space-x-4">
-                                <Avatar>
-                                    <AvatarImage :src="page.picture ? page.picture.data.url : ''" alt="@radix-vue" />
-                                    <AvatarFallback>CN</AvatarFallback>
-                                </Avatar>
-                                <div class="flex flex-col gap-3">
-                                    <div class="flex-1 space-y-1">
-                                        <p class="text-sm font-medium leading-none">
-                                            {{ page.name }}
-                                        </p>
-                                        <p class="text-sm text-muted-foreground">
-                                            {{ page.category }}
-                                        </p>
-                                        <p class="text-sm text-muted-foreground">
-                                            {{ page.page_id }}
-                                        </p>
+                            <div class=" flex items-center justify-between">
+                                <div class=" flex items-center space-x-4">
+                                    <Avatar>
+                                        <AvatarImage :src="page.picture ? page.picture.data.url : ''"
+                                            alt="@radix-vue" />
+                                        <AvatarFallback>CN</AvatarFallback>
+                                    </Avatar>
+                                    <div class="flex flex-col gap-3">
+                                        <div class="flex-1 space-y-1.5">
+                                            <p class="text-sm font-medium leading-none">
+                                                {{ page.name }} <span v-if="page.voided"
+                                                    class="ml-2 border px-3 rounded-xl border-red-500 text-red-500">Voided</span>
+                                            </p>
+                                            <p class="text-sm text-muted-foreground">
+                                                {{ page.category }}
+                                            </p>
+                                            <p class="text-sm text-muted-foreground">
+                                                {{ page.page_id }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <Switch :disabled="page.voided || processing_isActive_switch" :checked="page.isActive" @update:checked="activate_fb_page(index)"/>
                             </div>
+
                         </div>
                     </Card>
                 </div>
