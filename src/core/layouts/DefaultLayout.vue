@@ -23,9 +23,15 @@ import { useServicesStore } from '@/stores/servicesStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import type { MetaPagesData } from '../types/MetaTypes'
+import { usePlatformAPIStore } from '@/stores/platformAPIStore'
+import type { MetaAPIAccount, PlatformApiData } from '../types/PlaformAPITypes'
+import { uiHelpers } from '../utils/ui-helper'
 
 const useProject = useProjectStore()
 const user_auth = useAuthStore()
+const usePlatformApi = usePlatformAPIStore()
+const { platformAPI } = usePlatformApi
 const { project_data } = useProject
 const { page_init } = user_auth
 const router = useRouter()
@@ -52,7 +58,6 @@ const parentRoute = breadcrumbs[0]
 const project_id = ref<string>('')
 
 onMounted(async () => {
-  console.log('mounting layoutLoad...')
   layoutLoad.value = true
   //Get the Project Id
   const pj_id = route.params.pj_id as string
@@ -76,14 +81,30 @@ async function project_validation(pj_id: string): Promise<boolean> {
   if (pj_id) {
     if (!project_data.data || !project_data.isInitialized) {
       const get = await project_data.get(pj_id as string)
-      console.log(get.data)
       if (!get.status) return false
       project_data.set(get.data)
     }
-    console.log(project_data)
+    console.log(project_data.data)
     if (pj_id != project_data.data?.pj_id) return false
-    return true
-  } else return false
+    if (project_data.data.platform === 'META') {
+      const meta_page: MetaPagesData = <MetaPagesData>project_data.data.connectedAccount
+      const getPlatform = await platformAPI.get(meta_page.pa_id)
+      if (getPlatform.status) {
+        const fb_api_account = getPlatform.data.api_account as MetaAPIAccount
+        if (uiHelpers.isTokenExpired(fb_api_account.expiresIn)) {
+          toast({
+            title: 'Facebook Page Access expired',
+            description: 'You can still view this project however, if you want to continue using this project you must reauthenticate in API Integration settings',
+            variant: 'warning',
+          })
+        }
+        return true
+      } else {
+        return false
+      }
+    }
+  }
+  return false
 }
 
 async function returnToProjects(): Promise<void> {
@@ -96,7 +117,7 @@ async function returnToProjects(): Promise<void> {
 <template>
   <Toaster />
 
-  <div v-if="!layoutLoad&&page_init.initialize">
+  <div v-if="!layoutLoad && page_init.initialize">
     <!-- <MobileSidebar /> -->
     <DesktopSidebar>
       <!-- heading -->
@@ -109,10 +130,8 @@ async function returnToProjects(): Promise<void> {
         <ul role="list" class="-mx-2">
           <div class="flex flex-col gap-y-1">
             <li>
-              <RouterLink
-                :to="{ name: parentRoute, params: { pj_id: project_id } }"
-                class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
-              >
+              <RouterLink :to="{ name: parentRoute, params: { pj_id: project_id } }"
+                class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
                 <i class="material-icons text-xl">grid_view</i>
                 Dashboard
               </RouterLink>
@@ -121,8 +140,7 @@ async function returnToProjects(): Promise<void> {
             <li>
               <button
                 class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
-                @click="toggleServicesModal"
-              >
+                @click="toggleServicesModal">
                 <i class="material-icons text-xl">bookmark_border</i>
                 Manage Services
               </button>
@@ -130,8 +148,7 @@ async function returnToProjects(): Promise<void> {
             <li>
               <!-- Opens modal for this project -->
               <button
-                class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
-              >
+                class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25">
                 <i class="material-icons text-xl">settings_accessibility</i>
                 Project Settings
               </button>
@@ -143,33 +160,26 @@ async function returnToProjects(): Promise<void> {
       <!-- pinned services -->
       <Collapsible v-model:open="isPlatformServicesCollapsibleOpen" class="flex flex-col gap-y-1">
         <CollapsibleTrigger
-          class="flex w-full items-center justify-between text-xs font-bold uppercase text-primary/75"
-        >
+          class="flex w-full items-center justify-between text-xs font-bold uppercase text-primary/75">
           Pinned Services
-          <i
-            :class="[
-              'material-icons text-2xl transition-transform',
-              isPlatformServicesCollapsibleOpen && 'rotate-180',
-            ]"
-          >
+          <i :class="[
+            'material-icons text-2xl transition-transform',
+            isPlatformServicesCollapsibleOpen && 'rotate-180',
+          ]">
             arrow_drop_down
           </i>
         </CollapsibleTrigger>
         <CollapsibleContent as="ul" class="-mx-2">
           <div class="flex flex-col gap-y-1">
             <li v-for="[name, service] in pinnedServices" :key="name">
-              <RouterLink
-                :to="{ name, params: { pj_id: project_id } }"
-                class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
-              >
+              <RouterLink :to="{ name, params: { pj_id: project_id } }"
+                class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
                 <i :class="['bx text-xl', service.icon]"></i>
                 <span>
                   {{ service.label }}
                 </span>
-                <button
-                  class="grid place-content-center"
-                  @click.prevent="servicesStore.toggleServicePinnedStatus(route.path, name)"
-                >
+                <button class="grid place-content-center"
+                  @click.prevent="servicesStore.toggleServicePinnedStatus(route.path, name)">
                   <i class="material-icons text-xl">bookmark</i>
                 </button>
               </RouterLink>

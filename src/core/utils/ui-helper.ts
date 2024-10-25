@@ -87,6 +87,14 @@ export const uiHelpers = {
       unit = interval === 1 ? 'year' : 'years';
       return `${interval} ${unit} ago`;
     }
+  },
+  isTokenExpired(expirationTimestamp:number) {
+    // Convert the expiration timestamp to milliseconds
+    const expirationTimeInMillis = expirationTimestamp * 1000; // Convert to milliseconds
+    const currentTimeInMillis = Date.now(); // Get current time in milliseconds
+    
+    // Check if the token is expired
+    return currentTimeInMillis >= expirationTimeInMillis;
   }
 }
 
