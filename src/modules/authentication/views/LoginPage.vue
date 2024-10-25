@@ -35,9 +35,10 @@ const loginUser = async (email: string, password: string): Promise<void> => {
   loginLoad.value = true
   await setPersistence(auth, browserLocalPersistence).then(async () => {
     await signInWithEmailAndPassword(auth, email, password)
-      .then(() => {
+      .then(async() => {
         if (auth.currentUser) {
           user_auth.setUser(auth.currentUser)
+          await createNewUserProfile(auth.currentUser.uid)
           router.replace({ name: 'home' })
         }
       })

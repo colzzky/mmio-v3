@@ -175,6 +175,7 @@ export const useAuthStore = defineStore('authStore', () => {
         const checkUser = await user_profile.getWhere([
             { fieldName: 'uid', operator: '==', value: uid }
         ])
+        console.log('checkUser')
         console.log(checkUser)
         if (!checkUser.status || checkUser.data.length === 0) {
             const data: Pick<UserProfileData, "uid"> = {

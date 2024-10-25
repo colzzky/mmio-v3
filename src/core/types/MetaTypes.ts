@@ -29,6 +29,6 @@ export interface MetaPagesData {
     isActive: boolean
     voided: boolean
     isOnProject: boolean
-    createdAt: Timestamp | string
-    updatedAt: Timestamp | string
+    createdAt: string
+    updatedAt: string
 }

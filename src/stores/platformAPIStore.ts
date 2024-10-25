@@ -8,11 +8,12 @@ import {
 } from '@/core/utils/firebase-collections'
 import type { FirebaseOperators, FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
 import generalAxiosInstance from '@/core/utils/general-axios-instance'
-import type { DocumentData, DocumentSnapshot } from 'firebase/firestore'
+import type { DocumentData, DocumentSnapshot, Timestamp } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { useAuthStore } from './authStore'
 import type { Auth } from 'firebase/auth'
+import { uiHelpers } from '@/core/utils/ui-helper'
 
 interface PlaformApi {
   data: PlatformApiData | null
@@ -101,7 +102,28 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
     data: <PlatformApiData[]>[],
     isInitialized: <boolean>false,
     isLoading: <boolean>false,
-    lastSnapshot: <any>''
+    lastSnapshot: <any>'',
+    initializeAccountApis: async () => {
+      const useAuth = useAuthStore()
+      const { user_auth } = useAuth
+      if (user_auth.data) {
+        platform_api_list.isInitialized = false
+        platform_api_list.isLoading = true
+        const get_platform_api = await platformAPI.getWhere([{ fieldName: 'uid', operator: '==', value: user_auth.data?.uid },], undefined, [])
+        console.log(get_platform_api)
+        if (get_platform_api.status) {
+          if (get_platform_api.data.length > 0) {
+            platform_api_list.lastSnapshot = get_platform_api.data[get_platform_api.data.length - 1].pa_id;
+          }
+          get_platform_api.data.forEach(api => {
+            platform_api_list.data.push(api);
+          });
+        }
+      }
+      platform_api_list.isInitialized = true
+      platform_api_list.isLoading = false
+    }
+
   })
 
   const facebook_integration = reactive({

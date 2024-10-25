@@ -1,3 +1,4 @@
+import type { MetaPagesData } from './MetaTypes'
 import type { Timestamp } from './UniTypes'
 
 export type Platforms =
@@ -15,8 +16,9 @@ export interface ProjectData {
   uid: string
   name: string
   platform: Platforms
-  account: string
+  account_id: string // Connected page email marketing etc id
+  connectedAccount: MetaPagesData|null
   status: string
-  createdAt: Timestamp | string
-  updatedAt: Timestamp | string
+  createdAt:string
+  updatedAt:string
 }

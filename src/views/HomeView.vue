@@ -48,12 +48,13 @@ const loadMoreProjects = async () => {
       project_list.data.push({
         name: project.name,
         platform: project.platform,
-        account: project.account,
+        connectedAccount: project.connectedAccount,
+        account_id: project.account_id,
         status: project.status,
         pj_id: project.pj_id,
         uid: project.uid,
-        createdAt: uiHelpers.timestampToDateTimeAgo(project.createdAt as Timestamp),
-        updatedAt: uiHelpers.timestampToDateTimeAgo(project.updatedAt as Timestamp),
+        createdAt: project.createdAt,
+        updatedAt: project.updatedAt,
       })
     })
   }
@@ -125,16 +126,16 @@ const navigateToProject = (project: ProjectData) => {
                     <div class="flex items-center gap-x-3">
                       <i class="bx text-2xl" :class="find_icon(project.platform)"></i>
                       <div class="grid gap-0">
-                        <span class="text-sm">{{ project.name }} - {{ project.account }}</span>
+                        <span class="text-sm">{{ project.name }} - {{project.connectedAccount?.name}}</span>
                         <span class="text-xs">{{ project.pj_id }}</span>
                       </div>
                     </div>
                   </div>
                   <div class="col-span-2 text-sm text-gray-600">
-                    {{ project.createdAt }}
+                    {{ uiHelpers.timestampToDateTimeAgo(project.createdAt) }}
                   </div>
                   <div class="col-span-2 text-sm text-gray-600">
-                    {{ project.updatedAt }}
+                    {{ uiHelpers.timestampToDateTimeAgo(project.updatedAt) }}
                   </div>
                   <div class="col-span-1 text-sm text-gray-600">{{ project.status }}</div>
                   <div class="col-span-1 text-sm text-gray-600">Owner</div>

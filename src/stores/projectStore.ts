@@ -51,11 +51,11 @@ export const useProjectStore = defineStore('projectStore', () => {
     initialize() {
       this.data = {
         pj_id: '',
-        account: '',
+        account_id: '',
+        connectedAccount: null,
         uid: '',
         name: '',
         platform: '',
-
         status: '',
         createdAt: '',
         updatedAt: '',

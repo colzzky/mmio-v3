@@ -133,7 +133,7 @@ export async function postCollection<T extends keyof Collections>(
       // Get the document data
       const postData = {
         ...data,
-        updatedAt: serverTimestamp(),
+        updatedAt: new Date().toISOString(),
       }
       await updateDoc(userDocRef, { ...postData })
       return {
@@ -145,8 +145,8 @@ export async function postCollection<T extends keyof Collections>(
       if (type === 'new') {
         const postData = {
           ...data,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         }
         await setDoc(userDocRef, { ...postData })
 

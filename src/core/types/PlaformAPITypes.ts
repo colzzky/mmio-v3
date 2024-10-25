@@ -65,6 +65,6 @@ export interface PlatformApiData {
     uid: string
     platform: string
     api_account: MetaAPIAccount | EmailMarketingAPIAccount | null //This is a json stringify object like MetaAccount
-    createdAt: Timestamp | string
-    updatedAt: Timestamp | string
+    createdAt: string
+    updatedAt: string
 }

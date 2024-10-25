@@ -87,6 +87,11 @@ const populateFbApi = async (fbLoginStatus: fb.StatusResponse) => {
     const metaApi = await facebook_integration.exchangeForUserLongLivedToken(fbLoginStatus.authResponse.accessToken as string);
     if (metaApi) {
         set_fb_api(metaApi.api_account as MetaAPIAccount, metaApi)
+        const index = platform_api_list.data.findIndex(platform => platform.platform === "META");
+        if (index !== -1) {
+            platform_api_list.data.splice(index, 1);
+        }
+        platform_api_list.data.push(metaApi)
         await set_fb_pages()
         await get_fb_pages()
     }
@@ -115,6 +120,12 @@ const get_fb_pages = async () => {
         const fb_platform_id = fb_platform.value.pa_id
         const fb_pages = await mpi.get_fb_pages(fb_api_information.value.accessToken)
         await processFacebookPages(fb_pages, fb_platform_id)
+    } else {
+        toast({
+            title: 'Meta Login Error',
+            description: 'Please logged in to your FB first before exporting',
+            variant: 'destructive',
+        })
     }
     fb_pages_load.value = false
 }
@@ -194,6 +205,9 @@ watch(() => platform_api_list.isInitialized, async (newValue, oldValue) => {
         if (platform) {
             set_fb_api(platform.api_account as MetaAPIAccount, platform);
             await set_fb_pages()
+        } else {
+            fb_api_load.value = false
+            fb_pages_load.value = false
         }
     }
 }

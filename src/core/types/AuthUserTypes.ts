@@ -14,6 +14,6 @@ export interface UserProfileData {
   lastName: string
   contactEmail: string
   address: Address
-  createdAt: Timestamp | string
-  updatedAt: Timestamp | string
+  createdAt:string
+  updatedAt:string
 }

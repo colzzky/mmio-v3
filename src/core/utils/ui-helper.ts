@@ -37,32 +37,32 @@ export const uiHelpers = {
   computeExpirationDate(timestamp: number) {
     // Convert Unix timestamp to milliseconds
     const expirationDate = new Date(timestamp * 1000);
-    const options = <Intl.DateTimeFormatOptions>{ 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      second: '2-digit', 
-      hour12: true ,
+    const options = <Intl.DateTimeFormatOptions>{
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
       timeZone: 'Asia/Manila'
-  };
-  return expirationDate.toLocaleString('en-US', options).replace(',', '');
+    };
+    return expirationDate.toLocaleString('en-US', options).replace(',', '');
 
     // Return the expiration date in ISO format
   },
 
-  timestampToDateTimeAgo(timestamp: Timestamp): string {
-    // Convert seconds and nanoseconds to milliseconds
-    const date = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000);
+  timestampToDateTimeAgo(timestamp: string): string {
+    // Parse the ISO 8601 string to a Date object
+    const date = new Date(timestamp);
     const now = new Date();
 
     // Calculate the difference in seconds
-    const secondsAgo = Math.floor((now.getTime() - date.getTime()) / 1000)
+    const secondsAgo = Math.floor((now.getTime() - date.getTime()) / 1000);
 
     // Determine the appropriate time ago format
-    let interval: number
-    let unit: string
+    let interval: number;
+    let unit: string;
 
     if (secondsAgo < 60) {
       return `${secondsAgo} seconds ago`;

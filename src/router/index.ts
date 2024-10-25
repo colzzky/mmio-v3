@@ -3,6 +3,7 @@ import { routes as metaRoutes } from '@/modules/meta/routes'
 import { routes as settingsRoutes } from '@/modules/settings/routes'
 import othersRoutes from '@/modules/try/routes'
 import { useAuthStore } from '@/stores/authStore'
+import { usePlatformAPIStore } from '@/stores/platformAPIStore'
 import HomeView from '@/views/HomeView.vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
@@ -48,14 +49,18 @@ const router = createRouter({
 
 router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
+  const platformApiStore = usePlatformAPIStore()
   const { user_auth } = authStore
+  const {platform_api_list } = platformApiStore
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const nonAuth = to.matched.some((record) => record.meta.nonAuth)
   if (!from.name) {
     console.log('initializing....')
     await user_auth.initializeUser()
+    await platform_api_list.initializeAccountApis()
   }
   const check_if_userexist = await user_auth.check_user_auth()
+  console.log(check_if_userexist)
   if (requiresAuth) {
     if (!check_if_userexist) return { name: 'login' }
   }

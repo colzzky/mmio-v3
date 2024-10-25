@@ -128,12 +128,6 @@ const registrationField = reactive<RegistrationField>({
         variant: 'destructive',
       })
     }
-
-
-
-
-
-
   },
   async registerFirebase(): Promise<void> {
     await setPersistence(auth, browserLocalPersistence).then(async () => {
