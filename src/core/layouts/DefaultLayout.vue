@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/authStore'
 import ServicesModal from '../components/services-modal.vue'
 import DesktopSidebar from '../components/sidebar/desktop-sidebar.vue'
 import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar'
@@ -24,7 +25,9 @@ import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const useProject = useProjectStore()
+const user_auth = useAuthStore()
 const { project_data } = useProject
+const { page_init } = user_auth
 const router = useRouter()
 const layoutLoad = ref<boolean>(true)
 
@@ -93,7 +96,7 @@ async function returnToProjects(): Promise<void> {
 <template>
   <Toaster />
 
-  <div v-if="!layoutLoad">
+  <div v-if="!layoutLoad&&page_init.initialize">
     <!-- <MobileSidebar /> -->
     <DesktopSidebar>
       <!-- heading -->

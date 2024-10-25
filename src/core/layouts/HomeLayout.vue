@@ -8,7 +8,7 @@ import { useSidebarStore } from '@/stores/sidebarStore'
 import { Bars3Icon } from '@heroicons/vue/24/outline'
 import { ref } from 'vue'
 const useAuth = useAuthStore()
-const {  user_auth } = useAuth
+const {  user_auth,page_init } = useAuth
 const layoutLoad = ref<boolean>(false)
 
 const sidebarStore = useSidebarStore()
@@ -29,7 +29,7 @@ const navigation = [
 
 <template>
   <Toaster />
-  <div v-if="!layoutLoad">
+  <div v-if="!layoutLoad && page_init.initialize">
     <!-- <MobileSidebar /> -->
 
     <DesktopSidebar>

@@ -50,14 +50,17 @@ const router = createRouter({
 router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
   const platformApiStore = usePlatformAPIStore()
-  const { user_auth } = authStore
+  const { user_auth,page_init } = authStore
+  
   const {platform_api_list } = platformApiStore
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const nonAuth = to.matched.some((record) => record.meta.nonAuth)
   if (!from.name) {
+    page_init.initialize = false
     console.log('initializing....')
     await user_auth.initializeUser()
     await platform_api_list.initializeAccountApis()
+    page_init.initialize = true
   }
   const check_if_userexist = await user_auth.check_user_auth()
   console.log(check_if_userexist)
@@ -68,7 +71,7 @@ router.beforeEach(async (to, from) => {
     if (check_if_userexist) return { name: 'home' }
   }
 
-
+  
   return true
 })
 

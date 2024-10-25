@@ -8,6 +8,7 @@ import { postCollection, getCollection, getCollectionByField } from '@/core/util
 import { auth } from '@/core/utils/firebase-client';
 import type { DocumentData } from 'firebase/firestore';
 import { useProjectStore } from './projectStore'
+import { boolean } from 'zod'
 
 
 // type Nullable<T> = {
@@ -47,6 +48,9 @@ type UserProfileReturnData = FirebaseReturnBase & {
 
 
 export const useAuthStore = defineStore('authStore', () => {
+    const page_init=reactive({
+        initialize:<boolean>false
+    })
     const user_auth = reactive({
         data: <User | null>null,
         isInitializing: <boolean>false,
@@ -190,6 +194,7 @@ export const useAuthStore = defineStore('authStore', () => {
         projectStore.reset_state()
     }
     return {
+        page_init,
         createNewUserProfile,
         user_profile,
         user_auth
