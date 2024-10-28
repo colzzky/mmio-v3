@@ -17,15 +17,16 @@ const growthTools = inject('growthTools') as GrowthToolMap
 interface ModalInterface extends Omit<Modal, 'open'> {
   open(growthToolId: GrowthTool['id']): void
 
-  growthToolId: GrowthTool['id'] | undefined
+  growthToolId: GrowthTool['id'] | null
   deleteGrowthTool(): void
 }
 
 const modal = reactive<ModalInterface>({
   isOpen: false,
-  growthToolId: undefined,
+  growthToolId: null,
   initialState() {
     this.isOpen = false
+    this.growthToolId = null
   },
   open(growthToolId) {
     this.isOpen = true

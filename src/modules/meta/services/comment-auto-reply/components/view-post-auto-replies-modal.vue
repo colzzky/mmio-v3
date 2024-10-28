@@ -34,15 +34,15 @@ const autoRepliesByPostId = inject('autoRepliesByPostId') as AutoRepliesByIdArra
 interface ModalInterface extends Omit<Modal, 'open'> {
   open(post: Post): void
 
-  post: Post | undefined
+  post: Post | null
 }
 
 const modal = reactive<ModalInterface>({
   isOpen: false,
-  post: undefined,
+  post: null,
   initialState() {
     this.isOpen = false
-    this.post = undefined
+    this.post = null
   },
   open(post) {
     this.isOpen = true

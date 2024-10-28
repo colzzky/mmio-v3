@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import CreateEditModal from './components/create-edit-modal.vue'
 import DeleteModal from './components/delete-modal.vue'
+import type { GrowthToolType } from './utils'
 import { Button } from '@/core/components/ui/button'
 import {
   DropdownMenu,
@@ -20,24 +22,11 @@ import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { computed, provide, ref, useTemplateRef } from 'vue'
 
-type GrowthToolType =
-  | 'custom-chat-plugin'
-  | 'checkbox-plugin'
-  | 'messenger-link-plugin'
-  | 'send-to-messenger-plugin'
-
-const growthToolTypeLabels: Record<GrowthToolType, string> = {
-  'custom-chat-plugin': 'Custom Chat Plugin',
-  'checkbox-plugin': 'Checkbox Plugin',
-  'messenger-link-plugin': 'Messenger Link Plugin (M.me)',
-  'send-to-messenger-plugin': 'Send to Messenger Plugin',
-}
-
 export interface GrowthTool {
   id: number
   name: string
-  type: GrowthToolType
-  pageName: string
+  type: (typeof GrowthToolType)[number]
+  page: string
   createdAt: Date
 }
 
@@ -48,8 +37,8 @@ const growthTools = ref(
       {
         id: 1,
         name: 'Chat Support Tool',
-        type: 'custom-chat-plugin',
-        pageName: 'MarketingMaster.io',
+        type: 'Custom Chat Plugin',
+        page: 'MarketingMaster.io',
         createdAt: new Date('2023-01-15'),
       },
     ],
@@ -58,8 +47,8 @@ const growthTools = ref(
       {
         id: 2,
         name: 'Newsletter Signup',
-        type: 'checkbox-plugin',
-        pageName: 'MarketingMaster.io',
+        type: 'Checkbox Plugin',
+        page: 'MarketingMaster.io',
         createdAt: new Date('2023-03-10'),
       },
     ],
@@ -68,8 +57,8 @@ const growthTools = ref(
       {
         id: 3,
         name: 'Messenger Promo Link',
-        type: 'messenger-link-plugin',
-        pageName: 'MarketingMaster.io',
+        type: 'Messenger Link Plugin (M.me)',
+        page: 'MarketingMaster.io',
         createdAt: new Date('2023-05-22'),
       },
     ],
@@ -78,8 +67,8 @@ const growthTools = ref(
       {
         id: 4,
         name: 'Send to Messenger Offer',
-        type: 'send-to-messenger-plugin',
-        pageName: 'MarketingMaster.io',
+        type: 'Send to Messenger Plugin',
+        page: 'MarketingMaster.io',
         createdAt: new Date('2023-08-02'),
       },
     ],
@@ -109,6 +98,7 @@ function cloneGrowthTool(growthToolId: GrowthTool['id']) {
   })
 }
 
+const createEditModal = useTemplateRef('createEditModal')
 const deleteModalRef = useTemplateRef('deleteModal')
 </script>
 
@@ -116,7 +106,7 @@ const deleteModalRef = useTemplateRef('deleteModal')
   <DefaultLayout>
     <Main class="flex flex-col gap-y-4">
       <template #heading>Growth Tools</template>
-      <Button class="gap-x-2 self-end">
+      <Button class="gap-x-2 self-end" @click="createEditModal?.modal.open({ intent: 'create' })">
         <i class="bx bx-plus text-xl" />
         Create Growth Tool
       </Button>
@@ -133,8 +123,8 @@ const deleteModalRef = useTemplateRef('deleteModal')
         <TableBody>
           <TableRow v-for="[growthToolId, growthTool] in sortedGrowthTools" :key="growthToolId">
             <TableCell>{{ growthTool.name }}</TableCell>
-            <TableCell>{{ growthToolTypeLabels[growthTool.type] }}</TableCell>
-            <TableCell>{{ growthTool.pageName }}</TableCell>
+            <TableCell>{{ growthTool.type }}</TableCell>
+            <TableCell>{{ growthTool.page }}</TableCell>
             <TableCell>
               {{ uiHelpers.formatDateTimeAgo(growthTool.createdAt.toISOString()) }}
             </TableCell>
@@ -145,7 +135,10 @@ const deleteModalRef = useTemplateRef('deleteModal')
                     <i class="material-icons text-md">more_vert</i>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem class="gap-x-3" disabled>
+                    <DropdownMenuItem
+                      class="gap-x-3"
+                      @click="createEditModal?.modal.open({ intent: 'edit', growthToolId })"
+                    >
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
@@ -169,6 +162,7 @@ const deleteModalRef = useTemplateRef('deleteModal')
       </Table>
     </Main>
 
+    <CreateEditModal ref="createEditModal" />
     <DeleteModal ref="deleteModal" />
   </DefaultLayout>
 </template>

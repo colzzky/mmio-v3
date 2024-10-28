@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import CreateEditFlowModal from './components/create-edit-flow-modal.vue'
-import DeleteFlowModal from './components/delete-flow-modal.vue'
+import CreateEditModal from './components/create-edit-modal.vue'
+import DeleteModal from './components/delete-modal.vue'
 import { Badge } from '@/core/components/ui/badge'
 import { Button } from '@/core/components/ui/button'
 import {
@@ -30,10 +30,11 @@ export type Flow = {
 }
 
 const flows = ref(
-  new Map<Flow['id'], Omit<Flow, 'id'>>([
+  new Map<Flow['id'], Flow>([
     [
       174924,
       {
+        id: 174924,
         name: 'Coupon Code Generator Demo',
         status: 'active',
         createdAt: new Date('2024-05-08'),
@@ -42,6 +43,7 @@ const flows = ref(
     [
       173482,
       {
+        id: 173482,
         name: 'Chatbot AI Article Generator',
         status: 'active',
         createdAt: new Date('2024-02-19'),
@@ -50,6 +52,7 @@ const flows = ref(
     [
       173406,
       {
+        id: 173406,
         name: 'Makati Event Ads',
         status: 'active',
         createdAt: new Date('2024-02-14'),
@@ -58,6 +61,7 @@ const flows = ref(
     [
       172677,
       {
+        id: 172677,
         name: 'Timegap Test 2024',
         status: 'active',
         createdAt: new Date('2024-01-06'),
@@ -66,6 +70,7 @@ const flows = ref(
     [
       171319,
       {
+        id: 171319,
         name: 'Food Ordering Bot',
         status: 'active',
         createdAt: new Date('2023-10-08'),
@@ -100,14 +105,15 @@ function handleCloneFlow(flowId: Flow['id']) {
   // @temporary: get the highest flow id and increment it by 1
   const newFlowId = Math.max(...Array.from(flows.value.keys())) + 1
   flows.value.set(newFlowId, {
+    id: newFlowId,
     name: `${flow.name} Clone`,
     status: flow.status,
     createdAt: new Date(),
   })
 }
 
-const createEditFlowModalRef = useTemplateRef('createEditFlowModal')
-const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
+const createEditModalRef = useTemplateRef('createEditModal')
+const deleteModalRef = useTemplateRef('deleteModal')
 </script>
 
 <template>
@@ -116,7 +122,7 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
       <template #heading>Chatbot Flow Builder</template>
       <Button
         class="gap-x-2 self-end"
-        @click="createEditFlowModalRef?.modal.open({ intent: 'create' })"
+        @click="createEditModalRef?.modal.open({ intent: 'create' })"
       >
         <i class="bx bx-plus text-xl" />
         Create Messenger Flow
@@ -131,7 +137,7 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="[id, flow] in sortedFlows" :key="id">
+          <TableRow v-for="[flowId, flow] in sortedFlows" :key="flowId">
             <TableCell>{{ flow.name }}</TableCell>
             <TableCell>
               <Badge>
@@ -150,12 +156,12 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
                   <DropdownMenuContent>
                     <DropdownMenuItem
                       class="gap-x-3"
-                      @click="createEditFlowModalRef?.modal.open({ intent: 'edit', flowId: id })"
+                      @click="createEditModalRef?.modal.open({ intent: 'edit', flowId })"
                     >
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" @click="handleToggleFlowStatus(id)">
+                    <DropdownMenuItem class="gap-x-3" @click="handleToggleFlowStatus(flowId)">
                       <i
                         :class="[
                           'bx text-xl',
@@ -164,7 +170,7 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
                       />
                       Toggle Status
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" @click="handleCloneFlow(id)">
+                    <DropdownMenuItem class="gap-x-3" @click="handleCloneFlow(flowId)">
                       <i class="bx bx-copy text-xl" />
                       Clone
                     </DropdownMenuItem>
@@ -176,7 +182,7 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
                       <i class="bx bxs-error text-xl" />
                       View Error Logs
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" @click="deleteFlowModalRef?.modal.open(id)">
+                    <DropdownMenuItem class="gap-x-3" @click="deleteModalRef?.modal.open(flowId)">
                       <i class="bx bx-trash text-xl" />
                       Delete
                     </DropdownMenuItem>
@@ -189,7 +195,7 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
       </Table>
     </Main>
 
-    <CreateEditFlowModal ref="createEditFlowModal" />
-    <DeleteFlowModal ref="deleteFlowModal" />
+    <CreateEditModal ref="createEditModal" />
+    <DeleteModal ref="deleteModal" />
   </DefaultLayout>
 </template>

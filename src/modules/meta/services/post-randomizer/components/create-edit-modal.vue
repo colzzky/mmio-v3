@@ -28,9 +28,8 @@ const campaigns = inject('campaigns') as CampaignsMap
 interface ModalInterface extends Omit<Modal, 'open'> {
   open(args: { intent: 'create' } | { intent: 'edit'; campaignId: Campaign['id'] }): void
 
-  campaignId: Campaign['id'] | null
   intent: 'create' | 'edit' | null
-  form: Omit<Campaign, 'id' | 'status' | 'createdAt'>
+  form: Omit<Campaign, 'status' | 'createdAt'>
   submitForm(): void
   createCampaign(): void
   editCampaign(): void
@@ -39,8 +38,8 @@ interface ModalInterface extends Omit<Modal, 'open'> {
 const modal = reactive<ModalInterface>({
   isOpen: false,
   intent: null,
-  campaignId: null,
   form: {
+    id: 0,
     mediaSource: '',
     name: '',
     publishedTo: {},
@@ -49,8 +48,8 @@ const modal = reactive<ModalInterface>({
   initialState() {
     this.isOpen = false
     this.intent = null
-    this.campaignId = null
     this.form = {
+      id: 0,
       mediaSource: '',
       name: '',
       publishedTo: {},
@@ -64,8 +63,13 @@ const modal = reactive<ModalInterface>({
       const campaign = campaigns.value.get(args.campaignId)
       if (!campaign) throw new Error('Campaign not found')
 
-      this.campaignId = args.campaignId
-      this.form = { ...campaign }
+      this.form = {
+        id: campaign.id,
+        mediaSource: campaign.mediaSource,
+        name: campaign.name,
+        publishedTo: campaign.publishedTo,
+        duration: campaign.duration,
+      }
     }
 
     this.isOpen = true
@@ -80,15 +84,22 @@ const modal = reactive<ModalInterface>({
   createCampaign() {
     // @temporary: get the highest campaign id and increment it by 1
     const newCampaignId = Math.max(...Array.from(campaigns.value.keys())) + 1
-    campaigns.value.set(newCampaignId, { ...this.form, status: 'inactive', createdAt: new Date() })
+    campaigns.value.set(newCampaignId, {
+      ...this.form,
+      id: newCampaignId,
+      status: 'inactive',
+      createdAt: new Date(),
+    })
   },
   editCampaign() {
-    if (!this.campaignId) throw new Error('No Campaign ID value')
-
-    const campaign = campaigns.value.get(this.campaignId)
+    const campaign = campaigns.value.get(this.form.id)
     if (!campaign) throw new Error('Campaign not found')
 
-    campaigns.value.set(this.campaignId, { ...campaign, ...this.form })
+    campaigns.value.set(this.form.id, {
+      ...this.form,
+      status: campaign.status,
+      createdAt: campaign.createdAt,
+    })
   },
 })
 
@@ -101,19 +112,21 @@ defineExpose({
   <Dialog v-model:open="modal.isOpen" @update:open="modal.close()">
     <DialogContent class="gap-y-8">
       <DialogHeader>
-        <DialogTitle v-if="modal.intent === 'create'"> Create Campaign </DialogTitle>
-        <DialogTitle v-else-if="modal.intent === 'edit'"> Edit Campaign </DialogTitle>
-        <DialogDescription v-if="modal.intent === 'create'">
-          Enter the campaign details to create a new campaign.
-        </DialogDescription>
-        <DialogDescription v-else-if="modal.intent === 'edit'">
-          Enter the campaign details to edit this campaign.
-        </DialogDescription>
+        <template v-if="modal.intent === 'create'">
+          <DialogTitle>Create Campaign</DialogTitle>
+          <DialogDescription>
+            Enter the campaign details to create a new campaign.
+          </DialogDescription>
+        </template>
+        <template v-else>
+          <DialogTitle>Edit Campaign</DialogTitle>
+          <DialogDescription> Enter the campaign details to edit this campaign. </DialogDescription>
+        </template>
       </DialogHeader>
-      <form id="campaignForm" class="flex flex-col gap-y-4" @submit.prevent="modal.submitForm()">
+      <form id="form" class="flex flex-col gap-y-4" @submit.prevent="modal.submitForm()">
         <div class="flex flex-col gap-y-2">
           <Label for="mediaSource">Media Source</Label>
-          <Select id="mediaSource" v-model="modal.form.mediaSource">
+          <Select id="mediaSource" v-model="modal.form.mediaSource" required>
             <SelectTrigger>
               <SelectValue placeholder="Select Source" />
             </SelectTrigger>
@@ -139,7 +152,7 @@ defineExpose({
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="users">Instagram Business</Label>
-          <Select id="users" v-model="modal.form.publishedTo.users">
+          <Select id="users" v-model="modal.form.publishedTo.users" required>
             <SelectTrigger>
               <SelectValue placeholder="Select Instagram Business" />
             </SelectTrigger>
@@ -154,7 +167,7 @@ defineExpose({
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="pages">Pages</Label>
-          <Select id="pages" v-model="modal.form.publishedTo.pages">
+          <Select id="pages" v-model="modal.form.publishedTo.pages" required>
             <SelectTrigger>
               <SelectValue placeholder="Select Pages" />
             </SelectTrigger>
@@ -169,7 +182,7 @@ defineExpose({
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="groups">Groups</Label>
-          <Select id="groups" v-model="modal.form.publishedTo.groups">
+          <Select id="groups" v-model="modal.form.publishedTo.groups" required>
             <SelectTrigger>
               <SelectValue placeholder="Select Groups" />
             </SelectTrigger>
@@ -201,9 +214,8 @@ defineExpose({
       </form>
       <DialogFooter>
         <Button variant="secondary" @click="modal.close()">Cancel</Button>
-        <Button v-if="modal.intent === 'create'" type="submit" form="campaignForm"> Create </Button>
-        <Button v-else-if="modal.intent === 'edit'" type="submit" form="campaignForm">
-          Edit
+        <Button type="submit" form="form">
+          {{ modal.intent === 'create' ? 'Create' : 'Edit' }}
         </Button>
       </DialogFooter>
     </DialogContent>

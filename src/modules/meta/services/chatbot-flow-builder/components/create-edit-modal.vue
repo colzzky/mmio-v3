@@ -19,9 +19,8 @@ const flows = inject('flows') as FlowsMap
 interface ModalInterface extends Omit<Modal, 'open'> {
   open(args: { intent: 'create' } | { intent: 'edit'; flowId: Flow['id'] }): void
 
-  flowId: Flow['id'] | null
   intent: 'create' | 'edit' | null
-  form: Pick<Flow, 'name'>
+  form: Omit<Flow, 'status' | 'createdAt'>
   submitForm(): void
   createFlow(): void
   editFlow(): void
@@ -30,15 +29,15 @@ interface ModalInterface extends Omit<Modal, 'open'> {
 const modal = reactive<ModalInterface>({
   isOpen: false,
   intent: null,
-  flowId: null,
   form: {
+    id: 0,
     name: '',
   },
   initialState() {
     this.isOpen = false
     this.intent = null
-    this.flowId = null
     this.form = {
+      id: 0,
       name: '',
     }
   },
@@ -49,8 +48,10 @@ const modal = reactive<ModalInterface>({
       const flow = flows.value.get(args.flowId)
       if (!flow) throw new Error('Flow not found')
 
-      this.flowId = args.flowId
-      this.form = { ...flow }
+      this.form = {
+        id: flow.id,
+        name: flow.name,
+      }
     }
 
     this.isOpen = true
@@ -67,17 +68,20 @@ const modal = reactive<ModalInterface>({
     const newFlowId = Math.max(...Array.from(flows.value.keys())) + 1
     flows.value.set(newFlowId, {
       ...this.form,
+      id: newFlowId,
       status: 'inactive',
       createdAt: new Date(),
     })
   },
   editFlow() {
-    if (!this.flowId) throw new Error('No Flow ID value')
-
-    const flow = flows.value.get(this.flowId)
+    const flow = flows.value.get(this.form.id)
     if (!flow) throw new Error('Flow not found')
 
-    flows.value.set(this.flowId, { ...flow, name: this.form.name })
+    flows.value.set(this.form.id, {
+      ...this.form,
+      status: flow.status,
+      createdAt: flow.createdAt,
+    })
   },
 })
 
@@ -90,16 +94,16 @@ defineExpose({
   <Dialog v-model:open="modal.isOpen" @update:open="modal.close()">
     <DialogContent class="gap-y-8">
       <DialogHeader>
-        <DialogTitle v-if="modal.intent === 'create'"> Create Flow </DialogTitle>
-        <DialogTitle v-else-if="modal.intent === 'edit'"> Edit Flow </DialogTitle>
-        <DialogDescription v-if="modal.intent === 'create'">
-          Enter the flow details to create a new flow.
-        </DialogDescription>
-        <DialogDescription v-else-if="modal.intent === 'edit'">
-          Enter the flow details to edit this flow.
-        </DialogDescription>
+        <template v-if="modal.intent === 'create'">
+          <DialogTitle>Create Flow</DialogTitle>
+          <DialogDescription> Enter the flow details to create a new flow. </DialogDescription>
+        </template>
+        <template v-else>
+          <DialogTitle>Edit Flow</DialogTitle>
+          <DialogDescription> Enter the flow details to edit this flow. </DialogDescription>
+        </template>
       </DialogHeader>
-      <form id="flowForm" class="flex flex-col gap-y-4" @submit.prevent="modal.submitForm()">
+      <form id="form" class="flex flex-col gap-y-4" @submit.prevent="modal.submitForm()">
         <div class="flex flex-col gap-y-2">
           <Label for="name">Name</Label>
           <Input
@@ -114,8 +118,9 @@ defineExpose({
       </form>
       <DialogFooter>
         <Button variant="secondary" @click="modal.close()">Cancel</Button>
-        <Button v-if="modal.intent === 'create'" type="submit" form="flowForm"> Create </Button>
-        <Button v-else-if="modal.intent === 'edit'" type="submit" form="flowForm"> Edit </Button>
+        <Button type="submit" form="form">
+          {{ modal.intent === 'create' ? 'Create' : 'Edit' }}
+        </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
