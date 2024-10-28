@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/core/components/ui/dropdown-menu'
 import Main from '@/core/components/ui/main.vue'
+import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
 import {
   Table,
   TableBody,
@@ -20,7 +21,9 @@ import {
 } from '@/core/components/ui/table'
 import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { computed, provide, ref, useTemplateRef } from 'vue'
+import { useMetaRelatedStore } from '@/stores/metaRelatedStore'
+import { useProjectStore } from '@/stores/projectStore'
+import { computed, onMounted, provide, ref, useTemplateRef, watch } from 'vue'
 
 export type Flow = {
   id: number
@@ -28,6 +31,73 @@ export type Flow = {
   status: 'inactive' | 'active'
   createdAt: Date
 }
+
+const metaStore = useMetaRelatedStore()
+const useProject = useProjectStore()
+const { chat_bot_flow, chat_bot_flow_list } = metaStore
+const { project_data } = useProject
+
+onMounted(async () => {
+  if (project_data.isInitialized && project_data.data?.pj_id) {
+    console.log('project initlized')
+    await loadChatBotFlows()
+    chat_bot_flow_list.isInitialized = true
+  }else{
+    console.log('project not initlized')
+  }
+})
+
+
+const loadChatBotFlows = async () => {
+  chat_bot_flow_list.resetData()
+  const get_flow = await chat_bot_flow.getWhere([
+    { fieldName: 'pj_id', operator: '==', value: project_data.data?.pj_id },
+
+  ], 10, [{
+    fieldName:'updatedAt', direction:'asc'
+  }], chat_bot_flow_list.lastSnapshot)
+
+  console.log(get_flow)
+
+  if (get_flow.status) {
+    if (get_flow.data.length > 0) {
+      chat_bot_flow_list.lastSnapshot = get_flow.data[get_flow.data.length - 1].cb_id
+    }
+    get_flow.data.forEach((flow) => {
+      chat_bot_flow_list.data.push(flow)
+    })
+  }
+  chat_bot_flow_list.isLoading = false
+  chat_bot_flow_list.isInitialized = true
+}
+
+
+watch(() => project_data.isInitialized, async (newValue, oldValue) => {
+  if (newValue) {
+    if (!chat_bot_flow_list.isInitialized) {
+      await loadChatBotFlows()
+    }
+
+
+    // const project = platform_api_list.data.find(api => api.platform === 'META');
+    // console.log(platform);
+    // if (platform) {
+    //     set_fb_api(platform.api_account as MetaAPIAccount, platform);
+    //     await set_fb_pages()
+    // } else {
+    //     fb_api_load.value = false
+    //     fb_pages_load.value = false
+    // }
+  }
+}
+);
+
+
+
+
+
+
+
 
 const flows = ref(
   new Map<Flow['id'], Omit<Flow, 'id'>>([
@@ -114,10 +184,7 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
   <DefaultLayout>
     <Main class="flex flex-col gap-y-4">
       <template #heading>Chatbot Flow Builder</template>
-      <Button
-        class="gap-x-2 self-end"
-        @click="createEditFlowModalRef?.modal.open({ intent: 'create' })"
-      >
+      <Button class="gap-x-2 self-end" @click="createEditFlowModalRef?.modal.open({ intent: 'create' })">
         <i class="bx bx-plus text-xl" />
         Create Messenger Flow
       </Button>
@@ -130,8 +197,8 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
             <TableHead class="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
-        <TableBody>
-          <TableRow v-for="[id, flow] in sortedFlows" :key="id">
+        <TableBody v-if="!chat_bot_flow_list.isLoading">
+          <TableRow v-for="(flow, index) in chat_bot_flow_list.data" :key="flow.cb_id">
             <TableCell>{{ flow.name }}</TableCell>
             <TableCell>
               <Badge>
@@ -139,8 +206,8 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
               </Badge>
             </TableCell>
             <TableCell class="whitespace-nowrap">{{
-              uiHelpers.formatDateTimeAgo(flow.createdAt.toDateString())
-            }}</TableCell>
+              uiHelpers.timestampToDateTimeAgo(flow.updatedAt)
+              }}</TableCell>
             <TableCell>
               <div class="grid place-content-center">
                 <DropdownMenu>
@@ -148,23 +215,19 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
                     <i class="material-icons text-md">more_vert</i>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem
-                      class="gap-x-3"
-                      @click="createEditFlowModalRef?.modal.open({ intent: 'edit', flowId: id })"
-                    >
+                    <DropdownMenuItem class="gap-x-3"
+                      @click="createEditFlowModalRef?.modal.open({ intent: 'edit', flowId: flow.cb_id })">
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" @click="handleToggleFlowStatus(id)">
-                      <i
-                        :class="[
-                          'bx text-xl',
-                          flow.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
-                        ]"
-                      />
+                    <DropdownMenuItem class="gap-x-3">
+                      <i :class="[
+                        'bx text-xl',
+                        flow.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                      ]" />
                       Toggle Status
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" @click="handleCloneFlow(id)">
+                    <DropdownMenuItem class="gap-x-3">
                       <i class="bx bx-copy text-xl" />
                       Clone
                     </DropdownMenuItem>
@@ -176,13 +239,26 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
                       <i class="bx bxs-error text-xl" />
                       View Error Logs
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" @click="deleteFlowModalRef?.modal.open(id)">
+                    <DropdownMenuItem class="gap-x-3">
                       <i class="bx bx-trash text-xl" />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
+            </TableCell>
+          </TableRow>
+        </TableBody>
+        <TableBody v-else>
+          <TableRow>
+            <TableCell>
+              <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
+            </TableCell>
+            <TableCell>
+              <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
+            </TableCell>
+            <TableCell>
+              <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
             </TableCell>
           </TableRow>
         </TableBody>

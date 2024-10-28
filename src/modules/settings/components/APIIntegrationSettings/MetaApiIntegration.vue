@@ -201,7 +201,7 @@ const activate_fb_page = async (meta_page_index: number) => {
         meta_page.set(metaPage.data)
         await meta_page.createUpdate("update")
     }
-    meta_pages_list.data[meta_page_index].isActive = !meta_pages_list.data[meta_page_index].isActive 
+    meta_pages_list.data[meta_page_index].isActive = !meta_pages_list.data[meta_page_index].isActive
     processing_isActive_switch.value = false
 
     // meta_pages_list.data[meta_page_index].isActive = !meta_pages_list.data[meta_page_index].isActive
@@ -337,7 +337,8 @@ watch(() => platform_api_list.isInitialized, async (newValue, oldValue) => {
                                     </div>
                                 </div>
 
-                                <Switch :disabled="page.voided || processing_isActive_switch" :checked="page.isActive" @update:checked="activate_fb_page(index)"/>
+                                <Switch :disabled="page.voided || processing_isActive_switch" :checked="page.isActive"
+                                    @update:checked="activate_fb_page(index)" />
                             </div>
 
                         </div>

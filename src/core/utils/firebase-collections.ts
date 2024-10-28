@@ -1,4 +1,4 @@
-import type { UserProfileData, ProjectData,PlatformApiData, MetaPagesData} from '@/core/utils/types'
+import type { UserProfileData, ProjectData,PlatformApiData, MetaPagesData, ChatBotFlowData} from '@/core/utils/types'
 import { firestore } from './firebase-client'
 import {
   collection,
@@ -9,6 +9,7 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  Timestamp,
   setDoc,
   startAfter,
   updateDoc,
@@ -21,6 +22,7 @@ type Collections = {
   projects: 'pj_id'
   platform_api:'pa_id'
   meta_pages:'mp_id'
+  chat_bot_flow:'cb_id'
 }
 
 type CollectionFields = {
@@ -28,6 +30,8 @@ type CollectionFields = {
   projects: keyof ProjectData;
   platform_api: keyof PlatformApiData;
   meta_pages: keyof MetaPagesData;
+  chat_bot_flow:keyof ChatBotFlowData;
+  
 };
 
 export type FirebaseOperators = '==' | '!=' | '<' | '<=' | '>' | '>=' | 'array-contains' | 'array-contains-any' | 'in' | 'not-in'
@@ -74,7 +78,7 @@ export async function getCollectionByField<
   // Apply order conditions
   if (orderConditions) {
     for (const condition of orderConditions) {
-      q = query(q, orderBy(condition.fieldName as string, condition.direction ? 'asc': condition.direction));
+      q = query(q, orderBy(condition.fieldName as string, !condition.direction? 'asc':condition.direction));
     }
   }
 
@@ -97,7 +101,10 @@ export async function getCollectionByField<
   try {
     const querySnapshot = await getDocs(q) // Fetch the documents
     if (!querySnapshot.empty) {
-      const data = querySnapshot.docs.map((doc) => ({ ...doc.data() })) // Include document ID if needed
+      const data = querySnapshot.docs.map((doc) => ({ ...doc.data(),
+        createdAt:doc.data().createdAt.toDate().toISOString(),
+        updatedAt: doc.data().updatedAt.toDate().toISOString(),
+       })) // Include document ID if needed
       return {
         status: true,
         data: data,
@@ -133,26 +140,32 @@ export async function postCollection<T extends keyof Collections>(
       // Get the document data
       const postData = {
         ...data,
-        updatedAt: new Date().toISOString(),
+        updatedAt: Timestamp.fromDate(new Date()),
       }
       await updateDoc(userDocRef, { ...postData })
       return {
         status: true,
-        data: { ...postData },
+        data: { ...postData,
+          createdAt:postData.createdAt.toDate().toISOString(),
+          updatedAt: postData.updatedAt.toDate().toISOString(),
+         },
         error: '',
       }
     } else {
       if (type === 'new') {
         const postData = {
           ...data,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          createdAt: Timestamp.fromDate(new Date()),
+          updatedAt: Timestamp.fromDate(new Date()),
         }
-        await setDoc(userDocRef, { ...postData })
+        await setDoc(userDocRef, { ...postData})
 
         return {
           status: true,
-          data: { ...postData },
+          data: { ...postData,
+            createdAt:postData.createdAt.toDate().toISOString(),
+            updatedAt: postData.updatedAt.toDate().toISOString(),
+           },
           error: '',
         }
       }

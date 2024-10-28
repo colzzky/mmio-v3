@@ -32,3 +32,18 @@ export interface MetaPagesData {
     createdAt: string
     updatedAt: string
 }
+
+/** Meta Services */
+
+export interface ChatBotFlowData{
+    cb_id:string
+    pj_id:string // Meta_page_id
+    name:string
+    dataFlow:string // This is where flow data is needed
+    status:string
+    isEnabled:string
+    createdAt: string
+    updatedAt: string
+}
+
+/** Meta Services */

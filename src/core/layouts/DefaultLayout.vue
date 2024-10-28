@@ -23,28 +23,17 @@ import { useServicesStore } from '@/stores/servicesStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { MetaPagesData } from '../types/MetaTypes'
 import { usePlatformAPIStore } from '@/stores/platformAPIStore'
-import type { MetaAPIAccount, PlatformApiData } from '../types/PlaformAPITypes'
 import { uiHelpers } from '../utils/ui-helper'
 
 const useProject = useProjectStore()
-const user_auth = useAuthStore()
-const usePlatformApi = usePlatformAPIStore()
-const { platformAPI } = usePlatformApi
-const { project_data } = useProject
-const { page_init } = user_auth
+const { project_data, project_ui_page } = useProject
 const router = useRouter()
-const layoutLoad = ref<boolean>(true)
-
-const sidebarStore = useSidebarStore()
 const route = useRoute()
+const sidebarStore = useSidebarStore()
 const heading = sidebarStore.getServiceHeading(route.path)
-
 const isPlatformServicesCollapsibleOpen = ref(true)
-
 const isServicesModalOpen = ref(false)
-
 const servicesStore = useServicesStore()
 const services = servicesStore.getServiceLinks(route.path)
 const pinnedServices = computed(() => [...services].filter(([, service]) => service.pinned))
@@ -55,57 +44,33 @@ function toggleServicesModal() {
 
 const breadcrumbs = route.path.split('/').slice(3)
 const parentRoute = breadcrumbs[0]
-const project_id = ref<string>('')
+const layoutInitialized = ref<boolean>(false)
 
 onMounted(async () => {
-  layoutLoad.value = true
   //Get the Project Id
-  const pj_id = route.params.pj_id as string
-  const validate_project = await project_validation(pj_id)
-  if (!validate_project) {
-    toast({
-      title: 'Project does not exist',
-      description: 'Please choose a project first before proceeding',
-      variant: 'destructive',
-    })
-    router.push({ name: 'home' })
-  } else {
-    if (project_data.data) {
-      project_id.value = project_data.data.pj_id
+  if (project_ui_page.project_id != route.params.pj_id && !layoutInitialized.value) {
+    const pj_id = route.params.pj_id as string
+    project_ui_page.project_id = pj_id
+
+    /** Do something here before intilizing Project Data. Data like users etc */
+    await uiHelpers.timeout(2000);
+
+    project_ui_page.isInitialize = true
+
+    
+
+    const validate_project = await project_ui_page.initializeProjData()
+    if (!validate_project) {
+      toast({
+        title: 'Project does not exist',
+        description: 'Please choose a project first before proceeding',
+        variant: 'destructive',
+      })
+      router.push({ name: 'home' })
     }
   }
-  layoutLoad.value = false
 })
 
-async function project_validation(pj_id: string): Promise<boolean> {
-  if (pj_id) {
-    if (!project_data.data || !project_data.isInitialized) {
-      const get = await project_data.get(pj_id as string)
-      if (!get.status) return false
-      project_data.set(get.data)
-    }
-    console.log(project_data.data)
-    if (pj_id != project_data.data?.pj_id) return false
-    if (project_data.data.platform === 'META') {
-      const meta_page: MetaPagesData = <MetaPagesData>project_data.data.connectedAccount
-      const getPlatform = await platformAPI.get(meta_page.pa_id)
-      if (getPlatform.status) {
-        const fb_api_account = getPlatform.data.api_account as MetaAPIAccount
-        if (uiHelpers.isTokenExpired(fb_api_account.expiresIn)) {
-          toast({
-            title: 'Facebook Page Access expired',
-            description: 'You can still view this project however, if you want to continue using this project you must reauthenticate in API Integration settings',
-            variant: 'warning',
-          })
-        }
-        return true
-      } else {
-        return false
-      }
-    }
-  }
-  return false
-}
 
 async function returnToProjects(): Promise<void> {
   project_data.resetData()
@@ -117,7 +82,7 @@ async function returnToProjects(): Promise<void> {
 <template>
   <Toaster />
 
-  <div v-if="!layoutLoad && page_init.initialize">
+  <div v-if="project_ui_page.isInitialize">
     <!-- <MobileSidebar /> -->
     <DesktopSidebar>
       <!-- heading -->
@@ -130,7 +95,7 @@ async function returnToProjects(): Promise<void> {
         <ul role="list" class="-mx-2">
           <div class="flex flex-col gap-y-1">
             <li>
-              <RouterLink :to="{ name: parentRoute, params: { pj_id: project_id } }"
+              <RouterLink :to="{ name: parentRoute, params: { pj_id: project_ui_page.project_id } }"
                 class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
                 <i class="material-icons text-xl">grid_view</i>
                 Dashboard
@@ -172,7 +137,7 @@ async function returnToProjects(): Promise<void> {
         <CollapsibleContent as="ul" class="-mx-2">
           <div class="flex flex-col gap-y-1">
             <li v-for="[name, service] in pinnedServices" :key="name">
-              <RouterLink :to="{ name, params: { pj_id: project_id } }"
+              <RouterLink :to="{ name, params: { pj_id: project_ui_page.project_id } }"
                 class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
                 <i :class="['bx text-xl', service.icon]"></i>
                 <span>

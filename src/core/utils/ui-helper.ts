@@ -95,7 +95,12 @@ export const uiHelpers = {
     
     // Check if the token is expired
     return currentTimeInMillis >= expirationTimeInMillis;
+  },
+
+  async timeout(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
+
 
 
