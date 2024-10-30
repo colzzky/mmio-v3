@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import CreateEditFlowModal from './components/create-edit-flow-modal.vue'
-import DeleteFlowModal from './components/delete-flow-modal.vue'
+import CreateEditModal from './components/create-edit-modal.vue'
+import DeleteModal from './components/delete-modal.vue'
 import { Badge } from '@/core/components/ui/badge'
 import { Button } from '@/core/components/ui/button'
 import {
@@ -26,7 +26,7 @@ import { useProjectStore } from '@/stores/projectStore'
 import { computed, onMounted, provide, ref, useTemplateRef, watch } from 'vue'
 
 export type Flow = {
-  id: number
+  id: string
   name: string
   status: 'inactive' | 'active'
   createdAt: Date
@@ -99,92 +99,98 @@ watch(() => project_data.isInitialized, async (newValue, oldValue) => {
 
 
 
-const flows = ref(
-  new Map<Flow['id'], Omit<Flow, 'id'>>([
-    [
-      174924,
-      {
-        name: 'Coupon Code Generator Demo',
-        status: 'active',
-        createdAt: new Date('2024-05-08'),
-      },
-    ],
-    [
-      173482,
-      {
-        name: 'Chatbot AI Article Generator',
-        status: 'active',
-        createdAt: new Date('2024-02-19'),
-      },
-    ],
-    [
-      173406,
-      {
-        name: 'Makati Event Ads',
-        status: 'active',
-        createdAt: new Date('2024-02-14'),
-      },
-    ],
-    [
-      172677,
-      {
-        name: 'Timegap Test 2024',
-        status: 'active',
-        createdAt: new Date('2024-01-06'),
-      },
-    ],
-    [
-      171319,
-      {
-        name: 'Food Ordering Bot',
-        status: 'active',
-        createdAt: new Date('2023-10-08'),
-      },
-    ],
-  ]),
-)
-const sortedFlows = computed(() =>
-  Array.from(flows.value.entries()).sort(
-    ([, a], [, b]) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  ),
-)
-export type FlowsMap = typeof flows
-provide('flows', flows)
+// const flows = ref(
+//   new Map<Flow['id'], Flow>([
+//     [
+//       174924,
+//       {
+//         id: 174924,
+//         name: 'Coupon Code Generator Demo',
+//         status: 'active',
+//         createdAt: new Date('2024-05-08'),
+//       },
+//     ],
+//     [
+//       173482,
+//       {
+//         id: 173482,
+//         name: 'Chatbot AI Article Generator',
+//         status: 'active',
+//         createdAt: new Date('2024-02-19'),
+//       },
+//     ],
+//     [
+//       173406,
+//       {
+//         id: 173406,
+//         name: 'Makati Event Ads',
+//         status: 'active',
+//         createdAt: new Date('2024-02-14'),
+//       },
+//     ],
+//     [
+//       172677,
+//       {
+//         id: 172677,
+//         name: 'Timegap Test 2024',
+//         status: 'active',
+//         createdAt: new Date('2024-01-06'),
+//       },
+//     ],
+//     [
+//       171319,
+//       {
+//         id: 171319,
+//         name: 'Food Ordering Bot',
+//         status: 'active',
+//         createdAt: new Date('2023-10-08'),
+//       },
+//     ],
+//   ]),
+// )
+// const sortedFlows = computed(() =>
+//   Array.from(flows.value.entries()).sort(
+//     ([, a], [, b]) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+//   ),
+// )
+// export type FlowsMap = typeof flows
+// provide('flows', flows)
 
-// TOGGLE FLOW STATUS
-function handleToggleFlowStatus(flowId: Flow['id']) {
-  const flow = flows.value.get(flowId)
-  if (!flow) throw new Error('Flow not found')
+// // TOGGLE FLOW STATUS
+// function handleToggleFlowStatus(flowId: Flow['id']) {
+//   const flow = flows.value.get(flowId)
+//   if (!flow) throw new Error('Flow not found')
 
-  flows.value.set(flowId, {
-    ...flow,
-    status: flow.status === 'active' ? 'inactive' : 'active',
-  })
-}
+//   flows.value.set(flowId, {
+//     ...flow,
+//     status: flow.status === 'active' ? 'inactive' : 'active',
+//   })
+// }
 
-// CLONE FLOW
-function handleCloneFlow(flowId: Flow['id']) {
-  const flow = flows.value.get(flowId)
-  if (!flow) throw new Error('Flow not found')
+// // CLONE FLOW
+// function handleCloneFlow(flowId: Flow['id']) {
+//   const flow = flows.value.get(flowId)
+//   if (!flow) throw new Error('Flow not found')
 
-  // @temporary: get the highest flow id and increment it by 1
-  const newFlowId = Math.max(...Array.from(flows.value.keys())) + 1
-  flows.value.set(newFlowId, {
-    name: `${flow.name} Clone`,
-    status: flow.status,
-    createdAt: new Date(),
-  })
-}
+//   // @temporary: get the highest flow id and increment it by 1
+//   const newFlowId = Math.max(...Array.from(flows.value.keys())) + 1
+//   flows.value.set(newFlowId, {
+//     id: newFlowId,
+//     name: `${flow.name} Clone`,
+//     status: flow.status,
+//     createdAt: new Date(),
+//   })
+// }
 
-const createEditFlowModalRef = useTemplateRef('createEditFlowModal')
-const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
+const createEditModalRef = useTemplateRef('createEditModal')
+const deleteModalRef = useTemplateRef('deleteModal')
 </script>
 
 <template>
   <DefaultLayout>
     <Main class="flex flex-col gap-y-4">
       <template #heading>Chatbot Flow Builder</template>
-      <Button class="gap-x-2 self-end" @click="createEditFlowModalRef?.modal.open({ intent: 'create' })">
+      <Button class="gap-x-2 self-end" @click="createEditModalRef?.modal.open({ intent: 'create' })">
         <i class="bx bx-plus text-xl" />
         Create Messenger Flow
       </Button>
@@ -215,8 +221,8 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
                     <i class="material-icons text-md">more_vert</i>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem class="gap-x-3"
-                      @click="createEditFlowModalRef?.modal.open({ intent: 'edit', flowId: flow.cb_id })">
+                    <DropdownMenuItem class="gap-x-3">
+                      <!-- @click="deleteModalRef?.modal.open({ intent: 'edit', flowId:flow.cb_id })"> -->
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
@@ -265,7 +271,7 @@ const deleteFlowModalRef = useTemplateRef('deleteFlowModal')
       </Table>
     </Main>
 
-    <CreateEditFlowModal ref="createEditFlowModal" />
-    <DeleteFlowModal ref="deleteFlowModal" />
+    <CreateEditModal ref="createEditModal" />
+    <DeleteModal ref="deleteModal" />
   </DefaultLayout>
 </template>

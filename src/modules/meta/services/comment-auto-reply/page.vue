@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import CreateEditAutoReplyModal from './components/create-edit-auto-reply-modal.vue'
-import ViewPostCommentAutoRepliesModal from './components/view-post-comment-auto-replies-modal.vue'
+import ViewPostAutoRepliesModal from './components/view-post-auto-replies-modal.vue'
 import ViewPostModal from './components/view-post-modal.vue'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
 import { Badge } from '@/core/components/ui/badge'
@@ -233,7 +233,6 @@ function toggleAutoReplyStatus(autoReplyId: AutoReply['id']) {
   })
 }
 
-// ACTIVATE/DEACTIVATE ALL AUTO REPLIES
 function toggleAllAutoRepliesStatus({
   postId,
   intent,
@@ -249,7 +248,7 @@ function toggleAllAutoRepliesStatus({
 }
 
 const viewPostModalRef = useTemplateRef('viewPostModal')
-const viewPostCommentAutoRepliesModalRef = useTemplateRef('viewPostCommentAutoRepliesModal')
+const viewPostAutoRepliesModalRef = useTemplateRef('viewPostAutoRepliesModal')
 const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
 </script>
 
@@ -274,19 +273,19 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow v-for="[id, post] in posts" :key="id">
+              <TableRow v-for="[postId, post] in posts" :key="postId">
                 <TableCell class="whitespace-nowrap">
                   <div class="flex items-center justify-center gap-x-2">
                     <Avatar class="size-9">
                       <AvatarImage :src="post.user.image" />
                     </Avatar>
                     <a
-                      :href="`http://example.com/${id}`"
+                      :href="`http://example.com/${postId}`"
                       target="_blank"
                       rel="noopener noreferrer"
                       class="text-blue-500 hover:underline"
                     >
-                      Post ID: {{ id }}
+                      Post ID: {{ postId }}
                     </a>
                   </div>
                 </TableCell>
@@ -296,7 +295,7 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                 <TableCell class="whitespace-nowrap">
                   {{ uiHelpers.formatDateTimeAgo(post.createdAt.toDateString()) }}
                 </TableCell>
-                <TableCell>{{ autoRepliesByPostId.get(id).length }}</TableCell>
+                <TableCell>{{ autoRepliesByPostId.get(postId).length }}</TableCell>
                 <TableCell>
                   <div class="grid place-content-center">
                     <DropdownMenu>
@@ -319,7 +318,7 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                           @click="
                             createEditAutoReplyModalRef?.modal.open({
                               intent: 'create',
-                              postId: id,
+                              postId,
                             })
                           "
                         >
@@ -328,7 +327,7 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           class="gap-x-3"
-                          @click="viewPostCommentAutoRepliesModalRef?.modal.open({ ...post, id })"
+                          @click="viewPostAutoRepliesModalRef?.modal.open({ ...post })"
                         >
                           <i class="bx bx-list-ul text-xl"></i>
                           View All
@@ -336,14 +335,14 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
 
                         <DropdownMenuItem
                           class="gap-x-3"
-                          @click="toggleAllAutoRepliesStatus({ postId: id, intent: 'activate' })"
+                          @click="toggleAllAutoRepliesStatus({ postId, intent: 'activate' })"
                         >
                           <i class="bx bx-play-circle text-xl"></i>
                           Activate All
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           class="gap-x-3"
-                          @click="toggleAllAutoRepliesStatus({ postId: id, intent: 'deactivate' })"
+                          @click="toggleAllAutoRepliesStatus({ postId, intent: 'deactivate' })"
                         >
                           <i class="bx bx-pause-circle text-xl"></i>
                           Deactivate All
@@ -369,8 +368,8 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow v-for="[id, autoReply] in autoReplies" :key="id">
-                <TableCell>{{ id }}</TableCell>
+              <TableRow v-for="[autoReplyId, autoReply] in autoReplies" :key="autoReplyId">
+                <TableCell>{{ autoReplyId }}</TableCell>
                 <TableCell>{{ autoReply.name }}</TableCell>
                 <TableCell class="whitespace-nowrap">
                   <div class="flex items-center gap-x-2">
@@ -409,14 +408,17 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                           @click="
                             createEditAutoReplyModalRef?.modal.open({
                               intent: 'edit',
-                              autoReplyId: id,
+                              autoReplyId,
                             })
                           "
                         >
                           <i class="bx bx-edit text-xl" />
                           Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem class="gap-x-3" @click="toggleAutoReplyStatus(id)">
+                        <DropdownMenuItem
+                          class="gap-x-3"
+                          @click="toggleAutoReplyStatus(autoReplyId)"
+                        >
                           <i
                             :class="[
                               'bx text-xl',
@@ -447,8 +449,8 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
 
     <ViewPostModal ref="viewPostModal" />
 
-    <ViewPostCommentAutoRepliesModal
-      ref="viewPostCommentAutoRepliesModal"
+    <ViewPostAutoRepliesModal
+      ref="viewPostAutoRepliesModal"
       @add-auto-reply-click="
         createEditAutoReplyModalRef?.modal.open({
           intent: 'create',

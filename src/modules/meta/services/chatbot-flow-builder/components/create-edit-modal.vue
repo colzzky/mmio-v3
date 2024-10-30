@@ -160,14 +160,14 @@ defineExpose({
   <Dialog v-model:open="modal.isOpen" @update:open="modal.close()">
     <DialogContent class="gap-y-8">
       <DialogHeader>
-        <DialogTitle v-if="modal.intent === 'create'"> Create Flow </DialogTitle>
-        <DialogTitle v-else-if="modal.intent === 'edit'"> Edit Flow </DialogTitle>
-        <DialogDescription v-if="modal.intent === 'create'">
-          Enter the flow details to create a new flow.
-        </DialogDescription>
-        <DialogDescription v-else-if="modal.intent === 'edit'">
-          Enter the flow details to edit this flow.
-        </DialogDescription>
+        <template v-if="modal.intent === 'create'">
+          <DialogTitle>Create Flow</DialogTitle>
+          <DialogDescription> Enter the flow details to create a new flow. </DialogDescription>
+        </template>
+        <template v-else>
+          <DialogTitle>Edit Flow</DialogTitle>
+          <DialogDescription> Enter the flow details to edit this flow. </DialogDescription>
+        </template>
       </DialogHeader>
         <div class="flex flex-col gap-y-2">
           <Label for="name">Name</Label>

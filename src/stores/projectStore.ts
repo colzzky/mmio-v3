@@ -12,6 +12,7 @@ import type { DocumentData, DocumentSnapshot } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { usePlatformAPIStore } from '@/stores/platformAPIStore'
+import { useAuthStore } from './authStore'
 
 interface Project {
   data: ProjectData | null
@@ -48,15 +49,18 @@ type ProjectReturnData = FirebaseReturnBase & {
 }
 
 export const useProjectStore = defineStore('projectStore', () => {
+  const useAuth = useAuthStore()
+  const {user_auth} = useAuth
   const project_ui_page = reactive({
     isInitialize: <boolean>false,
     project_id: <string>'',
     async initializeProjData():Promise<boolean> {
       const { platformAPI } = usePlatformAPIStore()
-      if (this.project_id) {
+      if (this.project_id  && user_auth.data) {
         if (!project_data.data || !project_data.isInitialized) {
           const get = await project_data.get(this.project_id as string)
           if (!get.status) return false
+          if (get.data.shared_uids.includes(user_auth.data.uid))
           project_data.set(get.data)
         }
         if (this.project_id != project_data.data?.pj_id) return false

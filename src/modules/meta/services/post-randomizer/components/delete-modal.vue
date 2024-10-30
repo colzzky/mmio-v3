@@ -38,9 +38,6 @@ const modal = reactive<ModalInterface>({
   deleteCampaign() {
     if (!this.campaignId) throw new Error('No Campaign ID provided')
 
-    const campaign = campaigns.value.get(this.campaignId)
-    if (!campaign) throw new Error('Campaign not found')
-
     campaigns.value.delete(this.campaignId)
 
     this.close()

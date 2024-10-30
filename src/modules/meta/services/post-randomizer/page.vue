@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import CreateEditCampaignModal from './components/create-edit-campaign-modal.vue'
-import DeleteCampaignModal from './components/delete-campaign-modal.vue'
+import CreateEditModal from './components/create-edit-modal.vue'
+import DeleteModal from './components/delete-modal.vue'
 import Badge from '@/core/components/ui/badge/Badge.vue'
 import { Button } from '@/core/components/ui/button'
 import {
@@ -41,10 +41,11 @@ export interface Campaign {
 }
 
 const campaigns = ref(
-  new Map<Campaign['id'], Omit<Campaign, 'id'>>([
+  new Map<Campaign['id'], Campaign>([
     [
       4,
       {
+        id: 4,
         name: 'MMIO Posts',
         publishedTo: {},
         duration: {},
@@ -55,6 +56,7 @@ const campaigns = ref(
     [
       146,
       {
+        id: 146,
         name: 'ASDASD',
         publishedTo: {},
         duration: {},
@@ -65,6 +67,7 @@ const campaigns = ref(
     [
       712,
       {
+        id: 712,
         name: 'Post Randomizer Test',
         mediaSource: 'Post Randomizer Test',
         publishedTo: { pages: 'Filhomes' },
@@ -89,8 +92,8 @@ function handleToggleCampaignStatus(campaignId: Campaign['id']) {
   })
 }
 
-const createEditCampaignModalRef = useTemplateRef('createEditCampaignModal')
-const deleteCampaignModalRef = useTemplateRef('deleteCampaignModal')
+const createEditModalRef = useTemplateRef('createEditModal')
+const deleteModalRef = useTemplateRef('deleteModal')
 </script>
 
 <template>
@@ -99,7 +102,7 @@ const deleteCampaignModalRef = useTemplateRef('deleteCampaignModal')
       <template #heading>Post Randomizer</template>
       <Button
         class="gap-x-2 self-end"
-        @click="createEditCampaignModalRef?.modal.open({ intent: 'create' })"
+        @click="createEditModalRef?.modal.open({ intent: 'create' })"
       >
         <i class="bx bx-plus text-xl" />
         Create Campaign
@@ -117,7 +120,7 @@ const deleteCampaignModalRef = useTemplateRef('deleteCampaignModal')
           </TableRow>
         </TableHeader>
         <TableBody>
-          <TableRow v-for="[id, campaign] in campaigns" :key="id">
+          <TableRow v-for="[campaignId, campaign] in campaigns" :key="campaignId">
             <TableCell>{{ campaign.name }}</TableCell>
             <TableCell>{{ campaign.mediaSource }}</TableCell>
             <TableCell>
@@ -157,14 +160,15 @@ const deleteCampaignModalRef = useTemplateRef('deleteCampaignModal')
                   <DropdownMenuContent>
                     <DropdownMenuItem
                       class="gap-x-3"
-                      @click="
-                        createEditCampaignModalRef?.modal.open({ intent: 'edit', campaignId: id })
-                      "
+                      @click="createEditModalRef?.modal.open({ intent: 'edit', campaignId })"
                     >
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" @click="handleToggleCampaignStatus(id)">
+                    <DropdownMenuItem
+                      class="gap-x-3"
+                      @click="handleToggleCampaignStatus(campaignId)"
+                    >
                       <i
                         :class="[
                           'bx text-xl',
@@ -179,7 +183,7 @@ const deleteCampaignModalRef = useTemplateRef('deleteCampaignModal')
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       class="gap-x-3"
-                      @click="deleteCampaignModalRef?.modal.open(id)"
+                      @click="deleteModalRef?.modal.open(campaignId)"
                     >
                       <i class="bx bx-trash text-xl" />
                       Delete
@@ -193,7 +197,7 @@ const deleteCampaignModalRef = useTemplateRef('deleteCampaignModal')
       </Table>
     </Main>
 
-    <CreateEditCampaignModal ref="createEditCampaignModal" />
-    <DeleteCampaignModal ref="deleteCampaignModal" />
+    <CreateEditModal ref="createEditModal" />
+    <DeleteModal ref="deleteModal" />
   </DefaultLayout>
 </template>

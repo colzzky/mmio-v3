@@ -13,16 +13,16 @@ import type { Modal } from '@/core/utils/types'
 import { reactive } from 'vue'
 
 interface ModalInterface extends Omit<Modal, 'open'> {
-  open(post: Omit<Post, 'autoReplies'>): void
+  open(post: Post): void
 
-  post: Omit<Post, 'autoReplies'> | undefined
+  post: Post | null
 }
 const modal = reactive<ModalInterface>({
   isOpen: false,
-  post: undefined,
+  post: null,
   initialState() {
     this.isOpen = false
-    this.post = undefined
+    this.post = null
   },
   open(post) {
     this.isOpen = true

@@ -24,9 +24,7 @@ interface ModalInterface extends Omit<Modal, 'open'> {
   ): void
 
   intent: 'create' | 'edit' | null
-  form: Pick<AutoReply, 'name'>
-  postId: Post['id'] | undefined
-  autoReplyId: AutoReply['id'] | undefined
+  form: Omit<AutoReply, 'status' | 'createdAt' | 'updatedAt'>
   submitForm(): void
   createAutoReply(): void
   editAutoReply(): void
@@ -35,14 +33,16 @@ const modal = reactive<ModalInterface>({
   isOpen: false,
   intent: null,
   form: {
+    id: 0,
+    postId: 0,
     name: '',
   },
-  postId: undefined,
-  autoReplyId: undefined,
   initialState() {
     this.isOpen = false
     this.intent = null
     this.form = {
+      id: 0,
+      postId: 0,
       name: '',
     }
   },
@@ -50,14 +50,14 @@ const modal = reactive<ModalInterface>({
     this.intent = args.intent
 
     if (args.intent === 'create') {
-      this.postId = args.postId
+      this.form.postId = args.postId
     } else if (args.intent === 'edit') {
-      this.autoReplyId = args.autoReplyId
-
-      const autoReply = autoReplies.value.get(this.autoReplyId)
+      const autoReply = autoReplies.value.get(args.autoReplyId)
       if (!autoReply) throw new Error('Auto reply not found')
 
       this.form = {
+        id: autoReply.id,
+        postId: autoReply.postId,
         name: autoReply.name,
       }
     }
@@ -72,28 +72,25 @@ const modal = reactive<ModalInterface>({
     this.close()
   },
   createAutoReply() {
-    if (!this.postId) throw new Error('Post ID not initialized')
-
     // @temporary: get the highest auto reply id and increment it by 1
     const newAutoReplyId = Math.max(...Array.from(autoReplies.value.keys())) + 1
     autoReplies.value.set(newAutoReplyId, {
       ...this.form,
       id: newAutoReplyId,
-      postId: this.postId,
       status: 'inactive',
       createdAt: new Date(),
       updatedAt: new Date(),
     })
   },
   editAutoReply() {
-    if (!this.autoReplyId) throw new Error('Auto Reply ID not initialized')
-
-    const autoReply = autoReplies.value.get(this.autoReplyId)
+    const autoReply = autoReplies.value.get(this.form.id)
     if (!autoReply) throw new Error('Auto reply not found')
 
-    autoReplies.value.set(this.autoReplyId, {
-      ...autoReply,
-      name: this.form.name,
+    autoReplies.value.set(this.form.id, {
+      ...this.form,
+      status: autoReply.status,
+      createdAt: autoReply.createdAt,
+      updatedAt: new Date(),
     })
   },
 })
@@ -116,7 +113,7 @@ defineExpose({
           <DialogDescription> Enter the details to edit this auto reply </DialogDescription>
         </template>
       </DialogHeader>
-      <form id="autoReplyForm" class="flex flex-col gap-y-4" @submit.prevent="modal.submitForm()">
+      <form id="form" class="flex flex-col gap-y-4" @submit.prevent="modal.submitForm()">
         <div class="flex flex-col gap-y-2">
           <Label for="name">Name</Label>
           <Input
@@ -131,11 +128,8 @@ defineExpose({
       </form>
       <DialogFooter>
         <Button variant="secondary" @click="modal.close()">Cancel</Button>
-        <Button v-if="modal.intent === 'create'" type="submit" form="autoReplyForm">
-          Create
-        </Button>
-        <Button v-else-if="modal.intent === 'edit'" type="submit" form="autoReplyForm">
-          Edit
+        <Button type="submit" form="form">
+          {{ modal.intent === 'create' ? 'Create' : 'Edit' }}
         </Button>
       </DialogFooter>
     </DialogContent>
