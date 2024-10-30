@@ -127,7 +127,7 @@ const servicesRecord: ServiceRecord = {
   'meta-chat-sequences': {
     icon: 'bx-comment-add',
     label: 'Chat Sequences',
-    pinned: false,
+    pinned: true,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
@@ -176,7 +176,7 @@ const routeRecords: RouteRecord = {
   },
   'meta-chat-sequences': {
     meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
+    component: () => import('./services/chat-sequence/page.vue'),
   },
   'meta-messenger-webview': {
     meta: { requiresAuth: true },

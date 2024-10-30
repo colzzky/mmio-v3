@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Flow, FlowsMap } from '../page.vue'
+import type { Sequence, SequencesMap } from '../page.vue'
 import { Button } from '@/core/components/ui/button'
 import {
   Dialog,
@@ -12,40 +12,38 @@ import {
 import type { Modal } from '@/core/utils/types'
 import { inject, reactive } from 'vue'
 
-const flows = inject('flows') as FlowsMap
+const sequences = inject('sequences') as SequencesMap
 
 interface ModalInterface extends Omit<Modal, 'open'> {
-  open(flowId: Flow['id']): void
+  open(sequenceId: Sequence['id']): void
 
-  flowId: Flow['id'] | null
-  deleteFlow(): void
+  sequenceId: Sequence['id'] | null
+  deleteSequence(): void
 }
 
 const modal = reactive<ModalInterface>({
   isOpen: false,
-  flowId: null,
+  sequenceId: null,
   initialState() {
     this.isOpen = false
-    this.flowId = null
+    this.sequenceId = null
   },
-  open(flowId) {
+  open(sequenceId) {
     this.isOpen = true
-    this.flowId = flowId
+    this.sequenceId = sequenceId
   },
   close() {
     this.initialState()
   },
-  deleteFlow() {
-    if (!this.flowId) throw new Error('No Flow ID provided')
+  deleteSequence() {
+    if (!this.sequenceId) throw new Error('No Sequences ID provided')
 
-    flows.value.delete(this.flowId)
+    sequences.value.delete(this.sequenceId)
     this.close()
   },
 })
 
-defineExpose({
-  modal,
-})
+defineExpose({ modal })
 </script>
 
 <template>
@@ -60,7 +58,7 @@ defineExpose({
 
       <DialogFooter>
         <Button variant="secondary" @click="modal.close()">Cancel</Button>
-        <Button variant="destructive" @click="modal.deleteFlow()">Delete</Button>
+        <Button variant="destructive" @click="modal.deleteSequence()">Delete</Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>
