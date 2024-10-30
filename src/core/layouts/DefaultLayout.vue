@@ -56,9 +56,6 @@ onMounted(async () => {
     await uiHelpers.timeout(2000);
 
     project_ui_page.isInitialize = true
-
-    
-
     const validate_project = await project_ui_page.initializeProjData()
     if (!validate_project) {
       toast({
