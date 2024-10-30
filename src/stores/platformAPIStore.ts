@@ -75,7 +75,7 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
       console.log(type)
       console.log(this.data)
       const id = type === 'new' ? crypto.randomUUID() : this.data ? this.data.pa_id : ''
-      if (this.data) this.data.pa_id = id
+      console.log(id)
       console.log(this.data)
       const post = await postCollection('platform_api', 'pa_id', id, this.data, type)
       console.log(post)

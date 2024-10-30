@@ -88,6 +88,7 @@ export const useProjectStore = defineStore('projectStore', () => {
         connectedAccount: null,
         uid: '',
         name: '',
+        shared_uids:[],
         platform: '',
         status: '',
         createdAt: '',
@@ -145,6 +146,8 @@ export const useProjectStore = defineStore('projectStore', () => {
       this.lastSnapshot = ''
     },
   })
+
+
   const reset_state = () => {
     project_list.resetData()
     project_data.resetData()

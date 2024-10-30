@@ -140,6 +140,7 @@ export async function postCollection<T extends keyof Collections>(
       // Get the document data
       const postData = {
         ...data,
+        createdAt: Timestamp.fromDate(new Date(data.createdAt)),
         updatedAt: Timestamp.fromDate(new Date()),
       }
       await updateDoc(userDocRef, { ...postData })

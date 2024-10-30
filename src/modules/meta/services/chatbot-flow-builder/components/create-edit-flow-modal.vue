@@ -31,7 +31,6 @@ type SelectedFormKey = Pick<ChatBotFlowData, 'name'>
 
 interface ModalInterface extends Omit<Modal, 'open'> {
   open(args: { intent: 'create' } | { intent: 'edit'; flowId: ChatBotFlowData['cb_id'] }): void
-
   flowId: ChatBotFlowData['cb_id'] | null
   intent: 'create' | 'edit' | null
   form: SelectedFormKey

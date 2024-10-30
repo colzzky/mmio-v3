@@ -32,7 +32,7 @@ const loadMoreProjects = async () => {
   project_list.isLoading = true
 
   const get_projects = await project_data.getWhere([
-    { fieldName: 'uid', operator: '==', value: user_auth.data?.uid },
+    { fieldName: 'shared_uids', operator: 'array-contains', value: user_auth.data?.uid },
 
   ], 2, [
     { fieldName: 'createdAt', direction: 'desc' },
@@ -45,17 +45,7 @@ const loadMoreProjects = async () => {
       project_list.lastSnapshot = get_projects.data[get_projects.data.length - 1].pj_id
     }
     get_projects.data.forEach((project) => {
-      project_list.data.push({
-        name: project.name,
-        platform: project.platform,
-        connectedAccount: project.connectedAccount,
-        account_id: project.account_id,
-        status: project.status,
-        pj_id: project.pj_id,
-        uid: project.uid,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
-      })
+      project_list.data.push(project)
     })
   }
   project_list.isLoading = false
