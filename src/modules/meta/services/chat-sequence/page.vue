@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CreateEditModal from './components/create-edit-modal.vue'
 import DeleteModal from './components/delete-modal.vue'
 import { Button } from '@/core/components/ui/button'
 import {
@@ -114,6 +115,7 @@ const sequences = ref(
 export type SequencesMap = typeof sequences
 provide('sequences', sequences)
 
+const createEditModalRef = useTemplateRef('createEditModal')
 const deleteModalRef = useTemplateRef('deleteModal')
 </script>
 
@@ -121,7 +123,10 @@ const deleteModalRef = useTemplateRef('deleteModal')
   <DefaultLayout>
     <Main class="flex flex-col gap-y-4">
       <template #heading>Chat Sequence</template>
-      <Button class="gap-x-2 self-end">
+      <Button
+        class="gap-x-2 self-end"
+        @click="createEditModalRef?.modal.open({ intent: 'create' })"
+      >
         <i class="bx bx-plus text-xl" />
         Create Chat Sequence
       </Button>
@@ -144,7 +149,10 @@ const deleteModalRef = useTemplateRef('deleteModal')
                     <i class="material-icons text-md">more_vert</i>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem class="gap-x-3" disabled>
+                    <DropdownMenuItem
+                      class="gap-x-3"
+                      @click="createEditModalRef?.modal.open({ intent: 'edit', sequenceId })"
+                    >
                       <i class="bx bx-edit text-xl" />
                       Edit
                     </DropdownMenuItem>
@@ -169,5 +177,6 @@ const deleteModalRef = useTemplateRef('deleteModal')
     </Main>
   </DefaultLayout>
 
+  <CreateEditModal ref="createEditModal" />
   <DeleteModal ref="deleteModal" />
 </template>

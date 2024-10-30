@@ -50,9 +50,9 @@ defineExpose({ modal })
   <Dialog v-model:open="modal.isOpen" @update:open="modal.close()">
     <DialogContent>
       <DialogHeader>
-        <DialogTitle>Delete Flow?</DialogTitle>
+        <DialogTitle>Delete Chat Sequence?</DialogTitle>
         <DialogDescription>
-          Are you sure you want to delete this flow? This cannot be undone.
+          Are you sure you want to delete this chat sequence? This cannot be undone.
         </DialogDescription>
       </DialogHeader>
 
