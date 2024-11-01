@@ -1,4 +1,5 @@
 import type { Timestamp } from "firebase/firestore"
+import type { SubCollections } from "./UniTypes"
 
 export interface MetaPagesReturn {
     access_token: string,
@@ -18,7 +19,7 @@ export interface MetaPictureReturn {
     }
 }
 
-export interface MetaPagesData {
+export interface MetaPagesData extends SubCollections {
     mp_id: string
     pa_id: string
     page_id: string
@@ -35,7 +36,7 @@ export interface MetaPagesData {
 
 /** Meta Services */
 
-export interface ChatBotFlowData{
+export interface ChatBotFlowData extends SubCollections{
     cb_id:string
     pj_id:string // Meta_page_id
     name:string

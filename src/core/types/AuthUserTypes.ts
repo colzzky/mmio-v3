@@ -1,4 +1,4 @@
-import type { Timestamp } from './UniTypes'
+import type { SubCollections, Timestamp } from './UniTypes'
 
 export interface Address {
   street: string
@@ -7,7 +7,7 @@ export interface Address {
   country: string
   zipCode: string
 }
-export interface UserProfileData {
+export interface UserProfileData extends SubCollections {
   up_id: string
   uid: string
   firstName: string

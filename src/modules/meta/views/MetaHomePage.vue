@@ -3,7 +3,7 @@ import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { useProjectStore } from '@/stores/projectStore'
 
 const useProject = useProjectStore()
-const { project_data } = useProject
+const { workspace_data } = useProject
 </script>
 
 <template>
@@ -12,7 +12,7 @@ const { project_data } = useProject
       this is meta home page
       <div>Data</div>
       <div>
-        {{ project_data.data }}
+        {{ workspace_data.data }}
       </div>
     </main>
   </DefaultLayout>

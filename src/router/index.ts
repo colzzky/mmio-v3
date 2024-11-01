@@ -26,7 +26,7 @@ const routes = [
     component: () => HomeView,
   },
   {
-    path: '/project/:id',
+    path: '/project/:ws_id',
     name: 'project-overview',
     meta: {
       requiresAuth: true,

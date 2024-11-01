@@ -1,5 +1,6 @@
 import type { Timestamp } from "firebase/firestore"
 import type { MetaPictureReturn } from "./MetaTypes"
+import type { SubCollections } from "./UniTypes"
 
 export interface EmailMarketingAPIAccount {
     client_id: string
@@ -60,7 +61,7 @@ export interface FBLonglivedCodeReturn {
     machine_id: string
 }
 
-export interface PlatformApiData {
+export interface PlatformApiData extends SubCollections {
     pa_id: string
     uid: string
     platform: string

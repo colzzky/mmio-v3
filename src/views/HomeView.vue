@@ -3,7 +3,7 @@ import Button from '@/core/components/ui/button/Button.vue'
 import { Skeleton } from '@/core/components/ui/skeleton'
 import { toast } from '@/core/components/ui/toast'
 import HomeLayout from '@/core/layouts/HomeLayout.vue'
-import type { Platforms, ProjectData } from '@/core/types/ProjectTypes'
+import type { Platforms, WorkspaceData } from '@/core/types/WorkSpaceTypes'
 import type { Timestamp } from '@/core/types/UniTypes'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useAuthStore } from '@/stores/authStore';
@@ -11,9 +11,10 @@ import { useProjectStore } from '@/stores/projectStore';
 import { serverTimestamp, type DocumentSnapshot } from 'firebase/firestore';
 import { onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { getWhereAny } from '@/core/utils/firebase-collections'
 const useAuth = useAuthStore()
 const useProject = useProjectStore()
-const { project_data, project_list } = useProject
+const { workspace_data, workspace_list } = useProject
 const { user_auth } = useAuth
 const router = useRouter()
 const pageLoad = ref<boolean>(true)
@@ -21,34 +22,33 @@ const pageLoad = ref<boolean>(true)
 onMounted(async () => {
   pageLoad.value = true
 
-  if (!project_list.isInitialized) {
+  if (!workspace_list.isInitialized) {
     await loadMoreProjects()
-    project_list.isInitialized = true
+    workspace_list.isInitialized = true
   }
   pageLoad.value = false
 })
 
 const loadMoreProjects = async () => {
-  project_list.isLoading = true
+  workspace_list.isLoading = true
+  const get_projects = await getWhereAny(
+    'workspaces_share',
+    'workspaces/:ws_id/share/',{ws_id:''},
+    ['shared'], [{fieldName:''}],
+    []
+  )
 
-  const get_projects = await project_data.getWhere([
-    { fieldName: 'shared_uids', operator: 'array-contains', value: user_auth.data?.uid },
+    console.log(get_projects)
 
-  ], 2, [
-    { fieldName: 'createdAt', direction: 'desc' },
-  ], project_list.lastSnapshot)
-
-  console.log(get_projects)
-
-  if (get_projects.status) {
+  if (get_projects.status && get_projects.data) {
     if (get_projects.data.length > 0) {
-      project_list.lastSnapshot = get_projects.data[get_projects.data.length - 1].pj_id
+      workspace_list.lastSnapshot = get_projects.data[get_projects.data.length - 1].ws_id
     }
     get_projects.data.forEach((project) => {
-      project_list.data.push(project)
+      workspace_list.data.push(project)
     })
   }
-  project_list.isLoading = false
+  workspace_list.isLoading = false
 }
 
 interface PlatformsIcon {
@@ -73,13 +73,13 @@ const find_icon = (name: string): string | undefined => {
   return icon
 }
 
-const navigateToProject = (project: ProjectData) => {
+const navigateToProject = (workspace: WorkspaceData) => {
   //We can set a validation by fetching from firebaste itself calling get
   //For faster validation we can check based on what we fetched earlier
-  const validate = project_list.data.find(proj => proj.pj_id === project.pj_id)
+  const validate = workspace_list.data.find(proj => proj.ws_id === workspace.ws_id)
   if (validate) {
-    project_data.set(project)
-    router.push({ name: project.platform.toLowerCase(), params: { pj_id: project.pj_id } })
+    workspace_data.set(workspace)
+    router.push({ name: workspace.platform.toLowerCase(), params: { ws_id: workspace.ws_id } })
   } else {
     toast({
       title: 'Project does not exist',
@@ -108,8 +108,8 @@ const navigateToProject = (project: ProjectData) => {
           </div>
 
           <div v-if="!pageLoad">
-            <div v-if="project_list.data.length">
-              <div v-for="project in project_list.data" :key="project.name"
+            <div v-if="workspace_list.data.length">
+              <div v-for="project in workspace_list.data" :key="project.name"
                 class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300">
                 <div class="grid grid-cols-12 items-center">
                   <div class="col-span-5" @click="navigateToProject(project)">
@@ -117,7 +117,7 @@ const navigateToProject = (project: ProjectData) => {
                       <i class="bx text-2xl" :class="find_icon(project.platform)"></i>
                       <div class="grid gap-0">
                         <span class="text-sm">{{ project.name }} - {{project.connectedAccount?.name}}</span>
-                        <span class="text-xs">{{ project.pj_id }}</span>
+                        <span class="text-xs">{{ project.ws_id }}</span>
                       </div>
                     </div>
                   </div>
@@ -141,7 +141,7 @@ const navigateToProject = (project: ProjectData) => {
             <div v-else>No Data found</div>
           </div>
 
-          <div v-if="pageLoad || project_list.isLoading" class="rounded-xl px-2 py-4">
+          <div v-if="pageLoad || workspace_list.isLoading" class="rounded-xl px-2 py-4">
             <div class="grid grid-cols-12 items-center">
               <div class="col-span-5">
                 <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />

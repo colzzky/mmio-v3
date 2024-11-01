@@ -27,7 +27,7 @@ import { usePlatformAPIStore } from '@/stores/platformAPIStore'
 import { uiHelpers } from '../utils/ui-helper'
 
 const useProject = useProjectStore()
-const { project_data, project_ui_page } = useProject
+const { workspace_data, workspace_ui_page } = useProject
 const router = useRouter()
 const route = useRoute()
 const sidebarStore = useSidebarStore()
@@ -48,15 +48,15 @@ const layoutInitialized = ref<boolean>(false)
 
 onMounted(async () => {
   //Get the Project Id
-  if (project_ui_page.project_id != route.params.pj_id && !layoutInitialized.value) {
-    const pj_id = route.params.pj_id as string
-    project_ui_page.project_id = pj_id
+  if (workspace_ui_page.workspace_id != route.params.ws_id && !layoutInitialized.value) {
+    const ws_id = route.params.ws_id as string
+    workspace_ui_page.workspace_id = ws_id
 
     /** Do something here before intilizing Project Data. Data like users etc */
     await uiHelpers.timeout(2000);
 
-    project_ui_page.isInitialize = true
-    const validate_project = await project_ui_page.initializeProjData()
+    workspace_ui_page.isInitialize = true
+    const validate_project = await workspace_ui_page.initializeProjData()
     if (!validate_project) {
       toast({
         title: 'Project does not exist',
@@ -70,8 +70,8 @@ onMounted(async () => {
 
 
 async function returnToProjects(): Promise<void> {
-  project_data.resetData()
-  console.log(project_data)
+  workspace_data.resetData()
+  console.log(workspace_data)
   router.push({ name: 'home' })
 }
 </script>
@@ -79,7 +79,7 @@ async function returnToProjects(): Promise<void> {
 <template>
   <Toaster />
 
-  <div v-if="project_ui_page.isInitialize">
+  <div v-if="workspace_ui_page.isInitialize">
     <!-- <MobileSidebar /> -->
     <DesktopSidebar>
       <!-- heading -->
@@ -92,7 +92,7 @@ async function returnToProjects(): Promise<void> {
         <ul role="list" class="-mx-2">
           <div class="flex flex-col gap-y-1">
             <li>
-              <RouterLink :to="{ name: parentRoute, params: { pj_id: project_ui_page.project_id } }"
+              <RouterLink :to="{ name: parentRoute, params: { ws_id: workspace_ui_page.workspace_id } }"
                 class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
                 <i class="material-icons text-xl">grid_view</i>
                 Dashboard
@@ -134,7 +134,7 @@ async function returnToProjects(): Promise<void> {
         <CollapsibleContent as="ul" class="-mx-2">
           <div class="flex flex-col gap-y-1">
             <li v-for="[name, service] in pinnedServices" :key="name">
-              <RouterLink :to="{ name, params: { pj_id: project_ui_page.project_id } }"
+              <RouterLink :to="{ name, params: { ws_id: workspace_ui_page.workspace_id } }"
                 class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground">
                 <i :class="['bx text-xl', service.icon]"></i>
                 <span>

@@ -1,12 +1,15 @@
 import type { MetaPagesData } from '@/core/types/MetaTypes'
 import type { MetaAPIAccount } from '@/core/types/PlaformAPITypes'
-import type { ProjectData, Platforms } from '@/core/types/ProjectTypes'
+import type { WorkspaceData, Platforms } from '@/core/types/WorkSpaceTypes'
 import {
   postCollection,
   getCollection,
   getCollectionByField,
+  postBySub,
+  getBySub,
+  getWhereAny
 } from '@/core/utils/firebase-collections'
-import type { FirebaseOperators, FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
+import type { CollectionWhereCondition, FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import type { DocumentData, DocumentSnapshot } from 'firebase/firestore'
 import { defineStore } from 'pinia'
@@ -15,13 +18,19 @@ import { usePlatformAPIStore } from '@/stores/platformAPIStore'
 import { useAuthStore } from './authStore'
 
 interface Project {
-  data: ProjectData | null
+  data: WorkspaceData | null
   isInitialized: boolean
   initialize: () => void
-  get: (id: string) => Promise<ProjectReturnData>
-  getWhere: (where: FirebaseWhereCondition<'projects'>[], limit?: number, orderBy?: FirebaseOrderCondition<'projects'>[], startAfterDoc?: string) => Promise<ProjectReturnList>
+  get: (id: string, subCollections: string[]) => Promise<ProjectReturnData>
+  getBySubCol: (id: string, subCollections: string[]) => Promise<ProjectReturnData>
+
+
+  getWhere: (where: FirebaseWhereCondition<'workspaces'>[], limit?: number, orderBy?: FirebaseOrderCondition<'workspaces'>[], startAfterDoc?: string) => Promise<ProjectReturnList>
+
+  createUpdateBySubCol: (type: 'new' | 'update') => Promise<ProjectReturnData>
   createUpdate: (type: 'new' | 'update') => Promise<ProjectReturnData>
-  set: (data: ProjectData) => ProjectData
+
+  set: (data: WorkspaceData) => WorkspaceData
   resetData: () => void
 }
 
@@ -42,30 +51,31 @@ interface FirebaseReturn {
 
 type FirebaseReturnBase = Omit<FirebaseReturn, 'data'>
 type ProjectReturnList = FirebaseReturnBase & {
-  data: ProjectData[]
+  data: WorkspaceData[]
 }
 type ProjectReturnData = FirebaseReturnBase & {
-  data: ProjectData
+  data: WorkspaceData
 }
 
 export const useProjectStore = defineStore('projectStore', () => {
   const useAuth = useAuthStore()
-  const {user_auth} = useAuth
-  const project_ui_page = reactive({
+  const { user_auth } = useAuth
+  const workspace_ui_page = reactive({
     isInitialize: <boolean>false,
-    project_id: <string>'',
-    async initializeProjData():Promise<boolean> {
+    workspace_id: <string>'',
+    async initializeProjData(): Promise<boolean> {
       const { platformAPI } = usePlatformAPIStore()
-      if (this.project_id  && user_auth.data) {
-        if (!project_data.data || !project_data.isInitialized) {
-          const get = await project_data.get(this.project_id as string)
+      if (this.workspace_id && user_auth.data) {
+        if (!workspace_data.data || !workspace_data.isInitialized) {
+          const get = await workspace_data.get(this.workspace_id as string, [])
+          console.log(get)
           if (!get.status) return false
-          if (get.data.shared_uids.includes(user_auth.data.uid))
-          project_data.set(get.data)
+          if (!get.data.shared_uids.includes(user_auth.data.uid)) return false
+          workspace_data.set(get.data)
         }
-        if (this.project_id != project_data.data?.pj_id) return false
-        if (project_data.data.platform === 'META') {
-          const meta_page = <MetaPagesData>project_data.data.connectedAccount
+        if (this.workspace_id != workspace_data.data?.ws_id) return false
+        if (workspace_data.data.platform === 'META') {
+          const meta_page = <MetaPagesData>workspace_data.data.connectedAccount
           const getPlatform = await platformAPI.get(meta_page.pa_id)
           if (getPlatform.status) {
             const fb_api_account = getPlatform.data.api_account as MetaAPIAccount
@@ -82,51 +92,80 @@ export const useProjectStore = defineStore('projectStore', () => {
     }
   })
 
-  const project_data = reactive<Project>({
+  const workspace_data = reactive<Project>({
     data: null,
     isInitialized: false,
     initialize() {
       this.data = {
-        pj_id: '',
+        ws_id: '',
         account_id: '',
         connectedAccount: null,
         uid: '',
         name: '',
-        shared_uids:[],
+        shared_uids: [],
         platform: '',
         status: '',
         createdAt: '',
         updatedAt: '',
+        updatedBy: '',
+        subCollections: ['subCollection1', 'subCollection2'],
+        subCollection1: [],
+        subCollection2: []
       }
       this.isInitialized = true
     },
-    async get(id: string) {
-      const get = await getCollection('projects', 'pj_id', id)
+    async get(id: string, subCollections = []) {
+      const get = await getCollection('workspaces', 'ws_id', id, subCollections)
       return {
         status: get.status,
-        data: get.data as ProjectData,
+        data: get.data as WorkspaceData,
         error: get.error,
       }
     },
+
+    async getBySubCol(id: string, subCollections = []) {
+      const get = await getBySub('workspaces', id, subCollections)
+      return {
+        status: get.status,
+        data: get.data as WorkspaceData, //Depends on whats declared here
+        error: get.error,
+      }
+    },
+
     async getWhere(where, limit, orderBy, snapshot) {
-      const get = await getCollectionByField('projects', 'pj_id', where, limit, orderBy, snapshot)
+      const get = await getCollectionByField('workspaces', 'ws_id', where, limit, orderBy, snapshot)
       return {
         status: get.status,
-        data: get.data as ProjectData[],
+        data: get.data as WorkspaceData[],
         error: get.error,
       }
     },
+    
     async createUpdate(type) {
-      const id = type === 'new' ? crypto.randomUUID() : this.data ? this.data.pj_id : ''
-      if (this.data) this.data.pj_id = id
-      const post = await postCollection('projects', 'pj_id', id, this.data, type)
+      const id = type === 'new' ? crypto.randomUUID() : this.data ? this.data.ws_id : ''
+      if (this.data) this.data.ws_id = id
+      const post = await postCollection('workspaces', 'ws_id', id, this.data, type)
       console.log(post)
       return {
         status: post.status,
-        data: post.data as ProjectData,
+        data: post.data as WorkspaceData,
         error: post.error,
       }
     },
+
+    async createUpdateBySubCol(type) {
+      const id = type === 'new' ? crypto.randomUUID() : this.data ? this.data.ws_id : ''
+      if (this.data) this.data.ws_id = id
+      const post = await postBySub('workspaces', id, this.data, type)
+      console.log(post)
+      return {
+        status: post.status,
+        data: post.data as WorkspaceData,
+        error: post.error,
+      }
+    },
+
+
     //Only set after fetch
     set(data) {
       this.data = data
@@ -138,8 +177,8 @@ export const useProjectStore = defineStore('projectStore', () => {
       this.isInitialized = false
     },
   })
-  const project_list = reactive({
-    data: <ProjectData[]>[],
+  const workspace_list = reactive({
+    data: <WorkspaceData[]>[],
     isInitialized: <boolean>false,
     isLoading: <boolean>false,
     lastSnapshot: <any>'',
@@ -153,15 +192,24 @@ export const useProjectStore = defineStore('projectStore', () => {
 
 
   const reset_state = () => {
-    project_list.resetData()
-    project_data.resetData()
+    workspace_list.resetData()
+    workspace_data.resetData()
 
   }
 
+  const get_collection_special = async () => {
+    //Use this for special call and condition only it will getch anything 
+    const get = await getWhereAny<WorkspaceData>('', [], [{
+      fieldName: 'account_id',
+      operator: '==',
+      value: 'sassadas'
+    }], [{ fieldName: 'account_id', direction: 'asc' }], 10, undefined)
+  }
+
   return {
-    project_list,
-    project_data,
-    project_ui_page,
+    workspace_list,
+    workspace_data,
+    workspace_ui_page,
     reset_state
   }
 })
