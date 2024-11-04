@@ -1,5 +1,4 @@
 import type { MetaPagesData } from './MetaTypes'
-import type { Timestamp } from './UniTypes'
 
 export type Platforms =
   | 'META'
@@ -17,13 +16,12 @@ export interface ProjectData {
   name: string
   platform: Platforms
   account_id: string // Connected page email marketing etc id
-  connectedAccount: MetaPagesData|null
-  shared_uids:string[]
+  connectedAccount: MetaPagesData | null
+  shared_uids: string[]
   status: string
-  createdAt:string
-  updatedAt:string
+  createdAt: string
+  updatedAt: string
 }
-
 
 export interface SharedProjectData {
   sp_id: string
@@ -31,6 +29,6 @@ export interface SharedProjectData {
   sharer_id: string
   sharee_uid: string[]
   access: boolean
-  createdAt:string
-  updatedAt:string
+  createdAt: string
+  updatedAt: string
 }

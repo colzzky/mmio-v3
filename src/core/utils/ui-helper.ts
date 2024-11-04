@@ -1,5 +1,3 @@
-import type { Timestamp } from '../types/UniTypes'
-
 export const uiHelpers = {
   formatDateTimeAgo(dateString: string, locale: string = 'en-US'): string {
     const date = new Date(dateString)

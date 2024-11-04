@@ -1,14 +1,14 @@
 import type { MetaPagesData } from '@/core/types/MetaTypes'
 import type { MetaAPIAccount } from '@/core/types/PlaformAPITypes'
-import type { ProjectData, Platforms } from '@/core/types/ProjectTypes'
+import type { ProjectData } from '@/core/types/ProjectTypes'
 import {
   postCollection,
   getCollection,
   getCollectionByField,
 } from '@/core/utils/firebase-collections'
-import type { FirebaseOperators, FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
+import type {  FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import type { DocumentData, DocumentSnapshot } from 'firebase/firestore'
+import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { usePlatformAPIStore } from '@/stores/platformAPIStore'

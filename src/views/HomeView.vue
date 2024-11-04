@@ -4,13 +4,12 @@ import { Skeleton } from '@/core/components/ui/skeleton'
 import { toast } from '@/core/components/ui/toast'
 import HomeLayout from '@/core/layouts/HomeLayout.vue'
 import type { Platforms, ProjectData } from '@/core/types/ProjectTypes'
-import type { Timestamp } from '@/core/types/UniTypes'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { useAuthStore } from '@/stores/authStore';
-import { useProjectStore } from '@/stores/projectStore';
-import { serverTimestamp, type DocumentSnapshot } from 'firebase/firestore';
-import { onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/authStore'
+import { useProjectStore } from '@/stores/projectStore'
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
 const useAuth = useAuthStore()
 const useProject = useProjectStore()
 const { project_data, project_list } = useProject
@@ -31,12 +30,12 @@ onMounted(async () => {
 const loadMoreProjects = async () => {
   project_list.isLoading = true
 
-  const get_projects = await project_data.getWhere([
-    { fieldName: 'shared_uids', operator: 'array-contains', value: user_auth.data?.uid },
-
-  ], 2, [
-    { fieldName: 'createdAt', direction: 'desc' },
-  ], project_list.lastSnapshot)
+  const get_projects = await project_data.getWhere(
+    [{ fieldName: 'shared_uids', operator: 'array-contains', value: user_auth.data?.uid }],
+    2,
+    [{ fieldName: 'createdAt', direction: 'desc' }],
+    project_list.lastSnapshot,
+  )
 
   console.log(get_projects)
 
@@ -76,7 +75,7 @@ const find_icon = (name: string): string | undefined => {
 const navigateToProject = (project: ProjectData) => {
   //We can set a validation by fetching from firebaste itself calling get
   //For faster validation we can check based on what we fetched earlier
-  const validate = project_list.data.find(proj => proj.pj_id === project.pj_id)
+  const validate = project_list.data.find((proj) => proj.pj_id === project.pj_id)
   if (validate) {
     project_data.set(project)
     router.push({ name: project.platform.toLowerCase(), params: { pj_id: project.pj_id } })
@@ -87,7 +86,6 @@ const navigateToProject = (project: ProjectData) => {
       variant: 'destructive',
     })
   }
-
 }
 </script>
 
@@ -109,14 +107,19 @@ const navigateToProject = (project: ProjectData) => {
 
           <div v-if="!pageLoad">
             <div v-if="project_list.data.length">
-              <div v-for="project in project_list.data" :key="project.name"
-                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300">
+              <div
+                v-for="project in project_list.data"
+                :key="project.name"
+                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
+              >
                 <div class="grid grid-cols-12 items-center">
                   <div class="col-span-5" @click="navigateToProject(project)">
                     <div class="flex items-center gap-x-3">
                       <i class="bx text-2xl" :class="find_icon(project.platform)"></i>
                       <div class="grid gap-0">
-                        <span class="text-sm">{{ project.name }} - {{project.connectedAccount?.name}}</span>
+                        <span class="text-sm"
+                          >{{ project.name }} - {{ project.connectedAccount?.name }}</span
+                        >
                         <span class="text-xs">{{ project.pj_id }}</span>
                       </div>
                     </div>
@@ -130,8 +133,10 @@ const navigateToProject = (project: ProjectData) => {
                   <div class="col-span-1 text-sm text-gray-600">{{ project.status }}</div>
                   <div class="col-span-1 text-sm text-gray-600">Owner</div>
                   <div class="col-span-1 justify-self-end">
-                    <button type="button"
-                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                    <button
+                      type="button"
+                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    >
                       <i class="material-icons text-md">more_vert</i>
                     </button>
                   </div>

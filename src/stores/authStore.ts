@@ -1,14 +1,12 @@
-import type { UserProfileData, Address } from '@/core/types/AuthUserTypes'
-import type { Timestamp } from '@/core/types/UniTypes'
+import type { UserProfileData } from '@/core/types/AuthUserTypes'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
-import type { FirebaseOperators, FirebaseWhereCondition, FirebaseOrderCondition } from '@/core/utils/firebase-collections'
+import type {  FirebaseWhereCondition, FirebaseOrderCondition } from '@/core/utils/firebase-collections'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { postCollection, getCollection, getCollectionByField } from '@/core/utils/firebase-collections';
 import { auth } from '@/core/utils/firebase-client';
 import type { DocumentData } from 'firebase/firestore';
 import { useProjectStore } from './projectStore'
-import { boolean } from 'zod'
 
 
 // type Nullable<T> = {

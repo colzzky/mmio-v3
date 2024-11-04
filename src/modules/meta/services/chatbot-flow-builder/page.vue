@@ -23,7 +23,7 @@ import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useMetaRelatedStore } from '@/stores/metaRelatedStore'
 import { useProjectStore } from '@/stores/projectStore'
-import { computed, onMounted, provide, ref, useTemplateRef, watch } from 'vue'
+import { onMounted, useTemplateRef, watch } from 'vue'
 
 export type Flow = {
   id: string
@@ -77,7 +77,7 @@ const loadChatBotFlows = async () => {
 
 watch(
   () => project_data.isInitialized,
-  async (newValue, oldValue) => {
+  async (newValue) => {
     if (newValue) {
       if (!chat_bot_flow_list.isInitialized) {
         await loadChatBotFlows()
@@ -180,7 +180,7 @@ watch(
 // }
 
 const createEditModalRef = useTemplateRef('createEditModal')
-const deleteModalRef = useTemplateRef('deleteModal')
+// const deleteModalRef = useTemplateRef('deleteModal')
 </script>
 
 <template>
@@ -204,7 +204,7 @@ const deleteModalRef = useTemplateRef('deleteModal')
           </TableRow>
         </TableHeader>
         <TableBody v-if="!chat_bot_flow_list.isLoading">
-          <TableRow v-for="(flow, index) in chat_bot_flow_list.data" :key="flow.cb_id">
+          <TableRow v-for="flow in chat_bot_flow_list.data" :key="flow.cb_id">
             <TableCell>{{ flow.name }}</TableCell>
             <TableCell>
               <Badge>

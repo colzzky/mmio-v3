@@ -6,14 +6,12 @@ import {
   getCollection,
   getCollectionByField,
 } from '@/core/utils/firebase-collections'
-import type { FirebaseOperators, FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
+import type {  FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
 import generalAxiosInstance from '@/core/utils/general-axios-instance'
-import type { DocumentData, DocumentSnapshot, Timestamp } from 'firebase/firestore'
+import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { useAuthStore } from './authStore'
-import type { Auth } from 'firebase/auth'
-import { uiHelpers } from '@/core/utils/ui-helper'
 
 interface PlaformApi {
   data: PlatformApiData | null

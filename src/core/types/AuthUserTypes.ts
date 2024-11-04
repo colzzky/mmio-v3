@@ -1,5 +1,3 @@
-import type { Timestamp } from './UniTypes'
-
 export interface Address {
   street: string
   city: string
@@ -14,6 +12,6 @@ export interface UserProfileData {
   lastName: string
   contactEmail: string
   address: Address
-  createdAt:string
-  updatedAt:string
+  createdAt: string
+  updatedAt: string
 }

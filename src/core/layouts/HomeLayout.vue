@@ -7,8 +7,9 @@ import { useAuthStore } from '@/stores/authStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { Bars3Icon } from '@heroicons/vue/24/outline'
 import { ref } from 'vue'
+
 const useAuth = useAuthStore()
-const {  user_auth,page_init } = useAuth
+const { page_init } = useAuth
 const layoutLoad = ref<boolean>(false)
 
 const sidebarStore = useSidebarStore()
@@ -36,8 +37,10 @@ const navigation = [
       <li>
         <ul role="list" class="-mx-2">
           <li v-for="item in navigation" :key="item.href">
-            <RouterLink :to="item.href"
-              class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/5 aria-[current=page]:bg-primary/10 aria-[current=page]:font-bold">
+            <RouterLink
+              :to="item.href"
+              class="group flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/5 aria-[current=page]:bg-primary/10 aria-[current=page]:font-bold"
+            >
               <i class="material-icons text-xl">{{ item.icon }}</i>
               {{ item.label }}
             </RouterLink>
@@ -47,9 +50,14 @@ const navigation = [
     </DesktopSidebar>
 
     <div class="lg:pl-72">
-      <div class="sticky top-0 z-40 flex h-20 shrink-0 items-center gap-x-4 bg-white px-4 sm:gap-x-6 sm:px-6 lg:px-8">
-        <button type="button" class="-m-2.5 p-2.5 text-gray-700 lg:hidden"
-          @click="sidebarStore.toggleMobileSidebar('on')">
+      <div
+        class="sticky top-0 z-40 flex h-20 shrink-0 items-center gap-x-4 bg-white px-4 sm:gap-x-6 sm:px-6 lg:px-8"
+      >
+        <button
+          type="button"
+          class="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+          @click="sidebarStore.toggleMobileSidebar('on')"
+        >
           <span class="sr-only">Open sidebar</span>
           <Bars3Icon class="h-6 w-6" aria-hidden="true" />
         </button>
@@ -65,10 +73,12 @@ const navigation = [
               </div>
               <input
                 class="block h-9 w-full rounded-l-md border-0 py-1 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:outline-none sm:text-sm sm:leading-6"
-                placeholder="Search Campaigns" />
+                placeholder="Search Campaigns"
+              />
             </div>
             <div
-              class="relative -ml-px inline-flex items-center rounded-r-md bg-white px-2 py-1 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10">
+              class="relative -ml-px inline-flex items-center rounded-r-md bg-white px-2 py-1 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+            >
               <ProjectCenter />
             </div>
           </span>
