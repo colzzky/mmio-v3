@@ -17,7 +17,6 @@ import {
   TableRow,
   TableCell,
 } from '@/core/components/ui/table'
-import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { provide, ref, useTemplateRef } from 'vue'
 

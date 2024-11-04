@@ -84,9 +84,8 @@ const registrationField = reactive<RegistrationField>({
   },
   async validateSubmit(type): Promise<void> {
     if (this.agreeToTermsAndCondition) {
-
       const typeActions: { [key in typeof type]: () => void } = {
-        'register': async () => {
+        register: async () => {
           this.isLoading = true
           Object.keys(this.errors).forEach((key) => {
             const field = key as keyof InputStructure
@@ -109,19 +108,16 @@ const registrationField = reactive<RegistrationField>({
           }
           this.isLoading = false
         },
-        'google': () => {
-
-        },
-        'meta': async () => {
+        google: () => {},
+        meta: async () => {
           this.isLoading = true
           await this.registerFacebook()
           this.isLoading = false
         },
       }
 
-      typeActions[type]?.();
-    }
-    else {
+      typeActions[type]?.()
+    } else {
       toast({
         title: 'Registration error',
         description: 'You must first agree with our terms and conditions',
@@ -152,7 +148,7 @@ const registrationField = reactive<RegistrationField>({
     })
   },
   async registerFacebook(): Promise<void> {
-    const provider = new FacebookAuthProvider();
+    const provider = new FacebookAuthProvider()
     await signInWithPopup(auth, provider)
       .then(async (result) => {
         user_auth.setUser(result.user)
@@ -269,19 +265,35 @@ const registrationField = reactive<RegistrationField>({
             </Button>
           </Label>
         </div>
-        <div v-if="!registrationField.isLoading" class="flex justify-end items-center gap-x-3">
-
-          <Button type="submit" @click="registrationField.validateSubmit('google')" size="sm" class="text-xs"
-            variant="outline">
-            <i class="bx text-2xl bxl-google pr-2"></i>Register with Google</Button>
-          <Button type="submit" @click="registrationField.validateSubmit('meta')" size="sm" class="text-xs"
-            variant="outline">
-            <i class="bx text-2xl bxl-meta pr-2"></i>
-            Register with Meta</Button>
-          <Button type="submit" @click="registrationField.validateSubmit('register')" size="sm" class="text-xs">Create
-            Account</Button>
+        <div v-if="!registrationField.isLoading" class="flex items-center justify-end gap-x-3">
+          <Button
+            type="submit"
+            @click="registrationField.validateSubmit('google')"
+            size="sm"
+            class="text-xs"
+            variant="outline"
+          >
+            <i class="bx bxl-google pr-2 text-2xl"></i>Register with Google</Button
+          >
+          <Button
+            type="submit"
+            @click="registrationField.validateSubmit('meta')"
+            size="sm"
+            class="text-xs"
+            variant="outline"
+          >
+            <i class="bx bxl-meta pr-2 text-2xl"></i>
+            Register with Meta</Button
+          >
+          <Button
+            type="submit"
+            @click="registrationField.validateSubmit('register')"
+            size="sm"
+            class="text-xs"
+            >Create Account</Button
+          >
         </div>
-        <div v-else class="flex justify-end items-center gap-x-3">
+        <div v-else class="flex items-center justify-end gap-x-3">
           <Button variant="outline" size="xs" disabled class="flex items-center gap-2">
             <i class="material-icons animate-spin text-sm">donut_large</i>Loading....
           </Button>

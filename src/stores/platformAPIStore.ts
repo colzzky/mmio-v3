@@ -160,9 +160,6 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
     async saveToFirestore(fb_code: FBLonglivedCodeReturn) {
       const useAuth = useAuthStore()
       const { user_auth } = useAuth
-      const {
-        APP_FACEBOOK_ID,
-      } = import.meta.env
       try {
         const get_account = await generalAxiosInstance.get(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${fb_code.access_token}`)
         const account = get_account.data as MetaAccount

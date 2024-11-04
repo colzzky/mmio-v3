@@ -22,7 +22,6 @@ import {
   TableRow,
 } from '@/core/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs'
-import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { computed, provide, ref, useTemplateRef } from 'vue'
 
