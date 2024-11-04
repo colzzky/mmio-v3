@@ -1,28 +1,29 @@
-import { services as metaServices } from '@/modules/meta/routes'
+import { useSidebarStore } from './sidebarStore'
+import { services as metaServices, type Service } from '@/modules/meta/routes'
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 export const useServicesStore = defineStore('services', () => {
-  const services = ref({
+  const sidebarStore = useSidebarStore()
+
+  const services = ref<Record<string, Map<string, Service>>>({
     meta: metaServices,
   })
-  function getServiceLinks(routePath: string) {
-    if (routePath.startsWith('/project') && routePath.includes('/meta')) return services.value.meta
 
-    throw new Error('Platform not found')
-  }
+  const platformServices = computed(() => services.value[sidebarStore.platformName])
+  const pinnedServices = computed(() =>
+    Array.from(platformServices.value).filter(([, service]) => service.pinned),
+  )
 
-  function toggleServicePinnedStatus(routePath: string, serviceKey: string) {
-    const services = getServiceLinks(routePath)
-    const service = services.get(serviceKey)
-
+  function toggleServicePinnedStatus(serviceName: string) {
+    const service = platformServices.value.get(serviceName)
     if (!service) throw new Error('Service not found')
 
-    services.set(serviceKey, {
+    platformServices.value.set(serviceName, {
       ...service,
-      pinned: !service.pinned,
+      pinned: service.pinned === true ? false : true,
     })
   }
 
-  return { services, getServiceLinks, toggleServicePinnedStatus }
+  return { services, platformServices, pinnedServices, toggleServicePinnedStatus }
 })

@@ -120,62 +120,54 @@ const deleteModalRef = useTemplateRef('deleteModal')
 </script>
 
 <template>
-  <DefaultLayout>
-    <Main class="flex flex-col gap-y-4">
-      <template #heading>Chat Sequence</template>
-      <Button
-        class="gap-x-2 self-end"
-        @click="createEditModalRef?.modal.open({ intent: 'create' })"
-      >
-        <i class="bx bx-plus text-xl" />
-        Create Chat Sequence
-      </Button>
-      <Table>
-        <TableHeader>
-          <TableHead>Name</TableHead>
-          <TableHead>Created</TableHead>
-          <TableHead class="text-center">Actions</TableHead>
-        </TableHeader>
-        <TableBody>
-          <TableRow v-for="[sequenceId, sequence] in sequences" :key="sequenceId">
-            <TableCell>{{ sequence.name }}</TableCell>
-            <TableCell>
-              {{ uiHelpers.formatDateTimeAgo(sequence.createdAt.toDateString()) }}
-            </TableCell>
-            <TableCell>
-              <div class="grid place-content-center">
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <i class="material-icons text-md">more_vert</i>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      class="gap-x-3"
-                      @click="createEditModalRef?.modal.open({ intent: 'edit', sequenceId })"
-                    >
-                      <i class="bx bx-edit text-xl" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" disabled>
-                      <i class="bx bxs-report text-xl" />
-                      View Report
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      class="gap-x-3"
-                      @click="deleteModalRef?.modal.open(sequenceId)"
-                    >
-                      <i class="bx bx-trash text-xl" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </Main>
-  </DefaultLayout>
+  <Main class="flex flex-col gap-y-4">
+    <template #heading>Chat Sequence</template>
+    <Button class="gap-x-2 self-end" @click="createEditModalRef?.modal.open({ intent: 'create' })">
+      <i class="bx bx-plus text-xl" />
+      Create Chat Sequence
+    </Button>
+    <Table>
+      <TableHeader>
+        <TableHead>Name</TableHead>
+        <TableHead>Created</TableHead>
+        <TableHead class="text-center">Actions</TableHead>
+      </TableHeader>
+      <TableBody>
+        <TableRow v-for="[sequenceId, sequence] in sequences" :key="sequenceId">
+          <TableCell>{{ sequence.name }}</TableCell>
+          <TableCell>
+            {{ uiHelpers.formatDateTimeAgo(sequence.createdAt.toDateString()) }}
+          </TableCell>
+          <TableCell>
+            <div class="grid place-content-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <i class="material-icons text-md">more_vert</i>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    class="gap-x-3"
+                    @click="createEditModalRef?.modal.open({ intent: 'edit', sequenceId })"
+                  >
+                    <i class="bx bx-edit text-xl" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem class="gap-x-3" disabled>
+                    <i class="bx bxs-report text-xl" />
+                    View Report
+                  </DropdownMenuItem>
+                  <DropdownMenuItem class="gap-x-3" @click="deleteModalRef?.modal.open(sequenceId)">
+                    <i class="bx bx-trash text-xl" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </Main>
 
   <CreateEditModal ref="createEditModal" />
   <DeleteModal ref="deleteModal" />

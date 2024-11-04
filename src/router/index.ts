@@ -4,40 +4,28 @@ import { routes as settingsRoutes } from '@/modules/settings/routes'
 import othersRoutes from '@/modules/try/routes'
 import { useAuthStore } from '@/stores/authStore'
 import { usePlatformAPIStore } from '@/stores/platformAPIStore'
-import HomeView from '@/views/HomeView.vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    meta: {
-      requiresAuth: true,
-    },
-    component: () => import('@/views/HomeView.vue'),
-    //add children here
-  },
-  {
-    path: '/project',
-    name: 'project',
-    meta: {
-      requiresAuth: true,
-    },
-    component: () => HomeView,
-  },
-  {
-    path: '/project/:id',
-    name: 'project-overview',
-    meta: {
-      requiresAuth: true,
-    },
-    component: () => {
-      return HomeView
-    },
+    meta: { requiresAuth: true },
+    component: () => import('@/core/layouts/home.vue'),
+    children: [
+      {
+        path: '',
+        name: 'home',
+        component: () => import('@/views/HomeView.vue'),
+      },
+      {
+        path: 'workspace/:workspaceId',
+        component: () => import('@/core/layouts/workspace.vue'),
+        children: [...metaRoutes],
+      },
+    ],
   },
 
   ...authenticationRoutes,
-  ...metaRoutes,
   ...settingsRoutes,
   ...othersRoutes,
 ] as RouteRecordRaw[]
@@ -50,9 +38,9 @@ const router = createRouter({
 router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
   const platformApiStore = usePlatformAPIStore()
-  const { user_auth,page_init } = authStore
-  
-  const {platform_api_list } = platformApiStore
+  const { user_auth, page_init } = authStore
+
+  const { platform_api_list } = platformApiStore
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const nonAuth = to.matched.some((record) => record.meta.nonAuth)
   if (!from.name) {
@@ -71,7 +59,6 @@ router.beforeEach(async (to, from) => {
     if (check_if_userexist) return { name: 'home' }
   }
 
-  
   return true
 })
 

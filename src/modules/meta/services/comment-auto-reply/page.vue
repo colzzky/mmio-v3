@@ -253,219 +253,211 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
 </script>
 
 <template>
-  <DefaultLayout>
-    <Main class="flex flex-col gap-y-4">
-      <template #heading>Comment Auto Reply</template>
-      <Tabs default-value="posts" class="flex flex-col gap-y-2">
-        <TabsList class="self-start">
-          <TabsTrigger value="posts">All Posts</TabsTrigger>
-          <TabsTrigger value="autoReplies">Auto Replies</TabsTrigger>
-        </TabsList>
-        <TabsContent value="posts">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Post</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead># Auto Replies</TableHead>
-                <TableHead class="text-center">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="[postId, post] in posts" :key="postId">
-                <TableCell class="whitespace-nowrap">
-                  <div class="flex items-center justify-center gap-x-2">
-                    <Avatar class="size-9">
-                      <AvatarImage :src="post.user.image" />
-                    </Avatar>
-                    <a
-                      :href="`http://example.com/${postId}`"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="text-blue-500 hover:underline"
-                    >
-                      Post ID: {{ postId }}
-                    </a>
-                  </div>
-                </TableCell>
-                <TableCell class="w-full max-w-px overflow-hidden text-ellipsis whitespace-nowrap">
-                  {{ post.description }}
-                </TableCell>
-                <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(post.createdAt.toDateString()) }}
-                </TableCell>
-                <TableCell>{{ autoRepliesByPostId.get(postId).length }}</TableCell>
-                <TableCell>
-                  <div class="grid place-content-center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <i class="material-icons text-md">more_vert</i>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuLabel>Post</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          class="gap-x-3"
-                          @click="viewPostModalRef?.modal.open(post)"
-                        >
-                          <i class="bx bx-show text-xl"></i>
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          class="gap-x-3"
-                          @click="
-                            createEditAutoReplyModalRef?.modal.open({
-                              intent: 'create',
-                              postId,
-                            })
-                          "
-                        >
-                          <i class="bx bx-message-square-add text-xl"></i>
-                          Create
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          class="gap-x-3"
-                          @click="viewPostAutoRepliesModalRef?.modal.open({ ...post })"
-                        >
-                          <i class="bx bx-list-ul text-xl"></i>
-                          View All
-                        </DropdownMenuItem>
+  <Main class="flex flex-col gap-y-4">
+    <template #heading>Comment Auto Reply</template>
+    <Tabs default-value="posts" class="flex flex-col gap-y-2">
+      <TabsList class="self-start">
+        <TabsTrigger value="posts">All Posts</TabsTrigger>
+        <TabsTrigger value="autoReplies">Auto Replies</TabsTrigger>
+      </TabsList>
+      <TabsContent value="posts">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>Post</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead># Auto Replies</TableHead>
+              <TableHead class="text-center">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow v-for="[postId, post] in posts" :key="postId">
+              <TableCell class="whitespace-nowrap">
+                <div class="flex items-center justify-center gap-x-2">
+                  <Avatar class="size-9">
+                    <AvatarImage :src="post.user.image" />
+                  </Avatar>
+                  <a
+                    :href="`http://example.com/${postId}`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-blue-500 hover:underline"
+                  >
+                    Post ID: {{ postId }}
+                  </a>
+                </div>
+              </TableCell>
+              <TableCell class="w-full max-w-px overflow-hidden text-ellipsis whitespace-nowrap">
+                {{ post.description }}
+              </TableCell>
+              <TableCell class="whitespace-nowrap">
+                {{ uiHelpers.formatDateTimeAgo(post.createdAt.toDateString()) }}
+              </TableCell>
+              <TableCell>{{ autoRepliesByPostId.get(postId).length }}</TableCell>
+              <TableCell>
+                <div class="grid place-content-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <i class="material-icons text-md">more_vert</i>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuLabel>Post</DropdownMenuLabel>
+                      <DropdownMenuItem class="gap-x-3" @click="viewPostModalRef?.modal.open(post)">
+                        <i class="bx bx-show text-xl"></i>
+                        View
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
+                      <DropdownMenuItem
+                        class="gap-x-3"
+                        @click="
+                          createEditAutoReplyModalRef?.modal.open({
+                            intent: 'create',
+                            postId,
+                          })
+                        "
+                      >
+                        <i class="bx bx-message-square-add text-xl"></i>
+                        Create
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        class="gap-x-3"
+                        @click="viewPostAutoRepliesModalRef?.modal.open({ ...post })"
+                      >
+                        <i class="bx bx-list-ul text-xl"></i>
+                        View All
+                      </DropdownMenuItem>
 
-                        <DropdownMenuItem
-                          class="gap-x-3"
-                          @click="toggleAllAutoRepliesStatus({ postId, intent: 'activate' })"
-                        >
-                          <i class="bx bx-play-circle text-xl"></i>
-                          Activate All
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          class="gap-x-3"
-                          @click="toggleAllAutoRepliesStatus({ postId, intent: 'deactivate' })"
-                        >
-                          <i class="bx bx-pause-circle text-xl"></i>
-                          Deactivate All
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TabsContent>
-        <TabsContent value="autoReplies">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Campaign Name</TableHead>
-                <TableHead>Post ID</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Updated</TableHead>
-                <TableHead class="text-center">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow v-for="[autoReplyId, autoReply] in autoReplies" :key="autoReplyId">
-                <TableCell>{{ autoReplyId }}</TableCell>
-                <TableCell>{{ autoReply.name }}</TableCell>
-                <TableCell class="whitespace-nowrap">
-                  <div class="flex items-center gap-x-2">
-                    <Avatar class="size-9">
-                      <AvatarImage :src="posts.get(autoReply.postId)?.user.image ?? ''" />
-                    </Avatar>
-                    <a
-                      :href="`http://example.com/${autoReply.postId}`"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="text-blue-500 hover:underline"
-                    >
-                      Post ID: {{ autoReply.postId }}
-                    </a>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge>{{ uiHelpers.toTitleCase(autoReply.status) }}</Badge>
-                </TableCell>
-                <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(autoReply.createdAt.toDateString()) }}
-                </TableCell>
-                <TableCell class="whitespace-nowrap">
-                  {{ uiHelpers.formatDateTimeAgo(autoReply.updatedAt.toDateString()) }}
-                </TableCell>
-                <TableCell>
-                  <div class="grid place-content-center">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger>
-                        <i class="material-icons text-md">more_vert</i>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          class="gap-x-3"
-                          @click="
-                            createEditAutoReplyModalRef?.modal.open({
-                              intent: 'edit',
-                              autoReplyId,
-                            })
-                          "
-                        >
-                          <i class="bx bx-edit text-xl" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          class="gap-x-3"
-                          @click="toggleAutoReplyStatus(autoReplyId)"
-                        >
-                          <i
-                            :class="[
-                              'bx text-xl',
-                              autoReply.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
-                            ]"
-                          />
-                          Toggle Status
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuLabel>Post</DropdownMenuLabel>
-                        <DropdownMenuItem
-                          class="gap-x-3"
-                          @click="viewPostModalRef?.modal.open(posts.get(autoReply.postId)!)"
-                        >
-                          <i class="bx bx-show text-xl"></i>
-                          View
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TabsContent>
-      </Tabs>
-    </Main>
+                      <DropdownMenuItem
+                        class="gap-x-3"
+                        @click="toggleAllAutoRepliesStatus({ postId, intent: 'activate' })"
+                      >
+                        <i class="bx bx-play-circle text-xl"></i>
+                        Activate All
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        class="gap-x-3"
+                        @click="toggleAllAutoRepliesStatus({ postId, intent: 'deactivate' })"
+                      >
+                        <i class="bx bx-pause-circle text-xl"></i>
+                        Deactivate All
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TabsContent>
+      <TabsContent value="autoReplies">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Campaign Name</TableHead>
+              <TableHead>Post ID</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead>Updated</TableHead>
+              <TableHead class="text-center">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow v-for="[autoReplyId, autoReply] in autoReplies" :key="autoReplyId">
+              <TableCell>{{ autoReplyId }}</TableCell>
+              <TableCell>{{ autoReply.name }}</TableCell>
+              <TableCell class="whitespace-nowrap">
+                <div class="flex items-center gap-x-2">
+                  <Avatar class="size-9">
+                    <AvatarImage :src="posts.get(autoReply.postId)?.user.image ?? ''" />
+                  </Avatar>
+                  <a
+                    :href="`http://example.com/${autoReply.postId}`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-blue-500 hover:underline"
+                  >
+                    Post ID: {{ autoReply.postId }}
+                  </a>
+                </div>
+              </TableCell>
+              <TableCell>
+                <Badge>{{ uiHelpers.toTitleCase(autoReply.status) }}</Badge>
+              </TableCell>
+              <TableCell class="whitespace-nowrap">
+                {{ uiHelpers.formatDateTimeAgo(autoReply.createdAt.toDateString()) }}
+              </TableCell>
+              <TableCell class="whitespace-nowrap">
+                {{ uiHelpers.formatDateTimeAgo(autoReply.updatedAt.toDateString()) }}
+              </TableCell>
+              <TableCell>
+                <div class="grid place-content-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <i class="material-icons text-md">more_vert</i>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
+                      <DropdownMenuItem
+                        class="gap-x-3"
+                        @click="
+                          createEditAutoReplyModalRef?.modal.open({
+                            intent: 'edit',
+                            autoReplyId,
+                          })
+                        "
+                      >
+                        <i class="bx bx-edit text-xl" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem class="gap-x-3" @click="toggleAutoReplyStatus(autoReplyId)">
+                        <i
+                          :class="[
+                            'bx text-xl',
+                            autoReply.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                          ]"
+                        />
+                        Toggle Status
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuLabel>Post</DropdownMenuLabel>
+                      <DropdownMenuItem
+                        class="gap-x-3"
+                        @click="viewPostModalRef?.modal.open(posts.get(autoReply.postId)!)"
+                      >
+                        <i class="bx bx-show text-xl"></i>
+                        View
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TabsContent>
+    </Tabs>
+  </Main>
 
-    <ViewPostModal ref="viewPostModal" />
+  <ViewPostModal ref="viewPostModal" />
 
-    <ViewPostAutoRepliesModal
-      ref="viewPostAutoRepliesModal"
-      @add-auto-reply-click="
-        createEditAutoReplyModalRef?.modal.open({
-          intent: 'create',
-          postId: $event,
-        })
-      "
-      @toggle-button-click="toggleAutoReplyStatus($event)"
-      @edit-auto-reply-click="
-        createEditAutoReplyModalRef?.modal.open({
-          intent: 'edit',
-          autoReplyId: $event,
-        })
-      "
-    />
+  <ViewPostAutoRepliesModal
+    ref="viewPostAutoRepliesModal"
+    @add-auto-reply-click="
+      createEditAutoReplyModalRef?.modal.open({
+        intent: 'create',
+        postId: $event,
+      })
+    "
+    @toggle-button-click="toggleAutoReplyStatus($event)"
+    @edit-auto-reply-click="
+      createEditAutoReplyModalRef?.modal.open({
+        intent: 'edit',
+        autoReplyId: $event,
+      })
+    "
+  />
 
-    <CreateEditAutoReplyModal ref="createEditAutoReplyModal" />
-  </DefaultLayout>
+  <CreateEditAutoReplyModal ref="createEditAutoReplyModal" />
 </template>

@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import Button from '@/core/components/ui/button/Button.vue'
+import { Button } from '@/core/components/ui/button'
 import { Skeleton } from '@/core/components/ui/skeleton'
 import { toast } from '@/core/components/ui/toast'
-import HomeLayout from '@/core/layouts/HomeLayout.vue'
 import type { Platforms, ProjectData } from '@/core/types/ProjectTypes'
 import { uiHelpers } from '@/core/utils/ui-helper'
+import ProjectCenter from '@/modules/try/components/ProjectCenter.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useProjectStore } from '@/stores/projectStore'
+import { useSidebarStore } from '@/stores/sidebarStore'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -16,6 +17,7 @@ const { project_data, project_list } = useProject
 const { user_auth } = useAuth
 const router = useRouter()
 const pageLoad = ref<boolean>(true)
+const sidebarStore = useSidebarStore()
 
 onMounted(async () => {
   pageLoad.value = true
@@ -90,89 +92,122 @@ const navigateToProject = (project: ProjectData) => {
 </script>
 
 <template>
-  <HomeLayout>
-    <main class="py-2">
-      <div class="px-4 sm:px-6 lg:px-8">
-        <div class="w-full px-2 py-2">
-          <div class="rounded-xl px-2 py-2">
-            <div class="grid grid-cols-12 items-center">
-              <div class="col-span-5 text-xs font-light">Name</div>
-              <div class="col-span-2 text-xs font-light">Created</div>
-              <div class="col-span-2 text-xs font-light">Updated</div>
-              <div class="col-span-1 text-xs font-light">Status</div>
-              <div class="col-span-1 text-xs font-light">Last Updated</div>
-              <div class="col-span-1 text-xs font-light"></div>
-            </div>
-          </div>
+  <div
+    class="sticky top-0 z-40 flex h-20 shrink-0 items-center gap-x-4 bg-white px-4 sm:gap-x-6 sm:px-6 lg:px-8"
+  >
+    <button
+      type="button"
+      class="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+      @click="sidebarStore.toggleMobileSidebar('on')"
+    >
+      <span class="sr-only">Open sidebar</span>
+      <i class="bx bx-menu text-2xl" aria-hidden="true" />
+    </button>
 
-          <div v-if="!pageLoad">
-            <div v-if="project_list.data.length">
-              <div
-                v-for="project in project_list.data"
-                :key="project.name"
-                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
-              >
-                <div class="grid grid-cols-12 items-center">
-                  <div class="col-span-5" @click="navigateToProject(project)">
-                    <div class="flex items-center gap-x-3">
-                      <i class="bx text-2xl" :class="find_icon(project.platform)"></i>
-                      <div class="grid gap-0">
-                        <span class="text-sm"
-                          >{{ project.name }} - {{ project.connectedAccount?.name }}</span
-                        >
-                        <span class="text-xs">{{ project.pj_id }}</span>
-                      </div>
+    <!-- Separator -->
+    <div class="h-6 w-px bg-gray-900/10 lg:hidden" aria-hidden="true"></div>
+
+    <div class="flex flex-1 justify-end">
+      <span class="isolate inline-flex rounded-md">
+        <div class="relative">
+          <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+            <i class="material-icons text-md">search</i>
+          </div>
+          <input
+            class="block h-9 w-full rounded-l-md border-0 py-1 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:outline-none sm:text-sm sm:leading-6"
+            placeholder="Search Campaigns"
+          />
+        </div>
+        <div
+          class="relative -ml-px inline-flex items-center rounded-r-md bg-white px-2 py-1 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10"
+        >
+          <ProjectCenter />
+        </div>
+      </span>
+    </div>
+  </div>
+
+  <main class="py-2">
+    <div class="px-4 sm:px-6 lg:px-8">
+      <div class="w-full px-2 py-2">
+        <div class="rounded-xl px-2 py-2">
+          <div class="grid grid-cols-12 items-center">
+            <div class="col-span-5 text-xs font-light">Name</div>
+            <div class="col-span-2 text-xs font-light">Created</div>
+            <div class="col-span-2 text-xs font-light">Updated</div>
+            <div class="col-span-1 text-xs font-light">Status</div>
+            <div class="col-span-1 text-xs font-light">Last Updated</div>
+            <div class="col-span-1 text-xs font-light"></div>
+          </div>
+        </div>
+
+        <div v-if="!pageLoad">
+          <div v-if="project_list.data.length">
+            <div
+              v-for="project in project_list.data"
+              :key="project.name"
+              class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
+            >
+              <div class="grid grid-cols-12 items-center">
+                <div class="col-span-5" @click="navigateToProject(project)">
+                  <div class="flex items-center gap-x-3">
+                    <i class="bx text-2xl" :class="find_icon(project.platform)"></i>
+                    <div class="grid gap-0">
+                      <span class="text-sm"
+                        >{{ project.name }} - {{ project.connectedAccount?.name }}</span
+                      >
+                      <span class="text-xs">{{ project.pj_id }}</span>
                     </div>
                   </div>
-                  <div class="col-span-2 text-sm text-gray-600">
-                    {{ uiHelpers.timestampToDateTimeAgo(project.createdAt) }}
-                  </div>
-                  <div class="col-span-2 text-sm text-gray-600">
-                    {{ uiHelpers.timestampToDateTimeAgo(project.updatedAt) }}
-                  </div>
-                  <div class="col-span-1 text-sm text-gray-600">{{ project.status }}</div>
-                  <div class="col-span-1 text-sm text-gray-600">Owner</div>
-                  <div class="col-span-1 justify-self-end">
-                    <button
-                      type="button"
-                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                      <i class="material-icons text-md">more_vert</i>
-                    </button>
-                  </div>
+                </div>
+                <div class="col-span-2 text-sm text-gray-600">
+                  {{ uiHelpers.timestampToDateTimeAgo(project.createdAt) }}
+                </div>
+                <div class="col-span-2 text-sm text-gray-600">
+                  {{ uiHelpers.timestampToDateTimeAgo(project.updatedAt) }}
+                </div>
+                <div class="col-span-1 text-sm text-gray-600">{{ project.status }}</div>
+                <div class="col-span-1 text-sm text-gray-600">Owner</div>
+                <div class="col-span-1 justify-self-end">
+                  <button
+                    type="button"
+                    class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  >
+                    <i class="material-icons text-md">more_vert</i>
+                  </button>
                 </div>
               </div>
             </div>
-            <div v-else>No Data found</div>
           </div>
+          <div v-else>No Data found</div>
+        </div>
 
-          <div v-if="pageLoad || project_list.isLoading" class="rounded-xl px-2 py-4">
-            <div class="grid grid-cols-12 items-center">
-              <div class="col-span-5">
-                <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
-              </div>
-              <div class="col-span-2">
-                <Skeleton class="h-3 w-[200px] rounded-full bg-gray-300" />
-              </div>
-              <div class="col-span-2">
-                <Skeleton class="h-3 w-[200px] rounded-full bg-gray-300" />
-              </div>
-              <div class="col-span-1">
-                <Skeleton class="h-3 w-[100px] rounded-full bg-gray-300" />
-              </div>
-              <div class="col-span-1">
-                <Skeleton class="h-3 w-[100px] rounded-full bg-gray-300" />
-              </div>
+        <div v-if="pageLoad || project_list.isLoading" class="rounded-xl px-2 py-4">
+          <div class="grid grid-cols-12 items-center">
+            <div class="col-span-5">
+              <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
+            </div>
+            <div class="col-span-2">
+              <Skeleton class="h-3 w-[200px] rounded-full bg-gray-300" />
+            </div>
+            <div class="col-span-2">
+              <Skeleton class="h-3 w-[200px] rounded-full bg-gray-300" />
+            </div>
+            <div class="col-span-1">
+              <Skeleton class="h-3 w-[100px] rounded-full bg-gray-300" />
+            </div>
+            <div class="col-span-1">
+              <Skeleton class="h-3 w-[100px] rounded-full bg-gray-300" />
             </div>
           </div>
+        </div>
 
-          <div class="flex items-center justify-end gap-2">
-            <Button variant="outline" size="xs" @click="loadMoreProjects()">
-              Sample Load More
-            </Button>
-          </div>
+        <div class="flex items-center justify-end gap-2">
+          <Button variant="outline" size="xs" @click="loadMoreProjects()">
+            Sample Load More
+          </Button>
         </div>
       </div>
-    </main>
-  </HomeLayout>
+    </div>
+  </main>
 </template>

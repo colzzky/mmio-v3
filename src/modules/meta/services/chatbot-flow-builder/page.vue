@@ -19,7 +19,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/core/components/ui/table'
-import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useMetaRelatedStore } from '@/stores/metaRelatedStore'
 import { useProjectStore } from '@/stores/projectStore'
@@ -184,96 +183,91 @@ const createEditModalRef = useTemplateRef('createEditModal')
 </script>
 
 <template>
-  <DefaultLayout>
-    <Main class="flex flex-col gap-y-4">
-      <template #heading>Chatbot Flow Builder</template>
-      <Button
-        class="gap-x-2 self-end"
-        @click="createEditModalRef?.modal.open({ intent: 'create' })"
-      >
-        <i class="bx bx-plus text-xl" />
-        Create Messenger Flow
-      </Button>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Flow Name</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead class="text-center">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody v-if="!chat_bot_flow_list.isLoading">
-          <TableRow v-for="flow in chat_bot_flow_list.data" :key="flow.cb_id">
-            <TableCell>{{ flow.name }}</TableCell>
-            <TableCell>
-              <Badge>
-                {{ uiHelpers.toTitleCase(flow.status) }}
-              </Badge>
-            </TableCell>
-            <TableCell class="whitespace-nowrap">{{
-              uiHelpers.timestampToDateTimeAgo(flow.updatedAt)
-            }}</TableCell>
-            <TableCell>
-              <div class="grid place-content-center">
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <i class="material-icons text-md">more_vert</i>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem class="gap-x-3">
-                      <!-- @click="deleteModalRef?.modal.open({ intent: 'edit', flowId:flow.cb_id })"> -->
-                      <i class="bx bx-edit text-xl" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3">
-                      <i
-                        :class="[
-                          'bx text-xl',
-                          flow.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
-                        ]"
-                      />
-                      Toggle Status
-                    </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3">
-                      <i class="bx bx-copy text-xl" />
-                      Clone
-                    </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" disabled>
-                      <i class="bx bx-share-alt text-xl" />
-                      Share
-                    </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" disabled>
-                      <i class="bx bxs-error text-xl" />
-                      View Error Logs
-                    </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3">
-                      <i class="bx bx-trash text-xl" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-        <TableBody v-else>
-          <TableRow>
-            <TableCell>
-              <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
-            </TableCell>
-            <TableCell>
-              <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
-            </TableCell>
-            <TableCell>
-              <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </Main>
+  <Main class="flex flex-col gap-y-4">
+    <template #heading>Chatbot Flow Builder</template>
+    <Button class="gap-x-2 self-end" @click="createEditModalRef?.modal.open({ intent: 'create' })">
+      <i class="bx bx-plus text-xl" />
+      Create Messenger Flow
+    </Button>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Flow Name</TableHead>
+          <TableHead>Status</TableHead>
+          <TableHead>Created</TableHead>
+          <TableHead class="text-center">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody v-if="!chat_bot_flow_list.isLoading">
+        <TableRow v-for="flow in chat_bot_flow_list.data" :key="flow.cb_id">
+          <TableCell>{{ flow.name }}</TableCell>
+          <TableCell>
+            <Badge>
+              {{ uiHelpers.toTitleCase(flow.status) }}
+            </Badge>
+          </TableCell>
+          <TableCell class="whitespace-nowrap">{{
+            uiHelpers.timestampToDateTimeAgo(flow.updatedAt)
+          }}</TableCell>
+          <TableCell>
+            <div class="grid place-content-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <i class="material-icons text-md">more_vert</i>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem class="gap-x-3">
+                    <!-- @click="deleteModalRef?.modal.open({ intent: 'edit', flowId:flow.cb_id })"> -->
+                    <i class="bx bx-edit text-xl" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem class="gap-x-3">
+                    <i
+                      :class="[
+                        'bx text-xl',
+                        flow.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                      ]"
+                    />
+                    Toggle Status
+                  </DropdownMenuItem>
+                  <DropdownMenuItem class="gap-x-3">
+                    <i class="bx bx-copy text-xl" />
+                    Clone
+                  </DropdownMenuItem>
+                  <DropdownMenuItem class="gap-x-3" disabled>
+                    <i class="bx bx-share-alt text-xl" />
+                    Share
+                  </DropdownMenuItem>
+                  <DropdownMenuItem class="gap-x-3" disabled>
+                    <i class="bx bxs-error text-xl" />
+                    View Error Logs
+                  </DropdownMenuItem>
+                  <DropdownMenuItem class="gap-x-3">
+                    <i class="bx bx-trash text-xl" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+      <TableBody v-else>
+        <TableRow>
+          <TableCell>
+            <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
+          </TableCell>
+          <TableCell>
+            <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
+          </TableCell>
+          <TableCell>
+            <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </Main>
 
-    <CreateEditModal ref="createEditModal" />
-    <DeleteModal ref="deleteModal" />
-  </DefaultLayout>
+  <CreateEditModal ref="createEditModal" />
+  <DeleteModal ref="deleteModal" />
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Button } from '../components/ui/button'
-import { uiHelpers } from '../utils/ui-helper'
+import { Button } from '@/core/components/ui/button'
+import { uiHelpers } from '@/core/utils/ui-helper'
 import { links as sidebarLinks } from '@/modules/settings/routes'
 import { useAuthStore } from '@/stores/authStore'
 import { ref } from 'vue'
@@ -19,7 +19,7 @@ const linksBySection = new Map(
 </script>
 
 <template>
-  <div v-if="!layoutLoad && page_init.initialize">
+  <template v-if="!layoutLoad && page_init.initialize">
     <div
       class="mx-auto grid w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-cols-[minmax(250px,275px)_1fr] gap-8 py-[var(--gutter)] [--gutter:theme(spacing.4)]"
     >
@@ -56,7 +56,7 @@ const linksBySection = new Map(
       <!--  -->
       <RouterView />
     </div>
-  </div>
+  </template>
 
   <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
     <div class="flex animate-pulse items-center gap-x-1">

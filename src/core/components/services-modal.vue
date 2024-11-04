@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Modal } from '../utils/types'
 import {
   Dialog,
   DialogContent,
@@ -7,17 +8,28 @@ import {
   DialogDescription,
 } from '@/core/components/ui/dialog'
 import { useServicesStore } from '@/stores/servicesStore'
-import { useRoute } from 'vue-router'
+import { reactive } from 'vue'
 
-const servicesStore = useServicesStore()
-const route = useRoute()
-const services = servicesStore.getServiceLinks(route.path)
+const modal = reactive<Modal>({
+  isOpen: false,
+  initialState() {
+    this.isOpen = false
+  },
+  open() {
+    this.isOpen = true
+  },
+  close() {
+    this.initialState()
+  },
+})
 
-const pj_id = route.params.pj_id
+const serviceStore = useServicesStore()
+
+defineExpose({ modal })
 </script>
 
 <template>
-  <Dialog>
+  <Dialog v-model:open="modal.isOpen" @update:open="modal.close()">
     <DialogContent class="pb-2">
       <DialogHeader>
         <DialogTitle>Choose a service</DialogTitle>
@@ -25,12 +37,12 @@ const pj_id = route.params.pj_id
       </DialogHeader>
       <ul class="-mx-4 flex max-h-[50svh] flex-col overflow-y-scroll">
         <li
-          v-for="[name, service] in services"
-          :key="name"
+          v-for="[serviceName, service] in serviceStore.platformServices"
+          :key="serviceName"
           class="grid grid-cols-[1fr_var(--bookmark-size)] gap-x-2 rounded p-4 [--bookmark-size:48px] [&:has(a:hover)]:bg-primary/5"
         >
           <RouterLink
-            :to="{ name, params: { pj_id } }"
+            :to="{ name: serviceName }"
             class="grid grid-cols-[var(--icon-size)_1fr] gap-x-4 [--icon-size:36px]"
           >
             <div
@@ -43,7 +55,7 @@ const pj_id = route.params.pj_id
           </RouterLink>
           <button
             class="size-[var(--bookmark-size)] self-center rounded-full leading-none hover:bg-primary/5"
-            @click="servicesStore.toggleServicePinnedStatus(route.path, name)"
+            @click="serviceStore.toggleServicePinnedStatus(serviceName)"
           >
             <i class="material-icons">
               {{ service.pinned ? 'bookmark' : 'bookmark_outline' }}

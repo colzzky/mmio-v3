@@ -1,35 +1,28 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 export const useSidebarStore = defineStore('sidebar', () => {
+  const route = useRoute()
+
   // TOGGLE MOBILE SIDEBAR
   const isMobileSidebarOpen = ref(false)
   function toggleMobileSidebar(value: 'on' | 'off') {
     isMobileSidebarOpen.value = value === 'on' ? true : false
   }
 
-  // LOGOUT USER
-  const router = useRouter()
-  function logoutUser() {
-    router.push('/login')
-  }
+  const platformName = computed(() => route.fullPath.split('/').filter(Boolean)[2])
 
-  // GET SERVICE HEADING
-  const serviceHeading = ref({
-    meta: 'Meta Automation',
+  const platformHeading = computed(() => {
+    if (platformName.value === 'meta') return 'Meta Automation'
+
+    return 'UNHANDLED PLATFORM HEADING CASE'
   })
-
-  function getServiceHeading(routePath: string) {
-    if (routePath.includes('meta')) return serviceHeading.value.meta
-
-    throw new Error('Service not found')
-  }
 
   return {
     isMobileSidebarOpen,
     toggleMobileSidebar,
-    logoutUser,
-    getServiceHeading,
+    platformName,
+    platformHeading,
   }
 })
