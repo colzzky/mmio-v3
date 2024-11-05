@@ -1,10 +1,10 @@
 
-//This is where we save the the thirdparty logins like facebook, omnichannel, etc
-import type { PlatformApiData, FBLonglivedCodeReturn, MetaAPIAccount, MetaAccount } from '@/core/types/PlaformAPITypes'
+import type { Platforms } from '@/core/types/UniTypes'
 import {
   postCollection,
   getCollection,
   getCollectionByField,
+  getWhereAny,
 } from '@/core/utils/firebase-collections'
 import type {  FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
 import generalAxiosInstance from '@/core/utils/general-axios-instance'
@@ -12,15 +12,15 @@ import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { useAuthStore } from './authStore'
+import { platform_api_data, type FBLonglivedCodeReturn, type MetaAccount, type MetaAPIAccount, type PlatformApiData } from '@/core/types/AuthUserTypes'
 
 interface PlaformApi {
   data: PlatformApiData | null
   isInitialized: boolean
-  initialize: () => void
-  get: (id: string) => Promise<PlatformApiDataReturnData>
-  getWhere: (where: FirebaseWhereCondition<'platform_api'>[], limit?: number, orderBy?: FirebaseOrderCondition<'platform_api'>[], startAfterDoc?: string) => Promise<PlatformApiDataReturnList>
-  createUpdate: (type: 'new' | 'update') => Promise<PlatformApiDataReturnData>
-  set: (data: PlatformApiData) => PlatformApiData
+  initialize: () => void,
+  set: (data: PlatformApiData) => void
+  get: (uid: string, platform:Platforms) => Promise<PlatformApiDataReturnData>
+  createUpdate: (uid: string, type: 'new' | 'update') => Promise<PlatformApiDataReturnData>
   resetData: () => void
 }
 
@@ -43,44 +43,23 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
     data: null,
     isInitialized: false,
     initialize() {
-      this.data = {
-        pa_id: '',
-        uid: '',
-        platform: '',
-        api_account: null,
-        createdAt: '',
-        updatedAt: '',
-      }
+      this.data = {...platform_api_data}
       this.isInitialized = true
     },
-    async get(id: string) {
-      const get = await getCollection('platform_api', 'pa_id', id)
+    async get(uid: string, platform:Platforms) {
+      const get = await getCollection('platform_api', 'users/:uid/platform_apis',{uid},platform,[])
       return {
         status: get.status,
         data: get.data as PlatformApiData,
         error: get.error,
       }
     },
-    async getWhere(where, limit, orderBy, snapshot) {
-      const get = await getCollectionByField('platform_api', 'pa_id', where, limit, orderBy, snapshot)
+    async createUpdate(uid: string, type) {
+      const post = await postCollection('platform_api', 'users/:uid/platform_apis', {uid}, this.data?.platform, this.data, type)
       return {
-        status: get.status,
-        data: get.data as PlatformApiData[],
-        error: get.error,
-      }
-    },
-    async createUpdate(type) {
-      console.log(type)
-      console.log(this.data)
-      const id = type === 'new' ? crypto.randomUUID() : this.data ? this.data.pa_id : ''
-      if (this.data) this.data.pa_id = id
-      console.log(this.data)
-      const post = await postCollection('platform_api', 'pa_id', id, this.data, type)
-      console.log(post)
-      return {
-        status: post.status,
-        data: post.data as PlatformApiData,
-        error: post.error,
+          status: post.status,
+          data: post.data as PlatformApiData,
+          error: post.error
       }
     },
     //Only set after fetch
@@ -104,15 +83,13 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
     initializeAccountApis: async () => {
       const useAuth = useAuthStore()
       const { user_auth } = useAuth
+      const uid = user_auth.data? user_auth.data.uid : ''
       if (user_auth.data) {
         platform_api_list.isInitialized = false
         platform_api_list.isLoading = true
-        const get_platform_api = await platformAPI.getWhere([{ fieldName: 'uid', operator: '==', value: user_auth.data?.uid },], undefined, [])
+        const get_platform_api = await getWhereAny('platform_api','users/:uid/platform_apis',{uid},[])
         console.log(get_platform_api)
         if (get_platform_api.status) {
-          if (get_platform_api.data.length > 0) {
-            platform_api_list.lastSnapshot = get_platform_api.data[get_platform_api.data.length - 1].pa_id;
-          }
           get_platform_api.data.forEach(api => {
             platform_api_list.data.push(api);
           });
@@ -121,7 +98,6 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
       platform_api_list.isInitialized = true
       platform_api_list.isLoading = false
     }
-
   })
 
   const facebook_integration = reactive({
@@ -160,6 +136,7 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
     async saveToFirestore(fb_code: FBLonglivedCodeReturn) {
       const useAuth = useAuthStore()
       const { user_auth } = useAuth
+      const uid = user_auth.data? user_auth.data.uid : ''
       try {
         const get_account = await generalAxiosInstance.get(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${fb_code.access_token}`)
         const account = get_account.data as MetaAccount
@@ -175,30 +152,25 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
         }
 
         //Map meta account API Information that will be save to firestore
-        const getExistingAcount = await platformAPI.getWhere([
-          { fieldName: 'uid', operator: '==', value: user_auth.data?.uid },
-          { fieldName: 'platform', operator: '==', value: 'META' }
-        ])
+        const getExistingAcount = await platformAPI.get(uid,'Meta')
 
         console.log(getExistingAcount)
         let type = <'new' | 'update'>'new'
         if (getExistingAcount.status) {
           type = 'update'
-          platformAPI.set(getExistingAcount.data[0])
+          platformAPI.set(getExistingAcount.data)
           if (platformAPI.data) {
-            platformAPI.data.api_account = new_meta_api_account;
+            platformAPI.data.client_account = new_meta_api_account;
           }
         } else {
           type = 'new'
           platformAPI.initialize()
           if (platformAPI.data) {
-            platformAPI.data.platform = 'META'
-            platformAPI.data.uid = user_auth.data ? user_auth.data.uid : ''
-            platformAPI.data.api_account = new_meta_api_account;
+            platformAPI.data.platform = 'Meta'
+            platformAPI.data.client_account = new_meta_api_account;
           }
         }
-
-        const postPlatform = await platformAPI.createUpdate(type)
+        const postPlatform = await platformAPI.createUpdate(uid,type)
         return postPlatform.data
       } catch (error) {
         console.error('Error during token exchange:', error);

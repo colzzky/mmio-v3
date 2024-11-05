@@ -1,6 +1,6 @@
 
 //This is where we save the the thirdparty logins like facebook, omnichannel, etc
-import type { MetaPagesData, MetaPagesReturn, ChatBotFlowData } from '@/core/types/MetaTypes'
+import { type MetaPageData, type MetaPagesReturn, type ChatBotFlowData, meta_page_data } from '@/core/types/MetaTypes'
 import {
     postCollection,
     getCollection,
@@ -15,13 +15,12 @@ import { reactive } from 'vue'
 type FirebaseReturnBase = Omit<FirebaseReturn, 'data'>
 
 interface MetaPage {
-    data: MetaPagesData | null
+    data: MetaPageData | null
     isInitialized: boolean
-    initialize: () => void
-    get: (id: string) => Promise<MetaPagesDataReturnData>
-    getWhere: (where: FirebaseWhereCondition<'meta_pages'>[], limit?: number, orderBy?: FirebaseOrderCondition<'meta_pages'>[], startAfterDoc?: string) => Promise<MetaPagesDataReturnList>
-    createUpdate: (type: 'new' | 'update') => Promise<MetaPagesDataReturnData>
-    set: (data: MetaPagesData) => MetaPagesData
+    initialize: () => void,
+    set: (data: MetaPageData) => void
+    get: (id: string) => Promise<MetaPageDataReturnData>
+    createUpdate: (type: 'new' | 'update') => Promise<MetaPageDataReturnData>
     resetData: () => void
 }
 
@@ -32,11 +31,11 @@ interface FirebaseReturn {
 }
 
 
-type MetaPagesDataReturnList = FirebaseReturnBase & {
-    data: MetaPagesData[]
+type MetaPageDataReturnList = FirebaseReturnBase & {
+    data: MetaPageData[]
 }
-type MetaPagesDataReturnData = FirebaseReturnBase & {
-    data: MetaPagesData
+type MetaPageDataReturnData = FirebaseReturnBase & {
+    data: MetaPageData
 }
 
 
@@ -69,49 +68,26 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
         data: null,
         isInitialized: false,
         initialize() {
-            this.data = {
-                mp_id: '',
-                pa_id: '',
-                page_id: '',
-                access_token: '',
-                picture: undefined,
-                category: '',
-                name: '',
-                isActive: false,
-                isOnProject: false,
-                voided: false,
-                createdAt: '',
-                updatedAt: '',
-            }
+            this.data = {...meta_page_data}
             this.isInitialized = true
         },
         async get(id: string) {
-            const get = await getCollection('meta_pages', 'mp_id', id)
+            const get = await getCollection('meta_page','meta_pages', null, id)
             return {
                 status: get.status,
-                data: get.data as MetaPagesData,
-                error: get.error,
-            }
-        },
-        async getWhere(where, limit, orderBy, snapshot) {
-            const get = await getCollectionByField('meta_pages', 'mp_id', where, limit, orderBy, snapshot)
-            return {
-                status: get.status,
-                data: get.data as MetaPagesData[],
+                data: get.data as MetaPageData,
                 error: get.error,
             }
         },
         async createUpdate(type) {
-            console.log(type)
-            console.log(this.data)
-            const id = type === 'new' ? crypto.randomUUID() : this.data ? this.data.mp_id : ''
-            if (this.data) this.data.mp_id = id
-            console.log(this.data)
-            const post = await postCollection('meta_pages', 'mp_id', id, this.data, type)
+
+            let id = this.data?.mp_id ? this.data.mp_id : crypto.randomUUID();
+            if(this.data) this.data.mp_id = id
+            const post = await postCollection('meta_page','meta_pages', null, id, this.data, type)
             console.log(post)
             return {
                 status: post.status,
-                data: post.data as MetaPagesData,
+                data: post.data as MetaPageData,
                 error: post.error,
             }
         },
@@ -129,82 +105,82 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
     })
 
     const meta_pages_list = reactive({
-        data: <MetaPagesData[]>[],
+        data: <MetaPageData[]>[],
         isInitialized: <boolean>false,
         isLoading: <boolean>false,
         lastSnapshot: <any>''
     })
 
-    const chat_bot_flow = reactive<ChatBotFlow>({
-        data: null,
-        isInitialized: false,
-        initialize() {
-            this.data = {
-                cb_id: '',
-                pj_id: '',
-                name: '',
-                dataFlow: '',
-                status: 'active',
-                isEnabled: 'enabled',
-                createdAt: '',
-                updatedAt: '',
-            }
-            this.isInitialized = true
-        },
-        async get(id: string) {
-            const get = await getCollection('chat_bot_flow', 'cb_id', id)
-            return {
-                status: get.status,
-                data: get.data as ChatBotFlowData,
-                error: get.error,
-            }
-        },
-        async getWhere(where, limit, orderBy, snapshot) {
-            const get = await getCollectionByField('chat_bot_flow', 'cb_id', where, limit, orderBy, snapshot)
-            return {
-                status: get.status,
-                data: get.data as ChatBotFlowData[],
-                error: get.error,
-            }
-        },
-        async createUpdate(type) {
-            console.log(type)
-            console.log(this.data)
-            const id = type === 'new' ? crypto.randomUUID() : this.data ? this.data.cb_id : ''
-            if (this.data) this.data.cb_id = id
-            console.log(this.data)
-            const post = await postCollection('chat_bot_flow', 'cb_id', id, this.data, type)
-            console.log(post)
-            return {
-                status: post.status,
-                data: post.data as ChatBotFlowData,
-                error: post.error,
-            }
-        },
-        //Only set after fetch
-        set(data) {
-            this.data = data
-            this.isInitialized = true
-            return this.data
-        },
-        resetData() {
-            this.data = null
-            this.isInitialized = false
-        }
-    })
+    // const chat_bot_flow = reactive<ChatBotFlow>({
+    //     data: null,
+    //     isInitialized: false,
+    //     initialize() {
+    //         this.data = {
+    //             cb_id: '',
+    //             pj_id: '',
+    //             name: '',
+    //             dataFlow: '',
+    //             status: 'active',
+    //             isEnabled: 'enabled',
+    //             createdAt: '',
+    //             updatedAt: '',
+    //         }
+    //         this.isInitialized = true
+    //     },
+    //     async get(id: string) {
+    //         const get = await getCollection('chat_bot_flow', 'cb_id', id)
+    //         return {
+    //             status: get.status,
+    //             data: get.data as ChatBotFlowData,
+    //             error: get.error,
+    //         }
+    //     },
+    //     async getWhere(where, limit, orderBy, snapshot) {
+    //         const get = await getCollectionByField('chat_bot_flow', 'cb_id', where, limit, orderBy, snapshot)
+    //         return {
+    //             status: get.status,
+    //             data: get.data as ChatBotFlowData[],
+    //             error: get.error,
+    //         }
+    //     },
+    //     async createUpdate(type) {
+    //         console.log(type)
+    //         console.log(this.data)
+    //         const id = type === 'new' ? crypto.randomUUID() : this.data ? this.data.cb_id : ''
+    //         if (this.data) this.data.cb_id = id
+    //         console.log(this.data)
+    //         const post = await postCollection('chat_bot_flow', 'cb_id', id, this.data, type)
+    //         console.log(post)
+    //         return {
+    //             status: post.status,
+    //             data: post.data as ChatBotFlowData,
+    //             error: post.error,
+    //         }
+    //     },
+    //     //Only set after fetch
+    //     set(data) {
+    //         this.data = data
+    //         this.isInitialized = true
+    //         return this.data
+    //     },
+    //     resetData() {
+    //         this.data = null
+    //         this.isInitialized = false
+    //     }
+    // })
 
-    const chat_bot_flow_list = reactive({
-        data: <ChatBotFlowData[]>[],
-        isInitialized: <boolean>false,
-        isLoading: <boolean>true,
-        lastSnapshot: <any>'',
-        resetData() {
-            this.data = []
-            this.isInitialized = false
-            this.isLoading = true
-            this.lastSnapshot = ''
-        },
-    })
+    // const chat_bot_flow_list = reactive({
+    //     data: <ChatBotFlowData[]>[],
+    //     isInitialized: <boolean>false,
+    //     isLoading: <boolean>true,
+    //     lastSnapshot: <any>'',
+    //     resetData() {
+    //         this.data = []
+    //         this.isInitialized = false
+    //         this.isLoading = true
+    //         this.lastSnapshot = ''
+    //     },
+    // })
 
     const meta_pages_integration = reactive({
         async get_fb_pages(accessToken: string): Promise<MetaPagesReturn[] | null> {
@@ -222,8 +198,8 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
     return {
         meta_page,
         meta_pages_list,
-        chat_bot_flow,
-        chat_bot_flow_list,
+        // chat_bot_flow,
+        // chat_bot_flow_list,
         meta_pages_integration
     }
 })

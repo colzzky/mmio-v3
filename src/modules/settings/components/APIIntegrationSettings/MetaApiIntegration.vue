@@ -14,9 +14,10 @@ import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
 import Switch from '@/core/components/ui/switch/Switch.vue'
 import { toast } from '@/core/components/ui/toast'
 import Toaster from '@/core/components/ui/toast/Toaster.vue'
+import { user_data, type MetaAPIAccount, type PlatformApiData } from '@/core/types/AuthUserTypes'
 import type { MetaPagesReturn, MetaPictureReturn } from '@/core/types/MetaTypes'
-import type { MetaAPIAccount, PlatformApiData } from '@/core/types/PlaformAPITypes'
 import { loadFacebookSDK } from '@/core/utils/facebook-sdk'
+import { getWhereAny } from '@/core/utils/firebase-collections'
 import generalAxiosInstance from '@/core/utils/general-axios-instance'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useAuthStore } from '@/stores/authStore'
@@ -25,7 +26,7 @@ import { usePlatformAPIStore } from '@/stores/platformAPIStore'
 import { onMounted, ref, watch } from 'vue'
 
 const useAuth = useAuthStore()
-const { user_auth } = useAuth
+const { user_auth, user } = useAuth
 const platformApiStore = usePlatformAPIStore()
 const metaRelatedStore = useMetaRelatedStore()
 const { platformAPI, facebook_integration, platform_api_list } = platformApiStore
@@ -62,16 +63,11 @@ const facebookLogin = async (): Promise<void> => {
 watch(fb_data, async (newValue) => {
   if (newValue && fb_data.value) {
     //Add logic here and check first if it's the same facebook account with what register the firebase
-    const existingAcount = await platformAPI.getWhere([
-      { fieldName: 'uid', operator: '==', value: user_auth.data?.uid },
-      { fieldName: 'platform', operator: '==', value: 'META' },
-    ])
+    const uid = user_auth.data ? user_auth.data.uid : ''
+    const existingAcount = await platformAPI.get(uid,"Meta")
     if (existingAcount.status) {
-      const account = existingAcount.data[0]
-      if (
-        (account.api_account as MetaAPIAccount) &&
-        account.api_account?.client_id !== newValue.authResponse.userID
-      ) {
+      const account = existingAcount.data
+      if (account.client_account && account.client_account.client_id !== newValue.authResponse.userID) {
         const FB = await loadFacebookSDK()
         FB.logout(() => {
           toast({
@@ -96,8 +92,8 @@ const populateFbApi = async (fbLoginStatus: fb.StatusResponse) => {
     fbLoginStatus.authResponse.accessToken as string,
   )
   if (metaApi) {
-    set_fb_api(metaApi.api_account as MetaAPIAccount, metaApi)
-    const index = platform_api_list.data.findIndex((platform) => platform.platform === 'META')
+    set_fb_api(metaApi.client_account as MetaAPIAccount, metaApi)
+    const index = platform_api_list.data.findIndex((platform) => platform.platform === 'Meta')
     if (index !== -1) {
       platform_api_list.data.splice(index, 1)
     }
@@ -111,15 +107,16 @@ const set_fb_api = (metaApi: MetaAPIAccount, fbPlatform: PlatformApiData) => {
   fb_api_load.value = true
   fb_api_information.value = metaApi
   fb_platform.value = fbPlatform
-  //Add options here to fetch all pages
   fb_api_load.value = false
 }
 
+
 const set_fb_pages = async (): Promise<void> => {
   fb_pages_load.value = true
-  const pages = await meta_page.getWhere([
-    { fieldName: 'pa_id', operator: '==', value: fb_platform.value?.pa_id },
-  ])
+
+  const pages = await getWhereAny('meta_page','meta_pages',null, [], [{
+    fieldName:'owner_uid', operator:'==', value:user_auth.data?.uid
+  }])
   console.log(pages)
   meta_pages_list.data = pages.data
   fb_pages_load.value = false
@@ -127,10 +124,11 @@ const set_fb_pages = async (): Promise<void> => {
 
 const get_fb_pages = async () => {
   fb_pages_load.value = true
+
   if (fb_api_information.value && fb_platform.value) {
-    const fb_platform_id = fb_platform.value.pa_id
+    const owner_uid = user_auth.data ? user_auth.data.uid : ''
     const fb_pages = await mpi.get_fb_pages(fb_api_information.value.accessToken)
-    await processFacebookPages(fb_pages, fb_platform_id)
+    await processFacebookPages(fb_pages, owner_uid)
   } else {
     toast({
       title: 'Meta Login Error',
@@ -141,7 +139,7 @@ const get_fb_pages = async () => {
   fb_pages_load.value = false
 }
 
-async function processFacebookPages(fb_pages: MetaPagesReturn[] | null, platform_id: string) {
+async function processFacebookPages(fb_pages: MetaPagesReturn[] | null, owner_uid: string) {
   const previous_meta_pages = [...meta_pages_list.data]
   console.log(previous_meta_pages)
   const checked_previous_meta_pages: string[] = []
@@ -153,6 +151,7 @@ async function processFacebookPages(fb_pages: MetaPagesReturn[] | null, platform
       if (index_meta_page !== -1) {
         type = 'update'
         meta_page.set(meta_pages_list.data[index_meta_page])
+        console.log(meta_page.data)
       } else {
         type = 'new'
         meta_page.initialize()
@@ -167,7 +166,7 @@ async function processFacebookPages(fb_pages: MetaPagesReturn[] | null, platform
           console.log('something went wrong fetching image')
         }
 
-        meta_page.data.pa_id = platform_id
+        meta_page.data.owner_uid = owner_uid
         meta_page.data.page_id = page.id
         meta_page.data.access_token = page.access_token
         meta_page.data.category = page.category
@@ -219,9 +218,9 @@ const activate_fb_page = async (meta_page_index: number) => {
   // await meta_page.createUpdate("update")
 }
 
+
 onMounted(() => {
   componentLoad.value = true
-  //Do something here when you want to change something to the DOM itself
   componentLoad.value = false
 })
 
@@ -230,10 +229,10 @@ watch(
   () => platform_api_list.isInitialized,
   async (newValue) => {
     if (newValue) {
-      const platform = platform_api_list.data.find((api) => api.platform === 'META')
+      const platform = platform_api_list.data.find((api) => api.platform === 'Meta')
       console.log(platform)
       if (platform) {
-        set_fb_api(platform.api_account as MetaAPIAccount, platform)
+        set_fb_api(platform.client_account as MetaAPIAccount, platform)
         await set_fb_pages()
       } else {
         fb_api_load.value = false
@@ -315,7 +314,7 @@ watch(
             use</Label
           >
         </div>
-        <Button v-if="!fb_pages_load" @click="get_fb_pages" size="xs" class="text-sm">
+        <Button v-if="!fb_pages_load"  size="xs" class="text-sm" @click="get_fb_pages">
           Export FB Pages
         </Button>
         <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">

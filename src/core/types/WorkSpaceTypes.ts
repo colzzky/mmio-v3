@@ -2,7 +2,7 @@ import type { MetaPagesData } from './MetaTypes'
 import type { Timestamp, SubCollections } from './UniTypes'
 
 export type Platforms =
-  | 'META'
+  | 'Meta'
   | 'Email-Marketing'
   | 'Google-My-Business'
   | 'Whatsapp'
@@ -34,3 +34,4 @@ export interface Shared extends SubCollections {
   sharee_uid: string
   access: boolean
 }
+

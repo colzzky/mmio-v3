@@ -3,10 +3,10 @@ import type { Shared } from '@/core/types/WorkSpaceTypes'
 import type {
   UserData,
   WorkspaceData,
-  PlatformApiData,
-  MetaPagesData,
+  MetaPageData,
   ChatBotFlowData,
 } from '@/core/utils/types'
+import type { PlatformApiData } from './AuthUserTypes'
 
 export type SubCollectionKey<T extends SubCollections> = T['subCollections']
 
@@ -41,7 +41,7 @@ interface Workspace_Collection {
   }
 }
 
-export type CollectionsInterface2 = {
+interface User_Collection {
   user: {
     id: 'up_id'
     path: 'users'
@@ -49,25 +49,31 @@ export type CollectionsInterface2 = {
     sub_col: SubCollectionKey<UserData>[]
     sub_params: {} | null
   }
+
   platform_api: {
-    id: 'pa_id'
-    path: 'platform_api'
+    id: 'platform'
+    path: 'users/:uid/platform_apis'
     interface: PlatformApiData
     sub_col: SubCollectionKey<PlatformApiData>[]
-    sub_params: {} | null
+    sub_params: {
+      uid:string
+    } | null
   }
-  meta_pages: {
+}
+
+export type CollectionsInterface2 = {
+  meta_page: {
     id: 'mp_id'
     path: 'meta_pages'
-    interface: MetaPagesData
-    sub_col: SubCollectionKey<MetaPagesData>[]
+    interface: MetaPageData
+    sub_col: SubCollectionKey<MetaPageData>[]
     sub_params: {} | null
   }
-  chat_bot_flow: {
-    id: 'cb_id'
-    path: 'chat_bot_flow'
-    interface: ChatBotFlowData
-    sub_col: SubCollectionKey<ChatBotFlowData>[]
-    sub_params: {} | null
-  }
-} & Workspace_Collection
+  // chat_bot_flow: {
+  //   id: 'cb_id'
+  //   path: 'chat_bot_flow'
+  //   interface: ChatBotFlowData
+  //   sub_col: SubCollectionKey<ChatBotFlowData>[]
+  //   sub_params: {} | null
+  // }
+} & Workspace_Collection & User_Collection

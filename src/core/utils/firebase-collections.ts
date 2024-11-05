@@ -4,7 +4,7 @@ import type {
   UserData,
   WorkspaceData,
   PlatformApiData,
-  MetaPagesData,
+  MetaPageData,
   ChatBotFlowData,
 } from '@/core/utils/types'
 import {
@@ -35,22 +35,10 @@ type CollectionFields = {
   user_profile: keyof UserData
   workspaces: keyof WorkspaceData
   platform_api: keyof PlatformApiData
-  meta_pages: keyof MetaPagesData
+  meta_pages: keyof MetaPageData
   chat_bot_flow: keyof ChatBotFlowData
 }
 
-type CollectionsInterface = {
-  user_profile: UserData
-  workspaces: WorkspaceData
-  platform_api: PlatformApiData
-  meta_pages: MetaPagesData
-  chat_bot_flow: ChatBotFlowData
-}
-
-interface PathParams {
-  share?: string // ID of the share subcollection
-  comment?: string // ID of the comment subcollection
-}
 
 export type FirebaseOperators =
   | '=='
@@ -72,7 +60,7 @@ interface FirebaseReturn {
 
 interface FirebaseWhereReturn<T> {
   status: boolean
-  data: T[] | undefined
+  data: T[] | []
   error: string
 }
 
@@ -264,6 +252,7 @@ export async function getCollection<T extends keyof CollectionsInterface2>(
 
     const userDocRef = doc(firestore, fullPath, id)
     const userSnapshot = await getDoc(userDocRef)
+    
 
     if (userSnapshot.exists()) {
       const data = { id: userSnapshot.id, ...userSnapshot.data(), 
@@ -274,12 +263,17 @@ export async function getCollection<T extends keyof CollectionsInterface2>(
 
       // Fetch specified subcollections
       if ($sub_col) {
-        for (const subCol of $sub_col) {
-          const subColRef = collection(userDocRef, subCol)
-          const subColSnapshot = await getDocs(subColRef)
-
-          subCollectionData[subCol] = subColSnapshot.docs.map((doc) => {doc.data()})
-        }
+        for (const sub of $sub_col) {
+          
+          const subColRef = collection(firestore, `${fullPath}/${data.id}/${sub}`)
+          const subColSnapshot = await getDocs(subColRef)          
+          subCollectionData[sub] = subColSnapshot.docs.map((doc) => ({
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate().toISOString(),
+            updatedAt: doc.data().updatedAt?.toDate().toISOString(),
+          }))
+          
+        }  
       }
 
       return {
@@ -367,7 +361,7 @@ type CollectionConfig<T> = {
   sub_params: { key: string }[] | null // This can still be flexible
 }
 
-export async function getWhereAny<S, T extends keyof CollectionsInterface2>(
+export async function getWhereAny<T extends keyof CollectionsInterface2>(
   $col: T, // Path like 'collection/id',
   $path: CollectionsInterface2[T]['path'], // Path like 'collection/id',
   $sub_params: CollectionsInterface2[T]['sub_params'] | null = null,
@@ -384,7 +378,7 @@ export async function getWhereAny<S, T extends keyof CollectionsInterface2>(
 
   limitResult?: number,
   lastDocumentId?: string,
-): Promise<FirebaseWhereReturn<T>> {
+): Promise<FirebaseWhereReturn<CollectionsInterface2[T]['interface']>> {
   try {
     let fullPath = $path as string
 
@@ -447,6 +441,7 @@ export async function getWhereAny<S, T extends keyof CollectionsInterface2>(
       for (const sub of $sub_col) {
         const subCollectionRef = collection(firestore, `${fullPath}/${doc.id}/${sub}`)
         const subDocs = await getDocs(subCollectionRef)
+        
 
         if (!subDocs.empty) {
           // Append the subcollection data directly to the document
@@ -472,7 +467,7 @@ export async function getWhereAny<S, T extends keyof CollectionsInterface2>(
     return {
       status: false,
       error: `Error fetching data from subcollection path: ${error}`,
-      data: undefined,
+      data: [],
     }
   }
 }

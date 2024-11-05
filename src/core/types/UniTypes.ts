@@ -11,3 +11,13 @@ export interface SubCollections {
 export type MutablePick<T, K extends keyof T> = {
   -readonly [P in K]: T[P];
 };
+
+export type Platforms =
+  | 'Meta'
+  | 'Email-Marketing'
+  | 'Google-My-Business'
+  | 'Whatsapp'
+  | 'SMS-Marketing'
+  | 'E-Commerce'
+  | 'OmniChannel'
+  | ''

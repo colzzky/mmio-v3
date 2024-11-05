@@ -8,12 +8,6 @@ export interface MetaPagesReturn {
   name: string
   id: string
   tasks: string[]
-  access_token: string
-  category: string
-  category_list: { id: string; name: string }[]
-  name: string
-  id: string
-  tasks: string[]
 }
 
 export interface MetaPictureReturn {
@@ -23,18 +17,12 @@ export interface MetaPictureReturn {
     width: number
     height: number
   }
-  data: {
-    is_silhouette: boolean
-    url: string
-    width: number
-    height: number
-  }
 }
 
-export interface MetaPagesData extends SubCollections {
+export interface MetaPageData extends SubCollections {
   mp_id: string
-  pa_id: string
   page_id: string
+  owner_uid:string
   access_token: string
   picture?: MetaPictureReturn
   category: string
@@ -44,6 +32,21 @@ export interface MetaPagesData extends SubCollections {
   isOnProject: boolean
   createdAt: string
   updatedAt: string
+}
+
+export const meta_page_data: MetaPageData = {
+  mp_id: '',
+  page_id: '',
+  owner_uid:'',
+  access_token: '',
+  category: '',
+  name: '',
+  isActive: false,
+  voided: false,
+  isOnProject: false,
+  createdAt: '',
+  updatedAt: '',
+  subCollections:[]
 }
 
 /** Meta Services */

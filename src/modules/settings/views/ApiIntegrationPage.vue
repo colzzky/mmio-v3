@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import MetaApiIntegration from '../components/APIIntegrationSettings/MetaApiIntegration.vue'
-import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useAuthStore } from '@/stores/authStore'
 import { usePlatformAPIStore } from '@/stores/platformAPIStore'
@@ -15,21 +14,12 @@ const { platform_api_list } = platformApiStore
 
 onMounted(async () => {
   await platform_api_list.initializeAccountApis()
-  await platform_api_list.initializeAccountApis()
 })
 </script>
 <template>
-  <SettingsLayout>
-    <main>
-      <MetaApiIntegration
-        v-if="
-          route.name === 'settings-api-integrations-meta' ||
-          route.name === 'settings-api-integrations'
-        "
-      />
-    </main>
-  </SettingsLayout>
+  <main>
+    <MetaApiIntegration v-if="route.name === 'settings-api-integrations-meta' || route.name === 'api-integrations'" />
+  </main>
 </template>
 
 <style></style>
-

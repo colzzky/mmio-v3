@@ -100,7 +100,8 @@ export const useAuthStore = defineStore('authStore', () => {
             this.isInitialized = true
         },
         async get(id: string) {
-            const get = await getCollection('user', 'users', null, id);
+            const get = await getCollection('user', 'users', null, id, []);
+            console.log(get)
             return {
                 status: get.status,
                 data: get.data as UserData,
