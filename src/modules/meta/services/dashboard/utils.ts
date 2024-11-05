@@ -3,7 +3,7 @@ export function subtractDays(date: Date, days: number) {
 
   newDate.setDate(newDate.getDate() - days)
 
-  return newDate
+  return dateTimeFormat.format(newDate)
 }
 
 export const dateTimeFormat = Intl.DateTimeFormat('en-PH', {

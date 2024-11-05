@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import MessagesPerDayChart from './components/messages-per-day-chart.vue'
+import MessagesReceivedPerDayChart from './components/messages-received-per-day-chart.vue'
+import UniqueSubscribersPerUsers from './components/unique-subscribers-per-users.vue'
 import Main from '@/core/components/ui/main.vue'
 </script>
 
 <template>
   <Main class="grid gap-y-6">
     <template #heading>Dashboard</template>
-    <MessagesPerDayChart />
+    <MessagesReceivedPerDayChart />
+    <UniqueSubscribersPerUsers />
+    <MessagesReceivedPerDayChart />
+    <MessagesReceivedPerDayChart />
   </Main>
 </template>
