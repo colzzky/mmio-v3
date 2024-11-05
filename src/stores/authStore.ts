@@ -23,10 +23,10 @@ type PickAnyKey<T> = {
 
 
 interface AuthUser {
-    data: PickAnyKey<UserData> | null
+    data: UserData | null
     isInitialized: boolean
     initialize: () => void,
-    set: (data: PickAnyKey<UserData>) => void
+    set: (data: UserData) => void
     get: (id: string) => Promise<UserReturnData>
     createUpdate: (type: 'new' | 'update') => Promise<UserReturnData>
 }

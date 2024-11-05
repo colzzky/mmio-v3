@@ -109,10 +109,7 @@ export async function getCollectionByField<T extends keyof Collections>(
   // Apply order conditions
   if (orderConditions) {
     for (const condition of orderConditions) {
-      q = query(
-        q,
-        orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),
-      )
+      q = query(q,orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),)
       q = query(
         q,
         orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),
@@ -187,6 +184,7 @@ export async function postCollection<T extends keyof CollectionsInterface2>(
     const userSnapshot = await getDoc(userDocRef) // Fetch the document
     if (userSnapshot.exists()) {
       // Get the document data
+      console.log(data.createdAt)
       const postData = {
         ...data,
         createdAt: Timestamp.fromDate(new Date(data.createdAt)),
@@ -199,11 +197,7 @@ export async function postCollection<T extends keyof CollectionsInterface2>(
         data: {
           ...postData,
           createdAt: postData.createdAt.toDate().toISOString(),
-        data: {
-          ...postData,
-          createdAt: postData.createdAt.toDate().toISOString(),
           updatedAt: postData.updatedAt.toDate().toISOString(),
-        },
         },
         error: '',
       }
@@ -231,11 +225,7 @@ export async function postCollection<T extends keyof CollectionsInterface2>(
           data: {
             ...postData,
             createdAt: postData.createdAt.toDate().toISOString(),
-          data: {
-            ...postData,
-            createdAt: postData.createdAt.toDate().toISOString(),
             updatedAt: postData.updatedAt.toDate().toISOString(),
-          },
           },
           error: '',
         }
@@ -276,7 +266,10 @@ export async function getCollection<T extends keyof CollectionsInterface2>(
     const userSnapshot = await getDoc(userDocRef)
 
     if (userSnapshot.exists()) {
-      const data = { id: userSnapshot.id, ...userSnapshot.data() }
+      const data = { id: userSnapshot.id, ...userSnapshot.data(), 
+        createdAt: userSnapshot.data().createdAt.toDate().toISOString(),
+        updatedAt: userSnapshot.data().updatedAt.toDate().toISOString(),
+       }
       const subCollectionData: Record<string, any[]> = {} // To store subcollection data
 
       // Fetch specified subcollections
@@ -285,7 +278,7 @@ export async function getCollection<T extends keyof CollectionsInterface2>(
           const subColRef = collection(userDocRef, subCol)
           const subColSnapshot = await getDocs(subColRef)
 
-          subCollectionData[subCol] = subColSnapshot.docs.map((doc) => doc.data())
+          subCollectionData[subCol] = subColSnapshot.docs.map((doc) => {doc.data()})
         }
       }
 

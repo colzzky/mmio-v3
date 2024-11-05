@@ -17,7 +17,7 @@ import { z } from 'zod'
 
 const { toast } = useToast()
 const useAuth = useAuthStore()
-const { user_profile } = useAuth
+const { user } = useAuth
 //Requirement when setting up Component
 const componentLoad = ref<boolean>(true)
 //Requirement when data is still fetching
@@ -60,10 +60,10 @@ const inputField = reactive<InputField>({
   isLoading: false,
   confirmationModal: false,
   initializeValue(): void {
-    if (user_profile.data) {
-      inputField.dataInput.firstName = user_profile.data.firstName ?? ''
-      inputField.dataInput.lastName = user_profile.data.lastName ?? ''
-      inputField.dataInput.contactEmail = user_profile.data.contactEmail ?? ''
+    if (user.data) {
+      inputField.dataInput.firstName = user.data.profile.firstName ?? ''
+      inputField.dataInput.lastName = user.data.profile.lastName ?? ''
+      inputField.dataInput.contactEmail = user.data.profile.contactEmail ?? ''
     }
   },
   validateSingleField(field: keyof InputStructure): void {
@@ -100,13 +100,12 @@ const inputField = reactive<InputField>({
   },
   async updateBasicInfo(): Promise<void> {
     this.isLoading = true
-    //await updateProfile(user_auth.data, { displayName: this.dataInput.displayName });
-    if (user_profile.data) {
-      user_profile.data.firstName = this.dataInput.firstName
-      user_profile.data.lastName = this.dataInput.lastName
-      user_profile.data.contactEmail = this.dataInput.contactEmail
+    if (user.data) {
+      user.data.profile.firstName = this.dataInput.firstName
+      user.data.profile.lastName = this.dataInput.lastName
+      user.data.profile.contactEmail = this.dataInput.contactEmail
       console.log(this.dataInput)
-      const update = await user_profile.update()
+      const update = await user.createUpdate('update')
       if (update.status) {
         toast({
           title: 'Basic Information Update Successful',
@@ -133,10 +132,10 @@ onMounted(() => {
   componentLoad.value = false
 })
 const componentDataLoaded = computed<boolean>(() => {
-  if (user_profile.isInitialized) {
+  if (user.isInitialized) {
     inputField.initializeValue()
   }
-  return user_profile.isInitialized
+  return user.isInitialized
 })
 </script>
 <template>

@@ -17,7 +17,7 @@ import { z } from 'zod'
 
 const { toast } = useToast()
 const useAuth = useAuthStore()
-const { user_profile } = useAuth
+const { user } = useAuth
 //Requirement when setting up Component
 const componentLoad = ref<boolean>(true)
 //Requirement when data is still fetching
@@ -69,12 +69,12 @@ const inputField = reactive<InputField>({
   isLoading: false,
   confirmationModal: false,
   initializeValue(): void {
-    if (user_profile.data && user_profile.data.address) {
-      inputField.dataInput.street = user_profile.data.address.street ?? ''
-      inputField.dataInput.city = user_profile.data.address.city ?? ''
-      inputField.dataInput.state = user_profile.data.address.state ?? ''
-      inputField.dataInput.country = user_profile.data.address.country ?? ''
-      inputField.dataInput.zipCode = user_profile.data.address.zipCode ?? ''
+    if (user.data && user.data.address) {
+      inputField.dataInput.street = user.data.address.street ?? ''
+      inputField.dataInput.city = user.data.address.city ?? ''
+      inputField.dataInput.state = user.data.address.state ?? ''
+      inputField.dataInput.country = user.data.address.country ?? ''
+      inputField.dataInput.zipCode = user.data.address.zipCode ?? ''
     }
   },
   validateSingleField(field: keyof InputStructure): void {
@@ -112,15 +112,15 @@ const inputField = reactive<InputField>({
   async updateAddress(): Promise<void> {
     this.isLoading = true
     //await updateProfile(user_auth.data, { displayName: this.dataInput.displayName });
-    console.log(user_profile.data)
-    if (user_profile.data && user_profile.data.address) {
-      user_profile.data.address.city = this.dataInput.city
-      user_profile.data.address.state = this.dataInput.state
-      user_profile.data.address.street = this.dataInput.street
-      user_profile.data.address.country = this.dataInput.country
-      user_profile.data.address.zipCode = this.dataInput.zipCode
+    console.log(user.data)
+    if (user.data && user.data.address) {
+      user.data.address.city = this.dataInput.city
+      user.data.address.state = this.dataInput.state
+      user.data.address.street = this.dataInput.street
+      user.data.address.country = this.dataInput.country
+      user.data.address.zipCode = this.dataInput.zipCode
       console.log(this.dataInput)
-      const update = await user_profile.update()
+      const update = await user.createUpdate('update')
       if (update.status) {
         toast({
           title: 'Address Update Successful',
@@ -147,10 +147,10 @@ onMounted(() => {
   componentLoad.value = false
 })
 const componentDataLoaded = computed<boolean>(() => {
-  if (user_profile.isInitialized) {
+  if (user.isInitialized) {
     inputField.initializeValue()
   }
-  return user_profile.isInitialized
+  return user.isInitialized
 })
 </script>
 <template>

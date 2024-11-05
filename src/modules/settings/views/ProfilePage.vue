@@ -8,15 +8,12 @@ import { useAuthStore } from '@/stores/authStore'
 import { onMounted } from 'vue'
 
 const useAuth = useAuthStore()
-const { user_auth, user_profile } = useAuth
+const { user_auth, user } = useAuth
 onMounted(async () => {
-  if (!user_profile.isInitialized) {
+  if (!user.isInitialized && user_auth.data) {
     console.log('initializing...')
-    const profile = await user_profile.getWhere([
-      { fieldName: 'uid', operator: '==', value: user_auth.data?.uid },
-    ])
-    const data = profile.data[0]
-    user_profile.set(data)
+    const profile = await user.get(user_auth.data.uid)
+    user.set(profile.data)
   }
 })
 </script>
