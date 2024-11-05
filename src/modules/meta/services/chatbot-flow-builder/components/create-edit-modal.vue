@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import type { ChatBotFlowData } from '@/core/types/MetaTypes'
-import { useMetaRelatedStore } from '@/stores/metaRelatedStore'
-
 import type { Flow, FlowsMap } from '../page.vue'
 import { Button } from '@/core/components/ui/button'
 import {
@@ -14,15 +11,16 @@ import {
 } from '@/core/components/ui/dialog'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
+import type { ChatBotFlowData } from '@/core/types/MetaTypes'
 import type { Modal } from '@/core/utils/types'
+import { useMetaRelatedStore } from '@/stores/metaRelatedStore'
+import { useProjectStore } from '@/stores/projectStore'
 import { inject, reactive } from 'vue'
 import { z } from 'zod'
-import { useProjectStore } from '@/stores/projectStore'
-
 
 const metaStore = useMetaRelatedStore()
 const useProject = useProjectStore()
-const {chat_bot_flow, chat_bot_flow_list} = metaStore 
+const { chat_bot_flow, chat_bot_flow_list } = metaStore
 const { project_data } = useProject
 
 //const flows = inject('flows') as FlowsMap
@@ -41,7 +39,6 @@ interface ModalInterface extends Omit<Modal, 'open'> {
   submitForm(): Promise<void>
   createFlow(): Promise<void>
   editFlow(): Promise<void>
-
 }
 
 const schema = z.object({
@@ -103,7 +100,6 @@ const modal = reactive<ModalInterface>({
     if (this.validated) {
       //Submit or show
     }
-
   },
   validateSingleField(field: keyof SelectedFormKey): void {
     const value = this.form[field]
@@ -116,7 +112,7 @@ const modal = reactive<ModalInterface>({
   },
 
   async submitForm() {
-    this.intent === 'create' ? await  this.createFlow() : await this.editFlow()
+    this.intent === 'create' ? await this.createFlow() : await this.editFlow()
     this.close()
   },
   async createFlow() {
@@ -128,26 +124,23 @@ const modal = reactive<ModalInterface>({
     //   createdAt: new Date(),
     // })
     chat_bot_flow.initialize()
-    if(chat_bot_flow.data && project_data.data){
+    if (chat_bot_flow.data && project_data.data) {
       chat_bot_flow.data.name = this.form.name
       chat_bot_flow.data.pj_id = project_data.data.pj_id
       const create_flow = await chat_bot_flow.createUpdate('new')
-      if(create_flow.status){
+      if (create_flow.status) {
         chat_bot_flow_list.data.push(create_flow.data)
         console.log(chat_bot_flow_list.data)
-      }else{
+      } else {
         console.log('something went wrong adding chatbot flow -' + create_flow.error)
       }
     }
   },
   async editFlow() {
     // if (!this.flowId) throw new Error('No Flow ID value')
-
     // const flow = flows.value.get(this.flowId)
     // if (!flow) throw new Error('Flow not found')
-
     // flows.value.set(this.flowId, { ...flow, name: this.form.name })
-
   },
 })
 
@@ -169,14 +162,25 @@ defineExpose({
           <DialogDescription> Enter the flow details to edit this flow. </DialogDescription>
         </template>
       </DialogHeader>
-        <div class="flex flex-col gap-y-2">
-          <Label for="name">Name</Label>
-          <Input type="text" id="name" v-model="modal.form.name" name="name" placeholder="Input Name" required />
-        </div>
+      <div class="flex flex-col gap-y-2">
+        <Label for="name">Name</Label>
+        <Input
+          type="text"
+          id="name"
+          v-model="modal.form.name"
+          name="name"
+          placeholder="Input Name"
+          required
+        />
+      </div>
       <DialogFooter>
         <Button variant="secondary" @click="modal.close()">Cancel</Button>
-        <Button v-if="modal.intent === 'create'" @click="modal.submitForm()" form="flowForm"> Create </Button>
-        <Button v-else-if="modal.intent === 'edit'" @click="modal.submitForm()" form="flowForm"> Edit </Button>
+        <Button v-if="modal.intent === 'create'" @click="modal.submitForm()" form="flowForm">
+          Create
+        </Button>
+        <Button v-else-if="modal.intent === 'edit'" @click="modal.submitForm()" form="flowForm">
+          Edit
+        </Button>
       </DialogFooter>
     </DialogContent>
   </Dialog>

@@ -1,19 +1,50 @@
-import type { SubCollections, Timestamp } from './UniTypes'
+import type { SubCollections, MutablePick} from './UniTypes'
+import type { User } from 'firebase/auth'
 
-export interface Address {
+
+
+export interface UserAddress {
   street: string
   city: string
   state: string
   country: string
   zipCode: string
 }
-export interface UserProfileData extends SubCollections {
-  up_id: string
-  uid: string
+
+export interface UserProfile {
   firstName: string
   lastName: string
   contactEmail: string
-  address: Address
-  createdAt:string
-  updatedAt:string
 }
+
+export interface UserData extends SubCollections, MutablePick<User, 'displayName' | 'email' | 'photoURL' | 'uid' | 'emailVerified'> {
+  uid: string
+  profile: UserProfile
+  address: UserAddress
+  createdAt: string
+  updatedAt: string
+}
+
+export const user_data: UserData = {
+  uid: '',
+  profile: {
+    firstName: '',
+    lastName: '',
+    contactEmail: '',
+  },
+  address: {
+    city: '',
+    state: '',
+    country: '',
+    street: '',
+    zipCode: '',
+  },
+  displayName: '',
+  email: '',
+  emailVerified: true,
+  photoURL: '',
+  subCollections: [],
+  createdAt: '',
+  updatedAt: ''
+}
+

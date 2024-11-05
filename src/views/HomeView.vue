@@ -3,15 +3,16 @@ import Button from '@/core/components/ui/button/Button.vue'
 import { Skeleton } from '@/core/components/ui/skeleton'
 import { toast } from '@/core/components/ui/toast'
 import HomeLayout from '@/core/layouts/HomeLayout.vue'
-import type { Platforms, WorkspaceData } from '@/core/types/WorkSpaceTypes'
 import type { Timestamp } from '@/core/types/UniTypes'
-import { uiHelpers } from '@/core/utils/ui-helper'
-import { useAuthStore } from '@/stores/authStore';
-import { useProjectStore } from '@/stores/projectStore';
-import { serverTimestamp, type DocumentSnapshot } from 'firebase/firestore';
-import { onMounted, reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import type { Platforms, WorkspaceData } from '@/core/types/WorkSpaceTypes'
 import { getWhereAny } from '@/core/utils/firebase-collections'
+import { uiHelpers } from '@/core/utils/ui-helper'
+import { useAuthStore } from '@/stores/authStore'
+import { useProjectStore } from '@/stores/projectStore'
+import { serverTimestamp, type DocumentSnapshot } from 'firebase/firestore'
+import { onMounted, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
+
 const useAuth = useAuthStore()
 const useProject = useProjectStore()
 const { workspace_data, workspace_list } = useProject
@@ -33,12 +34,14 @@ const loadMoreProjects = async () => {
   workspace_list.isLoading = true
   const get_projects = await getWhereAny(
     'workspaces_share',
-    'workspaces/:ws_id/share/',{ws_id:''},
-    ['shared'], [{fieldName:''}],
-    []
+    'workspaces/:ws_id/share/',
+    { ws_id: '' },
+    ['shared'],
+    [{ fieldName: '' }],
+    [],
   )
 
-    console.log(get_projects)
+  console.log(get_projects)
 
   if (get_projects.status && get_projects.data) {
     if (get_projects.data.length > 0) {
@@ -76,7 +79,7 @@ const find_icon = (name: string): string | undefined => {
 const navigateToProject = (workspace: WorkspaceData) => {
   //We can set a validation by fetching from firebaste itself calling get
   //For faster validation we can check based on what we fetched earlier
-  const validate = workspace_list.data.find(proj => proj.ws_id === workspace.ws_id)
+  const validate = workspace_list.data.find((proj) => proj.ws_id === workspace.ws_id)
   if (validate) {
     workspace_data.set(workspace)
     router.push({ name: workspace.platform.toLowerCase(), params: { ws_id: workspace.ws_id } })
@@ -87,7 +90,6 @@ const navigateToProject = (workspace: WorkspaceData) => {
       variant: 'destructive',
     })
   }
-
 }
 </script>
 
@@ -109,14 +111,19 @@ const navigateToProject = (workspace: WorkspaceData) => {
 
           <div v-if="!pageLoad">
             <div v-if="workspace_list.data.length">
-              <div v-for="project in workspace_list.data" :key="project.name"
-                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300">
+              <div
+                v-for="project in workspace_list.data"
+                :key="project.name"
+                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
+              >
                 <div class="grid grid-cols-12 items-center">
                   <div class="col-span-5" @click="navigateToProject(project)">
                     <div class="flex items-center gap-x-3">
                       <i class="bx text-2xl" :class="find_icon(project.platform)"></i>
                       <div class="grid gap-0">
-                        <span class="text-sm">{{ project.name }} - {{project.connectedAccount?.name}}</span>
+                        <span class="text-sm"
+                          >{{ project.name }} - {{ project.connectedAccount?.name }}</span
+                        >
                         <span class="text-xs">{{ project.ws_id }}</span>
                       </div>
                     </div>
@@ -130,8 +137,10 @@ const navigateToProject = (workspace: WorkspaceData) => {
                   <div class="col-span-1 text-sm text-gray-600">{{ project.status }}</div>
                   <div class="col-span-1 text-sm text-gray-600">Owner</div>
                   <div class="col-span-1 justify-self-end">
-                    <button type="button"
-                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                    <button
+                      type="button"
+                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    >
                       <i class="material-icons text-md">more_vert</i>
                     </button>
                   </div>

@@ -42,20 +42,24 @@ onMounted(async () => {
     console.log('project initlized')
     await loadChatBotFlows()
     chat_bot_flow_list.isInitialized = true
-  }else{
+  } else {
     console.log('project not initlized')
   }
 })
 
-
 const loadChatBotFlows = async () => {
   chat_bot_flow_list.resetData()
-  const get_flow = await chat_bot_flow.getWhere([
-    { fieldName: 'pj_id', operator: '==', value: project_data.data?.pj_id },
-
-  ], 10, [{
-    fieldName:'updatedAt', direction:'asc'
-  }], chat_bot_flow_list.lastSnapshot)
+  const get_flow = await chat_bot_flow.getWhere(
+    [{ fieldName: 'pj_id', operator: '==', value: project_data.data?.pj_id }],
+    10,
+    [
+      {
+        fieldName: 'updatedAt',
+        direction: 'asc',
+      },
+    ],
+    chat_bot_flow_list.lastSnapshot,
+  )
 
   console.log(get_flow)
 
@@ -71,33 +75,26 @@ const loadChatBotFlows = async () => {
   chat_bot_flow_list.isInitialized = true
 }
 
+watch(
+  () => project_data.isInitialized,
+  async (newValue, oldValue) => {
+    if (newValue) {
+      if (!chat_bot_flow_list.isInitialized) {
+        await loadChatBotFlows()
+      }
 
-watch(() => project_data.isInitialized, async (newValue, oldValue) => {
-  if (newValue) {
-    if (!chat_bot_flow_list.isInitialized) {
-      await loadChatBotFlows()
+      // const project = platform_api_list.data.find(api => api.platform === 'META');
+      // console.log(platform);
+      // if (platform) {
+      //     set_fb_api(platform.api_account as MetaAPIAccount, platform);
+      //     await set_fb_pages()
+      // } else {
+      //     fb_api_load.value = false
+      //     fb_pages_load.value = false
+      // }
     }
-
-
-    // const project = platform_api_list.data.find(api => api.platform === 'META');
-    // console.log(platform);
-    // if (platform) {
-    //     set_fb_api(platform.api_account as MetaAPIAccount, platform);
-    //     await set_fb_pages()
-    // } else {
-    //     fb_api_load.value = false
-    //     fb_pages_load.value = false
-    // }
-  }
-}
-);
-
-
-
-
-
-
-
+  },
+)
 
 // const flows = ref(
 //   new Map<Flow['id'], Flow>([
@@ -190,7 +187,10 @@ const deleteModalRef = useTemplateRef('deleteModal')
   <DefaultLayout>
     <Main class="flex flex-col gap-y-4">
       <template #heading>Chatbot Flow Builder</template>
-      <Button class="gap-x-2 self-end" @click="createEditModalRef?.modal.open({ intent: 'create' })">
+      <Button
+        class="gap-x-2 self-end"
+        @click="createEditModalRef?.modal.open({ intent: 'create' })"
+      >
         <i class="bx bx-plus text-xl" />
         Create Messenger Flow
       </Button>
@@ -213,7 +213,7 @@ const deleteModalRef = useTemplateRef('deleteModal')
             </TableCell>
             <TableCell class="whitespace-nowrap">{{
               uiHelpers.timestampToDateTimeAgo(flow.updatedAt)
-              }}</TableCell>
+            }}</TableCell>
             <TableCell>
               <div class="grid place-content-center">
                 <DropdownMenu>
@@ -227,10 +227,12 @@ const deleteModalRef = useTemplateRef('deleteModal')
                       Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem class="gap-x-3">
-                      <i :class="[
-                        'bx text-xl',
-                        flow.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
-                      ]" />
+                      <i
+                        :class="[
+                          'bx text-xl',
+                          flow.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                        ]"
+                      />
                       Toggle Status
                     </DropdownMenuItem>
                     <DropdownMenuItem class="gap-x-3">

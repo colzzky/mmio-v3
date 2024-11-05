@@ -11,20 +11,7 @@ export type Platforms =
   | 'OmniChannel'
   | ''
 
-
-
-export interface WorkspaceDataSub  {
-  subCollection1:SubCollection1
-  subCollection2:SubCollection2
-}
-export type NewType<T extends SubCollections> = T['subCollections'];
-
-export type SubCollection<T> = {
-  id: string; // Unique identifier for the subcollection
-  path: string; // Path to access the subcollection
-  interface: T; // Interface type for the subcollection data
-  sub_col: (keyof T)[]; // Array of valid subcollection keys for type safety
-};
+//Only use subcollection if a collection have a data that has multiple data like activity logs etc.
 
 export interface WorkspaceData extends SubCollections {
   ws_id: string
@@ -38,61 +25,12 @@ export interface WorkspaceData extends SubCollections {
   createdAt: string
   updatedAt: string
   updatedBy: string
-  subCollections:('shared')[]
-
-  sub:{
-    shared:SubCollection<Shared>[]
-  }
+  subCollections: 'shared'[]
+  shared: Shared[]
 }
 
 export interface Shared extends SubCollections {
-  share_id:string,
-  sharee_uid:string
-  access:boolean
+  share_id: string
+  sharee_uid: string
+  access: boolean
 }
-
-
-export interface SubCollection1Sub  {
-  subCollection1_1:SubCollection1_1
-}
-
-export interface SubCollection1 {
-  sc1_id: string
-  name: string
-  subCollections:keyof SubCollection1Sub[]
-  createdAt: string
-  updatedAt: string
-  subCollection1_1:SubCollection1_1
-}
-
-export interface SubCollection1_1 {
-  sc1_1_id: string
-  name: string
-  createdAt: string
-  updatedAt: string
-}
-
-
-
-
-export interface SubCollection2Sub  {
-  subCollection2_1:SubCollection2_1
-}
-
-export interface SubCollection2 {
-  sc2_id: string
-  name: string
-  createdAt: string
-  updatedAt: string
-  subCollections:keyof SubCollection2Sub[]
-}
-
-
-
-export interface SubCollection2_1 {
-  sc2_1_id: string
-  name: string
-  createdAt: string
-  updatedAt: string
-}
-

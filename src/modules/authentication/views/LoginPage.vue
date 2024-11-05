@@ -8,7 +8,13 @@ import { auth } from '@/core/utils/firebase-client'
 import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { Icon } from '@iconify/vue'
-import { browserLocalPersistence, FacebookAuthProvider, setPersistence, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
+import {
+  browserLocalPersistence,
+  FacebookAuthProvider,
+  setPersistence,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from 'firebase/auth'
 import { reactive, ref } from 'vue'
 
 const authStore = useAuthStore()
@@ -35,10 +41,16 @@ const loginUser = async (email: string, password: string): Promise<void> => {
   loginLoad.value = true
   await setPersistence(auth, browserLocalPersistence).then(async () => {
     await signInWithEmailAndPassword(auth, email, password)
-      .then(async() => {
+      .then(async () => {
         if (auth.currentUser) {
           user_auth.setUser(auth.currentUser)
-          await createNewUserProfile(auth.currentUser.uid)
+          await createNewUserProfile({
+            displayName: auth.currentUser.displayName,
+            email: auth.currentUser.email,
+            emailVerified: auth.currentUser.emailVerified,
+            photoURL: auth.currentUser.photoURL,
+            uid: auth.currentUser.uid,
+          })
           router.replace({ name: 'home' })
         }
       })
@@ -55,11 +67,17 @@ const loginUser = async (email: string, password: string): Promise<void> => {
 
 async function registerFacebook(): Promise<void> {
   loginLoad.value = true
-  const provider = new FacebookAuthProvider();
+  const provider = new FacebookAuthProvider()
   await signInWithPopup(auth, provider)
     .then(async (result) => {
       user_auth.setUser(result.user)
-      await createNewUserProfile(result.user.uid)
+      await createNewUserProfile({
+        displayName: result.user.displayName,
+        email: result.user.email,
+        emailVerified: result.user.emailVerified,
+        photoURL: result.user.photoURL,
+        uid: result.user.uid,
+      })
       router.replace({ name: 'home' })
     })
     .catch((error) => {
@@ -71,9 +89,6 @@ async function registerFacebook(): Promise<void> {
     })
   loginLoad.value = false
 }
-
-
-
 </script>
 
 <template>
@@ -118,49 +133,25 @@ async function registerFacebook(): Promise<void> {
         <h1 class="text-4xl/none font-bold">Login with your Email</h1>
         <p class="text-sm">
           You can also use
-          <Button
-            variant="link"
-            class="h-[unset] p-0 text-blue-500"
-            @click="toggleSignInCredentialsForm"
-          >
+          <Button variant="link" class="h-[unset] p-0 text-blue-500" @click="toggleSignInCredentialsForm">
             Facebook or Google
           </Button>
           to login
         </p>
       </section>
-      <form
-        class="flex w-[calc(100svw-2rem)] max-w-lg flex-col gap-y-4 self-center"
-        @submit.prevent="handleLoginUser"
-      >
+      <form class="flex w-[calc(100svw-2rem)] max-w-lg flex-col gap-y-4 self-center" @submit.prevent="handleLoginUser">
         <div class="flex flex-col gap-y-2">
           <Label for="email">Email Address</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="johndoe@gmail.com"
-            autocomplete="email"
-            required
-            v-model="form.email"
-            :disabled="loginLoad"
-          />
+          <Input id="email" name="email" type="email" placeholder="johndoe@gmail.com" autocomplete="email" required
+            v-model="form.email" :disabled="loginLoad" />
         </div>
         <div class="grid grid-cols-2 gap-y-1">
           <Label for="password">Password</Label>
           <Button variant="link" as-child class="h-[unset] justify-self-end p-0 text-blue-500">
             <RouterLink to="/forgot-password">Forgot your password?</RouterLink>
           </Button>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            placeholder="********"
-            autocomplete="password"
-            class="col-span-2"
-            required
-            v-model="form.password"
-            :disabled="loginLoad"
-          />
+          <Input id="password" name="password" type="password" placeholder="********" autocomplete="password"
+            class="col-span-2" required v-model="form.password" :disabled="loginLoad" />
         </div>
         <Button v-if="!loginLoad" type="submit">Sign in</Button>
         <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">

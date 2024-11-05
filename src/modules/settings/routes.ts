@@ -12,8 +12,6 @@ const names = [
   'settings-project-management',
 ] as const
 
-
-
 const urls: Record<(typeof names)[number], string> = {
   'settings-account': '/settings/account',
   'settings-profile': '/settings/profile',
@@ -24,10 +22,7 @@ const urls: Record<(typeof names)[number], string> = {
   'settings-project-management': '/settings/project-management',
 }
 
-type LinkRecord = Record<
-  (typeof names)[number],
-  { label: string; icon: string; section: Section }
->
+type LinkRecord = Record<(typeof names)[number], { label: string; icon: string; section: Section }>
 const linkRecords: LinkRecord = {
   'settings-account': {
     label: 'Account',
@@ -95,7 +90,7 @@ const routeRecords: RouteRecord = {
         component: import('./views/ApiIntegrationPage.vue'),
         meta: { requiresAuth: true },
       },
-    ]
+    ],
   },
   'settings-team': {
     meta: { requiresAuth: true },

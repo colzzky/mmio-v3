@@ -10,8 +10,6 @@ export interface Service {
 type RouteRecord = Record<(typeof names)[number], Omit<RouteRecordRaw, 'path' | 'name'>>
 type ServiceRecord = Record<(typeof servicesName)[number], Service>
 
-const platformName = 'meta' as const
-
 const servicesName = [
   'meta-chatbot-flow-builder',
   'meta-comment-auto-reply',

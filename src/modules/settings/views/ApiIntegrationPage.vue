@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import SettingsLayout from '@/core/layouts/SettingsLayout.vue';
-import { onBeforeMount, onMounted, ref, watch } from 'vue';
-import { useAuthStore } from '@/stores/authStore';
-import { usePlatformAPIStore } from '@/stores/platformAPIStore';
-import { uiHelpers } from '@/core/utils/ui-helper';
-import type { Timestamp } from 'firebase/firestore';
-import MetaApiIntegration from '../components/APIIntegrationSettings/MetaApiIntegration.vue';
-import { useRoute, useRouter } from 'vue-router';
+import MetaApiIntegration from '../components/APIIntegrationSettings/MetaApiIntegration.vue'
+import SettingsLayout from '@/core/layouts/SettingsLayout.vue'
+import { uiHelpers } from '@/core/utils/ui-helper'
+import { useAuthStore } from '@/stores/authStore'
+import { usePlatformAPIStore } from '@/stores/platformAPIStore'
+import type { Timestamp } from 'firebase/firestore'
+import { onBeforeMount, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+
 const router = useRouter()
 const route = useRoute()
 const useAuth = useAuthStore()
@@ -19,18 +20,20 @@ const pageLoad = ref<boolean>(false)
 const pageDataLoad = ref<boolean>(true)
 
 onMounted(async () => {
-    await platform_api_list.initializeAccountApis()
+  await platform_api_list.initializeAccountApis()
 })
-
-
 </script>
 <template>
-    <SettingsLayout>
-        <main>
-            <MetaApiIntegration
-                v-if="route.name === 'settings-api-integrations-meta' || route.name === 'settings-api-integrations'" />
-        </main>
-    </SettingsLayout>
+  <SettingsLayout>
+    <main>
+      <MetaApiIntegration
+        v-if="
+          route.name === 'settings-api-integrations-meta' ||
+          route.name === 'settings-api-integrations'
+        "
+      />
+    </main>
+  </SettingsLayout>
 </template>
 
 <style></style>
