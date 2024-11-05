@@ -10,7 +10,7 @@ import {
 } from '@/core/utils/firebase-collections'
 import type { CollectionWhereCondition, FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import type { DocumentData, DocumentSnapshot } from 'firebase/firestore'
+import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { usePlatformAPIStore } from '@/stores/platformAPIStore'

@@ -95,7 +95,8 @@ async function registerFacebook(): Promise<void> {
   <Toaster />
   <main
     class="mx-auto flex w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl flex-col gap-y-8 py-[var(--gutter)] [--gutter:1rem] lg:[--gutter:2rem]"
-    :class="{ 'cursor-not-allowed': loginLoad }">
+    :class="{ 'cursor-not-allowed': loginLoad }"
+  >
     <img class="h-12 w-auto self-start" src="@/assets/logo.png" alt="marketingmaster.io logo" />
     <template v-if="!isSignInCredentialsFormVisible">
       <section class="flex flex-col gap-y-2 text-center">
@@ -107,7 +108,10 @@ async function registerFacebook(): Promise<void> {
           </Button>
         </p>
       </section>
-      <section v-if="!loginLoad" class="flex w-[calc(100svw-2rem)] max-w-xs flex-col gap-y-2 self-center">
+      <section
+        v-if="!loginLoad"
+        class="flex w-[calc(100svw-2rem)] max-w-xs flex-col gap-y-2 self-center"
+      >
         <Button variant="secondary" class="relative" @click="toggleSignInCredentialsForm">
           <Icon icon="ic:baseline-email" class="absolute left-4 top-1/2 size-5 -translate-y-1/2" />
           Email

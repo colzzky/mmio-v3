@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { Flow, FlowsMap } from '../page.vue'
 import { Button } from '@/core/components/ui/button'
 import {
   Dialog,
@@ -15,15 +14,13 @@ import type { ChatBotFlowData } from '@/core/types/MetaTypes'
 import type { Modal } from '@/core/utils/types'
 import { useMetaRelatedStore } from '@/stores/metaRelatedStore'
 import { useProjectStore } from '@/stores/projectStore'
-import { inject, reactive } from 'vue'
+import { reactive } from 'vue'
 import { z } from 'zod'
 
 const metaStore = useMetaRelatedStore()
 const useProject = useProjectStore()
 const { chat_bot_flow, chat_bot_flow_list } = metaStore
 const { project_data } = useProject
-
-//const flows = inject('flows') as FlowsMap
 
 type SelectedFormKey = Pick<ChatBotFlowData, 'name'>
 

@@ -9,7 +9,7 @@ import { Bars3Icon } from '@heroicons/vue/24/outline'
 import { ref } from 'vue'
 
 const useAuth = useAuthStore()
-const { user_auth, page_init } = useAuth
+const { page_init } = useAuth
 const layoutLoad = ref<boolean>(false)
 
 const sidebarStore = useSidebarStore()

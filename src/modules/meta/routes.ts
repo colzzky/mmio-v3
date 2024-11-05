@@ -1,212 +1,102 @@
 import type { RouteRecordRaw } from 'vue-router'
 
-export interface Service {
-  label: string
-  icon: string
-  description: string
-  pinned: boolean
-}
-
-type RouteRecord = Record<(typeof names)[number], Omit<RouteRecordRaw, 'path' | 'name'>>
-type ServiceRecord = Record<(typeof servicesName)[number], Service>
-
 const servicesName = [
-  'meta-chatbot-flow-builder',
-  'meta-comment-auto-reply',
-  'meta-post-randomizer',
-  'meta-livestream',
-  'meta-interest-finder',
-  'meta-live-chat',
-  'meta-subscribers',
-  'meta-growth-tools',
-  'meta-chat-broadcast',
-  'meta-chat-sequences',
+  'chatbot-flow-builder',
+  'comment-auto-reply',
+  'post-randomizer',
+  'livestream',
+  'interest-finder',
+  'live-chat',
+  'subscribers',
+  'growth-tools',
+  'chat-broadcast',
+  'chat-sequences',
 ] as const
 
 const names = [
-  platformName,
   ...servicesName,
-  'meta-messenger-webview',
-  'meta-persistent-menu',
-  'meta-welcome-message',
-  'meta-ice-breakers',
-  'meta-get-started',
-  'meta-keywords',
-  'meta-chatbot-defaults',
-  'meta-marketing-messages',
+  'messenger-webview',
+  'persistent-menu',
+  'welcome-message',
+  'ice-breakers',
+  'get-started',
+  'keywords',
+  'chatbot-defaults',
+  'marketing-messages',
 ] as const
 
-const urls: Record<(typeof names)[number], string> = {
-  meta: '/project/:ws_id/meta',
-  'meta-chatbot-flow-builder': '/project/:ws_id/meta/chatbot-flow-builder',
-  'meta-comment-auto-reply': '/project/:ws_id/meta/comment-auto-reply',
-  'meta-post-randomizer': '/project/:ws_id/meta/post-randomizer',
-  'meta-livestream': '/project/:ws_id/meta/livestream',
-  'meta-interest-finder': '/project/:ws_id/meta/interest-finder',
-  'meta-live-chat': '/project/:ws_id/meta/live-chat',
-  'meta-subscribers': '/project/:ws_id/meta/subscribers',
-  'meta-growth-tools': '/project/:ws_id/meta/growth-tools',
-  'meta-chat-broadcast': '/project/:ws_id/meta/chat-broadcast',
-  'meta-chat-sequences': '/project/:ws_id/meta/chat-sequences',
-  'meta-messenger-webview': '/project/:ws_id/meta/messenger-webview',
-  'meta-persistent-menu': '/project/:ws_id/meta/persistent-menu',
-  'meta-welcome-message': '/project/:ws_id/meta/welcome-message',
-  'meta-ice-breakers': '/project/:ws_id/meta/ice-breakers',
-  'meta-get-started': '/project/:ws_id/meta/get-started',
-  'meta-keywords': '/project/:ws_id/meta/keywords',
-  'meta-chatbot-defaults': '/project/:ws_id/meta/chatbot-defaults',
-  'meta-marketing-messages': '/project/:ws_id/meta/marketing-messages',
-}
-
+export type Service = { icon: string; label: string; pinned: boolean; description: string }
+type ServiceRecord = Record<(typeof servicesName)[number], Service>
 const servicesRecord: ServiceRecord = {
-  'meta-chatbot-flow-builder': {
+  'chatbot-flow-builder': {
     icon: 'bx-network-chart',
     label: 'Chatbot Flow Builder',
     pinned: true,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
-  'meta-comment-auto-reply': {
+  'comment-auto-reply': {
     icon: 'bx-conversation',
     label: 'Comment Auto Reply',
     pinned: true,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
-  'meta-post-randomizer': {
+  'post-randomizer': {
     icon: 'bx-message-dots',
     label: 'Post Randomizer',
     pinned: true,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
-  'meta-livestream': {
+  livestream: {
     icon: 'bx-video',
     label: 'Livestream',
     pinned: false,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
-  'meta-interest-finder': {
+  'interest-finder': {
     icon: 'bx-file-find',
     label: 'Interest Finder',
     pinned: false,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
-  'meta-live-chat': {
+  'live-chat': {
     icon: 'bx-message-dots',
     label: 'Live Chat',
     pinned: false,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
-  'meta-subscribers': {
+  subscribers: {
     icon: 'bx-group',
     label: 'Subscribers',
     pinned: false,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
-  'meta-growth-tools': {
+  'growth-tools': {
     icon: 'bx-chart',
     label: 'Growth Tools',
     pinned: true,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
-  'meta-chat-broadcast': {
+  'chat-broadcast': {
     icon: 'bx-broadcast',
     label: 'Chat Broadcast',
     pinned: false,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
-  'meta-chat-sequences': {
+  'chat-sequences': {
     icon: 'bx-comment-add',
     label: 'Chat Sequences',
-    pinned: false,
+    pinned: true,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
-  },
-}
-
-const routeRecords: RouteRecord = {
-  meta: {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-chatbot-flow-builder': {
-    meta: { requiresAuth: true },
-    component: () => import('./services/chatbot-flow-builder/page.vue'),
-  },
-  'meta-comment-auto-reply': {
-    meta: { requiresAuth: true },
-    component: () => import('./services/comment-auto-reply/page.vue'),
-  },
-  'meta-post-randomizer': {
-    meta: { requiresAuth: true },
-    component: () => import('./services/post-randomizer/page.vue'),
-  },
-  'meta-livestream': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-interest-finder': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-live-chat': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-subscribers': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-growth-tools': {
-    meta: { requiresAuth: true },
-    component: () => import('./services/growth-tools/page.vue'),
-  },
-  'meta-chat-broadcast': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-chat-sequences': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-messenger-webview': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-persistent-menu': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-welcome-message': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-ice-breakers': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-get-started': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-keywords': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-chatbot-defaults': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
-  },
-  'meta-marketing-messages': {
-    meta: { requiresAuth: true },
-    component: () => import('./views/MetaHomePage.vue'),
   },
 }
 
@@ -216,13 +106,83 @@ export const services = new Map(
     {
       ...values,
       name: key,
-      href: urls[key as keyof ServiceRecord],
     },
   ]),
 )
 
-export const routes = Object.entries(routeRecords).map(([key, values]) => ({
+type RouteRecord = Record<(typeof names)[number], Omit<RouteRecordRaw, 'path' | 'name'>>
+const childrenRouteRecords: RouteRecord = {
+  'chatbot-flow-builder': {
+    component: () => import('./services/chatbot-flow-builder/page.vue'),
+  },
+  'comment-auto-reply': {
+    component: () => import('./services/comment-auto-reply/page.vue'),
+  },
+  'post-randomizer': {
+    component: () => import('./services/post-randomizer/page.vue'),
+  },
+  livestream: {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  'interest-finder': {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  'live-chat': {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  subscribers: {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  'growth-tools': {
+    component: () => import('./services/growth-tools/page.vue'),
+  },
+  'chat-broadcast': {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  'chat-sequences': {
+    component: () => import('./services/chat-sequence/page.vue'),
+  },
+  'messenger-webview': {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  'persistent-menu': {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  'welcome-message': {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  'ice-breakers': {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  'get-started': {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  keywords: {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  'chatbot-defaults': {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+  'marketing-messages': {
+    component: () => import('./views/MetaHomePage.vue'),
+  },
+}
+const childrenRoutes = Object.entries(childrenRouteRecords).map(([key, values]) => ({
   ...values,
-  path: urls[key as keyof RouteRecord],
   name: key,
-}))
+  path: key,
+})) as RouteRecordRaw[]
+
+export const routes: RouteRecordRaw[] = [
+  {
+    path: 'meta',
+    children: [
+      {
+        path: '',
+        name: 'meta',
+        component: () => import('./views/MetaHomePage.vue'),
+      },
+      ...childrenRoutes,
+    ],
+  },
+]

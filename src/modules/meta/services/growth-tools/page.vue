@@ -18,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/core/components/ui/table'
-import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { computed, provide, ref, useTemplateRef } from 'vue'
 
@@ -103,66 +102,64 @@ const deleteModalRef = useTemplateRef('deleteModal')
 </script>
 
 <template>
-  <DefaultLayout>
-    <Main class="flex flex-col gap-y-4">
-      <template #heading>Growth Tools</template>
-      <Button class="gap-x-2 self-end" @click="createEditModal?.modal.open({ intent: 'create' })">
-        <i class="bx bx-plus text-xl" />
-        Create Growth Tool
-      </Button>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Page Name</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead class="text-center">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow v-for="[growthToolId, growthTool] in sortedGrowthTools" :key="growthToolId">
-            <TableCell>{{ growthTool.name }}</TableCell>
-            <TableCell>{{ growthTool.type }}</TableCell>
-            <TableCell>{{ growthTool.page }}</TableCell>
-            <TableCell>
-              {{ uiHelpers.formatDateTimeAgo(growthTool.createdAt.toISOString()) }}
-            </TableCell>
-            <TableCell>
-              <div class="grid place-content-center">
-                <DropdownMenu>
-                  <DropdownMenuTrigger>
-                    <i class="material-icons text-md">more_vert</i>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem
-                      class="gap-x-3"
-                      @click="createEditModal?.modal.open({ intent: 'edit', growthToolId })"
-                    >
-                      <i class="bx bx-edit text-xl" />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem class="gap-x-3" @click="cloneGrowthTool(growthToolId)">
-                      <i class="bx bx-copy text-xl" />
-                      Clone
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      class="gap-x-3"
-                      @click="deleteModalRef?.modal.open(growthToolId)"
-                    >
-                      <i class="bx bx-trash text-xl" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </Main>
+  <Main class="flex flex-col gap-y-4">
+    <template #heading>Growth Tools</template>
+    <Button class="gap-x-2 self-end" @click="createEditModal?.modal.open({ intent: 'create' })">
+      <i class="bx bx-plus text-xl" />
+      Create Growth Tool
+    </Button>
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Name</TableHead>
+          <TableHead>Type</TableHead>
+          <TableHead>Page Name</TableHead>
+          <TableHead>Created</TableHead>
+          <TableHead class="text-center">Actions</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow v-for="[growthToolId, growthTool] in sortedGrowthTools" :key="growthToolId">
+          <TableCell>{{ growthTool.name }}</TableCell>
+          <TableCell>{{ growthTool.type }}</TableCell>
+          <TableCell>{{ growthTool.page }}</TableCell>
+          <TableCell>
+            {{ uiHelpers.formatDateTimeAgo(growthTool.createdAt.toISOString()) }}
+          </TableCell>
+          <TableCell>
+            <div class="grid place-content-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <i class="material-icons text-md">more_vert</i>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem
+                    class="gap-x-3"
+                    @click="createEditModal?.modal.open({ intent: 'edit', growthToolId })"
+                  >
+                    <i class="bx bx-edit text-xl" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem class="gap-x-3" @click="cloneGrowthTool(growthToolId)">
+                    <i class="bx bx-copy text-xl" />
+                    Clone
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    class="gap-x-3"
+                    @click="deleteModalRef?.modal.open(growthToolId)"
+                  >
+                    <i class="bx bx-trash text-xl" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
+  </Main>
 
-    <CreateEditModal ref="createEditModal" />
-    <DeleteModal ref="deleteModal" />
-  </DefaultLayout>
+  <CreateEditModal ref="createEditModal" />
+  <DeleteModal ref="deleteModal" />
 </template>

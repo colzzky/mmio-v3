@@ -54,6 +54,7 @@ onMounted(async () => {
 
     /** Do something here before intilizing Project Data. Data like users etc */
     await uiHelpers.timeout(2000)
+    await uiHelpers.timeout(2000)
 
     workspace_ui_page.isInitialize = true
     const validate_project = await workspace_ui_page.initializeProjData()
@@ -105,6 +106,8 @@ async function returnToProjects(): Promise<void> {
                 class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
                 @click="toggleServicesModal"
               >
+                @click="toggleServicesModal"
+              >
                 <i class="material-icons text-xl">bookmark_border</i>
                 Manage Services
               </button>
@@ -112,6 +115,8 @@ async function returnToProjects(): Promise<void> {
             <li>
               <!-- Opens modal for this project -->
               <button
+                class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
+              >
                 class="group flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
               >
                 <i class="material-icons text-xl">settings_accessibility</i>
@@ -127,7 +132,15 @@ async function returnToProjects(): Promise<void> {
         <CollapsibleTrigger
           class="flex w-full items-center justify-between text-xs font-bold uppercase text-primary/75"
         >
+          class="flex w-full items-center justify-between text-xs font-bold uppercase text-primary/75"
+        >
           Pinned Services
+          <i
+            :class="[
+              'material-icons text-2xl transition-transform',
+              isPlatformServicesCollapsibleOpen && 'rotate-180',
+            ]"
+          >
           <i
             :class="[
               'material-icons text-2xl transition-transform',
@@ -148,6 +161,10 @@ async function returnToProjects(): Promise<void> {
                 <span>
                   {{ service.label }}
                 </span>
+                <button
+                  class="grid place-content-center"
+                  @click.prevent="servicesStore.toggleServicePinnedStatus(route.path, name)"
+                >
                 <button
                   class="grid place-content-center"
                   @click.prevent="servicesStore.toggleServicePinnedStatus(route.path, name)"

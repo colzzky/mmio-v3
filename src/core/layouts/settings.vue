@@ -1,24 +1,27 @@
 <script setup lang="ts">
-import { Button } from '../components/ui/button'
-import { uiHelpers } from '../utils/ui-helper'
-import { links, links as sidebarLinks } from '@/modules/settings/routes'
+import { Button } from '@/core/components/ui/button'
+import { uiHelpers } from '@/core/utils/ui-helper'
+import { links as sidebarLinks } from '@/modules/settings/routes'
 import { useAuthStore } from '@/stores/authStore'
 import { ref } from 'vue'
 
 const layoutLoad = ref(false)
 const useAuth = useAuthStore()
-const { user_auth, page_init } = useAuth
+const { page_init } = useAuth
 
 const distinctSections = Array.from(new Set(sidebarLinks.map((link) => link.section)))
 const linksBySection = new Map(
-  distinctSections.map((section) => [section, links.filter((link) => link.section === section)]),
+  distinctSections.map((section) => [
+    section,
+    sidebarLinks.filter((link) => link.section === section),
+  ]),
 )
 </script>
 
 <template>
-  <div v-if="!layoutLoad && page_init.initialize">
+  <template v-if="!layoutLoad && page_init.initialize">
     <div
-      class="mx-auto grid w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-cols-[minmax(250px,300px)_1fr] gap-8 py-[var(--gutter)] [--gutter:theme(spacing.4)]"
+      class="mx-auto grid w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-cols-[minmax(250px,275px)_1fr] gap-8 py-[var(--gutter)] [--gutter:theme(spacing.4)]"
     >
       <header class="col-span-2 flex items-center justify-between border-b py-2">
         <span class="flex items-center gap-x-2 text-xl font-bold">
@@ -49,9 +52,12 @@ const linksBySection = new Map(
           </div>
         </section>
       </aside>
-      <slot />
+
+      <!--  -->
+      <RouterView />
     </div>
-  </div>
+  </template>
+
   <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
     <div class="flex animate-pulse items-center gap-x-1">
       <i class="material-icons text-4xl">pin</i>

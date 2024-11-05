@@ -6,13 +6,11 @@ import {
     getCollection,
     getCollectionByField,
 } from '@/core/utils/firebase-collections'
-import type { FirebaseOperators, FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
+import type {  FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
 import generalAxiosInstance from '@/core/utils/general-axios-instance'
-import type { DocumentData, DocumentSnapshot } from 'firebase/firestore'
+import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
-import { useAuthStore } from './authStore'
-import type { Auth } from 'firebase/auth'
 
 type FirebaseReturnBase = Omit<FirebaseReturn, 'data'>
 

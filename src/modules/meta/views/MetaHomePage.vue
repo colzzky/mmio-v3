@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import DefaultLayout from '@/core/layouts/DefaultLayout.vue'
 import { useProjectStore } from '@/stores/projectStore'
 
 const useProject = useProjectStore()

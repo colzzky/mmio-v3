@@ -4,40 +4,28 @@ import { routes as settingsRoutes } from '@/modules/settings/routes'
 import othersRoutes from '@/modules/try/routes'
 import { useAuthStore } from '@/stores/authStore'
 import { usePlatformAPIStore } from '@/stores/platformAPIStore'
-import HomeView from '@/views/HomeView.vue'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    meta: {
-      requiresAuth: true,
-    },
-    component: () => import('@/views/HomeView.vue'),
-    //add children here
-  },
-  {
-    path: '/project',
-    name: 'project',
-    meta: {
-      requiresAuth: true,
-    },
-    component: () => HomeView,
-  },
-  {
-    path: '/project/:ws_id',
-    name: 'project-overview',
-    meta: {
-      requiresAuth: true,
-    },
-    component: () => {
-      return HomeView
-    },
+    meta: { requiresAuth: true },
+    component: () => import('@/core/layouts/home.vue'),
+    children: [
+      {
+        path: '',
+        name: 'home',
+        component: () => import('@/views/HomeView.vue'),
+      },
+      {
+        path: 'workspace/:workspaceId',
+        component: () => import('@/core/layouts/workspace.vue'),
+        children: [...metaRoutes],
+      },
+    ],
   },
 
   ...authenticationRoutes,
-  ...metaRoutes,
   ...settingsRoutes,
   ...othersRoutes,
 ] as RouteRecordRaw[]

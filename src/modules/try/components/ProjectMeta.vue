@@ -24,22 +24,19 @@ import { z } from 'zod'
 const { toast } = useToast()
 const useProject = useProjectStore()
 const useAuth = useAuthStore()
-const { project_data,project_list } = useProject
+const { project_data, project_list } = useProject
 const { user_auth } = useAuth
 const metaRelatedStore = useMetaRelatedStore()
 const platformApi = usePlatformAPIStore()
 const { meta_page } = metaRelatedStore
-const { platformAPI, platform_api_list } = platformApi
+const { platform_api_list } = platformApi
 //Requirement when setting up Component
 const componentLoad = ref<boolean>(true)
 const project_center = useProjectCenter()
 const { project_center_dialog: pcd } = project_center
-const meta_pages_options_id = <string[]>[]
-const meta_pages_options = <{
-  label: string,
-  value: string
-}[]>[]
-const meta_pages = <MetaPagesData[]>[]
+const meta_pages_options_id: string[] = []
+const meta_pages_options: { label: string; value: string }[] = []
+const meta_pages: MetaPagesData[] = []
 
 interface InputStructure {
   name: string
@@ -119,7 +116,7 @@ const inputField = reactive<InputField>({
   async createProject(): Promise<void> {
     this.isLoading = true
     project_data.initialize()
-    const selectedPage = meta_pages.find(mp => mp.mp_id === inputField.dataInput.account)
+    const selectedPage = meta_pages.find((mp) => mp.mp_id === inputField.dataInput.account)
     if (project_data.data && project_data.isInitialized && selectedPage) {
       meta_page.set(selectedPage)
       if (meta_page.data) {
@@ -140,7 +137,7 @@ const inputField = reactive<InputField>({
             description: 'You have succssfully created a new project!',
             variant: 'success',
           })
-          
+
           router.push({ name: 'meta', params: { pj_id: update.data.pj_id } })
           pcd.close()
         } else {
@@ -166,7 +163,7 @@ const inputField = reactive<InputField>({
       })
     }
     this.isLoading = false
-  }
+  },
 })
 
 function customSelectionAccount(event: string) {
@@ -178,24 +175,23 @@ onMounted(async () => {
   componentLoad.value = true
   inputField.initializeValue()
   //Load Meta Pages
-  const get_platform = platform_api_list.data.find(platform => platform.uid === user_auth.data?.uid && platform.platform === 'META')
+  const get_platform = platform_api_list.data.find(
+    (platform) => platform.uid === user_auth.data?.uid && platform.platform === 'META',
+  )
   if (get_platform) {
     const pages = await meta_page.getWhere([
       { fieldName: 'pa_id', operator: '==', value: get_platform.pa_id },
       { fieldName: 'voided', operator: '==', value: false },
-      { fieldName: 'isOnProject', operator: '==', value: false }
+      { fieldName: 'isOnProject', operator: '==', value: false },
     ])
-    pages.data.forEach(page => {
-      meta_pages_options.push(
-        {
-          label: `${page.name} - ${page.page_id}`,
-          value: page.mp_id,
-        }
-      )
+    pages.data.forEach((page) => {
+      meta_pages_options.push({
+        label: `${page.name} - ${page.page_id}`,
+        value: page.mp_id,
+      })
       meta_pages_options_id.push(page.mp_id)
       meta_pages.push(page)
     })
-
   }
   componentLoad.value = false
 })
@@ -209,9 +205,14 @@ onMounted(async () => {
   <div v-if="!componentLoad">
     <div v-if="pcd.activePage === 'services'">
       <div class="max-h-[40vh] overflow-y-auto">
-        <div v-for="[key, service] in pcd.active_platform?.services" :key="key"
-          class="group grid grid-cols-[var(--icon-size),1fr] gap-x-4 rounded-md p-2 text-sm/6 transition-all [--icon-size:2rem] hover:bg-gray-200">
-          <div class="flex size-8 items-center justify-center self-center rounded-full bg-black text-white">
+        <div
+          v-for="[key, service] in pcd.active_platform?.services"
+          :key="key"
+          class="group grid grid-cols-[var(--icon-size),1fr] gap-x-4 rounded-md p-2 text-sm/6 transition-all [--icon-size:2rem] hover:bg-gray-200"
+        >
+          <div
+            class="flex size-8 items-center justify-center self-center rounded-full bg-black text-white"
+          >
             <i :class="['bx text-xl', service.icon]" />
           </div>
           <div class="flex flex-col gap-y-0">
@@ -233,18 +234,37 @@ onMounted(async () => {
         <div class="grid gap-5">
           <div class="flex flex-col gap-y-2 px-2">
             <span class="text-sm font-semibold">Chosen Platform:</span>
-            <Input v-model="inputField.dataInput.platform" @blur="inputField.validateSingleField('platform')"
-              type="text" placeholder="Project platform" class="h-7 text-xs" disabled />
-            <div v-if="inputField.errors.platform" for="platform" class="flex items-center gap-1 text-xs text-red-500">
+            <Input
+              v-model="inputField.dataInput.platform"
+              @blur="inputField.validateSingleField('platform')"
+              type="text"
+              placeholder="Project platform"
+              class="h-7 text-xs"
+              disabled
+            />
+            <div
+              v-if="inputField.errors.platform"
+              for="platform"
+              class="flex items-center gap-1 text-xs text-red-500"
+            >
               <i class="material-icons text-sm">error</i>
               {{ inputField.errors.platform }}
             </div>
           </div>
           <div class="flex flex-col gap-y-2 px-2">
             <span class="text-sm font-semibold">Name of this Automation/Project</span>
-            <Input v-model="inputField.dataInput.name" @blur="inputField.validateSingleField('name')" type="text"
-              placeholder="Project Name" class="h-7 text-xs" />
-            <div v-if="inputField.errors.name" for="name" class="flex items-center gap-1 text-xs text-red-500">
+            <Input
+              v-model="inputField.dataInput.name"
+              @blur="inputField.validateSingleField('name')"
+              type="text"
+              placeholder="Project Name"
+              class="h-7 text-xs"
+            />
+            <div
+              v-if="inputField.errors.name"
+              for="name"
+              class="flex items-center gap-1 text-xs text-red-500"
+            >
               <i class="material-icons text-sm">error</i>
               {{ inputField.errors.name }}
             </div>
@@ -252,14 +272,27 @@ onMounted(async () => {
           <div class="flex flex-col gap-y-2 px-2">
             <div class="grid gap-1">
               <span class="text-sm font-semibold">Select a Page you will use</span>
-              <span class="text-xs">Can’t see your pages?
-                <RouterLink :to="{ name: 'settings-api-integrations-meta' }" class="text-blue-500 hover:text-blue-700">
-                  Click here</RouterLink> to import your
-                pages first
+              <span class="text-xs"
+                >Can’t see your pages?
+                <RouterLink
+                  :to="{ name: 'settings-api-integrations-meta' }"
+                  class="text-blue-500 hover:text-blue-700"
+                >
+                  Click here</RouterLink
+                >
+                to import your pages first
               </span>
             </div>
-            <Combobox model="page" :options="meta_pages_options" @select="customSelectionAccount($event)" />
-            <div v-if="inputField.errors.account" for="page_id" class="flex items-center gap-1 text-xs text-red-500">
+            <Combobox
+              model="page"
+              :options="meta_pages_options"
+              @select="customSelectionAccount($event)"
+            />
+            <div
+              v-if="inputField.errors.account"
+              for="page_id"
+              class="flex items-center gap-1 text-xs text-red-500"
+            >
               <i class="material-icons text-sm">error</i>
               {{ inputField.errors.account }}
             </div>
@@ -269,7 +302,8 @@ onMounted(async () => {
       <DialogFooter class="pt-4">
         <div v-if="!inputField.isLoading" class="flex items-center justify-end gap-2">
           <Button variant="outline" @click="pcd.returnToPlaforms()" size="xs"> Back </Button>
-          <Button variant="outline" size="xs" @click="inputField.validateDataInput()">Create
+          <Button variant="outline" size="xs" @click="inputField.validateDataInput()"
+            >Create
           </Button>
         </div>
         <div v-else class="flex items-center justify-end gap-2">

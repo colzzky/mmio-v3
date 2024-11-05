@@ -8,9 +8,21 @@ export interface MetaPagesReturn {
   name: string
   id: string
   tasks: string[]
+  access_token: string
+  category: string
+  category_list: { id: string; name: string }[]
+  name: string
+  id: string
+  tasks: string[]
 }
 
 export interface MetaPictureReturn {
+  data: {
+    is_silhouette: boolean
+    url: string
+    width: number
+    height: number
+  }
   data: {
     is_silhouette: boolean
     url: string
@@ -48,3 +60,4 @@ export interface ChatBotFlowData extends SubCollections {
 }
 
 /** Meta Services */
+

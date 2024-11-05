@@ -6,14 +6,12 @@ import {
   getCollection,
   getCollectionByField,
 } from '@/core/utils/firebase-collections'
-import type { FirebaseOperators, FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
+import type {  FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
 import generalAxiosInstance from '@/core/utils/general-axios-instance'
-import type { DocumentData, DocumentSnapshot, Timestamp } from 'firebase/firestore'
+import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import { useAuthStore } from './authStore'
-import type { Auth } from 'firebase/auth'
-import { uiHelpers } from '@/core/utils/ui-helper'
 
 interface PlaformApi {
   data: PlatformApiData | null
@@ -162,9 +160,6 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
     async saveToFirestore(fb_code: FBLonglivedCodeReturn) {
       const useAuth = useAuthStore()
       const { user_auth } = useAuth
-      const {
-        APP_FACEBOOK_ID,
-      } = import.meta.env
       try {
         const get_account = await generalAxiosInstance.get(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${fb_code.access_token}`)
         const account = get_account.data as MetaAccount

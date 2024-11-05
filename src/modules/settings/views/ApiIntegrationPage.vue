@@ -10,16 +10,11 @@ import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
-const useAuth = useAuthStore()
 const platformApiStore = usePlatformAPIStore()
-const { platformAPI, platform_api_list } = platformApiStore
-const { user_auth } = useAuth
-
-//Use this if you want a more dynamic loading
-const pageLoad = ref<boolean>(false)
-const pageDataLoad = ref<boolean>(true)
+const { platform_api_list } = platformApiStore
 
 onMounted(async () => {
+  await platform_api_list.initializeAccountApis()
   await platform_api_list.initializeAccountApis()
 })
 </script>
@@ -37,3 +32,4 @@ onMounted(async () => {
 </template>
 
 <style></style>
+

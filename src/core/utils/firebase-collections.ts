@@ -15,7 +15,6 @@ import {
   limit,
   orderBy,
   query,
-  serverTimestamp,
   Timestamp,
   setDoc,
   startAfter,
@@ -114,6 +113,10 @@ export async function getCollectionByField<T extends keyof Collections>(
         q,
         orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),
       )
+      q = query(
+        q,
+        orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),
+      )
     }
   }
 
@@ -196,7 +199,11 @@ export async function postCollection<T extends keyof CollectionsInterface2>(
         data: {
           ...postData,
           createdAt: postData.createdAt.toDate().toISOString(),
+        data: {
+          ...postData,
+          createdAt: postData.createdAt.toDate().toISOString(),
           updatedAt: postData.updatedAt.toDate().toISOString(),
+        },
         },
         error: '',
       }
@@ -224,7 +231,11 @@ export async function postCollection<T extends keyof CollectionsInterface2>(
           data: {
             ...postData,
             createdAt: postData.createdAt.toDate().toISOString(),
+          data: {
+            ...postData,
+            createdAt: postData.createdAt.toDate().toISOString(),
             updatedAt: postData.updatedAt.toDate().toISOString(),
+          },
           },
           error: '',
         }
