@@ -30,7 +30,6 @@ interface FirebaseReturn {
     error: string
 }
 
-
 type MetaPageDataReturnList = FirebaseReturnBase & {
     data: MetaPageData[]
 }
@@ -80,7 +79,6 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
             }
         },
         async createUpdate(type) {
-
             let id = this.data?.mp_id ? this.data.mp_id : crypto.randomUUID();
             if(this.data) this.data.mp_id = id
             const post = await postCollection('meta_page','meta_pages', null, id, this.data, type)
@@ -206,7 +204,6 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
 
 
 /** 
-
   PlatformApis (Meta, client_info(UserAuth, Access token, expiration))
   PageCollection (MetaClient, accesstoken, page id, page name, accessToken Expiration)
 */

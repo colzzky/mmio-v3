@@ -3,8 +3,7 @@ import { Button } from '@/core/components/ui/button'
 import { Skeleton } from '@/core/components/ui/skeleton'
 import { toast } from '@/core/components/ui/toast'
 import HomeLayout from '@/core/layouts/HomeLayout.vue'
-import type { Timestamp } from '@/core/types/UniTypes'
-import type { Platforms, WorkspaceData } from '@/core/types/WorkSpaceTypes'
+import type { Platforms, Timestamp } from '@/core/types/UniTypes'
 import { getWhereAny } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useAuthStore } from '@/stores/authStore'
@@ -62,7 +61,7 @@ interface PlatformsIcon {
 }
 
 const platforms: PlatformsIcon[] = [
-  { name: 'META', icon: 'bxl-meta' },
+  { name: 'Meta', icon: 'bxl-meta' },
   { name: 'Email-Marketing', icon: 'bx-envelope' },
   { name: 'Google-My-Business', icon: 'bxl-google' },
   { name: 'Whatsapp', icon: 'bxl-whatsapp' },

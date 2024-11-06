@@ -38,6 +38,42 @@ const fb_pages_load = ref<boolean>(true)
 const fb_api_information = ref<MetaAPIAccount | null>(null)
 const fb_platform = ref<PlatformApiData | null>(null)
 
+//Set and populate FB_business of user logged
+const set_fb_api = (metaApi: MetaAPIAccount, fbPlatform: PlatformApiData) => {
+  fb_api_load.value = true
+  fb_api_information.value = metaApi
+  fb_platform.value = fbPlatform
+  fb_api_load.value = false
+}
+
+const set_fb_pages = async (): Promise<void> => {
+  fb_pages_load.value = true
+
+  const pages = await getWhereAny('meta_page','meta_pages',null, [], [{
+    fieldName:'owner_uid', operator:'==', value:user_auth.data?.uid
+  }])
+  console.log(pages)
+  meta_pages_list.data = pages.data
+  fb_pages_load.value = false
+}
+
+//This will watch platform_api_list if it's loaded. When it's loaded it will fetch MetaAPI Platform of the user logged in
+watch(() => platform_api_list.isInitialized, async (newValue) => {
+    if (newValue) {
+      const platform = platform_api_list.data.find((api) => api.platform === 'Meta')
+      console.log(platform)
+      if (platform) {
+        set_fb_api(platform.client_account as MetaAPIAccount, platform)
+        await set_fb_pages()
+      } else {
+        fb_api_load.value = false
+        fb_pages_load.value = false
+      }
+    }
+  },
+)
+
+
 // Handle Facebook login
 const facebookLogin = async (): Promise<void> => {
   fb_api_load.value = true
@@ -87,39 +123,26 @@ watch(fb_data, async (newValue) => {
   }
 })
 
+//Populate Fb Account from firestore and fetch Exported fb Pages from firestore
 const populateFbApi = async (fbLoginStatus: fb.StatusResponse) => {
   const metaApi = await facebook_integration.exchangeForUserLongLivedToken(
     fbLoginStatus.authResponse.accessToken as string,
   )
   if (metaApi) {
+    //Assign the Information to load it to template
     set_fb_api(metaApi.client_account as MetaAPIAccount, metaApi)
+
+    //Find the platform from the fetched data and replace the existing Meta Platform from the list dynamically
     const index = platform_api_list.data.findIndex((platform) => platform.platform === 'Meta')
     if (index !== -1) {
       platform_api_list.data.splice(index, 1)
     }
     platform_api_list.data.push(metaApi)
+
+    //After setting FB account, You can now populat FB Page list
     await set_fb_pages()
     await get_fb_pages()
   }
-}
-
-const set_fb_api = (metaApi: MetaAPIAccount, fbPlatform: PlatformApiData) => {
-  fb_api_load.value = true
-  fb_api_information.value = metaApi
-  fb_platform.value = fbPlatform
-  fb_api_load.value = false
-}
-
-
-const set_fb_pages = async (): Promise<void> => {
-  fb_pages_load.value = true
-
-  const pages = await getWhereAny('meta_page','meta_pages',null, [], [{
-    fieldName:'owner_uid', operator:'==', value:user_auth.data?.uid
-  }])
-  console.log(pages)
-  meta_pages_list.data = pages.data
-  fb_pages_load.value = false
 }
 
 const get_fb_pages = async () => {
@@ -128,6 +151,8 @@ const get_fb_pages = async () => {
   if (fb_api_information.value && fb_platform.value) {
     const owner_uid = user_auth.data ? user_auth.data.uid : ''
     const fb_pages = await mpi.get_fb_pages(fb_api_information.value.accessToken)
+
+    //Process the Facebook page
     await processFacebookPages(fb_pages, owner_uid)
   } else {
     toast({
@@ -212,35 +237,13 @@ const activate_fb_page = async (meta_page_index: number) => {
   }
   meta_pages_list.data[meta_page_index].isActive = !meta_pages_list.data[meta_page_index].isActive
   processing_isActive_switch.value = false
-
-  // meta_pages_list.data[meta_page_index].isActive = !meta_pages_list.data[meta_page_index].isActive
-  // meta_page.set(meta_pages_list.data[meta_page_index])
-  // await meta_page.createUpdate("update")
 }
-
 
 onMounted(() => {
   componentLoad.value = true
+  //Do something bere
   componentLoad.value = false
 })
-
-//Use Watch for more
-watch(
-  () => platform_api_list.isInitialized,
-  async (newValue) => {
-    if (newValue) {
-      const platform = platform_api_list.data.find((api) => api.platform === 'Meta')
-      console.log(platform)
-      if (platform) {
-        set_fb_api(platform.client_account as MetaAPIAccount, platform)
-        await set_fb_pages()
-      } else {
-        fb_api_load.value = false
-        fb_pages_load.value = false
-      }
-    }
-  },
-)
 </script>
 <template>
   <Toaster />
