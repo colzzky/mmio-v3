@@ -78,7 +78,7 @@ const totalValue = computed(() =>
 
 <template>
   <div :class="cn('flex w-full flex-col items-end gap-y-4', $attrs.class ?? '')">
-    <ChartLegend v-model:items="legendItems" class="!w-full" />
+    <ChartLegend v-model:items="legendItems" />
     <VisSingleContainer
       :style="{ height: isMounted ? '100%' : 'auto' }"
       :margin="{ left: 20, right: 20 }"

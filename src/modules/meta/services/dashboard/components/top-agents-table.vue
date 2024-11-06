@@ -61,7 +61,7 @@ const data = [
 </script>
 
 <template>
-  <Card>
+  <Card class="col-span-2">
     <CardHeader>
       <CardTitle>Top Agents</CardTitle>
       <CardDescription>

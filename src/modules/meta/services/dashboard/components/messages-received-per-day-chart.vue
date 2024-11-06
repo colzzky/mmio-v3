@@ -24,7 +24,7 @@ const data = [
 </script>
 
 <template>
-  <Card>
+  <Card class="col-span-2">
     <CardHeader>
       <CardTitle>Messages Received per Day</CardTitle>
       <CardDescription>Daily message volume over the past week</CardDescription>

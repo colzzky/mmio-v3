@@ -7,7 +7,7 @@ import Main from '@/core/components/ui/main.vue'
 </script>
 
 <template>
-  <Main class="grid gap-y-6">
+  <Main class="grid grid-cols-2 gap-6">
     <template #heading>Dashboard</template>
     <MessagesReceivedPerDayChart />
     <UniqueSubscribersPerUsersChart />
