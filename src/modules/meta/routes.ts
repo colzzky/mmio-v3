@@ -180,7 +180,7 @@ export const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: 'meta',
-        component: () => import('./views/MetaHomePage.vue'),
+        component: () => import('./services/dashboard/page.vue'),
       },
       ...childrenRoutes,
     ],
