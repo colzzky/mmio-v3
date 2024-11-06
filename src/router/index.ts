@@ -25,6 +25,13 @@ const routes = [
     ],
   },
 
+  {
+    path: '/home2',
+    name: 'home2',
+    meta: { requiresAuth: true },
+    component: () => import('@/views/HomeView2.vue'),
+  },
+
   ...authenticationRoutes,
   ...settingsRoutes,
   ...othersRoutes,

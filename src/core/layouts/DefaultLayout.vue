@@ -130,23 +130,9 @@ async function returnToProjects(): Promise<void> {
       <!-- pinned services -->
       <Collapsible v-model:open="isPlatformServicesCollapsibleOpen" class="flex flex-col gap-y-1">
         <CollapsibleTrigger
-          class="flex w-full items-center justify-between text-xs font-bold uppercase text-primary/75"
-        >
-          class="flex w-full items-center justify-between text-xs font-bold uppercase text-primary/75"
-        >
+          class="flex w-full items-center justify-between text-xs font-bold uppercase text-primary/75">
           Pinned Services
-          <i
-            :class="[
-              'material-icons text-2xl transition-transform',
-              isPlatformServicesCollapsibleOpen && 'rotate-180',
-            ]"
-          >
-          <i
-            :class="[
-              'material-icons text-2xl transition-transform',
-              isPlatformServicesCollapsibleOpen && 'rotate-180',
-            ]"
-          >
+          <i :class="['material-icons text-2xl transition-transform',isPlatformServicesCollapsibleOpen && 'rotate-180',]">
             arrow_drop_down
           </i>
         </CollapsibleTrigger>
