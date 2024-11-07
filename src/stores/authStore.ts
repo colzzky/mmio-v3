@@ -4,7 +4,7 @@ import { user_data } from '@/core/types/AuthUserTypes'
 import type { MutablePick, Timestamp } from '@/core/types/UniTypes'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
-import type {  FirebaseWhereCondition, FirebaseOrderCondition } from '@/core/utils/firebase-collections'
+import type { FirebaseWhereCondition, FirebaseOrderCondition } from '@/core/utils/firebase-collections'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
 import { postCollection, getCollection, getCollectionByField } from '@/core/utils/firebase-collections';
 import { auth } from '@/core/utils/firebase-client';
@@ -24,7 +24,7 @@ type PickAnyKey<T> = {
 
 interface AuthUser {
     data: UserData | null
-    isInitialized: boolean
+    isInitialized:boolean
     initialize: () => void,
     set: (data: UserData) => void
     get: (id: string) => Promise<UserReturnData>
@@ -94,12 +94,18 @@ export const useAuthStore = defineStore('authStore', () => {
 
     const user = reactive<AuthUser>({
         data: null,
-        isInitialized: false,
+        isInitialized:false,
         initialize() {
             this.data = { ...user_data }
             this.isInitialized = true
         },
-        async get(id: string) {
+        set(data) {
+            this.data = data
+            console.log(this.data)
+            this.isInitialized = true
+        },
+        async get() {
+            const id = user_auth.data ? user_auth.data.uid : ''
             const get = await getCollection('user', 'users', null, id, []);
             console.log(get)
             return {
@@ -108,14 +114,10 @@ export const useAuthStore = defineStore('authStore', () => {
                 error: get.error
             }
         },
-        set(data) {
-            this.data = data
-            this.isInitialized = true
-            console.log(this.data)
-        },
 
-        async createUpdate(type):Promise<UserReturnData> {
-            const post = await postCollection('user', 'users', null, this.data?.uid, this.data, type)
+        async createUpdate(type): Promise<UserReturnData> {
+            const id = user_auth.data ? user_auth.data.uid : ''
+            const post = await postCollection('user', 'users', null, id, this.data, type)
             return {
                 status: post.status,
                 data: post.data as UserData,
@@ -125,14 +127,14 @@ export const useAuthStore = defineStore('authStore', () => {
     })
 
     //Called during initiali Registration
-    async function createNewUserProfile(data:MutablePick<User, 'displayName' | 'email' | 'photoURL' | 'uid' | 'emailVerified'>) {
+    async function createNewUserProfile(data: MutablePick<User, 'displayName' | 'email' | 'photoURL' | 'uid' | 'emailVerified'>) {
         //We need to check first if the user already exist in firebase
         const checkUser = await user.get(data.uid)
         if (!checkUser.status) {
             user.initialize()
-            if(user.data){
+            if (user.data) {
                 console.log(user.data)
-                user.data = {...user.data, ...data}
+                user.data = { ...user.data, ...data }
                 console.log(user.data)
                 await user.createUpdate('new');
             }
@@ -152,6 +154,6 @@ export const useAuthStore = defineStore('authStore', () => {
 },
     {
         persist: {
-            pick: ['user_auth']  // Only persist user_profile
+            pick: ['user_auth', 'user']  // Only persist user_profile
         }
     })

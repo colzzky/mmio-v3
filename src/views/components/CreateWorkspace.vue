@@ -5,9 +5,16 @@ import DialogContent from '@/core/components/ui/dialog/DialogContent.vue'
 import DialogTitle from '@/core/components/ui/dialog/DialogTitle.vue';
 import Input from '@/core/components/ui/input/Input.vue';
 import { uiHelpers } from '@/core/utils/ui-helper';
+import { useAuthStore } from '@/stores/authStore';
+import { useWorkspaceStore } from '@/stores/WorkspaceStore';
 import { VisuallyHidden } from 'radix-vue';
-import { reactive, defineProps, withDefaults, watch, computed, ref, onMounted, watchEffect } from 'vue';
+import { reactive, defineProps, watch, onMounted } from 'vue';
 import { unknown, z, type ZodRawShape } from 'zod';
+
+const workspaceStore = useWorkspaceStore()
+const authStore = useAuthStore()
+const { workspace: ws_model, workspace_list } = workspaceStore
+const { user_auth } = authStore
 
 interface PlatformDisplay {
     name: string
@@ -15,6 +22,11 @@ interface PlatformDisplay {
     href: string
     icon: string
 }
+interface WorkspaceInput {
+    name: string,
+    team: string // others that needs input like date etc
+}
+type WorkspaceCreate = Pick<WorkspaceInput, 'name'>
 enum NewWorkspaceStep {
     Create = "CREATE",
     Team = "TEAM",
@@ -78,15 +90,6 @@ watch(() => props.open_modal, (newTrigger) => {
     }
 })
 
-
-
-interface WorkspaceInput {
-    name: string,
-    team: string
-}
-
-type WorkspaceCreate = Pick<WorkspaceInput, 'name'>
-
 const workspace_create = reactive({
     dataInput: <WorkspaceCreate>{ name: '' },
     errors: <WorkspaceCreate>{ name: '' },
@@ -124,10 +127,6 @@ const workspace_create = reactive({
         this.dataInput = { name: '' }
         this.errors = { name: '' }
     }
-})
-
-const workspace_team = reactive({
-
 })
 
 const workspace_modal = reactive({
@@ -172,15 +171,26 @@ const workspace_modal = reactive({
     },
     async createWorkspace() {
         this.processing_msg = 'Creating a new workspace'
-        await uiHelpers.timeout(2000)
-        this.processing_msg = 'Populating Data'
-        await uiHelpers.timeout(2000)
-        this.processing_msg = 'Assining team members'
-        await uiHelpers.timeout(2000)
-        this.processing_msg = 'Almost done'
-        await uiHelpers.timeout(2000)
-        this.steps = NewWorkspaceStep.Complete
+        if (user_auth.data) {
+            //Create a new sowkrspace
+            ws_model.reInit()
+            ws_model.data.name = this.data.name
+            ws_model.data.team_id = this.data.team
+            ws_model.data.owner_uid = user_auth.data.uid
+            const post = await ws_model.createUpdate('new')
+            if(post.status){
+                ws_model.reInit()
+                this.steps = NewWorkspaceStep.Complete
+                this.close()
+            }else{
+                console.log('Something wentwrong')
+            }
+        }
     }
+})
+
+onMounted(async () => {
+
 })
 
 </script>
@@ -193,7 +203,8 @@ const workspace_modal = reactive({
             <div>
                 <div class="flex justify-end">
                     <div>
-                        <button v-if="workspace_modal.steps != NewWorkspaceStep.Processing && workspace_modal.steps != NewWorkspaceStep.Complete"
+                        <button
+                            v-if="workspace_modal.steps != NewWorkspaceStep.Processing && workspace_modal.steps != NewWorkspaceStep.Complete"
                             class="right-0 top-0 cursor-pointer border-0 bg-transparent text-xl text-gray-500 hover:text-gray-700 focus:outline-none"
                             aria-label="Close" @click="workspace_modal.close()">
                             <i class="material-icons">close</i>
@@ -382,7 +393,8 @@ const workspace_modal = reactive({
                                     class="h-[25vh] w-[25vh]">
                                 <div class="flex items-center gap-x-2">
                                     <i class="material-icons animate-spin text-md">donut_large</i>
-                                    <span class="text-md font-semibold">Please wait while we prepare your workspace</span>
+                                    <span class="text-md font-semibold">Please wait while we prepare your
+                                        workspace</span>
                                 </div>
                                 <span class="text-xs">{{ workspace_modal.processing_msg }}</span>
                             </div>
@@ -404,7 +416,8 @@ const workspace_modal = reactive({
                                     class="h-[25vh] w-[25vh]">
                                 <div class="flex items-center gap-x-2">
                                     <i class="material-icons animate-spin text-md">donut_large</i>
-                                    <span class="text-md font-semibold">Please wait while we redirect you to your workspace</span>
+                                    <span class="text-md font-semibold">Please wait while we redirect you to your
+                                        workspace</span>
                                 </div>
                             </div>
                         </div>

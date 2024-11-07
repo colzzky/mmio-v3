@@ -4,13 +4,14 @@ import { useAuthStore } from './authStore'
 import { reactive } from 'vue'
 import { getCollection, postCollection } from '@/core/utils/firebase-collections'
 import { defineStore } from 'pinia'
+import { team_data, type TeamData } from '@/core/types/TeamTypes'
 
-interface Workspace {
-  data: WorkspaceData
+interface Team {
+  data: TeamData
   reInit: () => void
-  set: (data: WorkspaceData) => void
-  get: (ws_id: string) => Promise<WorkspaceDataReturnData>
-  createUpdate: (type: 'new' | 'update') => Promise<WorkspaceDataReturnData>
+  set: (data: TeamData) => void
+  get: (ws_id: string) => Promise<TeamReturnData>
+  createUpdate: (type: 'new' | 'update') => Promise<TeamReturnData>
 }
 
 interface FirebaseReturn {
@@ -19,35 +20,35 @@ interface FirebaseReturn {
   error: string
 }
 type FirebaseReturnBase = Omit<FirebaseReturn, 'data'>
-type WorkspaceDataReturnData = FirebaseReturnBase & {
-  data: WorkspaceData
+type TeamReturnData = FirebaseReturnBase & {
+  data: TeamData
 }
 
-export const useWorkspaceStore = defineStore('workspaceStore', () => {
-  const workspace = <Workspace>({
-    data: { ...workspace_data },
+export const useTeamStore = defineStore('teamStore', () => {
+  const team = <Team>({
+    data: { ...team_data },
     reInit() {
-      this.data = { ...workspace_data }
+      this.data = { ...team_data }
     },
-    set(data: WorkspaceData) {
+    set(data: TeamData) {
       this.data = data
     },
-    async get(ws_id: string): Promise<WorkspaceDataReturnData> {
+    async get(ws_id: string): Promise<TeamReturnData> {
       const get = await getCollection('workspaces', 'workspaces', {}, ws_id, [])
       return {
         status: get.status,
-        data: get.data as WorkspaceData,
+        data: get.data as TeamData,
         error: get.error,
       }
     },
-    async createUpdate(type): Promise<WorkspaceDataReturnData> {
-      let id = this.data.ws_id !== '' ? this.data.ws_id : crypto.randomUUID();
-      this.data.ws_id = id
+    async createUpdate(type): Promise<TeamReturnData> {
+      let id = this.data.tm_id !== '' ? this.data.tm_id : crypto.randomUUID();
+      this.data.tm_id = id
       const post = await postCollection('workspaces', 'workspaces', null, id, this.data, type)
       console.log(post)
       return {
         status: post.status,
-        data: post.data as WorkspaceData,
+        data: post.data as TeamData,
         error: post.error,
       }
     },
@@ -58,7 +59,6 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
   }
 
   return {
-    workspace,
     reset_state
   }
 })

@@ -4,6 +4,7 @@ import type {
   WorkspaceData,
   MetaPageData,
   ChatBotFlowData,
+  TeamData,
 } from '@/core/utils/types'
 import type { PlatformApiData } from './AuthUserTypes'
 
@@ -45,6 +46,13 @@ export type CollectionsInterface2 = {
     path: 'meta_pages'
     interface: MetaPageData
     sub_col: SubCollectionKey<MetaPageData>[]
+    sub_params: {} | null
+  }
+  team:{
+    id: 'tm_id'
+    path: 'teams'
+    interface: TeamData
+    sub_col: SubCollectionKey<TeamData>[]
     sub_params: {} | null
   }
   // chat_bot_flow: {
