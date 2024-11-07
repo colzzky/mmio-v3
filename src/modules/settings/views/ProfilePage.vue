@@ -4,7 +4,7 @@ import BasicInformation from '../components/ProfileSettings/BasicInformation.vue
 import { Button } from '@/core/components/ui/button'
 import { Label } from '@/core/components/ui/label'
 import { Switch } from '@/core/components/ui/switch'
-import { getWhereAny } from '@/core/utils/firebase-collections'
+import { getCollection, getWhereAny } from '@/core/utils/firebase-collections'
 import { useAuthStore } from '@/stores/authStore'
 import { onMounted } from 'vue'
 
@@ -15,10 +15,6 @@ onMounted(async () => {
     console.log('initializing...')
     const profile = await user.get(user_auth.data.uid)
     user.set(profile.data)
-
-
-    const test = await getWhereAny('user','users', {}, ['platform_apis'])
-    console.log(test.data)
   }
 })
 </script>
