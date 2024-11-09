@@ -40,7 +40,7 @@ interface User_Collection {
   }
 }
 
-export type CollectionsInterface2 = {
+export type CollectionsInterface = {
   meta_page: {
     id: 'mp_id'
     path: 'meta_pages'

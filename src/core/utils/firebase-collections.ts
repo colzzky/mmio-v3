@@ -1,5 +1,5 @@
 import { firestore } from './firebase-client'
-import type { CollectionsInterface2, SubCollectionKey } from '@/core/types/FirestoreTypes'
+import type { CollectionsInterface, SubCollectionKey } from '@/core/types/FirestoreTypes'
 import type {
   UserData,
   WorkspaceData,
@@ -150,10 +150,10 @@ export async function getCollectionByField<T extends keyof Collections>(
   }
 }
 
-export async function postCollection<T extends keyof CollectionsInterface2>(
+export async function postCollection<T extends keyof CollectionsInterface>(
   $col: T,
-  $path: CollectionsInterface2[T]['path'], // Path like 'collection/id',
-  $sub_params: CollectionsInterface2[T]['sub_params'] | null = null,
+  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
+  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
   id: string = '',
   data: any,
   type: 'update' | 'new' = 'update',
@@ -234,12 +234,12 @@ export async function postCollection<T extends keyof CollectionsInterface2>(
   }
 }
 
-export async function getCollection<T extends keyof CollectionsInterface2>(
+export async function getCollection<T extends keyof CollectionsInterface>(
   $col: T,
-  $path: CollectionsInterface2[T]['path'], // Path like 'collection/id',
-  $sub_params: CollectionsInterface2[T]['sub_params'] | null = null,
+  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
+  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
   id: string,
-  $sub_col: SubCollectionKey<CollectionsInterface2[T]['interface']> = [], // Array of subcollection names to check
+  $sub_col: SubCollectionKey<CollectionsInterface[T]['interface']> = [], // Array of subcollection names to check
 ): Promise<FirebaseReturn> {
   try {
     let fullPath = $path as string
@@ -361,24 +361,24 @@ type CollectionConfig<T> = {
   sub_params: { key: string }[] | null // This can still be flexible
 }
 
-export async function getWhereAny<T extends keyof CollectionsInterface2>(
+export async function getWhereAny<T extends keyof CollectionsInterface>(
   $col: T, // Path like 'collection/id',
-  $path: CollectionsInterface2[T]['path'], // Path like 'collection/id',
-  $sub_params: CollectionsInterface2[T]['sub_params'] | null = null,
-  $sub_col: SubCollectionKey<CollectionsInterface2[T]['interface']> = [], // Array of subcollection names to check
+  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
+  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
+  $sub_col: SubCollectionKey<CollectionsInterface[T]['interface']> = [], // Array of subcollection names to check
   whereConditions: {
-    fieldName: keyof CollectionsInterface2[T]['interface']
+    fieldName: keyof CollectionsInterface[T]['interface']
     operator: FirebaseOperators
     value: any
   }[] = [],
   orderConditions?: {
-    fieldName: keyof CollectionsInterface2[T]['interface']
+    fieldName: keyof CollectionsInterface[T]['interface']
     direction?: 'asc' | 'desc'
   }[],
 
   limitResult?: number,
   lastDocumentId?: string,
-): Promise<FirebaseWhereReturn<CollectionsInterface2[T]['interface']>> {
+): Promise<FirebaseWhereReturn<CollectionsInterface[T]['interface']>> {
   try {
     let fullPath = $path as string
 
