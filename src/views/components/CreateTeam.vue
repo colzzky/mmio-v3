@@ -178,6 +178,7 @@ const create_team_modal = reactive({
                 this.isLoading = true
                 await this.inviteMembers()
                 this.isLoading = false
+                this.steps = CreateTeamSteps.Complete
             }
         }
     },
@@ -395,7 +396,7 @@ onMounted(async () => {
                             <div class="flex items-center justify-center">
                                 <div
                                     class="text-5xl font-bold text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-transparent ">
-                                    Workspace successfuly Created!</div>
+                                    You have successfuly created a team!</div>
                             </div>
                         </div>
                         <div class="col-span-1 pt-20">
@@ -405,7 +406,7 @@ onMounted(async () => {
                                 <div class="flex items-center gap-x-2">
                                     <i class="material-icons animate-spin text-md">donut_large</i>
                                     <span class="text-md font-semibold">Please wait while we redirect you to your
-                                        workspace</span>
+                                        team workspace</span>
                                 </div>
                             </div>
                         </div>
