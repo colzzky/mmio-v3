@@ -29,6 +29,7 @@ export const useTeamStore = defineStore('teamStore', () => {
     data: { ...team_data },
     reInit() {
       this.data = { ...team_data }
+      //this is team
     },
     set(data: TeamData) {
       this.data = data
