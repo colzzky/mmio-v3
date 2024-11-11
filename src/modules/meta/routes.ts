@@ -43,7 +43,7 @@ const servicesRecord: ServiceRecord = {
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
   'post-randomizer': {
-    icon: 'bx-message-dots',
+    icon: 'bx-shuffle',
     label: 'Post Randomizer',
     pinned: true,
     description:
@@ -64,9 +64,9 @@ const servicesRecord: ServiceRecord = {
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
   'live-chat': {
-    icon: 'bx-message-dots',
+    icon: 'bxs-message-alt-detail',
     label: 'Live Chat',
-    pinned: false,
+    pinned: true,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
@@ -128,7 +128,7 @@ const childrenRouteRecords: RouteRecord = {
     component: () => import('./views/MetaHomePage.vue'),
   },
   'live-chat': {
-    component: () => import('./views/MetaHomePage.vue'),
+    component: () => import('./services/live-chat/page.vue'),
   },
   subscribers: {
     component: () => import('./views/MetaHomePage.vue'),
