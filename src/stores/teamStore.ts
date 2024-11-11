@@ -5,6 +5,9 @@ import { reactive } from 'vue'
 import { getCollection, postCollection } from '@/core/utils/firebase-collections'
 import { defineStore } from 'pinia'
 import { team_data, type TeamData } from '@/core/types/TeamTypes'
+import { useUserStore } from './userStore'
+const userStore = useUserStore()
+const { user_team_refs } = userStore
 
 interface Team {
   data: TeamData
@@ -34,8 +37,8 @@ export const useTeamStore = defineStore('teamStore', () => {
     set(data: TeamData) {
       this.data = data
     },
-    async get(ws_id: string): Promise<TeamReturnData> {
-      const get = await getCollection('workspaces', 'workspaces', {}, ws_id, [])
+    async get(tm_id: string): Promise<TeamReturnData> {
+      const get = await getCollection('team', 'teams', {}, tm_id, [])
       return {
         status: get.status,
         data: get.data as TeamData,
@@ -45,7 +48,7 @@ export const useTeamStore = defineStore('teamStore', () => {
     async createUpdate(type): Promise<TeamReturnData> {
       let id = this.data.tm_id !== '' ? this.data.tm_id : crypto.randomUUID();
       this.data.tm_id = id
-      const post = await postCollection('workspaces', 'workspaces', null, id, this.data, type)
+      const post = await postCollection('team', 'teams', null, id, this.data, type)
       console.log(post)
       return {
         status: post.status,
@@ -55,11 +58,9 @@ export const useTeamStore = defineStore('teamStore', () => {
     },
   })
 
-  const reset_state = () => {
-    //workspace.resetData()
-  }
+  //Regenerate Team Invite
 
   return {
-    reset_state
+    team
   }
 })

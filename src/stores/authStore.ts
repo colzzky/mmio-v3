@@ -1,5 +1,5 @@
-import type { UserData, UserAddress } from '@/core/types/AuthUserTypes'
-import { user_data } from '@/core/types/AuthUserTypes'
+import type { UserData, UserAddress, TeamRefsData } from '@/core/types/AuthUserTypes'
+import { team_refs_data, user_data } from '@/core/types/AuthUserTypes'
 
 import type { MutablePick, Timestamp } from '@/core/types/UniTypes'
 import { defineStore } from 'pinia'
@@ -11,39 +11,35 @@ import { auth } from '@/core/utils/firebase-client';
 import type { DocumentData } from 'firebase/firestore';
 import { useProjectStore } from './projectStore'
 
-
-// type Nullable<T> = {
-//     [P in keyof T]: T[P] | null;
-// };
-// Add a new key "id" while preserving original keys
-type PickAnyKey<T> = {
-    // Original keys from UserProfileData
-    [K in keyof T]?: T[K];
-};
-
-
-interface AuthUser {
-    data: UserData | null
-    isInitialized:boolean
-    initialize: () => void,
-    set: (data: UserData) => void
-    get: (id: string) => Promise<UserReturnData>
-    createUpdate: (type: 'new' | 'update') => Promise<UserReturnData>
-}
-
 interface FirebaseReturn {
     status: boolean;
     data: DocumentData | undefined;
     error: string;
 }
-// Create a base type that omits 'data'
 type FirebaseReturnBase = Omit<FirebaseReturn, 'data'>;
-type UserReturnList = FirebaseReturnBase & {
-    data: PickAnyKey<UserData>[];
+type FSReturnData<T> = FirebaseReturnBase & {
+    data: T;
 };
-type UserReturnData = FirebaseReturnBase & {
-    data: UserData;
-};
+
+interface AuthUser {
+    data: UserData | null
+    isInitialized: boolean
+    initialize: () => void,
+    set: (data: UserData) => void
+    get: (id: string) => Promise<FSReturnData<UserData>>
+    createUpdate: (type: 'new' | 'update') => Promise<FSReturnData<UserData>>
+}
+
+
+interface TeamRefs {
+    data: TeamRefsData
+    reInit: () => void
+    set: (data: TeamRefsData) => void
+    get: (ws_id: string) => Promise<FSReturnData<TeamRefsData>>
+    createUpdate: (uid:string, type: 'new' | 'update') => Promise<FSReturnData<TeamRefsData>>
+  }
+
+
 
 
 
@@ -94,7 +90,7 @@ export const useAuthStore = defineStore('authStore', () => {
 
     const user = reactive<AuthUser>({
         data: null,
-        isInitialized:false,
+        isInitialized: false,
         initialize() {
             this.data = { ...user_data }
             this.isInitialized = true
@@ -115,13 +111,43 @@ export const useAuthStore = defineStore('authStore', () => {
             }
         },
 
-        async createUpdate(type): Promise<UserReturnData> {
+        async createUpdate(type): Promise<FSReturnData<UserData>> {
             const id = user_auth.data ? user_auth.data.uid : ''
             const post = await postCollection('user', 'users', null, id, this.data, type)
             return {
                 status: post.status,
                 data: post.data as UserData,
                 error: post.error
+            }
+        },
+    })
+
+    const user_team_refs = reactive<TeamRefs>({
+        data: { ...team_refs_data },
+        reInit() {
+            this.data = { ...team_refs_data }
+            //this is team
+        },
+        set(data: TeamRefsData) {
+            this.data = data
+        },
+        async get(tm_id: string): Promise<FSReturnData<TeamRefsData>> {
+            const get = await getCollection('team', 'teams', {}, tm_id, [])
+            return {
+                status: get.status,
+                data: get.data as TeamRefsData,
+                error: get.error,
+            }
+        },
+        async createUpdate(uid:string, type): Promise<FSReturnData<TeamRefsData>> {
+            let id = this.data.team_refs_id !== '' ? this.data.team_refs_id : crypto.randomUUID();
+            this.data.team_refs_id = id
+            const post = await postCollection('team_refs', 'users/:uid/team_refs', {uid}, id, this.data, type)
+            console.log(post)
+            return {
+                status: post.status,
+                data: post.data as TeamRefsData,
+                error: post.error,
             }
         },
     })

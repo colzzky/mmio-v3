@@ -21,6 +21,7 @@ import {
   updateDoc,
   where,
   type DocumentData,
+  writeBatch,
 } from 'firebase/firestore'
 
 type Collections = {
@@ -231,6 +232,74 @@ export async function postCollection<T extends keyof CollectionsInterface>(
       error: `No data found with that id error! ${$col}.`,
       data: undefined,
     }
+  }
+}
+
+export async function postBatchCollection<T extends keyof CollectionsInterface>(
+  $col: T,
+  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
+  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
+  data: any[], // An array of data for multiple posts
+): Promise<FirebaseWhereReturn<CollectionsInterface[T]['interface']>> {
+  let fullPath = $path as string;
+
+  if ($sub_params) {
+    Object.entries($sub_params).forEach(([key, value]) => {
+      fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
+    });
+  }
+
+  // Create a batch instance
+  const batch = writeBatch(firestore);
+
+  // Loop through the array of data to create/update multiple documents
+  for (const postData of data) {
+    const id = postData.id; // Assuming each postData contains an `id`
+    const userDocRef = doc(firestore, fullPath, id);
+
+    // Prepare the data to be saved
+    const preparedData = {
+      ...postData,
+      createdAt: Timestamp.fromDate(new Date(postData.createdAt)),
+      updatedAt: Timestamp.fromDate(new Date()),
+    };
+
+    try {
+      const userSnapshot = await getDoc(userDocRef); // Fetch the document
+
+      if (userSnapshot.exists()) {
+        // If document exists, update it
+        batch.update(userDocRef, preparedData);
+      } else {
+        // If document does not exist, skip or log it
+        console.log(`Document with ID ${id} does not exist, skipping update.`);
+        continue; // Skip this iteration, as we don't want to create new docs in batch
+      }
+    } catch (error) {
+      console.log(`Error processing document with ID ${id}:`, error);
+    }
+  }
+
+  try {
+    // Commit the batch of operations
+    await batch.commit();
+
+    return {
+      status: true,
+      data: data.map(post => ({
+        ...post,
+        createdAt: new Date(post.createdAt).toISOString(),
+        updatedAt: new Date().toISOString(),
+      })),
+      error: '',
+    };
+  } catch (error) {
+    console.log('Error during batch write!', error);
+    return {
+      status: false,
+      error: `Error fetching data from subcollection path: ${error}`,
+      data: [],
+    };
   }
 }
 

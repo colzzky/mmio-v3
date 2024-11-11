@@ -6,11 +6,13 @@ export interface TeamData extends SubCollections {
   tm_id: string,
   name: string,
   owner_uid: string,
-  members: [{
+  inviteLink:string,
+  members: {
     uid:string,
-    role:string,
-    isDisabled:boolean
-  }]|[],
+    permission:string[],
+    isDisabled:boolean,
+    dateAdded:string,
+  }[],
   createdAt: string,
   updatedAt: string,
 }
@@ -19,6 +21,7 @@ export const team_data:TeamData = {
     tm_id: '',
     name: '',
     owner_uid: '',
+    inviteLink: '',
     members: [],
     createdAt: '',
     updatedAt: '',

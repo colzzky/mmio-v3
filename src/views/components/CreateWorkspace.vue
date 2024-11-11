@@ -13,7 +13,7 @@ import { unknown, z, type ZodRawShape } from 'zod';
 
 const workspaceStore = useWorkspaceStore()
 const authStore = useAuthStore()
-const { workspace: ws_model, workspace_list } = workspaceStore
+const { workspace: ws_model} = workspaceStore
 const { user_auth } = authStore
 
 interface PlatformDisplay {

@@ -24,7 +24,7 @@ export interface UserData extends SubCollections, MutablePick<User, 'displayName
   address: UserAddress
   createdAt: string
   updatedAt: string
-  subCollections: ('platform_apis')[]
+  subCollections: ('platform_apis'|'team_refs')[]
 }
 
 export const user_data: UserData = {
@@ -45,7 +45,7 @@ export const user_data: UserData = {
   email: '',
   emailVerified: true,
   photoURL: '',
-  subCollections: ['platform_apis'],
+  subCollections: ['platform_apis', 'team_refs'],
   createdAt: '',
   updatedAt: ''
 }
@@ -65,6 +65,24 @@ export const platform_api_data: PlatformApiData = {
   updatedAt:''
 }
 
+///////////////////
+//Team Reference//
+//////////////////
+
+export interface TeamRefsData extends SubCollections {
+  team_refs_id:string
+  tm_id:string,
+  createdAt:string
+  updatedAt:string
+}
+
+export const team_refs_data: TeamRefsData = {
+  team_refs_id:'',
+  tm_id:'',
+  createdAt:'',
+  updatedAt:'',
+  subCollections:[],
+}
 
 ///////////////////
 //META API Model//
