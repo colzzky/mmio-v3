@@ -98,4 +98,10 @@ export const uiHelpers = {
   async timeout(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms))
   },
+  
+  generateExpirationDate(seconds:number) {
+    const date = new Date(); // Get the current date and time
+    date.setSeconds(date.getSeconds() + seconds); // Add the specified number of seconds
+    return date.toISOString(); // Convert to ISO string format
+  }
 }

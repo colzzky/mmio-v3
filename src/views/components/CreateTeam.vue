@@ -4,9 +4,13 @@ import Dialog from '@/core/components/ui/dialog/Dialog.vue'
 import DialogContent from '@/core/components/ui/dialog/DialogContent.vue'
 import DialogTitle from '@/core/components/ui/dialog/DialogTitle.vue';
 import Input from '@/core/components/ui/input/Input.vue';
-import type { TeamRefsData } from '@/core/types/AuthUserTypes';
+import { toast } from '@/core/components/ui/toast';
+import Toaster from '@/core/components/ui/toast/Toaster.vue';
+import type { TeamData } from '@/core/types/TeamTypes';
 import { getWhereAny, postBatchCollection } from '@/core/utils/firebase-collections';
+import { uiHelpers } from '@/core/utils/ui-helper';
 import { useAuthStore } from '@/stores/authStore';
+import { useInvitationStore } from '@/stores/invitationStore';
 import { useTeamStore } from '@/stores/teamStore';
 import { useUserStore } from '@/stores/userStore';
 import { VisuallyHidden } from 'radix-vue';
@@ -15,10 +19,12 @@ import { unknown, z, ZodString, type ZodRawShape } from 'zod';
 
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
+const invitationStore = useInvitationStore()
 const userStore = useUserStore()
 const { user_auth, user } = authStore
 const { team: team_model } = teamStore
 const { user_team_refs, setTeamReference } = userStore
+const { invitation } = invitationStore
 
 interface NewTeamInput {
     name: string,
@@ -155,7 +161,7 @@ const create_team_modal = reactive({
     steps: <CreateTeamSteps>CreateTeamSteps.Name,
     data: {
         name: '',
-        invite_link: '',
+        invite_link: 'Sample linkkkk.......',
     },
     processing_msg: '',
     async continue() {
@@ -194,14 +200,17 @@ const create_team_modal = reactive({
     },
     async createNewTeam(): Promise<boolean> {
         if (user_auth.data) {
-            //Create a new sowkrspace
+            //Create a new team
             team_model.reInit()
             team_model.data.name = this.data.name
             team_model.data.inviteLink = this.data.invite_link
             team_model.data.owner_uid = user_auth.data.uid
             const post = await team_model.createUpdate('new')
             if (post.status) {
+                //Create an Invite Code
                 team_model.set(post.data)
+                await createTeamInvite(team_model.data, team_model.data.inviteLink, "Team Invite")
+                await invitation.createUpdate("new")
                 return true
             } else {
                 //Toaster here when it's  a failure
@@ -209,59 +218,117 @@ const create_team_modal = reactive({
                 return false
             }
         }
+
+
         return false
     },
     async inviteMembers(): Promise<void> {
         //This should be called in the BACKEND!!!!
+        /**
+         * Create a unique invite code that will be sent to user
+         * Make the member invite pending
+         * If member access the link he/she will be referenced
+         */
         const invite_emails = choose_member_form.emails
-        const non_existing_users = [...choose_member_form.emails]
-        const users = await getWhereAny("user", "users", {}, [], [
-            { fieldName: 'email', operator: "in", value: invite_emails }
-        ])
-        if (users.status && users.data.length) {
-            for (const email of invite_emails) {
-                const user = users.data.find(user => user.email === email)
-                if (user) {
-                    const index = non_existing_users.indexOf(user.email as string);
-                    team_model.data.members.push({
-                        uid: user.uid,
-                        permission: ['read and write'],
-                        isDisabled: false,
-                        dateAdded: new Date().toISOString()
-                    })
-                    non_existing_users.splice(index, 1);
+        const member_invite_code = crypto.randomUUID()
+        const current_user_uid = user_auth.data ? user_auth.data.uid : ''
+        for (const email of invite_emails) {
+            team_model.data.members.push({
+                uid: '',
+                permission: [],
+                isDisabled: true,
+                dateAdded: new Date().toISOString(),
+                invitation: {
+                    reference: member_invite_code,
+                    email: email,
+                    invitedBy: current_user_uid,
                 }
-            }
-            console.log(team_model.data.members)
-            await team_model.createUpdate('update')
-            for (const member of team_model.data.members) {
-                user_team_refs.reInit()
-                user_team_refs.data.tm_id = team_model.data.tm_id
-                const create_team_refs = await user_team_refs.createUpdate(member.uid, 'new')
-                if (create_team_refs.status) {
-                    console.log('success')
-                } else {
-                    console.log(create_team_refs.error)
-                }
-            }
-
+            })
         }
-        non_existing_users.forEach(email => {
-            this.sendEmailInvite(email)
-        })
-        
+        await createTeamInvite(team_model.data, member_invite_code, "Member Team Invite")
+        await team_model.createUpdate('update')
     },
+    // async inviteMembers(): Promise<void> {
+    //     //This should be called in the BACKEND!!!!
+    //     const invite_emails = choose_member_form.emails
+    //     const non_existing_users = [...choose_member_form.emails]
+
+    //     const users = await getWhereAny("user", "users", {}, [], [
+    //         { fieldName: 'email', operator: "in", value: invite_emails }
+    //     ])
+    //     if (users.status && users.data.length) {
+    //         for (const email of invite_emails) {
+    //             const user = users.data.find(user => user.email === email)
+    //             if (user) {
+    //                 const index = non_existing_users.indexOf(user.email as string);
+    //                 team_model.data.members.push({
+    //                     uid: user.uid,
+    //                     permission: ['read and write'],
+    //                     isDisabled: false,
+    //                     dateAdded: new Date().toISOString()
+    //                 })
+    //                 non_existing_users.splice(index, 1);
+    //             }
+    //         }
+    //         console.log(team_model.data.members)
+    //         await team_model.createUpdate('update')
+
+
+
+    //         for (const member of team_model.data.members) {
+    //             user_team_refs.reInit()
+    //             user_team_refs.data.tm_id = team_model.data.tm_id
+    //             const create_team_refs = await user_team_refs.createUpdate(member.uid, 'new')
+    //             if (create_team_refs.status) {
+    //                 console.log('success')
+    //             } else {
+    //                 console.log(create_team_refs.error)
+    //             }
+    //         }
+
+    //     }
+    //     non_existing_users.forEach(email => {
+    //         this.sendEmailInvite(email)
+    //     })
+
+    // },
     async sendEmailInvite(email: string) {
         console.log('email sent')
     }
 })
 
-onMounted(async () => {
+async function createTeamInvite(team:TeamData, inviteLink:string, type:'Team Invite'|'Member Team Invite') {
+    invitation.reInit()
+    invitation.data.iv_id = inviteLink
+    invitation.data.reference = {
+        id: team.tm_id,
+        collection: 'teams',
+        path: `teams/${team_model.data.tm_id}`,
+    }
+    invitation.data.expiration = uiHelpers.generateExpirationDate(1800)
+    invitation.data.type = type
+}
 
-})
+
+async function copyLink() {
+    try {
+        await navigator.clipboard.writeText(`www.mmiov3/team/invite?link=${create_team_modal.data.invite_link}`);
+        toast({
+            title: 'Invited link Copied',
+            variant: 'default',
+            duration: 2000
+        })
+    } catch (err) {
+        console.error('Failed to copy text:', err);
+    }
+}
+
+//When you use an invite link you'll be automatically added to the team
+//When you invite someone in email it is not automatically added. Instead it will send another invite link to the email
 
 </script>
 <template>
+    <Toaster />
     <Dialog v-model:open="create_team_modal.isOpen">
         <DialogContent @interact-outside="(e) => e.preventDefault()" class="min-h-[75%] sm:max-w-[75%]">
             <VisuallyHidden>
@@ -346,24 +413,33 @@ onMounted(async () => {
                                 </div>
 
                                 <div class="space-y-2 pt-5 flex flex-col items-center">
-                                    <div
-                                        class="border-2 w-[70vh] p-4 rounded-lg flex flex-row flex-wrap gap-2 items-center">
-                                        <div v-for="email, index in choose_member_form.emails" :id="email"
-                                            class="p-2 px-3 rounded-full bg-blue-500 flex items-center space-x-2 self-start">
-                                            <span class="text-white font-semibold text-sm">{{ email }}</span>
-                                            <button @click="choose_member_form.removeEmail(index)"
-                                                class="cursor-pointer text-white focus:outline-none flex items-center">
-                                                <i class="material-icons text-md">close</i>
-                                            </button>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between items-center">
+                                            <span>Invite up to 40 teammates: </span>
+                                            <Button v-if="!create_team_modal.isLoading" class="text-blue-500" size="sm"
+                                                variant="ghost" @click="copyLink()">
+                                                <i class="material-icons pr-2">link</i>
+                                                Copy link</Button>
                                         </div>
+                                        <div
+                                            class="border-2 w-[70vh] p-4 rounded-lg flex flex-row flex-wrap gap-2 items-center">
+                                            <div v-for="email, index in choose_member_form.emails" :id="email"
+                                                class="p-2 px-3 rounded-full bg-blue-500 flex items-center space-x-2 self-start">
+                                                <span class="text-white font-semibold text-sm">{{ email }}</span>
+                                                <button @click="choose_member_form.removeEmail(index)"
+                                                    class="cursor-pointer text-white focus:outline-none flex items-center">
+                                                    <i class="material-icons text-md">close</i>
+                                                </button>
+                                            </div>
 
-                                        <div class="w-[30vh] rounded-full">
-                                            <Input v-model="choose_member_form.dataInput.member_email"
-                                                :disabled="create_team_modal.isLoading"
-                                                @blur="choose_member_form.addEmail()"
-                                                @keyup.enter="choose_member_form.addEmail()" type="text"
-                                                placeholder="User Email"
-                                                class="border-x-0 border-t-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none border-b focus-visible:border-blue-600 text-sm" />
+                                            <div class="w-[30vh] rounded-full">
+                                                <Input v-model="choose_member_form.dataInput.member_email"
+                                                    :disabled="create_team_modal.isLoading"
+                                                    @blur="choose_member_form.addEmail()"
+                                                    @keyup.enter="choose_member_form.addEmail()" type="text"
+                                                    placeholder="User Email"
+                                                    class="border-x-0 border-t-0 focus-visible:ring-0 focus-visible:ring-offset-0 rounded-none border-b focus-visible:border-blue-600 text-sm" />
+                                            </div>
                                         </div>
                                     </div>
                                     <div v-if="choose_member_form.errors.member_email" for="name"

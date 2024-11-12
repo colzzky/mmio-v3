@@ -12,6 +12,7 @@ import {
   DropdownMenuRadioItem,
 } from '@/core/components/ui/dropdown-menu'
 import { Input } from '@/core/components/ui/input'
+import CreateTeam from '@/views/components/CreateTeam.vue'
 import CreateWorkspace from '@/views/components/CreateWorkspace.vue'
 import { computed, ref } from 'vue'
 
@@ -29,6 +30,11 @@ const sharedWorkspaceFilter = ref('Most Recent')
 const newWorkspaceModal = ref(false)
 function newWorkspaceReturn() {
   newWorkspaceModal.value = false
+}
+
+const new_team_modal = ref(false) 
+function new_team_return(){
+    new_team_modal.value = false
 }
 </script>
 
@@ -66,7 +72,7 @@ function newWorkspaceReturn() {
           Paul's Team
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem class="flex items-center gap-x-1"> Create a Team </DropdownMenuItem>
+        <DropdownMenuItem class="flex items-center gap-x-1" @click="new_team_modal = !new_team_modal"> Create a Team </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
 
@@ -183,4 +189,5 @@ function newWorkspaceReturn() {
   </main>
 
   <CreateWorkspace :open_modal="newWorkspaceModal" @return="newWorkspaceReturn" />
+  <CreateTeam :open_modal="new_team_modal" @return="new_team_return" />
 </template>

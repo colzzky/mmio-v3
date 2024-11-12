@@ -17,5 +17,6 @@ export type { WorkspaceData } from '../types/WorkSpaceTypes'
 export type { MetaPageData } from '../types/MetaTypes'
 export type { ChatBotFlowData } from '../types/MetaTypes'
 export type { TeamData } from '../types/TeamTypes'
+export type { InvitationData } from '../types/InvitationTypes'
 
 export {user_data} from '../types/AuthUserTypes'

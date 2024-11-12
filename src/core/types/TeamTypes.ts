@@ -12,9 +12,15 @@ export interface TeamData extends SubCollections {
     permission:string[],
     isDisabled:boolean,
     dateAdded:string,
+    invitation:{
+      reference:string,
+      email:string,
+      invitedBy:string,
+    } | null
   }[],
   createdAt: string,
   updatedAt: string,
+
 }
 
 export const team_data:TeamData = {
@@ -25,6 +31,12 @@ export const team_data:TeamData = {
     members: [],
     createdAt: '',
     updatedAt: '',
-    subCollections:[]
+    subCollections:[],
+}
+
+const invitation = {
+  reference:'',
+  email:'',
+  invitedBy:'',
 }
 

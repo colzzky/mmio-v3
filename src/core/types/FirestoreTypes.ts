@@ -4,6 +4,7 @@ import type {
   WorkspaceData,
   MetaPageData,
   ChatBotFlowData,
+  InvitationData,
   TeamData,
 } from '@/core/utils/types'
 import type { PlatformApiData, TeamRefsData } from './AuthUserTypes'
@@ -63,6 +64,13 @@ export type CollectionsInterface = {
     path: 'teams'
     interface: TeamData
     sub_col: SubCollectionKey<TeamData>[]
+    sub_params: {} | null
+  }
+  invitation:{
+    id: 'iv_id'
+    path: 'invitations'
+    interface: InvitationData
+    sub_col: SubCollectionKey<InvitationData>[]
     sub_params: {} | null
   }
   // chat_bot_flow: {
