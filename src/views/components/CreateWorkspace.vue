@@ -8,7 +8,7 @@ import { uiHelpers } from '@/core/utils/ui-helper';
 import { useAuthStore } from '@/stores/authStore';
 import { useWorkspaceStore } from '@/stores/WorkspaceStore';
 import { VisuallyHidden } from 'radix-vue';
-import { reactive, defineProps, watch, onMounted } from 'vue';
+import { reactive,  watch, onMounted } from 'vue';
 import { unknown, z, type ZodRawShape } from 'zod';
 
 const workspaceStore = useWorkspaceStore()

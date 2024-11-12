@@ -10,12 +10,11 @@ const routes = [
   {
     path: '/',
     meta: { requiresAuth: true },
-    component: () => import('@/core/layouts/home.vue'),
     children: [
       {
         path: '',
         name: 'home',
-        component: () => import('@/views/HomeView.vue'),
+        component: () => import('@/modules/homepage/page.vue'),
       },
       {
         path: 'workspace/:workspaceId',
