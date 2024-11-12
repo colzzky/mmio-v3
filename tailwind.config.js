@@ -56,6 +56,10 @@ export default {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        gradient: {
+          red: '#fb1a1e',
+          purple: '#b25fee',
+        },
       },
       borderRadius: {
         xl: 'calc(var(--radius) + 4px)',
@@ -89,7 +93,5 @@ export default {
       },
     },
   },
-  plugins: [animate,
-    
-  ],
+  plugins: [animate],
 }
