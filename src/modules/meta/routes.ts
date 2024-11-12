@@ -31,7 +31,7 @@ const servicesRecord: ServiceRecord = {
   'chatbot-flow-builder': {
     icon: 'bx-network-chart',
     label: 'Chatbot Flow Builder',
-    pinned: true,
+    pinned: false,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
