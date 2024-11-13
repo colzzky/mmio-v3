@@ -1,6 +1,7 @@
 import authenticationRoutes from '@/modules/authentication/routes'
 import { routes as metaRoutes } from '@/modules/meta/routes'
 import { routes as settingsRoutes } from '@/modules/settings/routes'
+import { routes as teamsAndPermissionsRoutes } from '@/modules/teams-permissions/routes'
 import othersRoutes from '@/modules/try/routes'
 import { useAuthStore } from '@/stores/authStore'
 import { usePlatformAPIStore } from '@/stores/platformAPIStore'
@@ -33,6 +34,7 @@ const routes = [
 
   ...authenticationRoutes,
   ...settingsRoutes,
+  ...teamsAndPermissionsRoutes,
   ...othersRoutes,
 ] as RouteRecordRaw[]
 

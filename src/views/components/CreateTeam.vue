@@ -14,7 +14,7 @@ import { useInvitationStore } from '@/stores/invitationStore';
 import { useTeamStore } from '@/stores/teamStore';
 import { useUserStore } from '@/stores/userStore';
 import { VisuallyHidden } from 'radix-vue';
-import { reactive, defineProps, watch, onMounted } from 'vue';
+import { reactive, watch, onMounted } from 'vue';
 import { unknown, z, ZodString, type ZodRawShape } from 'zod';
 
 const teamStore = useTeamStore()
@@ -248,50 +248,52 @@ const create_team_modal = reactive({
         await createTeamInvite(team_model.data, member_invite_code, "Member Team Invite")
         await team_model.createUpdate('update')
     },
-    // async inviteMembers(): Promise<void> {
-    //     //This should be called in the BACKEND!!!!
-    //     const invite_emails = choose_member_form.emails
-    //     const non_existing_users = [...choose_member_form.emails]
+    /** 
+    async inviteMembers(): Promise<void> {
+        //This should be called in the BACKEND!!!!
+        const invite_emails = choose_member_form.emails
+        const non_existing_users = [...choose_member_form.emails]
 
-    //     const users = await getWhereAny("user", "users", {}, [], [
-    //         { fieldName: 'email', operator: "in", value: invite_emails }
-    //     ])
-    //     if (users.status && users.data.length) {
-    //         for (const email of invite_emails) {
-    //             const user = users.data.find(user => user.email === email)
-    //             if (user) {
-    //                 const index = non_existing_users.indexOf(user.email as string);
-    //                 team_model.data.members.push({
-    //                     uid: user.uid,
-    //                     permission: ['read and write'],
-    //                     isDisabled: false,
-    //                     dateAdded: new Date().toISOString()
-    //                 })
-    //                 non_existing_users.splice(index, 1);
-    //             }
-    //         }
-    //         console.log(team_model.data.members)
-    //         await team_model.createUpdate('update')
+        const users = await getWhereAny("user", "users", {}, [], [
+            { fieldName: 'email', operator: "in", value: invite_emails }
+        ])
+        if (users.status && users.data.length) {
+            for (const email of invite_emails) {
+                const user = users.data.find(user => user.email === email)
+                if (user) {
+                    const index = non_existing_users.indexOf(user.email as string);
+                    team_model.data.members.push({
+                        uid: user.uid,
+                        permission: ['read and write'],
+                        isDisabled: false,
+                        dateAdded: new Date().toISOString()
+                    })
+                    non_existing_users.splice(index, 1);
+                }
+            }
+            console.log(team_model.data.members)
+            await team_model.createUpdate('update')
 
 
 
-    //         for (const member of team_model.data.members) {
-    //             user_team_refs.reInit()
-    //             user_team_refs.data.tm_id = team_model.data.tm_id
-    //             const create_team_refs = await user_team_refs.createUpdate(member.uid, 'new')
-    //             if (create_team_refs.status) {
-    //                 console.log('success')
-    //             } else {
-    //                 console.log(create_team_refs.error)
-    //             }
-    //         }
+            for (const member of team_model.data.members) {
+                user_team_refs.reInit()
+                user_team_refs.data.tm_id = team_model.data.tm_id
+                const create_team_refs = await user_team_refs.createUpdate(member.uid, 'new')
+                if (create_team_refs.status) {
+                    console.log('success')
+                } else {
+                    console.log(create_team_refs.error)
+                }
+            }
 
-    //     }
-    //     non_existing_users.forEach(email => {
-    //         this.sendEmailInvite(email)
-    //     })
+        }
+        non_existing_users.forEach(email => {
+            this.sendEmailInvite(email)
+        })
 
-    // },
+    },
+    */
     async sendEmailInvite(email: string) {
         console.log('email sent')
     }
@@ -308,7 +310,6 @@ async function createTeamInvite(team:TeamData, inviteLink:string, type:'Team Inv
     invitation.data.expiration = uiHelpers.generateExpirationDate(1800)
     invitation.data.type = type
 }
-
 
 async function copyLink() {
     try {
@@ -421,8 +422,7 @@ async function copyLink() {
                                                 <i class="material-icons pr-2">link</i>
                                                 Copy link</Button>
                                         </div>
-                                        <div
-                                            class="border-2 w-[70vh] p-4 rounded-lg flex flex-row flex-wrap gap-2 items-center">
+                                        <div class="border-2 w-[70vh] p-4 rounded-lg flex flex-row flex-wrap gap-2 items-center">
                                             <div v-for="email, index in choose_member_form.emails" :id="email"
                                                 class="p-2 px-3 rounded-full bg-blue-500 flex items-center space-x-2 self-start">
                                                 <span class="text-white font-semibold text-sm">{{ email }}</span>

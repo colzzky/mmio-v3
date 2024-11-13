@@ -8,7 +8,6 @@ const names = [
   'plans',
   'payments-and-billings',
   'api-integrations',
-  'team',
   'project-management',
 ] as const
 
@@ -39,11 +38,6 @@ const linkRecords: LinkRecord = {
     icon: 'bxs-plug',
     section: 'personal',
   },
-  team: {
-    label: 'Team',
-    icon: 'bxs-group',
-    section: 'group',
-  },
   'project-management': {
     label: 'Project Management',
     icon: 'bxs-folder',
@@ -67,9 +61,6 @@ const childrenRouteRecords: RouteRecord = {
   },
   'api-integrations': {
     component: () => import('./views/ApiIntegrationPage.vue'),
-  },
-  team: {
-    component: () => import('./views/AccountPage.vue'),
   },
   'project-management': {
     component: () => import('./views/AccountPage.vue'),

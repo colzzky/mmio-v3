@@ -6,10 +6,11 @@ import { defineStore } from 'pinia'
 import { reactive } from 'vue'
 import type { FirebaseWhereCondition, FirebaseOrderCondition } from '@/core/utils/firebase-collections'
 import { onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { postCollection, getCollection, getCollectionByField } from '@/core/utils/firebase-collections';
+import { postCollection, getCollection, getCollectionByField, getWhereAny } from '@/core/utils/firebase-collections';
 import { auth } from '@/core/utils/firebase-client';
 import type { DocumentData } from 'firebase/firestore';
 import { useProjectStore } from './projectStore'
+import type { TeamData } from '@/core/types/TeamTypes'
 
 interface FirebaseReturn {
     status: boolean;
@@ -35,13 +36,7 @@ interface TeamRefs {
     data: TeamRefsData
     reInit: () => void
     set: (data: TeamRefsData) => void
-    get: (ws_id: string) => Promise<FSReturnData<TeamRefsData>>
-    createUpdate: (uid:string, type: 'new' | 'update') => Promise<FSReturnData<TeamRefsData>>
   }
-
-
-
-
 
 export const useAuthStore = defineStore('authStore', () => {
     const page_init = reactive({
@@ -60,6 +55,11 @@ export const useAuthStore = defineStore('authStore', () => {
                     resolve(user)
                 });
             });
+            const uid = user_auth.data ? user_auth.data.uid : ''
+            const fetch_user = await user.get(uid)
+            if(fetch_user.status){
+                user.set(fetch_user.data)
+            }
 
             const check = await authStatePromise.then((user: any) => {
                 this.setUser(user)
@@ -102,7 +102,7 @@ export const useAuthStore = defineStore('authStore', () => {
         },
         async get() {
             const id = user_auth.data ? user_auth.data.uid : ''
-            const get = await getCollection('user', 'users', null, id, []);
+            const get = await getCollection('user', 'users', null, id, ['team_refs']);
             console.log(get)
             return {
                 status: get.status,
@@ -122,34 +122,17 @@ export const useAuthStore = defineStore('authStore', () => {
         },
     })
 
-    const user_team_refs = reactive<TeamRefs>({
-        data: { ...team_refs_data },
-        reInit() {
-            this.data = { ...team_refs_data }
-            //this is team
-        },
-        set(data: TeamRefsData) {
-            this.data = data
-        },
-        async get(tm_id: string): Promise<FSReturnData<TeamRefsData>> {
-            const get = await getCollection('team', 'teams', {}, tm_id, [])
-            return {
-                status: get.status,
-                data: get.data as TeamRefsData,
-                error: get.error,
-            }
-        },
-        async createUpdate(uid:string, type): Promise<FSReturnData<TeamRefsData>> {
-            let id = this.data.team_refs_id !== '' ? this.data.team_refs_id : crypto.randomUUID();
-            this.data.team_refs_id = id
-            const post = await postCollection('team_refs', 'users/:uid/team_refs', {uid}, id, this.data, type)
-            console.log(post)
-            return {
-                status: post.status,
-                data: post.data as TeamRefsData,
-                error: post.error,
-            }
-        },
+    const user_team_refs = reactive({
+        data: <TeamData[]>[],
+        isInitialized: <boolean>false,
+        isLoading: <boolean>false,
+        lastSnapshot: <any>'',
+        resetData() {
+            this.data = []
+            this.isInitialized = false
+            this.isLoading = false
+            this.lastSnapshot = ''
+        }
     })
 
     //Called during initiali Registration
@@ -167,15 +150,38 @@ export const useAuthStore = defineStore('authStore', () => {
         }
     }
 
+    //called when initially fetching team refrence
+    async function fetch_team_list() {
+        console.log('fetching Team references.....')
+        user_team_refs.isLoading = true
+        const user_teams: string[] = []
+        if (user.data && user.data.team_refs) {
+            user.data.team_refs.forEach(team => {
+                user_teams.push(team.tm_id)
+            })
+            const fetch_team = await getWhereAny('team', 'teams', {}, [], [{
+                fieldName: 'tm_id', operator: 'in', value: user_teams
+            }])
+            if (fetch_team.status) {
+                user_team_refs.data = fetch_team.data
+            }
+        }
+        user_team_refs.isLoading = false
+        user_team_refs.isInitialized = true
+    }
+
     async function resetAllStore() {
         const projectStore = useProjectStore()
         projectStore.reset_state()
     }
+
     return {
         page_init,
         createNewUserProfile,
         user,
-        user_auth
+        user_auth,
+        user_team_refs,
+        fetch_team_list
     }
 },
     {
