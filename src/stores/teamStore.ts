@@ -42,7 +42,7 @@ export const useTeamStore = defineStore('teamStore', () => {
       }
     },
     async createUpdate(type): Promise<TeamReturnData> {
-      let id = this.data.tm_id !== '' ? this.data.tm_id : crypto.randomUUID();
+      const id = this.data.tm_id !== '' ? this.data.tm_id : crypto.randomUUID();
       this.data.tm_id = id
       const post = await postCollection('workspaces', 'workspaces', null, id, this.data, type)
       console.log(post)

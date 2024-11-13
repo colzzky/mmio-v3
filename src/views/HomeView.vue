@@ -144,71 +144,69 @@ const navigateToProject = (workspace: WorkspaceData) => {
           </div>
         </div>
 
-          <div v-if="!pageLoad">
-            <div v-if="workspace_list.data.length">
-              <div
-                v-for="project in workspace_list.data"
-                :key="project.name"
-                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
-              >
-                <div class="grid grid-cols-12 items-center">
-                  <div class="col-span-5" @click="navigateToProject(project)">
-                    <div class="flex items-center gap-x-3">
-                      <i class="bx text-2xl" :class="find_icon(project.platform)"></i>
-                      <div class="grid gap-0">
-                        <span class="text-sm"
-                          >{{ project.name }} - {{ project.connectedAccount?.name }}</span
-                        >
-                        <span class="text-xs">{{ project.ws_id }}</span>
-                      </div>
+        <div v-if="!pageLoad">
+          <div v-if="workspace_list.data.length">
+            <div
+              v-for="project in workspace_list.data"
+              :key="project.name"
+              class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
+            >
+              <div class="grid grid-cols-12 items-center">
+                <div class="col-span-5" @click="navigateToProject(project)">
+                  <div class="flex items-center gap-x-3">
+                    <i class="bx text-2xl" :class="find_icon(project.platform)"></i>
+                    <div class="grid gap-0">
+                      <span class="text-sm"
+                        >{{ project.name }} - {{ project.connectedAccount?.name }}</span
+                      >
+                      <span class="text-xs">{{ project.ws_id }}</span>
                     </div>
                   </div>
-                  <div class="col-span-2 text-sm text-gray-600">
-                    {{ uiHelpers.timestampToDateTimeAgo(project.createdAt) }}
-                  </div>
-                  <div class="col-span-2 text-sm text-gray-600">
-                    {{ uiHelpers.timestampToDateTimeAgo(project.updatedAt) }}
-                  </div>
-                  <div class="col-span-1 text-sm text-gray-600">{{ project.status }}</div>
-                  <div class="col-span-1 text-sm text-gray-600">Owner</div>
-                  <div class="col-span-1 justify-self-end">
-                    <button
-                      type="button"
-                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
-                      <i class="material-icons text-md">more_vert</i>
-                    </button>
-                  </div>
+                </div>
+                <div class="col-span-2 text-sm text-gray-600">
+                  {{ uiHelpers.timestampToDateTimeAgo(project.createdAt) }}
+                </div>
+                <div class="col-span-2 text-sm text-gray-600">
+                  {{ uiHelpers.timestampToDateTimeAgo(project.updatedAt) }}
+                </div>
+                <div class="col-span-1 text-sm text-gray-600">{{ project.status }}</div>
+                <div class="col-span-1 text-sm text-gray-600">Owner</div>
+                <div class="col-span-1 justify-self-end">
+                  <button
+                    type="button"
+                    class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                  >
+                    <i class="material-icons text-md">more_vert</i>
+                  </button>
                 </div>
               </div>
             </div>
-            <div v-else>No Data found</div>
           </div>
+          <div v-else>No Data found</div>
+        </div>
 
-          <div v-if="pageLoad || workspace_list.isLoading" class="rounded-xl px-2 py-4">
-            <div class="grid grid-cols-12 items-center">
-              <div class="col-span-5">
-                <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
-              </div>
-              <div class="col-span-2">
-                <Skeleton class="h-3 w-[200px] rounded-full bg-gray-300" />
-              </div>
-              <div class="col-span-2">
-                <Skeleton class="h-3 w-[200px] rounded-full bg-gray-300" />
-              </div>
-              <div class="col-span-1">
-                <Skeleton class="h-3 w-[100px] rounded-full bg-gray-300" />
-              </div>
-              <div class="col-span-1">
-                <Skeleton class="h-3 w-[100px] rounded-full bg-gray-300" />
-              </div>
+        <div v-if="pageLoad || workspace_list.isLoading" class="rounded-xl px-2 py-4">
+          <div class="grid grid-cols-12 items-center">
+            <div class="col-span-5">
+              <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
+            </div>
+            <div class="col-span-2">
+              <Skeleton class="h-3 w-[200px] rounded-full bg-gray-300" />
+            </div>
+            <div class="col-span-2">
+              <Skeleton class="h-3 w-[200px] rounded-full bg-gray-300" />
+            </div>
+            <div class="col-span-1">
+              <Skeleton class="h-3 w-[100px] rounded-full bg-gray-300" />
+            </div>
+            <div class="col-span-1">
+              <Skeleton class="h-3 w-[100px] rounded-full bg-gray-300" />
             </div>
           </div>
+        </div>
 
         <div class="flex items-center justify-end gap-2">
-          <Button variant="outline" size="xs">
-            Sample Load More
-          </Button>
+          <Button variant="outline" size="xs"> Sample Load More </Button>
         </div>
       </div>
     </div>

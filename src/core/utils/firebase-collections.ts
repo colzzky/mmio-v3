@@ -39,7 +39,6 @@ type CollectionFields = {
   chat_bot_flow: keyof ChatBotFlowData
 }
 
-
 export type FirebaseOperators =
   | '=='
   | '!='
@@ -97,7 +96,10 @@ export async function getCollectionByField<T extends keyof Collections>(
   // Apply order conditions
   if (orderConditions) {
     for (const condition of orderConditions) {
-      q = query(q,orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),)
+      q = query(
+        q,
+        orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),
+      )
       q = query(
         q,
         orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),
@@ -252,28 +254,27 @@ export async function getCollection<T extends keyof CollectionsInterface>(
 
     const userDocRef = doc(firestore, fullPath, id)
     const userSnapshot = await getDoc(userDocRef)
-    
 
     if (userSnapshot.exists()) {
-      const data = { id: userSnapshot.id, ...userSnapshot.data(), 
+      const data = {
+        id: userSnapshot.id,
+        ...userSnapshot.data(),
         createdAt: userSnapshot.data().createdAt.toDate().toISOString(),
         updatedAt: userSnapshot.data().updatedAt.toDate().toISOString(),
-       }
+      }
       const subCollectionData: Record<string, any[]> = {} // To store subcollection data
 
       // Fetch specified subcollections
       if ($sub_col) {
         for (const sub of $sub_col) {
-          
           const subColRef = collection(firestore, `${fullPath}/${data.id}/${sub}`)
-          const subColSnapshot = await getDocs(subColRef)          
+          const subColSnapshot = await getDocs(subColRef)
           subCollectionData[sub] = subColSnapshot.docs.map((doc) => ({
             ...doc.data(),
             createdAt: doc.data().createdAt?.toDate().toISOString(),
             updatedAt: doc.data().updatedAt?.toDate().toISOString(),
           }))
-          
-        }  
+        }
       }
 
       return {
@@ -441,7 +442,6 @@ export async function getWhereAny<T extends keyof CollectionsInterface>(
       for (const sub of $sub_col) {
         const subCollectionRef = collection(firestore, `${fullPath}/${doc.id}/${sub}`)
         const subDocs = await getDocs(subCollectionRef)
-        
 
         if (!subDocs.empty) {
           // Append the subcollection data directly to the document

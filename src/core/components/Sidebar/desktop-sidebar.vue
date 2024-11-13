@@ -1,102 +1,163 @@
 <script setup lang="ts">
+import ServicesModal from '@/core/components/services-modal.vue'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/core/components/ui/collapsible'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/core/components/ui/dropdown-menu'
-import router from '@/router'
-import { useAuthStore } from '@/stores/authStore'
+import { Separator } from '@/core/components/ui/separator'
+import { useServicesStore } from '@/stores/servicesStore'
+import { useSidebarStore } from '@/stores/sidebarStore'
+import { useTemplateRef } from 'vue'
 
-const authStore = useAuthStore()
-const { user_auth } = authStore
+const sidebarStore = useSidebarStore()
+const servicesStore = useServicesStore()
 
-const configuration = [
-  {
-    icon: 'loyalty',
-    name: 'Plans & Subscriptions',
-    href: '#',
-  },
-  {
-    icon: 'language',
-    name: 'Languages',
-    href: '#',
-  },
-  {
-    icon: 'cloud_sync',
-    name: 'Account Import',
-    href: '#',
-  },
-  {
-    icon: 'api',
-    name: 'API Integration',
-    href: '/settings/api-integrations',
-  },
-  {
-    icon: 'logout',
-    name: 'Logout',
-    href: '#',
-  },
-  {
-    icon: 'settings',
-    name: 'Settings',
-    href: '/settings/account',
-  },
-]
-
-const signOut = async () => {
-  await user_auth.signOut().then(() => {
-    router.replace({ name: 'login' })
-  })
-}
+const servicesModalRef = useTemplateRef('servicesModal')
 </script>
 
 <template>
   <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-    <div class="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-300 px-6 pb-4 pt-8">
+    <div class="flex grow flex-col overflow-y-auto border-r border-gray-300">
       <DropdownMenu>
-        <DropdownMenuTrigger class="flex items-center gap-x-1">
-          <i class="material-icons text-4xl">pin</i>
-          <span class="text-xl font-extrabold">MMIO</span>
+        <DropdownMenuTrigger class="flex items-center gap-x-2 px-3 py-2">
+          <i class="material-icons text-5xl">pin</i>
+          <span class="text-start font-bold leading-none">Sample Workspace Name</span>
           <i class="material-icons">arrow_drop_down</i>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>Item #1</DropdownMenuItem>
-          <DropdownMenuItem>Item #2</DropdownMenuItem>
-          <DropdownMenuItem>Item #3</DropdownMenuItem>
+          <DropdownMenuItem class="font-bold">Sample Workspace Name</DropdownMenuItem>
+          <DropdownMenuItem>Edgelord Workspace</DropdownMenuItem>
+          <DropdownMenuItem>MMIO Workspace</DropdownMenuItem>
+          <DropdownMenuItem>Accenture Workspace</DropdownMenuItem>
+          <DropdownMenuItem>Flowers and Flower Co.</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <nav class="flex flex-1 flex-col">
-        <ul role="list" class="flex flex-1 flex-col gap-y-4">
-          <slot />
+      <Separator />
 
-          <li class="-mx-2 mt-auto">
-            <ul class="grid">
-              <li v-for="item in configuration" :key="item.name">
-                <div v-if="item.name === 'Logout'">
-                  <div
-                    @click="signOut()"
-                    class="group flex cursor-pointer items-center gap-x-3 rounded-md px-2 py-1 text-xs font-semibold leading-6 hover:bg-primary/5"
+      <nav class="flex flex-1 flex-col">
+        <ul role="list" class="flex flex-1 flex-col">
+          <li>
+            <ul role="list" class="-mx-2 flex flex-col gap-y-1 p-4">
+              <li>
+                <RouterLink
+                  :to="{ name: sidebarStore.platformName }"
+                  class="flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+                >
+                  <i class="material-icons text-xl">grid_view</i>
+                  Dashboard
+                </RouterLink>
+              </li>
+
+              <li>
+                <RouterLink
+                  to="analytics"
+                  class="flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+                >
+                  <i class="material-icons text-xl">analytics</i>
+                  Analytics
+                </RouterLink>
+              </li>
+
+              <li>
+                <button
+                  class="flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
+                  @click="servicesModalRef?.modal.open()"
+                >
+                  <i class="material-icons text-xl">bookmark_border</i>
+                  All Platforms & Services
+                </button>
+              </li>
+            </ul>
+          </li>
+
+          <Separator />
+
+          <Collapsible class="flex flex-col p-2 text-xs" default-open>
+            <CollapsibleTrigger
+              class="group flex w-full items-center justify-between px-3 font-bold uppercase text-primary/75"
+            >
+              Pinned Services
+              <i
+                class="material-icons text-2xl transition-transform group-aria-expanded:rotate-180"
+              >
+                arrow_drop_down
+              </i>
+            </CollapsibleTrigger>
+            <CollapsibleContent
+              as="ul"
+              class="flex flex-col gap-y-1 rounded bg-primary/5 p-2 empty:hidden"
+            >
+              <li v-for="[name, service] in servicesStore.pinnedServices" :key="name">
+                <RouterLink
+                  :to="{ name }"
+                  class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md px-2 py-1 font-semibold leading-6 transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+                >
+                  <i :class="['bx text-lg', service.icon]"></i>
+                  <span>
+                    {{ service.label }}
+                  </span>
+                  <button
+                    class="grid place-content-center"
+                    @click.prevent="servicesStore.toggleServicePinnedStatus(name)"
                   >
-                    <i class="material-icons text-sm">{{ item.icon }}</i>
-                    {{ item.name }}
-                  </div>
-                </div>
-                <div v-else>
-                  <RouterLink
-                    :to="item.href"
-                    class="group flex items-center gap-x-3 rounded-md px-2 py-1 text-xs font-semibold leading-6 hover:bg-primary/5"
-                  >
-                    <i class="material-icons text-sm">{{ item.icon }}</i>
-                    {{ item.name }}
-                  </RouterLink>
-                </div>
+                    <i class="material-icons text-lg">bookmark</i>
+                  </button>
+                </RouterLink>
+              </li>
+            </CollapsibleContent>
+          </Collapsible>
+
+          <li class="mt-auto p-2 text-xs">
+            <ul role="list" class="flex flex-col gap-y-1 rounded bg-primary/5 p-1.5">
+              <div class="flex items-center justify-between px-2 py-1.5">
+                <span class="font-medium">Paul's Team</span>
+                <RouterLink to="/settings/team" class="font-bold text-blue-500">
+                  Manage Team
+                </RouterLink>
+              </div>
+              <li>
+                <RouterLink
+                  to="/settings/project"
+                  class="flex items-center gap-x-3 rounded-md px-2 py-0.5 font-semibold leading-6 transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+                >
+                  <i class="material-icons text-sm">settings</i>
+                  Project Settings
+                </RouterLink>
+              </li>
+
+              <li>
+                <RouterLink
+                  to="/settings/languages"
+                  class="flex items-center gap-x-3 rounded-md px-2 py-0.5 font-semibold leading-6 transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+                >
+                  <i class="material-icons text-sm">language</i>
+                  Language
+                </RouterLink>
+              </li>
+
+              <li>
+                <RouterLink
+                  to="/"
+                  class="flex items-center gap-x-3 rounded-md px-2 py-0.5 font-semibold leading-6 transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+                >
+                  <i class="material-icons text-sm">keyboard_return</i>
+                  Return Home
+                </RouterLink>
               </li>
             </ul>
           </li>
         </ul>
       </nav>
     </div>
+
+    <ServicesModal ref="servicesModal" />
   </div>
 </template>

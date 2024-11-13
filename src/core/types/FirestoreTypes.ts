@@ -1,3 +1,4 @@
+import type { PlatformApiData } from './AuthUserTypes'
 import type { SubCollections } from '@/core/types/UniTypes'
 import type {
   UserData,
@@ -6,7 +7,6 @@ import type {
   ChatBotFlowData,
   TeamData,
 } from '@/core/utils/types'
-import type { PlatformApiData } from './AuthUserTypes'
 
 export type SubCollectionKey<T extends SubCollections> = T['subCollections']
 
@@ -35,7 +35,7 @@ interface User_Collection {
     interface: PlatformApiData
     sub_col: SubCollectionKey<PlatformApiData>[]
     sub_params: {
-      uid:string
+      uid: string
     } | null
   }
 }
@@ -48,7 +48,7 @@ export type CollectionsInterface = {
     sub_col: SubCollectionKey<MetaPageData>[]
     sub_params: {} | null
   }
-  team:{
+  team: {
     id: 'tm_id'
     path: 'teams'
     interface: TeamData
@@ -62,4 +62,5 @@ export type CollectionsInterface = {
   //   sub_col: SubCollectionKey<ChatBotFlowData>[]
   //   sub_params: {} | null
   // }
-} & Workspace_Collection & User_Collection
+} & Workspace_Collection &
+  User_Collection

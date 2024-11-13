@@ -79,7 +79,7 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
             }
         },
         async createUpdate(type) {
-            let id = this.data?.mp_id ? this.data.mp_id : crypto.randomUUID();
+            const id = this.data?.mp_id ? this.data.mp_id : crypto.randomUUID();
             if(this.data) this.data.mp_id = id
             const post = await postCollection('meta_page','meta_pages', null, id, this.data, type)
             console.log(post)

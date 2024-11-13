@@ -41,7 +41,7 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
       }
     },
     async createUpdate(type): Promise<WorkspaceDataReturnData> {
-      let id = this.data.ws_id !== '' ? this.data.ws_id : crypto.randomUUID();
+      const id = this.data.ws_id !== '' ? this.data.ws_id : crypto.randomUUID();
       this.data.ws_id = id
       const post = await postCollection('workspaces', 'workspaces', null, id, this.data, type)
       console.log(post)

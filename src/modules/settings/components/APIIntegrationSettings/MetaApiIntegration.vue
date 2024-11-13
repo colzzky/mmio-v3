@@ -49,16 +49,28 @@ const set_fb_api = (metaApi: MetaAPIAccount, fbPlatform: PlatformApiData) => {
 const set_fb_pages = async (): Promise<void> => {
   fb_pages_load.value = true
 
-  const pages = await getWhereAny('meta_page','meta_pages',null, [], [{
-    fieldName:'owner_uid', operator:'==', value:user_auth.data?.uid
-  }])
+  const pages = await getWhereAny(
+    'meta_page',
+    'meta_pages',
+    null,
+    [],
+    [
+      {
+        fieldName: 'owner_uid',
+        operator: '==',
+        value: user_auth.data?.uid,
+      },
+    ],
+  )
   console.log(pages)
   meta_pages_list.data = pages.data
   fb_pages_load.value = false
 }
 
 //This will watch platform_api_list if it's loaded. When it's loaded it will fetch MetaAPI Platform of the user logged in
-watch(() => platform_api_list.isInitialized, async (newValue) => {
+watch(
+  () => platform_api_list.isInitialized,
+  async (newValue) => {
     if (newValue) {
       const platform = platform_api_list.data.find((api) => api.platform === 'Meta')
       console.log(platform)
@@ -72,7 +84,6 @@ watch(() => platform_api_list.isInitialized, async (newValue) => {
     }
   },
 )
-
 
 // Handle Facebook login
 const facebookLogin = async (): Promise<void> => {
@@ -100,10 +111,13 @@ watch(fb_data, async (newValue) => {
   if (newValue && fb_data.value) {
     //Add logic here and check first if it's the same facebook account with what register the firebase
     const uid = user_auth.data ? user_auth.data.uid : ''
-    const existingAcount = await platformAPI.get(uid,"Meta")
+    const existingAcount = await platformAPI.get(uid, 'Meta')
     if (existingAcount.status) {
       const account = existingAcount.data
-      if (account.client_account && account.client_account.client_id !== newValue.authResponse.userID) {
+      if (
+        account.client_account &&
+        account.client_account.client_id !== newValue.authResponse.userID
+      ) {
         const FB = await loadFacebookSDK()
         FB.logout(() => {
           toast({
@@ -317,7 +331,7 @@ onMounted(() => {
             use</Label
           >
         </div>
-        <Button v-if="!fb_pages_load"  size="xs" class="text-sm" @click="get_fb_pages">
+        <Button v-if="!fb_pages_load" size="xs" class="text-sm" @click="get_fb_pages">
           Export FB Pages
         </Button>
         <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">

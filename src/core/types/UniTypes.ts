@@ -9,8 +9,8 @@ export interface SubCollections {
 
 //Removes readonly
 export type MutablePick<T, K extends keyof T> = {
-  -readonly [P in K]: T[P];
-};
+  -readonly [P in K]: T[P]
+}
 
 export type Platforms =
   | 'Meta'
