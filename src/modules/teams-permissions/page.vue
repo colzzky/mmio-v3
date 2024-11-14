@@ -18,7 +18,7 @@ onMounted(async () => {
 </script>
 <template>
     <TeamsPermissionsLayout>
-        <div v-if="route.path === 'team-permission' || route.name === 'teams'">
+        <div v-if="route.name === 'team-permission' || route.name === 'teams'">
             <Teams/>
         </div>
         <div v-else-if="route.name === 'team-view'">

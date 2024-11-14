@@ -6,6 +6,7 @@ import type {
   ChatBotFlowData,
   InvitationData,
   TeamData,
+  TeamMembersData,
 } from '@/core/utils/types'
 import type { PlatformApiData, TeamRefsData } from './AuthUserTypes'
 
@@ -51,6 +52,25 @@ interface User_Collection {
   }
 }
 
+interface Team_Collection {
+  team: {
+    id: 'tm_id'
+    path: 'teams'
+    interface: TeamData
+    sub_col: SubCollectionKey<TeamData>[]
+    sub_params: {} | null
+  }
+  team_members:{
+    id: 'member_id'
+    path: 'teams/:tm_id/team_members'
+    interface: TeamMembersData
+    sub_col: SubCollectionKey<TeamMembersData>[]
+    sub_params: {
+      tm_id:string
+    } | null
+  }
+}
+
 export type CollectionsInterface = {
   meta_page: {
     id: 'mp_id'
@@ -59,13 +79,7 @@ export type CollectionsInterface = {
     sub_col: SubCollectionKey<MetaPageData>[]
     sub_params: {} | null
   }
-  team:{
-    id: 'tm_id'
-    path: 'teams'
-    interface: TeamData
-    sub_col: SubCollectionKey<TeamData>[]
-    sub_params: {} | null
-  }
+
   invitation:{
     id: 'iv_id'
     path: 'invitations'
@@ -80,4 +94,4 @@ export type CollectionsInterface = {
   //   sub_col: SubCollectionKey<ChatBotFlowData>[]
   //   sub_params: {} | null
   // }
-} & Workspace_Collection & User_Collection
+} & Workspace_Collection & User_Collection & Team_Collection

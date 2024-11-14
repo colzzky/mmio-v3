@@ -56,4 +56,10 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('./page.vue'),
     children: childrenRoutes
   },
+  {
+    path: '/team-invite/:invi_id',
+    name: 'team-invite',
+    meta: { requiresAuth: true },
+    component: () => import('./views/team-invite.vue'),
+  },
 ]

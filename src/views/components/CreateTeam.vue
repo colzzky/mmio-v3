@@ -6,8 +6,9 @@ import DialogTitle from '@/core/components/ui/dialog/DialogTitle.vue';
 import Input from '@/core/components/ui/input/Input.vue';
 import { toast } from '@/core/components/ui/toast';
 import Toaster from '@/core/components/ui/toast/Toaster.vue';
-import type { TeamData } from '@/core/types/TeamTypes';
-import { getWhereAny, postBatchCollection } from '@/core/utils/firebase-collections';
+import type { InvitationData } from '@/core/types/InvitationTypes';
+import type { TeamData, TeamMembersData } from '@/core/types/TeamTypes';
+import { postCollectionBatch } from '@/core/utils/firebase-collections';
 import { uiHelpers } from '@/core/utils/ui-helper';
 import { useAuthStore } from '@/stores/authStore';
 import { useInvitationStore } from '@/stores/invitationStore';
@@ -22,9 +23,9 @@ const authStore = useAuthStore()
 const invitationStore = useInvitationStore()
 const userStore = useUserStore()
 const { user_auth, user } = authStore
-const { team: team_model } = teamStore
+const { team: team_model, team_members } = teamStore
 const { user_team_refs, setTeamReference } = userStore
-const { invitation } = invitationStore
+const { invitation, createTeamInvite } = invitationStore
 
 interface NewTeamInput {
     name: string,
@@ -42,7 +43,7 @@ enum CreateTeamSteps {
 const props = defineProps<{ open_modal: boolean }>()
 
 const emit = defineEmits<{
-    (e: 'return', value: boolean): void
+    (e: 'return', value: TeamData | null): void
 }>()
 
 watch(() => props.open_modal, (newTrigger) => {
@@ -92,7 +93,7 @@ const team_name_form = reactive({
 })
 
 const choose_member_form = reactive({
-    emails: ["superadmin@mmio.com", 'banana@gmail.com', 'saunty@gmail.com', 'paulfdelavega@gmail.com'],
+    emails: <string[]>[],
     dataInput: <ChooseMemberFields>{ member_email: '' },
     errors: <ChooseMemberFields>{ member_email: '' },
     schema(input: ChooseMemberFields): ZodRawShape {
@@ -107,9 +108,20 @@ const choose_member_form = reactive({
         const value = this.dataInput[field]
         this.errors[field] = ''
         const result = z.object(this.schema(this.dataInput) as ZodRawShape).shape[field].safeParse(value)
+
         if (!result.success) {
             console.log(result.error.errors[0])
             this.errors[field] = result.error.errors[0].message
+            return false
+        }
+
+        if (field === 'member_email' && this.dataInput['member_email'] === user_auth.data?.email) {
+            this.errors[field] = 'You cannot invite yourself'
+            return false
+        }
+
+        if (this.emails.includes(this.dataInput['member_email'])) {
+            this.errors[field] = 'This email is already on the invitation'
             return false
         }
         return true
@@ -152,6 +164,7 @@ const choose_member_form = reactive({
     reset() {
         this.dataInput = { member_email: '' }
         this.errors = { member_email: '' }
+        this.emails = []
     }
 })
 
@@ -185,6 +198,7 @@ const create_team_modal = reactive({
                 await this.inviteMembers()
                 this.isLoading = false
                 this.steps = CreateTeamSteps.Complete
+                this.close()
             }
         }
     },
@@ -195,22 +209,34 @@ const create_team_modal = reactive({
             invite_link: '',
         }
         team_name_form.reset()
+        choose_member_form.reset()
         this.isOpen = false
-        emit('return', false)
+        emit('return', team_model.data)
     },
     async createNewTeam(): Promise<boolean> {
         if (user_auth.data) {
             //Create a new team
             team_model.reInit()
+            console.log(team_model.data)
             team_model.data.name = this.data.name
             team_model.data.inviteLink = this.data.invite_link
             team_model.data.owner_uid = user_auth.data.uid
+
             const post = await team_model.createUpdate('new')
             if (post.status) {
                 //Create an Invite Code
                 team_model.set(post.data)
-                await createTeamInvite(team_model.data, team_model.data.inviteLink, "Team Invite")
+                await createTeamInvite(team_model.data, team_model.data.inviteLink, "Team Invite", `teams/${team_model.data.tm_id}`)
                 await invitation.createUpdate("new")
+                team_members.reInit()
+                team_members.data.uid = user_auth.data.uid
+                team_members.data.member_id = crypto.randomUUID()
+                team_members.data.permission = ['Read and write']
+                team_members.data.isDisabled = true
+                team_members.data.isPending = false
+                await team_members.createUpdate(team_model.data.tm_id, 'new')
+                //Create Reference
+                await setTeamReference(team_model.data.tm_id, user_auth.data.uid,)
                 return true
             } else {
                 //Toaster here when it's  a failure
@@ -218,8 +244,6 @@ const create_team_modal = reactive({
                 return false
             }
         }
-
-
         return false
     },
     async inviteMembers(): Promise<void> {
@@ -232,21 +256,51 @@ const create_team_modal = reactive({
         const invite_emails = choose_member_form.emails
         const member_invite_code = crypto.randomUUID()
         const current_user_uid = user_auth.data ? user_auth.data.uid : ''
+        const team_members = <TeamMembersData[]>[]
+        const team_members_ids = <string[]>[]
+        const member_invite = <InvitationData[]>[]
+        const member_invite_ids = <string[]>[]
         for (const email of invite_emails) {
-            team_model.data.members.push({
+            const member_uuid = crypto.randomUUID()
+            const invite_uuid = crypto.randomUUID()
+            team_members_ids.push(member_uuid)
+            team_members.push({
                 uid: '',
+                member_id: member_uuid,
                 permission: [],
                 isDisabled: true,
-                dateAdded: new Date().toISOString(),
+                isPending: true,
                 invitation: {
                     reference: member_invite_code,
                     email: email,
                     invitedBy: current_user_uid,
-                }
+                },
+                createdAt: '',
+                updatedAt: '',
+                subCollections: []
             })
+
+            member_invite.push({
+                iv_id: invite_uuid,
+                type: 'Member Team Invite',
+                reference: {
+                    collection:'team_members',
+                    path:'teams/:tm_id/team_members',
+                    id:member_uuid
+                },
+                isActive: true,
+                expiration: uiHelpers.generateExpirationDate(1800),
+                createdAt: '',
+                updatedAt: '',
+                subCollections: []
+            })
+            member_invite_ids.push(invite_uuid)
+
         }
-        await createTeamInvite(team_model.data, member_invite_code, "Member Team Invite")
-        await team_model.createUpdate('update')
+        const add_members = await postCollectionBatch('team_members', 'teams/:tm_id/team_members', { tm_id: team_model.data.tm_id }, team_members_ids, team_members)
+        const send_invites = await postCollectionBatch('invitation', 'invitations', null, member_invite_ids, member_invite)
+        console.log(add_members)
+        console.log(send_invites)
     },
     /** 
     async inviteMembers(): Promise<void> {
@@ -299,17 +353,7 @@ const create_team_modal = reactive({
     }
 })
 
-async function createTeamInvite(team:TeamData, inviteLink:string, type:'Team Invite'|'Member Team Invite') {
-    invitation.reInit()
-    invitation.data.iv_id = inviteLink
-    invitation.data.reference = {
-        id: team.tm_id,
-        collection: 'teams',
-        path: `teams/${team_model.data.tm_id}`,
-    }
-    invitation.data.expiration = uiHelpers.generateExpirationDate(1800)
-    invitation.data.type = type
-}
+
 
 async function copyLink() {
     try {
@@ -422,7 +466,8 @@ async function copyLink() {
                                                 <i class="material-icons pr-2">link</i>
                                                 Copy link</Button>
                                         </div>
-                                        <div class="border-2 w-[70vh] p-4 rounded-lg flex flex-row flex-wrap gap-2 items-center">
+                                        <div
+                                            class="border-2 w-[70vh] p-4 rounded-lg flex flex-row flex-wrap gap-2 items-center">
                                             <div v-for="email, index in choose_member_form.emails" :id="email"
                                                 class="p-2 px-3 rounded-full bg-blue-500 flex items-center space-x-2 self-start">
                                                 <span class="text-white font-semibold text-sm">{{ email }}</span>

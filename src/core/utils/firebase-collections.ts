@@ -76,80 +76,6 @@ export type FirebaseOrderCondition<T extends keyof Collections> = {
   direction?: 'asc' | 'desc'
 }
 
-export async function getCollectionByField<T extends keyof Collections>(
-  $col: T,
-  $id: Collections[T],
-  // fieldName: F,
-  whereConditions: FirebaseWhereCondition<T>[],
-  limitResults?: number,
-  orderConditions?: FirebaseOrderCondition<T>[],
-  lastDocumentId?: string,
-): Promise<FirebaseReturn> {
-  const collectionRef = collection(firestore, $col)
-
-  // Create a base query
-  let q = query(collectionRef)
-
-  // Apply where conditions
-  for (const condition of whereConditions) {
-    q = query(q, where(condition.fieldName as string, condition.operator, condition.value))
-  }
-
-  // Apply order conditions
-  if (orderConditions) {
-    for (const condition of orderConditions) {
-      q = query(q,orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),)
-      q = query(
-        q,
-        orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),
-      )
-    }
-  }
-
-  // Apply limit if specified
-  if (limitResults) {
-    q = query(q, limit(limitResults))
-  }
-
-  // Apply startAfter if a document is provided
-  if (lastDocumentId) {
-    const lastDocumentSnapshot = await getDoc(doc(firestore, $col, lastDocumentId)) // Fetch last document snapshot
-    if (lastDocumentSnapshot.exists()) {
-      q = query(q, startAfter(lastDocumentSnapshot)) // Use the snapshot for pagination
-    } else {
-      console.warn(`Document with ID ${lastDocumentId} does not exist.`)
-      // Optional: handle non-existing document scenario, e.g., reset to initial query
-    }
-  }
-
-  try {
-    const querySnapshot = await getDocs(q) // Fetch the documents
-    if (!querySnapshot.empty) {
-      const data = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
-        createdAt: doc.data().createdAt.toDate().toISOString(),
-        updatedAt: doc.data().updatedAt.toDate().toISOString(),
-      })) // Include document ID if needed
-      return {
-        status: true,
-        data: data,
-        error: '',
-      }
-    } else {
-      return {
-        status: false,
-        error: `No data found.`,
-        data: [],
-      }
-    }
-  } catch (error) {
-    return {
-      status: false,
-      error: `Error fetching data ${error}`,
-      data: undefined,
-    }
-  }
-}
 
 export async function postCollection<T extends keyof CollectionsInterface>(
   $col: T,
@@ -235,71 +161,66 @@ export async function postCollection<T extends keyof CollectionsInterface>(
   }
 }
 
-export async function postBatchCollection<T extends keyof CollectionsInterface>(
+export async function postCollectionBatch<T extends keyof CollectionsInterface>(
   $col: T,
-  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
-  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
-  data: any[], // An array of data for multiple posts
+  $path: CollectionsInterface[T]["path"], // Path like 'collection/id',
+  $sub_params: CollectionsInterface[T]["sub_params"] | null = null,
+  ids: string[], // Array of document IDs to update or create
+  data: CollectionsInterface[T]["interface"][]
 ): Promise<FirebaseWhereReturn<CollectionsInterface[T]['interface']>> {
-  let fullPath = $path as string;
-
-  if ($sub_params) {
-    Object.entries($sub_params).forEach(([key, value]) => {
-      fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
-    });
-  }
-
-  // Create a batch instance
   const batch = writeBatch(firestore);
-
-  // Loop through the array of data to create/update multiple documents
-  for (const postData of data) {
-    const id = postData.id; // Assuming each postData contains an `id`
-    const userDocRef = doc(firestore, fullPath, id);
-
-    // Prepare the data to be saved
-    const preparedData = {
-      ...postData,
-      createdAt: Timestamp.fromDate(new Date(postData.createdAt)),
-      updatedAt: Timestamp.fromDate(new Date()),
-    };
-
-    try {
-      const userSnapshot = await getDoc(userDocRef); // Fetch the document
-
-      if (userSnapshot.exists()) {
-        // If document exists, update it
-        batch.update(userDocRef, preparedData);
-      } else {
-        // If document does not exist, skip or log it
-        console.log(`Document with ID ${id} does not exist, skipping update.`);
-        continue; // Skip this iteration, as we don't want to create new docs in batch
-      }
-    } catch (error) {
-      console.log(`Error processing document with ID ${id}:`, error);
-    }
-  }
+  const results: FirebaseReturn[] = [];
 
   try {
-    // Commit the batch of operations
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
+      const docData = data[i];
+
+      let fullPath = $path as string;
+      if ($sub_params) {
+        Object.entries($sub_params).forEach(([key, value]) => {
+          fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
+        });
+      }
+
+      const docRef = doc(firestore, fullPath, id);
+
+      const postData = {
+        ...docData,
+        createdAt: docData.createdAt
+          ? Timestamp.fromDate(new Date(docData.createdAt))
+          : Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
+      };
+
+      // Use set with merge: true to either create or update the document
+      batch.set(docRef, { ...postData }, { merge: true });
+
+      results.push({
+        status: true,
+        data: {
+          ...postData,
+          createdAt: postData.createdAt.toDate().toISOString(),
+          updatedAt: postData.updatedAt.toDate().toISOString(),
+        },
+        error: "",
+      });
+    }
+
+    // Commit the batch operation
     await batch.commit();
 
     return {
       status: true,
-      data: data.map(post => ({
-        ...post,
-        createdAt: new Date(post.createdAt).toISOString(),
-        updatedAt: new Date().toISOString(),
-      })),
+      data,
       error: '',
-    };
-  } catch (error) {
-    console.log('Error during batch write!', error);
+    }
+  } catch (error:any) {
     return {
       status: false,
       error: `Error fetching data from subcollection path: ${error}`,
       data: [],
-    };
+    }
   }
 }
 
@@ -429,6 +350,82 @@ type CollectionConfig<T> = {
   sub_col: string[]
   sub_params: { key: string }[] | null // This can still be flexible
 }
+
+export async function getCollectionByField<T extends keyof Collections>(
+  $col: T,
+  $id: Collections[T],
+  // fieldName: F,
+  whereConditions: FirebaseWhereCondition<T>[],
+  limitResults?: number,
+  orderConditions?: FirebaseOrderCondition<T>[],
+  lastDocumentId?: string,
+): Promise<FirebaseReturn> {
+  const collectionRef = collection(firestore, $col)
+
+  // Create a base query
+  let q = query(collectionRef)
+
+  // Apply where conditions
+  for (const condition of whereConditions) {
+    q = query(q, where(condition.fieldName as string, condition.operator, condition.value))
+  }
+
+  // Apply order conditions
+  if (orderConditions) {
+    for (const condition of orderConditions) {
+      q = query(q,orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),)
+      q = query(
+        q,
+        orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),
+      )
+    }
+  }
+
+  // Apply limit if specified
+  if (limitResults) {
+    q = query(q, limit(limitResults))
+  }
+
+  // Apply startAfter if a document is provided
+  if (lastDocumentId) {
+    const lastDocumentSnapshot = await getDoc(doc(firestore, $col, lastDocumentId)) // Fetch last document snapshot
+    if (lastDocumentSnapshot.exists()) {
+      q = query(q, startAfter(lastDocumentSnapshot)) // Use the snapshot for pagination
+    } else {
+      console.warn(`Document with ID ${lastDocumentId} does not exist.`)
+      // Optional: handle non-existing document scenario, e.g., reset to initial query
+    }
+  }
+
+  try {
+    const querySnapshot = await getDocs(q) // Fetch the documents
+    if (!querySnapshot.empty) {
+      const data = querySnapshot.docs.map((doc) => ({
+        ...doc.data(),
+        createdAt: doc.data().createdAt.toDate().toISOString(),
+        updatedAt: doc.data().updatedAt.toDate().toISOString(),
+      })) // Include document ID if needed
+      return {
+        status: true,
+        data: data,
+        error: '',
+      }
+    } else {
+      return {
+        status: false,
+        error: `No data found.`,
+        data: [],
+      }
+    }
+  } catch (error) {
+    return {
+      status: false,
+      error: `Error fetching data ${error}`,
+      data: undefined,
+    }
+  }
+}
+
 
 export async function getWhereAny<T extends keyof CollectionsInterface>(
   $col: T, // Path like 'collection/id',

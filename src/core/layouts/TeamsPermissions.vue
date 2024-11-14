@@ -16,7 +16,7 @@ const { page_init } = useAuth
 </script>
 
 <template>
-    <template v-if="!layoutLoad && page_init.initialize">
+    <template class="page-container h-screen overflow-hidden" v-if="!layoutLoad && page_init.initialize">
         <div
             class="mx-auto grid w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-cols-[minmax(250px,275px)_1fr] gap-8 py-[var(--gutter)] [--gutter:theme(spacing.4)]">
             <header class="col-span-2 flex items-center justify-between border-b py-2">
@@ -53,3 +53,11 @@ const { page_init } = useAuth
         </div>
     </div>
 </template>
+
+<style scoped>
+.page-container {
+  /* This will apply only to this page */
+  margin: 0;
+  padding: 0;
+}
+</style>

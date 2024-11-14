@@ -1,7 +1,9 @@
 import type { DocumentData } from 'firebase/firestore'
 import { getCollection, postCollection } from '@/core/utils/firebase-collections'
 import { defineStore } from 'pinia'
-import { invitation_data, type InvitationData } from '@/core/types/InvitationTypes'
+import { invitation_data, invitation_reference, type InvitationData } from '@/core/types/InvitationTypes'
+import type { TeamData } from '@/core/types/TeamTypes';
+import { uiHelpers } from '@/core/utils/ui-helper';
 
 interface FirebaseReturn {
   status: boolean;
@@ -17,20 +19,20 @@ interface Invitation {
   data: InvitationData
   reInit: () => void
   set: (data: InvitationData) => void
-  get: (ws_id: string) => Promise<FSReturnData<InvitationData>>
+  get: (iv_id: string) => Promise<FSReturnData<InvitationData>>
   createUpdate: (type: 'new' | 'update') => Promise<FSReturnData<InvitationData>>
 }
 export const useInvitationStore = defineStore('invitationStore', () => {
   const invitation = <Invitation>({
     data: { ...invitation_data },
     reInit() {
-      this.data = { ...invitation_data }
+      this.data = { ...invitation_data, reference:{...invitation_reference} }
     },
     set(data: InvitationData) {
       this.data = data
     },
-    async get(ws_id: string): Promise<FSReturnData<InvitationData>> {
-      const get = await getCollection('invitation', 'invitations', {}, ws_id, [])
+    async get(iv_id: string): Promise<FSReturnData<InvitationData>> {
+      const get = await getCollection('invitation', 'invitations', {}, iv_id, [])
       return {
         status: get.status,
         data: get.data as InvitationData,
@@ -50,11 +52,24 @@ export const useInvitationStore = defineStore('invitationStore', () => {
     },
   })
 
+  async function createTeamInvite(team:TeamData, inviteLink:string, type:'Team Invite'|'Member Team Invite', path:string) {
+    invitation.reInit()
+    invitation.data.iv_id = inviteLink
+    invitation.data.reference = {
+        id: team.tm_id,
+        collection: 'teams',
+        path,
+    }
+    invitation.data.expiration = uiHelpers.generateExpirationDate(1800)
+    invitation.data.type = type
+}
+
   const reset_state = () => {
     //workspace.resetData()
   }
 
   return {
     invitation,
+    createTeamInvite
   }
 })

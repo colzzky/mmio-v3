@@ -159,9 +159,10 @@ export const useAuthStore = defineStore('authStore', () => {
             user.data.team_refs.forEach(team => {
                 user_teams.push(team.tm_id)
             })
-            const fetch_team = await getWhereAny('team', 'teams', {}, [], [{
+            const fetch_team = await getWhereAny('team', 'teams', {}, ['team_members'], [{
                 fieldName: 'tm_id', operator: 'in', value: user_teams
             }])
+            console.log(fetch_team)
             if (fetch_team.status) {
                 user_team_refs.data = fetch_team.data
             }
