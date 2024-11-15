@@ -6,6 +6,7 @@ import type {
   PlatformApiData,
   MetaPageData,
   ChatBotFlowData,
+  TeamMembersData,
 } from '@/core/utils/types'
 import {
   collection,
@@ -64,6 +65,11 @@ interface FirebaseWhereReturn<T> {
   data: T[] | []
   error: string
 }
+interface FirebaseModelReturn<T> {
+  status: boolean
+  data: T| undefined
+  error: string
+}
 
 export type FirebaseWhereCondition<T extends keyof Collections> = {
   fieldName: CollectionFields[T] // This will reference the fields for the collection type
@@ -75,6 +81,19 @@ export type FirebaseOrderCondition<T extends keyof Collections> = {
   fieldName: CollectionFields[T]
   direction?: 'asc' | 'desc'
 }
+
+type NestedKeyOf<ObjectType> = ObjectType extends object
+  ? {
+    [Key in keyof ObjectType & (string | number)]:
+    ObjectType[Key] extends object | undefined  // Changed this line to handle optional objects
+    ? Key extends string | number
+    ? `${Key}` | `${Key}.${NestedKeyOf<Exclude<ObjectType[Key], undefined>>}`
+    : never
+    : Key extends string | number
+    ? `${Key}`
+    : never;
+  }[keyof ObjectType & (string | number)]
+  : never;
 
 
 export async function postCollection<T extends keyof CollectionsInterface>(
@@ -215,7 +234,7 @@ export async function postCollectionBatch<T extends keyof CollectionsInterface>(
       data,
       error: '',
     }
-  } catch (error:any) {
+  } catch (error: any) {
     return {
       status: false,
       error: `Error fetching data from subcollection path: ${error}`,
@@ -242,28 +261,29 @@ export async function getCollection<T extends keyof CollectionsInterface>(
 
     const userDocRef = doc(firestore, fullPath, id)
     const userSnapshot = await getDoc(userDocRef)
-    
+
 
     if (userSnapshot.exists()) {
-      const data = { id: userSnapshot.id, ...userSnapshot.data(), 
+      const data = {
+        id: userSnapshot.id, ...userSnapshot.data(),
         createdAt: userSnapshot.data().createdAt.toDate().toISOString(),
         updatedAt: userSnapshot.data().updatedAt.toDate().toISOString(),
-       }
+      }
       const subCollectionData: Record<string, any[]> = {} // To store subcollection data
 
       // Fetch specified subcollections
       if ($sub_col) {
         for (const sub of $sub_col) {
-          
+
           const subColRef = collection(firestore, `${fullPath}/${data.id}/${sub}`)
-          const subColSnapshot = await getDocs(subColRef)          
+          const subColSnapshot = await getDocs(subColRef)
           subCollectionData[sub] = subColSnapshot.docs.map((doc) => ({
             ...doc.data(),
             createdAt: doc.data().createdAt?.toDate().toISOString(),
             updatedAt: doc.data().updatedAt?.toDate().toISOString(),
           }))
-          
-        }  
+
+        }
       }
 
       return {
@@ -373,7 +393,7 @@ export async function getCollectionByField<T extends keyof Collections>(
   // Apply order conditions
   if (orderConditions) {
     for (const condition of orderConditions) {
-      q = query(q,orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),)
+      q = query(q, orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),)
       q = query(
         q,
         orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),
@@ -426,19 +446,18 @@ export async function getCollectionByField<T extends keyof Collections>(
   }
 }
 
-
 export async function getWhereAny<T extends keyof CollectionsInterface>(
   $col: T, // Path like 'collection/id',
   $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
   $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
   $sub_col: SubCollectionKey<CollectionsInterface[T]['interface']> = [], // Array of subcollection names to check
   whereConditions: {
-    fieldName: keyof CollectionsInterface[T]['interface']
+    fieldName: NestedKeyOf<CollectionsInterface[T]['interface']>
     operator: FirebaseOperators
     value: any
   }[] = [],
   orderConditions?: {
-    fieldName: keyof CollectionsInterface[T]['interface']
+    fieldName: NestedKeyOf<CollectionsInterface[T]['interface']>
     direction?: 'asc' | 'desc'
   }[],
 
@@ -507,7 +526,7 @@ export async function getWhereAny<T extends keyof CollectionsInterface>(
       for (const sub of $sub_col) {
         const subCollectionRef = collection(firestore, `${fullPath}/${doc.id}/${sub}`)
         const subDocs = await getDocs(subCollectionRef)
-        
+
 
         if (!subDocs.empty) {
           // Append the subcollection data directly to the document
@@ -537,3 +556,96 @@ export async function getWhereAny<T extends keyof CollectionsInterface>(
     }
   }
 }
+
+
+/**
+ * Fetches a specific document from Firestore and optionally its subcollections.
+ * 
+ * @param $col - The main collection key (from `CollectionsInterface`) to define which collection the document belongs to.
+ * @param $path - The full path to the document (e.g., `collection/id`).
+ * @param $sub_col - An optional array of subcollection names to fetch data from. Default is an empty array (no subcollections).
+ * 
+ * @returns A promise that resolves to an object representing the status, data, and any error message.
+ * 
+ * The data returned will include:
+ * - The fields from the document specified in `CollectionsInterface[T]['interface']`.
+ * - Optionally, data from any subcollections if `$sub_col` is provided.
+ * 
+ * If an error occurs while fetching the document or subcollections, the promise will resolve to an error message.
+ * 
+ * Example:
+ * ```ts
+ * const result = await getExact('meta_page', 'meta_pages/mp_id', ['comments', 'logs']);
+ * if (result.status) {
+ *   console.log(result.data); // Document data along with subcollection data
+ * } else {
+ *   console.error(result.error); // Error message
+ * }
+ * ```
+ */
+export async function getExact<T extends keyof CollectionsInterface>(
+  $col: T, // Collection key (e.g., 'meta_page', 'invitation')
+  $path: string, // Full path to the document (e.g., 'meta_pages/mp_id')
+  $sub_col: SubCollectionKey<CollectionsInterface[T]['interface']> = [] // Subcollection names (e.g., ['comments', 'logs'])
+): Promise<FirebaseModelReturn<CollectionsInterface[T]['interface']>> {
+  try {
+    // Reference to the document
+    const docRef = doc(firestore, $path);
+    const userSnapshot = await getDoc(docRef); // Fetch the document
+
+    if (userSnapshot.exists()) {
+      // Extract document data and format timestamps
+      const data = {
+        id: userSnapshot.id,
+        ...userSnapshot.data(),
+        createdAt: userSnapshot.data().createdAt.toDate().toISOString(),
+        updatedAt: userSnapshot.data().updatedAt.toDate().toISOString(),
+      };
+
+      // Store subcollection data if available
+      const subCollectionData: Record<string, any[]> = {}; // To store subcollection data
+
+      // Fetch subcollections if provided
+      if ($sub_col) {
+        for (const sub of $sub_col) {
+          const subColRef = collection(firestore, `${$path}/${data.id}/${sub}`);
+          const subColSnapshot = await getDocs(subColRef);
+
+          // Map and format subcollection data
+          subCollectionData[sub] = subColSnapshot.docs.map((doc) => ({
+            ...doc.data(),
+            createdAt: doc.data().createdAt?.toDate().toISOString(),
+            updatedAt: doc.data().updatedAt?.toDate().toISOString(),
+          }));
+        }
+      }
+
+      // Remove the id from the data to keep it clean
+      const { id, ...new_data } = data;
+
+      // Return the document data along with subcollection data if available
+      return {
+        status: true,
+        data: {
+          ...new_data,
+          ...subCollectionData, // Add subcollection data to the result
+        } as CollectionsInterface[T]['interface'],
+        error: '',
+      };
+    } else {
+      return {
+        status: false,
+        error: `No data found`,
+        data: undefined,
+      };
+    }
+  } catch (error) {
+    // Catch any errors and return them
+    return {
+      status: false,
+      error: `Error fetching data: ${error}`,
+      data: undefined,
+    };
+  }
+}
+

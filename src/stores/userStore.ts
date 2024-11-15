@@ -1,4 +1,4 @@
-import type {TeamRefsData } from '@/core/types/AuthUserTypes'
+import type { TeamRefsData } from '@/core/types/AuthUserTypes'
 import { team_refs_data } from '@/core/types/AuthUserTypes'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
@@ -21,8 +21,8 @@ interface TeamRefs {
     reInit: () => void
     set: (data: TeamRefsData) => void
     get: (ws_id: string) => Promise<FSReturnData<TeamRefsData>>
-    createUpdate: (uid:string, type: 'new' | 'update') => Promise<FSReturnData<TeamRefsData>>
-  }
+    createUpdate: (uid: string, type: 'new' | 'update') => Promise<FSReturnData<TeamRefsData>>
+}
 
 
 export const useUserStore = defineStore('userStore', () => {
@@ -43,10 +43,10 @@ export const useUserStore = defineStore('userStore', () => {
                 error: get.error,
             }
         },
-        async createUpdate(uid:string, type): Promise<FSReturnData<TeamRefsData>> {
+        async createUpdate(uid: string, type): Promise<FSReturnData<TeamRefsData>> {
             let id = this.data.team_refs_id !== '' ? this.data.team_refs_id : crypto.randomUUID();
             this.data.team_refs_id = id
-            const post = await postCollection('team_refs', 'users/:uid/team_refs', {uid}, id, this.data, type)
+            const post = await postCollection('team_refs', 'users/:uid/team_refs', { uid }, id, this.data, type)
             console.log(post)
             return {
                 status: post.status,
@@ -56,11 +56,15 @@ export const useUserStore = defineStore('userStore', () => {
         },
     })
 
-    async function setTeamReference(tm_id:string, uid:string){
+    async function setTeamReference(tm_id: string, uid: string): Promise<boolean> {
         user_team_refs.reInit()
         user_team_refs.data.tm_id = tm_id
-        await user_team_refs.createUpdate(uid, 'new')
-      }
+        const post = await user_team_refs.createUpdate(uid, 'new')
+        if (post.status) {
+            return true
+        }
+        return false
+    }
 
     return {
         user_team_refs,

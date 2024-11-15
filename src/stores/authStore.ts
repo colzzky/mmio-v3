@@ -102,7 +102,7 @@ export const useAuthStore = defineStore('authStore', () => {
         },
         async get() {
             const id = user_auth.data ? user_auth.data.uid : ''
-            const get = await getCollection('user', 'users', null, id, ['team_refs']);
+            const get = await getCollection('user', 'users', null, id, ['team_refs','platform_apis']);
             console.log(get)
             return {
                 status: get.status,

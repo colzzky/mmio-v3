@@ -6,7 +6,7 @@ import {
   getCollectionByField,
   getWhereAny,
 } from '@/core/utils/firebase-collections'
-import type {  FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
+import type { FirebaseOrderCondition, FirebaseWhereCondition } from '@/core/utils/firebase-collections'
 import generalAxiosInstance from '@/core/utils/general-axios-instance'
 import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
@@ -19,7 +19,7 @@ interface PlaformApi {
   isInitialized: boolean
   initialize: () => void,
   set: (data: PlatformApiData) => void
-  get: (uid: string, platform:Platforms) => Promise<PlatformApiDataReturnData>
+  get: (uid: string, platform: Platforms) => Promise<PlatformApiDataReturnData>
   createUpdate: (uid: string, type: 'new' | 'update') => Promise<PlatformApiDataReturnData>
   resetData: () => void
 }
@@ -43,11 +43,11 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
     data: null,
     isInitialized: false,
     initialize() {
-      this.data = {...platform_api_data}
+      this.data = { ...platform_api_data }
       this.isInitialized = true
     },
-    async get(uid: string, platform:Platforms) {
-      const get = await getCollection('platform_api', 'users/:uid/platform_apis',{uid},platform,[])
+    async get(uid: string, platform: Platforms) {
+      const get = await getCollection('platform_api', 'users/:uid/platform_apis', { uid }, platform, [])
       return {
         status: get.status,
         data: get.data as PlatformApiData,
@@ -55,11 +55,11 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
       }
     },
     async createUpdate(uid: string, type) {
-      const post = await postCollection('platform_api', 'users/:uid/platform_apis', {uid}, this.data?.platform, this.data, type)
+      const post = await postCollection('platform_api', 'users/:uid/platform_apis', { uid }, this.data?.platform, this.data, type)
       return {
-          status: post.status,
-          data: post.data as PlatformApiData,
-          error: post.error
+        status: post.status,
+        data: post.data as PlatformApiData,
+        error: post.error
       }
     },
     //Only set after fetch
@@ -82,18 +82,15 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
     lastSnapshot: <any>'',
     initializeAccountApis: async () => {
       const useAuth = useAuthStore()
-      const { user_auth } = useAuth
-      const uid = user_auth.data? user_auth.data.uid : ''
-      if (user_auth.data) {
+      const { user_auth, user } = useAuth
+      const uid = user_auth.data ? user_auth.data.uid : ''
+      if (user_auth.data && user.data && user.data.platform_apis) {
         platform_api_list.isInitialized = false
         platform_api_list.isLoading = true
-        const get_platform_api = await getWhereAny('platform_api','users/:uid/platform_apis',{uid},[])
-        console.log(get_platform_api)
-        if (get_platform_api.status) {
-          get_platform_api.data.forEach(api => {
-            platform_api_list.data.push(api);
-          });
-        }
+        console.log(user.data.platform_apis)
+        user.data.platform_apis.forEach(api => {
+          platform_api_list.data.push(api);
+        });
       }
       platform_api_list.isInitialized = true
       platform_api_list.isLoading = false
@@ -136,7 +133,7 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
     async saveToFirestore(fb_code: FBLonglivedCodeReturn) {
       const useAuth = useAuthStore()
       const { user_auth } = useAuth
-      const uid = user_auth.data? user_auth.data.uid : ''
+      const uid = user_auth.data ? user_auth.data.uid : ''
       try {
         const get_account = await generalAxiosInstance.get(`https://graph.facebook.com/me?fields=id,name,email,picture&access_token=${fb_code.access_token}`)
         const account = get_account.data as MetaAccount
@@ -152,7 +149,7 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
         }
 
         //Map meta account API Information that will be save to firestore
-        const getExistingAcount = await platformAPI.get(uid,'Meta')
+        const getExistingAcount = await platformAPI.get(uid, 'Meta')
 
         console.log(getExistingAcount)
         let type = <'new' | 'update'>'new'
@@ -170,7 +167,7 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
             platformAPI.data.client_account = new_meta_api_account;
           }
         }
-        const postPlatform = await platformAPI.createUpdate(uid,type)
+        const postPlatform = await platformAPI.createUpdate(uid, type)
         return postPlatform.data
       } catch (error) {
         console.error('Error during token exchange:', error);

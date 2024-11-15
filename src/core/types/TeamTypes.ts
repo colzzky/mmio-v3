@@ -21,9 +21,27 @@ export interface TeamMembersData extends SubCollections {
   isDisabled: boolean,
   createdAt: string,
   updatedAt: string,
-  invitation?: TeamInvitation | null
+  invitation?: TeamInvitation
 
 }
+
+interface TestObject {
+  name: string;
+  age: number;
+  address: {
+    street: string;
+    city: string;
+    country: {
+      code: string;
+      name: string;
+    };
+  };
+  settings?: {
+    theme: string;
+    notifications: boolean;
+  };
+}
+
 
 export interface TeamInvitation {
   reference: string,

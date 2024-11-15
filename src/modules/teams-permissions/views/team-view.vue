@@ -5,6 +5,8 @@ import AvatarImage from '@/core/components/ui/avatar/AvatarImage.vue';
 import Button from '@/core/components/ui/button/Button.vue';
 import Input from '@/core/components/ui/input/Input.vue';
 import Switch from '@/core/components/ui/switch/Switch.vue';
+import { toast } from '@/core/components/ui/toast';
+import Toaster from '@/core/components/ui/toast/Toaster.vue';
 import { user_data, type UserData } from '@/core/types/AuthUserTypes';
 import type { InvitationData } from '@/core/types/InvitationTypes';
 import type { TeamData, TeamInvitation, TeamMembersData } from '@/core/types/TeamTypes';
@@ -96,7 +98,7 @@ const current_team = reactive({
                     isDisabled: true,
                     isPending: true,
                     invitation: {
-                        reference: member_invite_code,
+                        reference: invite_uuid,
                         email: email,
                         invitedBy: current_user_uid,
                     },
@@ -110,8 +112,13 @@ const current_team = reactive({
                     type: 'Member Team Invite',
                     reference: {
                         collection: 'team_members',
-                        path: `teams/${member_uuid}/team_members`,
+                        path: `teams/${team_id}/team_members/${member_uuid}`,
                         id: member_uuid
+                    },
+                    teamReference: {
+                        collection: 'teams',
+                        path: `teams/${team_model.data.tm_id}`,
+                        id: team_model.data.tm_id
                     },
                     isActive: true,
                     expiration: uiHelpers.generateExpirationDate(1800),
@@ -126,10 +133,10 @@ const current_team = reactive({
             const send_invites = await postCollectionBatch('invitation', 'invitations', null, member_invite_ids, member_invite)
             console.log(add_members)
             console.log(send_invites)
-            if(this.data.team_members) this.data.team_members = [...this.data.team_members, ...team_members]
+            if (this.data.team_members) this.data.team_members = [...this.data.team_members, ...team_members]
             await this.get_members()
             choose_member_form.emails = []
-            
+
         }
         this.invite_load = false
     },
@@ -257,6 +264,19 @@ async function fetch_validate_team() {
     pageLoad.value = false
 }
 
+async function copyLink(invi_id: string) {
+    try {
+        await navigator.clipboard.writeText(`http://localhost:5173/team-invite/${invi_id}`);
+        toast({
+            title: 'Invited link Copied',
+            variant: 'default',
+            duration: 2000
+        })
+    } catch (err) {
+        console.error('Failed to copy text:', err);
+    }
+}
+
 onMounted(async () => {
     if (user_team_refs.isInitialized) {
         await fetch_validate_team()
@@ -272,6 +292,7 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
 
 </script>
 <template>
+    <Toaster />
     <div v-if="!pageLoad">
         <div v-if="current_team.data" class="space-y-4">
             <div class="flex items-center space-x-2">
@@ -323,7 +344,7 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
                                         </div>
                                         <div class="w-[20%]">
                                             <div class="text-sm">{{ member.uid === current_team.data.owner_uid ? 'Owner'
-                                                : 'Member'}}</div>
+                                                : 'Member' }}</div>
                                         </div>
                                     </div>
                                     <div v-else-if="member.isPending && member.invitation"
@@ -380,7 +401,8 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
                                 <div class="flex justify-between items-center">
                                     <span class="text-xs w-64 truncate">www.mmiv3.com/invite/{{
                                         current_team.data.inviteLink }}</span>
-                                    <Button class="text-blue-500 p-0 text-sm" size="sm" variant="ghost"><i
+                                    <Button class="text-blue-500 p-0 text-sm" size="sm" variant="ghost"
+                                        @click="copyLink(current_team.data.inviteLink)"><i
                                             class="material-icons">link</i> Copy link</Button>
                                 </div>
                                 <div class="flex flex-col justify-end h-14">

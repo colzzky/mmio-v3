@@ -227,7 +227,6 @@ const create_team_modal = reactive({
                 //Create an Invite Code
                 team_model.set(post.data)
                 await createTeamInvite(team_model.data, team_model.data.inviteLink, "Team Invite", `teams/${team_model.data.tm_id}`)
-                await invitation.createUpdate("new")
                 team_members.reInit()
                 team_members.data.uid = user_auth.data.uid
                 team_members.data.member_id = crypto.randomUUID()
@@ -236,7 +235,7 @@ const create_team_modal = reactive({
                 team_members.data.isPending = false
                 await team_members.createUpdate(team_model.data.tm_id, 'new')
                 //Create Reference
-                await setTeamReference(team_model.data.tm_id, user_auth.data.uid,)
+                await setTeamReference(team_model.data.tm_id, user_auth.data.uid)
                 return true
             } else {
                 //Toaster here when it's  a failure
@@ -271,7 +270,7 @@ const create_team_modal = reactive({
                 isDisabled: true,
                 isPending: true,
                 invitation: {
-                    reference: member_invite_code,
+                    reference: invite_uuid,
                     email: email,
                     invitedBy: current_user_uid,
                 },
@@ -284,9 +283,14 @@ const create_team_modal = reactive({
                 iv_id: invite_uuid,
                 type: 'Member Team Invite',
                 reference: {
-                    collection:'team_members',
-                    path:'teams/:tm_id/team_members',
-                    id:member_uuid
+                    collection: 'team_members',
+                    path: `teams/${team_model.data.tm_id}/team_members/${member_uuid}`,
+                    id: member_uuid
+                },
+                teamReference: {
+                    collection: 'teams',
+                    path: `teams/${team_model.data.tm_id}`,
+                    id: team_model.data.tm_id
                 },
                 isActive: true,
                 expiration: uiHelpers.generateExpirationDate(1800),

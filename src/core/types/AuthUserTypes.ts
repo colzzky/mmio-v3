@@ -26,6 +26,7 @@ export interface UserData extends SubCollections, MutablePick<User, 'displayName
   updatedAt: string
   subCollections: ('platform_apis'|'team_refs')[],
   team_refs?:TeamRefsData[]
+  platform_apis?:PlatformApiData[]
 }
 
 export const user_data: UserData = {

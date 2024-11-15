@@ -62,4 +62,10 @@ export const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
     component: () => import('./views/team-invite.vue'),
   },
+  {
+    path: '/member-invite/:invi_id',
+    name: 'member-invite',
+    meta: { requiresAuth: true },
+    component: () => import('./views/member-invite.vue'),
+  },
 ]

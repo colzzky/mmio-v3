@@ -62,6 +62,7 @@ export const useInvitationStore = defineStore('invitationStore', () => {
     }
     invitation.data.expiration = uiHelpers.generateExpirationDate(1800)
     invitation.data.type = type
+    invitation.createUpdate("new")
 }
 
   const reset_state = () => {

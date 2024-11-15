@@ -6,6 +6,7 @@ export interface InvitationData extends SubCollections {
     iv_id: string
     type: 'Team Invite'|'Member Team Invite'|'' //team invite or member invite
     reference: InvitationReference
+    teamReference?: InvitationReference
     isActive: boolean
     expiration: string
     createdAt: string
