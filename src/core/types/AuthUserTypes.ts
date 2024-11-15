@@ -50,7 +50,6 @@ export const user_data: UserData = {
   subCollections: ['platform_apis', 'team_refs'],
   createdAt: '',
   updatedAt: '',
-  updatedAt: '',
 }
 
 export interface PlatformApiData extends SubCollections {
