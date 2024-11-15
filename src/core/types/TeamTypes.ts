@@ -25,24 +25,6 @@ export interface TeamMembersData extends SubCollections {
 
 }
 
-interface TestObject {
-  name: string;
-  age: number;
-  address: {
-    street: string;
-    city: string;
-    country: {
-      code: string;
-      name: string;
-    };
-  };
-  settings?: {
-    theme: string;
-    notifications: boolean;
-  };
-}
-
-
 export interface TeamInvitation {
   reference: string,
   email: string,
@@ -74,4 +56,3 @@ const invitation = {
   email: '',
   invitedBy: '',
 }
-

@@ -18,7 +18,9 @@ onMounted(async () => {
 </script>
 <template>
   <main>
-    <MetaApiIntegration v-if="route.name === 'settings-api-integrations-meta' || route.name === 'api-integrations'" />
+    <MetaApiIntegration
+      v-if="route.name === 'settings-api-integrations-meta' || route.name === 'api-integrations'"
+    />
   </main>
 </template>
 

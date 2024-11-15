@@ -37,7 +37,7 @@ interface User_Collection {
     interface: PlatformApiData
     sub_col: SubCollectionKey<PlatformApiData>[]
     sub_params: {
-      uid:string
+      uid: string
     } | null
   }
 
@@ -48,6 +48,25 @@ interface User_Collection {
     sub_col: SubCollectionKey<TeamRefsData>[]
     sub_params: {
       uid:string
+    } | null
+  }
+}
+
+interface Team_Collection {
+  team: {
+    id: 'tm_id'
+    path: 'teams'
+    interface: TeamData
+    sub_col: SubCollectionKey<TeamData>[]
+    sub_params: {} | null
+  }
+  team_members:{
+    id: 'member_id'
+    path: 'teams/:tm_id/team_members'
+    interface: TeamMembersData
+    sub_col: SubCollectionKey<TeamMembersData>[]
+    sub_params: {
+      tm_id:string
     } | null
   }
 }

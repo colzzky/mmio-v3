@@ -13,16 +13,9 @@ export const useSidebarStore = defineStore('sidebar', () => {
 
   const platformName = computed(() => route.fullPath.split('/').filter(Boolean)[2])
 
-  const platformHeading = computed(() => {
-    if (platformName.value === 'meta') return 'Meta Automation'
-
-    return 'UNHANDLED PLATFORM HEADING CASE'
-  })
-
   return {
     isMobileSidebarOpen,
     toggleMobileSidebar,
     platformName,
-    platformHeading,
   }
 })

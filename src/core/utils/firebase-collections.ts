@@ -41,7 +41,6 @@ type CollectionFields = {
   chat_bot_flow: keyof ChatBotFlowData
 }
 
-
 export type FirebaseOperators =
   | '=='
   | '!='
@@ -269,6 +268,7 @@ export async function getCollection<T extends keyof CollectionsInterface>(
         createdAt: userSnapshot.data().createdAt.toDate().toISOString(),
         updatedAt: userSnapshot.data().updatedAt.toDate().toISOString(),
       }
+      }
       const subCollectionData: Record<string, any[]> = {} // To store subcollection data
 
       // Fetch specified subcollections
@@ -276,6 +276,7 @@ export async function getCollection<T extends keyof CollectionsInterface>(
         for (const sub of $sub_col) {
 
           const subColRef = collection(firestore, `${fullPath}/${data.id}/${sub}`)
+          const subColSnapshot = await getDocs(subColRef)
           const subColSnapshot = await getDocs(subColRef)
           subCollectionData[sub] = subColSnapshot.docs.map((doc) => ({
             ...doc.data(),

@@ -135,11 +135,11 @@ const registrationField = reactive<RegistrationField>({
             await updateProfile(auth.currentUser, { displayName: this.dataInput.name })
             user_auth.setUser(auth.currentUser)
             await createNewUserProfile({
-              displayName:auth.currentUser.displayName,
-              email:auth.currentUser.email,
-              emailVerified:auth.currentUser.emailVerified,
-              photoURL:auth.currentUser.photoURL, 
-              uid:auth.currentUser.uid, 
+              displayName: auth.currentUser.displayName,
+              email: auth.currentUser.email,
+              emailVerified: auth.currentUser.emailVerified,
+              photoURL: auth.currentUser.photoURL,
+              uid: auth.currentUser.uid,
             })
             router.push({ name: 'home' })
           }
@@ -159,12 +159,12 @@ const registrationField = reactive<RegistrationField>({
       .then(async (result) => {
         user_auth.setUser(result.user)
         await createNewUserProfile({
-              displayName:result.user.displayName,
-              email:result.user.email,
-              emailVerified:result.user.emailVerified,
-              photoURL:result.user.photoURL, 
-              uid:result.user.uid, 
-            })
+          displayName: result.user.displayName,
+          email: result.user.email,
+          emailVerified: result.user.emailVerified,
+          photoURL: result.user.photoURL,
+          uid: result.user.uid,
+        })
         router.replace({ name: 'home' })
       })
       .catch((error) => {

@@ -69,7 +69,7 @@ const childrenRouteRecords: RouteRecord = {
 
 export const links = Object.entries(linkRecords).map(([key, value]) => ({
   ...value,
-  href: key,
+  name: key,
 }))
 
 const childrenRoutes = Object.entries(childrenRouteRecords).map(([key, values]) => ({

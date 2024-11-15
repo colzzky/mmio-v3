@@ -12,11 +12,11 @@ export interface Modal {
   close(): void
 }
 //Types
-export type { UserData, PlatformApiData} from '../types/AuthUserTypes'
+export type { UserData, PlatformApiData } from '../types/AuthUserTypes'
 export type { WorkspaceData } from '../types/WorkSpaceTypes'
 export type { MetaPageData } from '../types/MetaTypes'
 export type { ChatBotFlowData } from '../types/MetaTypes'
 export type { TeamData, TeamMembersData} from '../types/TeamTypes'
 export type { InvitationData } from '../types/InvitationTypes'
 
-export {user_data} from '../types/AuthUserTypes'
+export { user_data } from '../types/AuthUserTypes'

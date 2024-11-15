@@ -1,8 +1,6 @@
 import type { MetaPictureReturn } from './MetaTypes'
-import type { SubCollections, MutablePick} from './UniTypes'
+import type { SubCollections, MutablePick } from './UniTypes'
 import type { User } from 'firebase/auth'
-
-
 
 export interface UserAddress {
   street: string
@@ -18,7 +16,9 @@ export interface UserProfile {
   contactEmail: string
 }
 
-export interface UserData extends SubCollections, MutablePick<User, 'displayName' | 'email' | 'photoURL' | 'uid' | 'emailVerified'> {
+export interface UserData
+  extends SubCollections,
+    MutablePick<User, 'displayName' | 'email' | 'photoURL' | 'uid' | 'emailVerified'> {
   uid: string
   profile: UserProfile
   address: UserAddress
@@ -50,21 +50,22 @@ export const user_data: UserData = {
   subCollections: ['platform_apis', 'team_refs'],
   createdAt: '',
   updatedAt: '',
+  updatedAt: '',
 }
 
 export interface PlatformApiData extends SubCollections {
-  platform:'Meta'|''
-  client_account:MetaAPIAccount|null
-  createdAt:string
-  updatedAt:string
+  platform: 'Meta' | ''
+  client_account: MetaAPIAccount | null
+  createdAt: string
+  updatedAt: string
 }
 
 export const platform_api_data: PlatformApiData = {
-  platform:'',
-  client_account:null,
-  subCollections:[],
-  createdAt:'',
-  updatedAt:''
+  platform: '',
+  client_account: null,
+  subCollections: [],
+  createdAt: '',
+  updatedAt: '',
 }
 
 ///////////////////
@@ -118,7 +119,6 @@ export interface MetaLonglivedCodeReturn {
   expires_in: number
   machine_id: string
 }
-
 
 export interface MetaAPIAccount {
   client_id: string

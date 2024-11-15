@@ -22,7 +22,7 @@ export interface MetaPictureReturn {
 export interface MetaPageData extends SubCollections {
   mp_id: string
   page_id: string
-  owner_uid:string
+  owner_uid: string
   access_token: string
   picture?: MetaPictureReturn
   category: string
@@ -37,7 +37,7 @@ export interface MetaPageData extends SubCollections {
 export const meta_page_data: MetaPageData = {
   mp_id: '',
   page_id: '',
-  owner_uid:'',
+  owner_uid: '',
   access_token: '',
   category: '',
   name: '',
@@ -46,7 +46,7 @@ export const meta_page_data: MetaPageData = {
   isOnProject: false,
   createdAt: '',
   updatedAt: '',
-  subCollections:[]
+  subCollections: [],
 }
 
 /** Meta Services */
@@ -63,4 +63,3 @@ export interface ChatBotFlowData extends SubCollections {
 }
 
 /** Meta Services */
-

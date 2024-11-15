@@ -2,7 +2,7 @@
 import CreateWorkspace from './components/CreateWorkspace.vue'
 import CreateTeam from './components/CreateTeam.vue'
 import Button from '@/core/components/ui/button/Button.vue'
-import { reactive, ref } from 'vue';
+import { reactive, ref } from 'vue'
 
 //Opens createWorkspace Component
 const new_workspace_modal = ref(false) 

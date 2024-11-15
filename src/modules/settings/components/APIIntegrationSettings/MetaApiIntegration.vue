@@ -117,7 +117,10 @@ watch(fb_data, async (newValue) => {
     const existingAcount = await platformAPI.get(uid, "Meta")
     if (existingAcount.status) {
       const account = existingAcount.data
-      if (account.client_account && account.client_account.client_id !== newValue.authResponse.userID) {
+      if (
+        account.client_account &&
+        account.client_account.client_id !== newValue.authResponse.userID
+      ) {
         const FB = await loadFacebookSDK()
         FB.logout(() => {
           toast({
