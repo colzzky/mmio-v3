@@ -14,7 +14,7 @@ import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
 import Switch from '@/core/components/ui/switch/Switch.vue'
 import { toast } from '@/core/components/ui/toast'
 import Toaster from '@/core/components/ui/toast/Toaster.vue'
-import { user_data, type MetaAPIAccount, type PlatformApiData } from '@/core/types/AuthUserTypes'
+import {type MetaAPIAccount, type PlatformApiData } from '@/core/types/AuthUserTypes'
 import type { MetaPagesReturn, MetaPictureReturn } from '@/core/types/MetaTypes'
 import { loadFacebookSDK } from '@/core/utils/facebook-sdk'
 import { getWhereAny } from '@/core/utils/firebase-collections'
@@ -49,8 +49,8 @@ const set_fb_api = (metaApi: MetaAPIAccount, fbPlatform: PlatformApiData) => {
 const set_fb_pages = async (): Promise<void> => {
   fb_pages_load.value = true
 
-  const pages = await getWhereAny('meta_page','meta_pages',null, [], [{
-    fieldName:'owner_uid', operator:'==', value:user_auth.data?.uid
+  const pages = await getWhereAny('meta_page', 'meta_pages', null, [], [{
+    fieldName: 'owner_uid', operator: '==', value: user_auth.data?.uid
   }])
   console.log(pages)
   meta_pages_list.data = pages.data
@@ -58,20 +58,34 @@ const set_fb_pages = async (): Promise<void> => {
 }
 
 //This will watch platform_api_list if it's loaded. When it's loaded it will fetch MetaAPI Platform of the user logged in
+/**  NO LONGER NEEDED
 watch(() => platform_api_list.isInitialized, async (newValue) => {
-    if (newValue) {
-      const platform = platform_api_list.data.find((api) => api.platform === 'Meta')
-      console.log(platform)
-      if (platform) {
-        set_fb_api(platform.client_account as MetaAPIAccount, platform)
-        await set_fb_pages()
-      } else {
-        fb_api_load.value = false
-        fb_pages_load.value = false
-      }
+  if (newValue) {
+    const platform = platform_api_list.data.find((api) => api.platform === 'Meta')
+    if (platform) {
+      set_fb_api(platform.client_account as MetaAPIAccount, platform)
+      await set_fb_pages()
+    } else {
+
     }
-  },
+  }
+  fb_api_load.value = false
+  fb_pages_load.value = false
+},
 )
+*/
+
+async function get_meta_platform(){
+  if (platform_api_list.isInitialized) {
+    const platform = platform_api_list.data.find((api) => api.platform === 'Meta')
+    if (platform) {
+      set_fb_api(platform.client_account as MetaAPIAccount, platform)
+      await set_fb_pages()
+    }
+    fb_api_load.value = false
+    fb_pages_load.value = false
+  }
+}
 
 
 // Handle Facebook login
@@ -100,7 +114,7 @@ watch(fb_data, async (newValue) => {
   if (newValue && fb_data.value) {
     //Add logic here and check first if it's the same facebook account with what register the firebase
     const uid = user_auth.data ? user_auth.data.uid : ''
-    const existingAcount = await platformAPI.get(uid,"Meta")
+    const existingAcount = await platformAPI.get(uid, "Meta")
     if (existingAcount.status) {
       const account = existingAcount.data
       if (account.client_account && account.client_account.client_id !== newValue.authResponse.userID) {
@@ -239,10 +253,12 @@ const activate_fb_page = async (meta_page_index: number) => {
   processing_isActive_switch.value = false
 }
 
-onMounted(() => {
+onMounted(async () => {
   componentLoad.value = true
-  //Do something bere
   componentLoad.value = false
+  
+  await get_meta_platform()
+
 })
 </script>
 <template>
@@ -259,10 +275,8 @@ onMounted(() => {
             <div v-if="fb_api_information" class="grid-gap-4">
               <div class="flex items-center space-x-4 rounded-md border p-4">
                 <Avatar>
-                  <AvatarImage
-                    :src="fb_api_information.picture ? fb_api_information.picture.data.url : ''"
-                    alt="@radix-vue"
-                  />
+                  <AvatarImage :src="fb_api_information.picture ? fb_api_information.picture.data.url : ''"
+                    alt="@radix-vue" />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
                 <div class="flex flex-col gap-3">
@@ -312,12 +326,10 @@ onMounted(() => {
       <div class="flex items-center justify-between">
         <div>
           <div class="text-2xl font-semibold">Your Meta Pages</div>
-          <Label
-            >If you haven't find your pages please reauthenticate and check pagges you want to
-            use</Label
-          >
+          <Label>If you haven't find your pages please reauthenticate and check pagges you want to
+            use</Label>
         </div>
-        <Button v-if="!fb_pages_load"  size="xs" class="text-sm" @click="get_fb_pages">
+        <Button v-if="!fb_pages_load" size="xs" class="text-sm" @click="get_fb_pages">
           Export FB Pages
         </Button>
         <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">
@@ -331,21 +343,15 @@ onMounted(() => {
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                   <Avatar>
-                    <AvatarImage
-                      :src="page.picture ? page.picture.data.url : ''"
-                      alt="@radix-vue"
-                    />
+                    <AvatarImage :src="page.picture ? page.picture.data.url : ''" alt="@radix-vue" />
                     <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
                   <div class="flex flex-col gap-3">
                     <div class="flex-1 space-y-1.5">
                       <p class="text-sm font-medium leading-none">
                         {{ page.name }}
-                        <span
-                          v-if="page.voided"
-                          class="ml-2 rounded-xl border border-red-500 px-3 text-red-500"
-                          >Voided</span
-                        >
+                        <span v-if="page.voided"
+                          class="ml-2 rounded-xl border border-red-500 px-3 text-red-500">Voided</span>
                       </p>
                       <p class="text-sm text-muted-foreground">
                         {{ page.category }}
@@ -357,11 +363,8 @@ onMounted(() => {
                   </div>
                 </div>
 
-                <Switch
-                  :disabled="page.voided || processing_isActive_switch"
-                  :checked="page.isActive"
-                  @update:checked="activate_fb_page(index)"
-                />
+                <Switch :disabled="page.voided || processing_isActive_switch" :checked="page.isActive"
+                  @update:checked="activate_fb_page(index)" />
               </div>
             </div>
           </Card>

@@ -84,13 +84,10 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
       const useAuth = useAuthStore()
       const { user_auth, user } = useAuth
       const uid = user_auth.data ? user_auth.data.uid : ''
+      platform_api_list.isInitialized = false
+      platform_api_list.isLoading = true
       if (user_auth.data && user.data && user.data.platform_apis) {
-        platform_api_list.isInitialized = false
-        platform_api_list.isLoading = true
-        console.log(user.data.platform_apis)
-        user.data.platform_apis.forEach(api => {
-          platform_api_list.data.push(api);
-        });
+        platform_api_list.data = user.data.platform_apis
       }
       platform_api_list.isInitialized = true
       platform_api_list.isLoading = false
