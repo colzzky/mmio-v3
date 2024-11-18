@@ -7,6 +7,7 @@ import type {
   InvitationData,
   TeamData,
   TeamMembersData,
+  PermissionData,
 } from '@/core/utils/types'
 import type { PlatformApiData, TeamRefsData } from './AuthUserTypes'
 
@@ -104,6 +105,13 @@ export type CollectionsInterface = {
     path: 'invitations'
     interface: InvitationData
     sub_col: SubCollectionKey<InvitationData>[]
+    sub_params: {} | null
+  }
+  permission:{
+    id: 'permission_id'
+    path: 'permissions'
+    interface: PermissionData
+    sub_col: SubCollectionKey<PermissionData>[]
     sub_params: {} | null
   }
   // chat_bot_flow: {

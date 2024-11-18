@@ -12,7 +12,7 @@ import {
   DropdownMenuRadioItem,
 } from '@/core/components/ui/dropdown-menu'
 import { Input } from '@/core/components/ui/input'
-import CreateTeam from '@/views/components/CreateTeam.vue'
+import CreateTeam from '@/modules/teams-permissions/components/team/CreateTeam.vue'
 import CreateWorkspace from '@/views/components/CreateWorkspace.vue'
 import { computed, ref } from 'vue'
 

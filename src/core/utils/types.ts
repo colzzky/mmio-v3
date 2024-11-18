@@ -18,5 +18,6 @@ export type { MetaPageData } from '../types/MetaTypes'
 export type { ChatBotFlowData } from '../types/MetaTypes'
 export type { TeamData, TeamMembersData} from '../types/TeamTypes'
 export type { InvitationData } from '../types/InvitationTypes'
+export type { PermissionData } from '../types/PermissionTypes'
 
 export { user_data } from '../types/AuthUserTypes'

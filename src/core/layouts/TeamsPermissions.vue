@@ -30,14 +30,14 @@ const { page_init } = useAuth
             </header>
             <aside class="col-span-1 flex flex-col gap-y-2">
                 <section v-for="link in sidebarLinks" :key="link.name" class="flex flex-col">
-                    <div @click="router.push({name:link.name})" class="cursor-pointer px-4 rounded-md py-1 text-lg font-semibold flex items-center gap-x-2 hover:bg-gray-300 transition-all duration-75">
+                    <div @click="router.push({name:link.name})" class="cursor-pointer px-4 rounded-md py-1 text-lg font-semibold flex items-center gap-x-2 hover:bg-gray-300 transition-all duration-75"
+                    :class="{'bg-gray-300':route.path.toLowerCase().startsWith(`/team-permission/${link.name}`)}">
                         <i :class="['bx text-[length:var(--icon-size)]', link.icon]" />
                         {{ link.label }}
                     </div>
                 </section>
             </aside>
 
-            <!--  -->
             <slot />
         </div>
     </template>

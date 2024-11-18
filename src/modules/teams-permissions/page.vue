@@ -2,6 +2,7 @@
 import TeamsPermissionsLayout from '@/core/layouts/TeamsPermissions.vue';
 import TeamView from './views/team-view.vue';
 import Teams from './views/teams.vue';
+import Permissions from './permission-view/permissions.vue';
 import { onMounted} from 'vue'
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
@@ -23,6 +24,9 @@ onMounted(async () => {
         </div>
         <div v-else-if="route.name === 'team-view'">
             <TeamView />
+        </div>
+        <div v-else-if="route.name === 'permissions'">
+            <Permissions />
         </div>
     </TeamsPermissionsLayout>
 </template>
