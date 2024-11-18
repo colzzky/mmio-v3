@@ -33,8 +33,7 @@ async function handleInvitation() {
 
     // Get the invitation details
     const get_invite = await invitation.get(invitation_id);
-    console.log(get_invite)
-
+    
     // Check if invitation fetch from firestore exist
     if (!get_invite.status || !get_invite.data.teamReference) {
         console.log('Invite link not valid');
@@ -83,8 +82,13 @@ async function accept_invite(invitation: InvitationData, team_id:string) {
     const team_reference = invitation.teamReference
     if (user_auth.data && team_reference) {
         //Check if the user already exist first
+
+
         const member = await getExact('team_members', `${invitation.reference.path}`, [])
-        if (member.status && member.data) {
+        if (member.status && member.data && member.data.invitation) {
+            //Validate if the invitation email matched with the user who is currently logged on
+            const validate_email_user = member.data.invitation.email === user_auth.data.email
+            if(!validate_email_user) return false
             member_exist = member.data
         }
 

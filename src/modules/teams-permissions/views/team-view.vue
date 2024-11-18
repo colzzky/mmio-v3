@@ -336,6 +336,7 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
                                                     <p class="text-xs text-muted-foreground">
                                                         {{ current_team.members_info[member.uid].email }}
                                                     </p>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -362,6 +363,11 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
                                                     <p class="text-xs leading-none">
                                                         (Pending)
                                                     </p>
+                                                    <div>
+                                                        <Button class="text-blue-500 p-0 text-sm" size="sm"
+                                                            variant="ghost" @click="copyLink(member.invitation.reference)"><i
+                                                                class="material-icons">link</i> Copy link</Button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
