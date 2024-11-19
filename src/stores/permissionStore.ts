@@ -18,7 +18,7 @@ interface Permission {
   data: PermissionData
   reInit: () => void
   set: (data: PermissionData) => void
-  get: (tm_id: string) => Promise<FSReturnData<PermissionData>>
+  get: (permission_id: string) => Promise<FSReturnData<PermissionData>>
   createUpdate: (type: 'new' | 'update') => Promise<FSReturnData<PermissionData>>
 }
 
