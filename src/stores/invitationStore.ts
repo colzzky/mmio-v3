@@ -40,7 +40,7 @@ export const useInvitationStore = defineStore('invitationStore', () => {
       }
     },
     async createUpdate(type): Promise<FSReturnData<InvitationData>> {
-      let id = this.data.iv_id !== '' ? this.data.iv_id : crypto.randomUUID();
+      const id = this.data.iv_id !== '' ? this.data.iv_id : crypto.randomUUID();
       this.data.iv_id = id
       const post = await postCollection('invitation', 'invitations', null, id, this.data, type)
       console.log(post)

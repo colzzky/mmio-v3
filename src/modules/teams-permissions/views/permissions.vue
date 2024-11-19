@@ -5,6 +5,7 @@ import Button from '@/core/components/ui/button/Button.vue'
 import { usePermissionStore } from '@/stores/permissionStore';
 import { useUserStore } from '@/stores/userStore';
 import { useAuthStore } from '@/stores/authStore';
+import router from '@/router';
 const permissionStore = usePermissionStore()
 const authStore = useAuthStore()
 const {permission:permission_model} = permissionStore
@@ -24,6 +25,7 @@ async function create_permission(){
         const add_permission = await permission_model.createUpdate("new")
         if(add_permission.status){
             console.log(add_permission.data)
+            router.push({name:"permission-view", params:{permission_id:add_permission.data.permission_id}})
         }
     }
 

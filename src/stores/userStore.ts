@@ -44,7 +44,7 @@ export const useUserStore = defineStore('userStore', () => {
             }
         },
         async createUpdate(uid: string, type): Promise<FSReturnData<TeamRefsData>> {
-            let id = this.data.team_refs_id !== '' ? this.data.team_refs_id : crypto.randomUUID();
+            const id = this.data.team_refs_id !== '' ? this.data.team_refs_id : crypto.randomUUID();
             this.data.team_refs_id = id
             const post = await postCollection('team_refs', 'users/:uid/team_refs', { uid }, id, this.data, type)
             console.log(post)

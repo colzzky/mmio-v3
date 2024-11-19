@@ -47,7 +47,7 @@ export const usePermissionStore = defineStore('permissionStore', () => {
       }
     },
     async createUpdate(type): Promise<FSReturnData<PermissionData>> {
-      let id = this.data.permission_id !== '' ? this.data.permission_id : crypto.randomUUID();
+      const id = this.data.permission_id !== '' ? this.data.permission_id : crypto.randomUUID();
       this.data.permission_id = id
       const post = await postCollection('permission', 'permissions', null, id, this.data, type)
       console.log(post)
