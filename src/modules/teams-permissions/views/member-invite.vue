@@ -110,7 +110,6 @@ async function accept_invite(invitation: InvitationData, team_id:string) {
             if (validate_reference && validate_update) return true
         }
 
-
     }
     return false
 }

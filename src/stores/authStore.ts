@@ -36,7 +36,7 @@ interface TeamRefs {
     data: TeamRefsData
     reInit: () => void
     set: (data: TeamRefsData) => void
-  }
+}
 
 export const useAuthStore = defineStore('authStore', () => {
     const page_init = reactive({
@@ -57,7 +57,7 @@ export const useAuthStore = defineStore('authStore', () => {
             });
             const uid = user_auth.data ? user_auth.data.uid : ''
             const fetch_user = await user.get(uid)
-            if(fetch_user.status){
+            if (fetch_user.status) {
                 user.set(fetch_user.data)
             }
 
@@ -102,7 +102,7 @@ export const useAuthStore = defineStore('authStore', () => {
         },
         async get() {
             const id = user_auth.data ? user_auth.data.uid : ''
-            const get = await getCollection('user', 'users', null, id, ['team_refs','platform_apis']);
+            const get = await getCollection('user', 'users', null, id, ['team_refs', 'platform_apis']);
             console.log(get)
             return {
                 status: get.status,
@@ -134,6 +134,14 @@ export const useAuthStore = defineStore('authStore', () => {
             this.lastSnapshot = ''
         }
     })
+
+    //Store the information that needs persisting when moving to other page
+    const user_details = reactive({
+        team_owners_uid: <string[]>[],
+        team_owners:<{ [key: string]: UserData } | null>(null)
+    
+    })
+
 
     //Called during initiali Registration
     async function createNewUserProfile(data: MutablePick<User, 'displayName' | 'email' | 'photoURL' | 'uid' | 'emailVerified'>) {
@@ -182,7 +190,8 @@ export const useAuthStore = defineStore('authStore', () => {
         user,
         user_auth,
         user_team_refs,
-        fetch_team_list
+        fetch_team_list,
+        user_details
     }
 },
     {

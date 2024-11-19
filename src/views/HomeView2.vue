@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import CreateTeam from './components/CreateTeam.vue'
 import CreateWorkspace from './components/CreateWorkspace.vue'
+import CreateTeam from '../modules/teams-permissions/components/team/CreateTeam.vue'
 import Button from '@/core/components/ui/button/Button.vue'
 import { reactive, ref } from 'vue'
 

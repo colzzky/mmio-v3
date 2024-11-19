@@ -37,6 +37,9 @@ const { page_init } = useAuth
           <div
             @click="router.push({ name: link.name })"
             class="flex cursor-pointer items-center gap-x-2 rounded-md px-4 py-1 text-lg font-semibold transition-all duration-75 hover:bg-gray-300"
+            :class="{
+              'bg-gray-300': route.path.toLowerCase().startsWith(`/team-permission/${link.name}`),
+            }"
           >
             <i :class="['bx text-[length:var(--icon-size)]', link.icon]" />
             {{ link.label }}
@@ -44,7 +47,6 @@ const { page_init } = useAuth
         </section>
       </aside>
 
-      <!--  -->
       <slot />
     </div>
   </template>
