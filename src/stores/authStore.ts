@@ -11,6 +11,9 @@ import { auth } from '@/core/utils/firebase-client';
 import type { DocumentData } from 'firebase/firestore';
 import { useProjectStore } from './projectStore'
 import type { TeamData } from '@/core/types/TeamTypes'
+import type { PermissionData } from '@/core/types/PermissionTypes'
+import router from '@/router'
+import { uiHelpers } from '@/core/utils/ui-helper'
 
 interface FirebaseReturn {
     status: boolean;
@@ -135,11 +138,37 @@ export const useAuthStore = defineStore('authStore', () => {
         }
     })
 
+    const user_created_permissions = reactive({
+        data: <PermissionData[]>[],
+        isInitialized: <boolean>false,
+        isLoading: <boolean>false,
+        lastSnapshot: <any>'',
+        nextFetch:<string>'',
+        generateNextFetch(){
+            this.nextFetch = uiHelpers.generateExpirationDate(300)
+        },
+        checkNextFetch(){
+            if(this.nextFetch){
+                const now = new Date();
+                const expireDate = new Date(this.nextFetch);
+                console.log(expireDate)
+                return now >= expireDate;
+            }
+            return true
+        },
+        resetData() {
+            this.data = []
+            this.isInitialized = false
+            this.isLoading = false
+            this.lastSnapshot = ''
+        },
+    })
+
     //Store the information that needs persisting when moving to other page
     const user_details = reactive({
         team_owners_uid: <string[]>[],
-        team_owners:<{ [key: string]: UserData } | null>(null)
-    
+        team_owners:<{ [key: string]: UserData } | null>(null),
+        user_permissions:null
     })
 
 
@@ -191,7 +220,8 @@ export const useAuthStore = defineStore('authStore', () => {
         user_auth,
         user_team_refs,
         fetch_team_list,
-        user_details
+        user_details,
+        user_created_permissions
     }
 },
     {

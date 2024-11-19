@@ -13,6 +13,7 @@ export enum Access_levels {
     READ = 'read',
     WRITE = 'write',
     DELETE = 'delete',
+    CUSTOM = 'custom',
 }
 
 interface CustomPermissions {
