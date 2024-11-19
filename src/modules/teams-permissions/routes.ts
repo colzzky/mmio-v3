@@ -26,13 +26,20 @@ const childrenRouteRecords: RouteRecord = {
       {
         path: ':team_id',
         name: 'team-view',
-        component: () => import('./views/team-view.vue'),
+        component: () => import('./page.vue'),
       },
     ],
   },
   permissions: {
-    component: () => import('./permission-view/permissions.vue'),
-  },
+    component: () => import('./page.vue'),
+    children: [
+      {
+        path: ':permission_id',
+        name: 'permission-view',
+        component: () => import('./page.vue'),
+      },
+    ]
+  }
 }
 const childrenRoutes = Object.entries(childrenRouteRecords).map(([key, values]) => ({
   ...values,

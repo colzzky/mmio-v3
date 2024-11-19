@@ -32,40 +32,33 @@ export const useUserStore = defineStore(
   'userStore',
   () => {
     const user_team_refs = reactive<TeamRefs>({
-      data: { ...team_refs_data },
-      reInit() {
-        this.data = { ...team_refs_data }
-        //this is team
-      },
-      set(data: TeamRefsData) {
-        this.data = data
-      },
-      async get(tm_id: string): Promise<FSReturnData<TeamRefsData>> {
-        const get = await getCollection('team', 'teams', {}, tm_id, [])
-        return {
-          status: get.status,
-          data: get.data as TeamRefsData,
-          error: get.error,
-        }
-      },
-      async createUpdate(uid: string, type): Promise<FSReturnData<TeamRefsData>> {
-        const id = this.data.team_refs_id !== '' ? this.data.team_refs_id : crypto.randomUUID()
-        this.data.team_refs_id = id
-        const post = await postCollection(
-          'team_refs',
-          'users/:uid/team_refs',
-          { uid },
-          id,
-          this.data,
-          type,
-        )
-        console.log(post)
-        return {
-          status: post.status,
-          data: post.data as TeamRefsData,
-          error: post.error,
-        }
-      },
+        data: { ...team_refs_data },
+        reInit() {
+            this.data = { ...team_refs_data }
+            //this is team
+        },
+        set(data: TeamRefsData) {
+            this.data = data
+        },
+        async get(tm_id: string): Promise<FSReturnData<TeamRefsData>> {
+            const get = await getCollection('team', 'teams', {}, tm_id, [])
+            return {
+                status: get.status,
+                data: get.data as TeamRefsData,
+                error: get.error,
+            }
+        },
+        async createUpdate(uid: string, type): Promise<FSReturnData<TeamRefsData>> {
+            const id = this.data.team_refs_id !== '' ? this.data.team_refs_id : crypto.randomUUID();
+            this.data.team_refs_id = id
+            const post = await postCollection('team_refs', 'users/:uid/team_refs', { uid }, id, this.data, type)
+            console.log(post)
+            return {
+                status: post.status,
+                data: post.data as TeamRefsData,
+                error: post.error,
+            }
+        },
     })
 
     async function setTeamReference(tm_id: string, uid: string): Promise<boolean> {
