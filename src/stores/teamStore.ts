@@ -9,6 +9,8 @@ import { useUserStore } from './userStore'
 const userStore = useUserStore()
 const { user_team_refs } = userStore
 
+//Comment for testing
+
 interface FirebaseReturn {
   status: boolean;
   data: DocumentData | undefined;
