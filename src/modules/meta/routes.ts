@@ -64,7 +64,7 @@ const servicesRecord: ServiceRecord = {
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
   'live-chat': {
-    icon: 'bxs-message-alt-detail',
+    icon: 'bx-message-alt-dots',
     label: 'Live Chat',
     pinned: true,
     description:

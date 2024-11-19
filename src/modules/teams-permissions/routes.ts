@@ -1,11 +1,8 @@
-import type { RouteRecordRaw } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router'
 
 type Section = 'personal' | 'group'
 
-const names = [
-  'teams',
-  'permissions',
-] as const
+const names = ['teams', 'permissions'] as const
 
 type Categories = Record<(typeof names)[number], { label: string; icon: string; section: Section }>
 const categories: Categories = {
@@ -31,11 +28,11 @@ const childrenRouteRecords: RouteRecord = {
         name: 'team-view',
         component: () => import('./views/team-view.vue'),
       },
-    ]
+    ],
   },
   permissions: {
     component: () => import('./page.vue'),
-  }
+  },
 }
 const childrenRoutes = Object.entries(childrenRouteRecords).map(([key, values]) => ({
   ...values,
@@ -54,7 +51,7 @@ export const routes: RouteRecordRaw[] = [
     name: 'team-permission',
     meta: { requiresAuth: true },
     component: () => import('./page.vue'),
-    children: childrenRoutes
+    children: childrenRoutes,
   },
   {
     path: '/team-invite/:invi_id',

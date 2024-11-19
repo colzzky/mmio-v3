@@ -24,9 +24,9 @@ export interface UserData
   address: UserAddress
   createdAt: string
   updatedAt: string
-  subCollections: ('platform_apis'|'team_refs')[],
-  team_refs?:TeamRefsData[]
-  platform_apis?:PlatformApiData[]
+  subCollections: ('platform_apis' | 'team_refs')[]
+  team_refs?: TeamRefsData[]
+  platform_apis?: PlatformApiData[]
 }
 
 export const user_data: UserData = {
@@ -72,18 +72,18 @@ export const platform_api_data: PlatformApiData = {
 //////////////////
 
 export interface TeamRefsData extends SubCollections {
-  team_refs_id:string
-  tm_id:string,
-  createdAt:string
-  updatedAt:string
+  team_refs_id: string
+  tm_id: string
+  createdAt: string
+  updatedAt: string
 }
 
 export const team_refs_data: TeamRefsData = {
-  team_refs_id:'',
-  tm_id:'',
-  createdAt:'',
-  updatedAt:'',
-  subCollections:[],
+  team_refs_id: '',
+  tm_id: '',
+  createdAt: '',
+  updatedAt: '',
+  subCollections: [],
 }
 
 ///////////////////

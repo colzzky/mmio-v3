@@ -1,29 +1,36 @@
-import { useSidebarStore } from './sidebarStore'
-import { services as metaServices, type Service } from '@/modules/meta/routes'
-import { defineStore } from 'pinia'
+import { services as metaServices } from '@/modules/meta/routes'
+import { acceptHMRUpdate, defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
 export const useServicesStore = defineStore('services', () => {
-  const sidebarStore = useSidebarStore()
+  const services = ref(new Map([['meta', metaServices]]))
 
-  const services = ref<Record<string, Map<string, Service>>>({
-    meta: metaServices,
-  })
-
-  const platformServices = computed(() => services.value[sidebarStore.platformName])
   const pinnedServices = computed(() =>
-    Array.from(platformServices.value).filter(([, service]) => service.pinned),
+    Array.from(services.value.values()).flatMap((platform) =>
+      Array.from(platform).filter(([, service]) => service.pinned),
+    ),
   )
 
   function toggleServicePinnedStatus(serviceName: string) {
-    const service = platformServices.value.get(serviceName)
-    if (!service) throw new Error('Service not found')
+    const platform = Array.from(services.value.entries()).find(([, platformServices]) =>
+      platformServices.has(serviceName),
+    )
+    if (!platform) throw new Error('No platform found')
 
-    platformServices.value.set(serviceName, {
+    const [, platformServices] = platform
+
+    const service = platformServices.get(serviceName)
+    if (!service) throw new Error('No service found')
+
+    platformServices.set(serviceName, {
       ...service,
-      pinned: service.pinned === true ? false : true,
+      pinned: !service.pinned,
     })
   }
 
-  return { services, platformServices, pinnedServices, toggleServicePinnedStatus }
+  return { services, pinnedServices, toggleServicePinnedStatus }
 })
+
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useServicesStore, import.meta.hot))
+}

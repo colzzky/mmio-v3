@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ServicesModal from '@/core/components/services-modal.vue'
 import {
   Collapsible,
   CollapsibleContent,
@@ -14,21 +13,21 @@ import {
 import { Separator } from '@/core/components/ui/separator'
 import { useServicesStore } from '@/stores/servicesStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
-import { useTemplateRef } from 'vue'
 
 const sidebarStore = useSidebarStore()
 const servicesStore = useServicesStore()
-
-const servicesModalRef = useTemplateRef('servicesModal')
 </script>
 
 <template>
   <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
     <div class="flex grow flex-col overflow-y-auto border-r border-gray-300">
       <DropdownMenu>
-        <DropdownMenuTrigger class="flex items-center gap-x-2 px-3 py-2">
+        <DropdownMenuTrigger class="flex h-16 items-center gap-x-2 p-2">
           <i class="material-icons text-5xl">pin</i>
-          <span class="text-start font-bold leading-none">Sample Workspace Name</span>
+          <span
+            class="overflow-hidden text-ellipsis whitespace-nowrap text-start font-bold leading-none"
+            >Sample Workspace Name</span
+          >
           <i class="material-icons">arrow_drop_down</i>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
@@ -48,6 +47,7 @@ const servicesModalRef = useTemplateRef('servicesModal')
             <ul role="list" class="-mx-2 flex flex-col gap-y-1 p-4">
               <li>
                 <RouterLink
+                  v-if="sidebarStore.platformName !== 'platforms'"
                   :to="{ name: sidebarStore.platformName }"
                   class="flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
                 >
@@ -56,24 +56,24 @@ const servicesModalRef = useTemplateRef('servicesModal')
                 </RouterLink>
               </li>
 
-              <li>
+              <!-- <li>
                 <RouterLink
-                  to="analytics"
+                  to="#"
                   class="flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
                 >
                   <i class="material-icons text-xl">analytics</i>
                   Analytics
                 </RouterLink>
-              </li>
+              </li> -->
 
               <li>
-                <button
-                  class="flex w-full items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold hover:bg-primary/25"
-                  @click="servicesModalRef?.modal.open()"
+                <RouterLink
+                  :to="{ name: 'all-platforms' }"
+                  class="flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
                 >
                   <i class="material-icons text-xl">bookmark_border</i>
                   All Platforms & Services
-                </button>
+                </RouterLink>
               </li>
             </ul>
           </li>
@@ -119,14 +119,12 @@ const servicesModalRef = useTemplateRef('servicesModal')
             <ul role="list" class="flex flex-col gap-y-1 rounded bg-primary/5 p-1.5">
               <div class="flex items-center justify-between px-2 py-1.5">
                 <span class="font-medium">Paul's Team</span>
-                <RouterLink to="/settings/team" class="font-bold text-blue-500">
-                  Manage Team
-                </RouterLink>
+                <RouterLink to="#" class="font-bold text-blue-500"> Manage Team </RouterLink>
               </div>
               <li>
                 <RouterLink
-                  to="/settings/project"
-                  class="flex items-center gap-x-3 rounded-md px-2 py-0.5 font-semibold leading-6 transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+                  to="#"
+                  class="flex items-center gap-x-3 rounded-md px-2 py-0.5 font-semibold leading-6 transition-colors hover:bg-primary/25"
                 >
                   <i class="material-icons text-sm">settings</i>
                   Project Settings
@@ -135,8 +133,8 @@ const servicesModalRef = useTemplateRef('servicesModal')
 
               <li>
                 <RouterLink
-                  to="/settings/languages"
-                  class="flex items-center gap-x-3 rounded-md px-2 py-0.5 font-semibold leading-6 transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+                  to="#"
+                  class="flex items-center gap-x-3 rounded-md px-2 py-0.5 font-semibold leading-6 transition-colors hover:bg-primary/25"
                 >
                   <i class="material-icons text-sm">language</i>
                   Language
@@ -146,7 +144,7 @@ const servicesModalRef = useTemplateRef('servicesModal')
               <li>
                 <RouterLink
                   to="/"
-                  class="flex items-center gap-x-3 rounded-md px-2 py-0.5 font-semibold leading-6 transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
+                  class="flex items-center gap-x-3 rounded-md px-2 py-0.5 font-semibold leading-6 transition-colors hover:bg-primary/25"
                 >
                   <i class="material-icons text-sm">keyboard_return</i>
                   Return Home
@@ -157,7 +155,5 @@ const servicesModalRef = useTemplateRef('servicesModal')
         </ul>
       </nav>
     </div>
-
-    <ServicesModal ref="servicesModal" />
   </div>
 </template>

@@ -60,7 +60,7 @@ export const useTeamStore = defineStore('teamStore', () => {
       }
     },
     async createUpdate(type): Promise<FSReturnData<TeamData>> {
-      let id = this.data.tm_id !== '' ? this.data.tm_id : crypto.randomUUID();
+      const id = this.data.tm_id !== '' ? this.data.tm_id : crypto.randomUUID();
       this.data.tm_id = id
       const post = await postCollection('team', 'teams', null, id, this.data, type)
       console.log(post)
@@ -90,7 +90,7 @@ export const useTeamStore = defineStore('teamStore', () => {
       }
     },
     async createUpdate(tm_id: string, type): Promise<FSReturnData<TeamMembersData>> {
-      let id = this.data.member_id !== '' ? this.data.member_id : crypto.randomUUID();
+      const id = this.data.member_id !== '' ? this.data.member_id : crypto.randomUUID();
       this.data.member_id = id
       const post = await postCollection('team_members', 'teams/:tm_id/team_members', {tm_id}, id, this.data, type)
       console.log(post)

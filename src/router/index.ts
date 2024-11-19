@@ -20,7 +20,14 @@ const routes = [
       {
         path: 'workspace/:workspaceId',
         component: () => import('@/core/layouts/workspace.vue'),
-        children: [...metaRoutes],
+        children: [
+          {
+            path: 'platforms',
+            name: 'all-platforms',
+            component: () => import('@/modules/platforms/page.vue'),
+          },
+          ...metaRoutes,
+        ],
       },
     ],
   },

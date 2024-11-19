@@ -1,3 +1,4 @@
+import type { PlatformApiData, TeamRefsData } from './AuthUserTypes'
 import type { SubCollections } from '@/core/types/UniTypes'
 import type {
   UserData,
@@ -8,7 +9,6 @@ import type {
   TeamData,
   TeamMembersData,
 } from '@/core/utils/types'
-import type { PlatformApiData, TeamRefsData } from './AuthUserTypes'
 
 export type SubCollectionKey<T extends SubCollections> = T['subCollections']
 
@@ -47,7 +47,7 @@ interface User_Collection {
     interface: TeamRefsData
     sub_col: SubCollectionKey<TeamRefsData>[]
     sub_params: {
-      uid:string
+      uid: string
     } | null
   }
 }
@@ -60,13 +60,13 @@ interface Team_Collection {
     sub_col: SubCollectionKey<TeamData>[]
     sub_params: {} | null
   }
-  team_members:{
+  team_members: {
     id: 'member_id'
     path: 'teams/:tm_id/team_members'
     interface: TeamMembersData
     sub_col: SubCollectionKey<TeamMembersData>[]
     sub_params: {
-      tm_id:string
+      tm_id: string
     } | null
   }
 }
@@ -79,13 +79,13 @@ interface Team_Collection {
     sub_col: SubCollectionKey<TeamData>[]
     sub_params: {} | null
   }
-  team_members:{
+  team_members: {
     id: 'member_id'
     path: 'teams/:tm_id/team_members'
     interface: TeamMembersData
     sub_col: SubCollectionKey<TeamMembersData>[]
     sub_params: {
-      tm_id:string
+      tm_id: string
     } | null
   }
 }
@@ -99,7 +99,7 @@ export type CollectionsInterface = {
     sub_params: {} | null
   }
 
-  invitation:{
+  invitation: {
     id: 'iv_id'
     path: 'invitations'
     interface: InvitationData
@@ -113,4 +113,6 @@ export type CollectionsInterface = {
   //   sub_col: SubCollectionKey<ChatBotFlowData>[]
   //   sub_params: {} | null
   // }
-} & Workspace_Collection & User_Collection & Team_Collection
+} & Workspace_Collection &
+  User_Collection &
+  Team_Collection

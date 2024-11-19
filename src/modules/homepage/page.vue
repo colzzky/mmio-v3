@@ -32,9 +32,9 @@ function newWorkspaceReturn() {
   newWorkspaceModal.value = false
 }
 
-const new_team_modal = ref(false) 
-function new_team_return(){
-    new_team_modal.value = false
+const new_team_modal = ref(false)
+function new_team_return() {
+  new_team_modal.value = false
 }
 </script>
 
@@ -72,7 +72,12 @@ function new_team_return(){
           Paul's Team
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem class="flex items-center gap-x-1" @click="new_team_modal = !new_team_modal"> Create a Team </DropdownMenuItem>
+        <DropdownMenuItem
+          class="flex items-center gap-x-1"
+          @click="new_team_modal = !new_team_modal"
+        >
+          Create a Team
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
 
