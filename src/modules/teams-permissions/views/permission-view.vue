@@ -1,12 +1,6 @@
 <script lang="ts" setup>
 import Button from '@/core/components/ui/button/Button.vue';
 import Checkbox from '@/core/components/ui/checkbox/Checkbox.vue';
-import DropdownMenu from '@/core/components/ui/dropdown-menu/DropdownMenu.vue';
-import DropdownMenuCheckboxItem from '@/core/components/ui/dropdown-menu/DropdownMenuCheckboxItem.vue';
-import DropdownMenuContent from '@/core/components/ui/dropdown-menu/DropdownMenuContent.vue';
-import DropdownMenuLabel from '@/core/components/ui/dropdown-menu/DropdownMenuLabel.vue';
-import DropdownMenuSeparator from '@/core/components/ui/dropdown-menu/DropdownMenuSeparator.vue';
-import DropdownMenuTrigger from '@/core/components/ui/dropdown-menu/DropdownMenuTrigger.vue';
 import Input from '@/core/components/ui/input/Input.vue';
 import Label from '@/core/components/ui/label/Label.vue';
 import RadioGroup from '@/core/components/ui/radio-group/RadioGroup.vue';
@@ -14,7 +8,7 @@ import RadioGroupItem from '@/core/components/ui/radio-group/RadioGroupItem.vue'
 import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue';
 import { toast } from '@/core/components/ui/toast';
 import Toaster from '@/core/components/ui/toast/Toaster.vue';
-import { Access_levels, custom_access, Permission_Services, type PermissionData, type AccessStructure, custom_permission, type CustomPermissions } from '@/core/types/PermissionTypes';
+import { Access_levels, custom_access as custom_permission_struct, Permission_Services, type PermissionData, type AccessStructure, custom_permission, type CustomPermissions } from '@/core/types/PermissionTypes';
 import router from '@/router';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissionStore } from '@/stores/permissionStore';
@@ -28,11 +22,10 @@ const permissionStore = usePermissionStore()
 const { user_auth, user_created_permissions: permissions } = authStore
 const { permission: pm_model } = permissionStore
 const pageLoad = ref<boolean>(false)
+
 const custom_order = <(keyof CustomPermissions)[]>['view', 'add', 'edit', 'delete', 'publish'];
-
-
-
 const permission_id = route.params.permission_id
+const custom_access = <AccessStructure>JSON.parse(JSON.stringify(custom_permission_struct))
 const selected_permission = reactive({
     data: <PermissionData | null>null,
     isFetching: <boolean>false,
@@ -86,6 +79,7 @@ const selected_permission = reactive({
                 }
                 if (custom !== -1) {
                     this.data.assignment[key].access.splice(custom, 1);
+                    delete this.data.assignment[key].custom
                 }
                 this.data.assignment[key].access.push(access_level)
             }
@@ -137,6 +131,22 @@ const selected_permission = reactive({
     }
 })
 
+async function find_selected_permission() {
+    selected_permission.isFetching = true
+    if (permissions.data.length) {
+        const find_permission = permissions.data.find((permission: PermissionData) => permission.permission_id === permission_id)
+        if (find_permission) {
+            selected_permission.data = find_permission
+        }
+    } else {
+        const find_permission = await pm_model.get(permission_id as string)
+        if (find_permission.status) {
+            selected_permission.data = find_permission.data
+        }
+    }
+    selected_permission.isFetching = false
+}
+
 const name_form = reactive({
     input: <Pick<PermissionData, 'name'>>{
         name: ''
@@ -176,23 +186,6 @@ const name_form = reactive({
         }
     }
 })
-
-
-async function find_selected_permission() {
-    selected_permission.isFetching = true
-    if (permissions.data.length) {
-        const find_permission = permissions.data.find((permission: PermissionData) => permission.permission_id === permission_id)
-        if (find_permission) {
-            selected_permission.data = find_permission
-        }
-    } else {
-        const find_permission = await pm_model.get(permission_id as string)
-        if (find_permission.status) {
-            selected_permission.data = find_permission.data
-        }
-    }
-    selected_permission.isFetching = false
-}
 
 const accessLevelsArray = Object.entries(Access_levels)
 
