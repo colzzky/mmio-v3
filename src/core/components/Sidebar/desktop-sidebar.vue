@@ -94,7 +94,7 @@ const servicesStore = useServicesStore()
             >
               <li v-for="[name, service] in servicesStore.pinnedServices" :key="name">
                 <RouterLink
-                  :to="{ name }"
+                  :to="{ name: service.name }"
                   class="grid grid-cols-[20px_1fr_20px] items-center gap-x-3 rounded-md px-2 py-1 font-semibold leading-6 transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
                 >
                   <i :class="['bx text-lg', service.icon]"></i>

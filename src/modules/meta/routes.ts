@@ -105,7 +105,7 @@ export const services = new Map(
     key,
     {
       ...values,
-      name: key,
+      name: `meta-${key}`,
     },
   ]),
 )
@@ -167,9 +167,10 @@ const childrenRouteRecords: RouteRecord = {
     component: () => import('./views/MetaHomePage.vue'),
   },
 }
+
 const childrenRoutes = Object.entries(childrenRouteRecords).map(([key, values]) => ({
   ...values,
-  name: key,
+  name: `meta-${key}`,
   path: key,
 })) as RouteRecordRaw[]
 
