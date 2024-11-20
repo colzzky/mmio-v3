@@ -61,6 +61,9 @@ export const admin_access: AccessStructure = {
     },
     CommentAutoReply: {
         access: [Access_levels.FULL],
+    },
+    EmailMarketing: {
+        access: [Access_levels.READ],
     }
 }
 
