@@ -45,7 +45,7 @@ async function get_permissions() {
         const get = await getWhereAny('permission', 'permissions', {}, [], [{
             fieldName: 'owner_uid', operator: '==', value: user_auth.data.uid
         }])
-        if (get.status) {
+        if (get.status && get.data.length) {
             get.data.forEach(permission => {
                 permissions.data.push(permission)
             });
