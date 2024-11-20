@@ -7,7 +7,8 @@ import Input from '@/core/components/ui/input/Input.vue';
 import { toast } from '@/core/components/ui/toast';
 import Toaster from '@/core/components/ui/toast/Toaster.vue';
 import type { InvitationData } from '@/core/types/InvitationTypes';
-import type { TeamData, TeamMembersData } from '@/core/types/TeamTypes';
+import { admin_access, default_access } from '@/core/types/PermissionTypes';
+import { TeamRole, type TeamData, type TeamMembersData } from '@/core/types/TeamTypes';
 import { postCollectionBatch } from '@/core/utils/firebase-collections';
 import { uiHelpers } from '@/core/utils/ui-helper';
 import { useAuthStore } from '@/stores/authStore';
@@ -230,8 +231,9 @@ const create_team_modal = reactive({
                 team_members.reInit()
                 team_members.data.uid = user_auth.data.uid
                 team_members.data.member_id = crypto.randomUUID()
-                team_members.data.permission = ['Read and write']
+                team_members.data.accessPermissions = JSON.parse(JSON.stringify(admin_access))
                 team_members.data.isDisabled = true
+                team_members.data.role = TeamRole.OWNER
                 team_members.data.isPending = false
                 await team_members.createUpdate(team_model.data.tm_id, 'new')
                 //Create Reference
@@ -266,9 +268,10 @@ const create_team_modal = reactive({
             team_members.push({
                 uid: '',
                 member_id: member_uuid,
-                permission: [],
+                accessPermissions: JSON.parse(JSON.stringify(default_access)),
                 isDisabled: true,
                 isPending: true,
+                role:TeamRole.MEMBER,
                 invitation: {
                     reference: invite_uuid,
                     email: email,

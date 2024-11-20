@@ -9,7 +9,8 @@ import { toast } from '@/core/components/ui/toast';
 import Toaster from '@/core/components/ui/toast/Toaster.vue';
 import { user_data, type UserData } from '@/core/types/AuthUserTypes';
 import type { InvitationData } from '@/core/types/InvitationTypes';
-import type { TeamData, TeamInvitation, TeamMembersData } from '@/core/types/TeamTypes';
+import { default_access } from '@/core/types/PermissionTypes';
+import { TeamRole, type TeamData, type TeamInvitation, type TeamMembersData } from '@/core/types/TeamTypes';
 import { getWhereAny, postCollectionBatch } from '@/core/utils/firebase-collections';
 import { uiHelpers } from '@/core/utils/ui-helper';
 import router from '@/router';
@@ -94,9 +95,10 @@ const current_team = reactive({
                 team_members.push({
                     uid: '',
                     member_id: member_uuid,
-                    permission: [],
+                    accessPermissions: JSON.parse(JSON.stringify(default_access)),
                     isDisabled: true,
                     isPending: true,
+                    role:TeamRole.MEMBER,
                     invitation: {
                         reference: invite_uuid,
                         email: email,
@@ -151,7 +153,7 @@ const selected_member = reactive({
     invitation: <TeamInvitation | null>null,
     get_active_member(uid: string, isPending: boolean, member: TeamMembersData) {
         this.member_info = member
-        this.permission = `${this.member_info.permission.length} permission/s`
+        this.permission = `${Object.keys(this.member_info.accessPermissions).length} permission/s`
         this.isDisabled = this.member_info.isDisabled
         if (uid && !isPending) {
             this.user_data = current_team.members_info[uid]
