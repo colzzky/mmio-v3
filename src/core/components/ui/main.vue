@@ -28,7 +28,7 @@ async function handleLogout() {
 
 <template>
   <header class="flex h-16 items-center justify-between p-4">
-    <div>
+    <div class="grid gap-y-0.5">
       <h1 class="font-bold leading-6 tracking-tight">
         <slot name="heading" />
       </h1>
@@ -64,7 +64,7 @@ async function handleLogout() {
             </RouterLink>
           </DropdownMenuItem>
           <DropdownMenuItem class="flex items-center gap-x-2" as-child>
-            <RouterLink to="/settings/api-integrations">
+            <RouterLink :to="{ name: 'workspace-settings-integrations' }">
               <i class="bx bx-box text-lg" />
               API Integrations
             </RouterLink>

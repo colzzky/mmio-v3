@@ -12,9 +12,7 @@ import {
 } from '@/core/components/ui/dropdown-menu'
 import { Separator } from '@/core/components/ui/separator'
 import { useServicesStore } from '@/stores/servicesStore'
-import { useSidebarStore } from '@/stores/sidebarStore'
 
-const sidebarStore = useSidebarStore()
 const servicesStore = useServicesStore()
 </script>
 
@@ -47,8 +45,7 @@ const servicesStore = useServicesStore()
             <ul role="list" class="-mx-2 flex flex-col gap-y-1 p-4">
               <li>
                 <RouterLink
-                  v-if="sidebarStore.platformName !== 'platforms'"
-                  :to="{ name: sidebarStore.platformName }"
+                  :to="{ name: 'meta' }"
                   class="flex items-center gap-x-3 rounded-md p-2 text-sm/6 font-semibold transition-colors hover:bg-primary/25 aria-[current=page]:bg-primary aria-[current=page]:text-primary-foreground"
                 >
                   <i class="material-icons text-xl">grid_view</i>
@@ -123,7 +120,7 @@ const servicesStore = useServicesStore()
               </div>
               <li>
                 <RouterLink
-                  to="#"
+                  :to="{ name: 'workspace-settings-general' }"
                   class="flex items-center gap-x-3 rounded-md px-2 py-0.5 font-semibold leading-6 transition-colors hover:bg-primary/25"
                 >
                   <i class="material-icons text-sm">settings</i>
@@ -133,7 +130,7 @@ const servicesStore = useServicesStore()
 
               <li>
                 <RouterLink
-                  to="#"
+                  :to="{ name: 'workspace-settings-languages' }"
                   class="flex items-center gap-x-3 rounded-md px-2 py-0.5 font-semibold leading-6 transition-colors hover:bg-primary/25"
                 >
                   <i class="material-icons text-sm">language</i>
