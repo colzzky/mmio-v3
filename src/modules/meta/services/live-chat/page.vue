@@ -16,10 +16,10 @@ const selectedChat = computed(() => chatsMap.get(+(route.query.chatId ?? chats[0
 </script>
 
 <template>
-  <Main class="grid gap-y-4">
+  <Main class="grid gap-y-4 [--container-padding:theme(spacing.4)]">
     <template #heading>Live Chat</template>
     <Card
-      class="grid h-[calc(100svh-166px)] grid-cols-[var(--inline-cols)_minmax(0,1fr)_var(--inline-cols)] grid-rows-1 overflow-hidden text-xs [--inline-cols:min(250px)]"
+      class="grid h-[calc(100svh-var(--header-height)-(var(--container-padding)*2))] grid-cols-[var(--inline-cols)_minmax(0,1fr)_var(--inline-cols)] grid-rows-1 overflow-hidden text-xs [--header-height:64px] [--inline-cols:min(250px)]"
     >
       <!-- chat list -->
       <section class="flex flex-col gap-y-4 border-e p-4">
