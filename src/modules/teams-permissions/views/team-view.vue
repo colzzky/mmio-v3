@@ -22,13 +22,21 @@ import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { z, type ZodRawShape } from 'zod';
 import MemberPermission from '../components/team/memberPermission.vue';
+import Select from '@/core/components/ui/select/Select.vue';
+import SelectTrigger from '@/core/components/ui/select/SelectTrigger.vue';
+import SelectValue from '@/core/components/ui/select/SelectValue.vue';
+import SelectContent from '@/core/components/ui/select/SelectContent.vue';
+import SelectGroup from '@/core/components/ui/select/SelectGroup.vue';
+import SelectLabel from '@/core/components/ui/select/SelectLabel.vue';
+import SelectItem from '@/core/components/ui/select/SelectItem.vue';
 const route = useRoute();
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
 const invitationStore = useInvitationStore()
 const { invitation, createTeamInvite } = invitationStore
 const { user_auth, user, user_team_refs } = authStore
-const { team: team_model } = teamStore
+const { team: team_model, team_members } = teamStore
+const team_role = Object.values(TeamRole).filter(role => role !== TeamRole.OWNER);
 
 const team_id = route.params.team_id
 const pageLoad = ref<boolean>(true)
@@ -99,7 +107,7 @@ const current_team = reactive({
                     accessPermissions: JSON.parse(JSON.stringify(default_access)),
                     isDisabled: true,
                     isPending: true,
-                    role:TeamRole.MEMBER,
+                    role: TeamRole.MEMBER,
                     invitation: {
                         reference: invite_uuid,
                         email: email,
@@ -149,19 +157,33 @@ const selected_member = reactive({
     user_data: <UserData | null>null,
     member_info: <TeamMembersData | null>null,
     permission: '',
-    role: <string>'',
-    isDisabled: <boolean>false,
-    invitation: <TeamInvitation | null>null,
+    change_role_load: <boolean>false,
     set_active_member(uid: string, isPending: boolean, member: TeamMembersData) {
         this.member_info = member
         this.permission = `${Object.keys(this.member_info.accessPermissions).length} permission/s`
-        this.isDisabled = this.member_info.isDisabled
         if (uid && !isPending) {
             this.user_data = current_team.members_info[uid]
         } else {
             if (member.invitation) {
                 this.user_data = user_data
                 this.user_data.email = member.invitation.email
+            }
+        }
+    },
+    async change_role() {
+        this.change_role_load = true
+        console.log(this.member_info?.role)
+        await this.save_update()
+        this.change_role_load = false
+    },
+
+    async save_update() {
+        if (this.member_info) {
+            team_members.reInit()
+            team_members.set(this.member_info)
+            const update_member = await team_members.createUpdate(team_id as string, "update")
+            if (update_member.status) {
+                this.member_info = update_member.data
             }
         }
     },
@@ -266,9 +288,9 @@ async function fetch_validate_team() {
     pageLoad.value = false
 }
 
-async function copyLink(type:'member'|'team',invi_id: string) {
+async function copyLink(type: 'member' | 'team', invi_id: string) {
     try {
-        if(type === 'member')await navigator.clipboard.writeText(`http://localhost:5173/member-invite/${invi_id}`);
+        if (type === 'member') await navigator.clipboard.writeText(`http://localhost:5173/member-invite/${invi_id}`);
         await navigator.clipboard.writeText(`http://localhost:5173/team-invite/${invi_id}`);
         toast({
             title: 'Invited link Copied',
@@ -294,18 +316,18 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
 });
 
 const member_permission_modal = ref(false)
-async function member_permission_modal_return(member_data:TeamMembersData|null) {
+async function member_permission_modal_return(member_data: TeamMembersData | null) {
     member_permission_modal.value = false
-    if(member_data && current_team.data && current_team.data.team_members){
+    if (member_data && current_team.data && current_team.data.team_members) {
         selected_member.member_info = member_data
         const member_index = current_team.data.team_members.findIndex(member => member.member_id === member_data.member_id)
-        if(member_index){
+        if (member_index) {
             current_team.data.team_members[member_index] = member_data
             toast({
-            title: 'Permission successfully updated',
-            variant: 'success',
-            duration: 2000
-        })
+                title: 'Permission successfully updated',
+                variant: 'success',
+                duration: 2000
+            })
         }
     }
 }
@@ -361,10 +383,11 @@ async function member_permission_modal_return(member_data:TeamMembersData|null) 
                                             </div>
                                         </div>
                                         <div class="w-[30%]">
-                                            <div class="text-sm">{{Object.keys(member.accessPermissions).length}} Permissions</div>
+                                            <div class="text-sm">{{ Object.keys(member.accessPermissions).length }}
+                                                Permissions</div>
                                         </div>
                                         <div class="w-[20%]">
-                                            <div class="text-sm">{{ member.role}}</div>
+                                            <div class="text-sm">{{ member.role }}</div>
                                         </div>
                                     </div>
                                     <div v-else-if="member.isPending && member.invitation"
@@ -384,14 +407,16 @@ async function member_permission_modal_return(member_data:TeamMembersData|null) 
                                                     </p>
                                                     <div>
                                                         <Button class="text-blue-500 p-0 text-sm" size="sm"
-                                                            variant="ghost" @click="copyLink('member',member.invitation.reference)"><i
+                                                            variant="ghost"
+                                                            @click="copyLink('member', member.invitation.reference)"><i
                                                                 class="material-icons">link</i> Copy link</Button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="w-[30%]">
-                                            <div class="text-sm">{{Object.keys(member.accessPermissions).length}} Permissions</div>
+                                            <div class="text-sm">{{ Object.keys(member.accessPermissions).length }}
+                                                Permissions</div>
                                         </div>
                                         <div class="w-[20%]">
                                             <div class="text-sm">Member</div>
@@ -514,23 +539,42 @@ async function member_permission_modal_return(member_data:TeamMembersData|null) 
                                 </div>
                             </div>
 
-                            <div class="flex flex-col">
+                            <div class="flex justify-between items-center">
                                 <span class="font-semibold text-sm">Role:</span>
-                                <span class="text-md">{{ selected_member.member_info.role}}</span>
+                                <Select v-if="!selected_member.change_role_load" v-model="selected_member.member_info.role"
+                                    @update:model-value="selected_member.change_role()">
+                                    <SelectTrigger class="w-[180px] h-[3vh] ">
+                                        <SelectValue :placeholder="selected_member.member_info.role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>{{ selected_member.member_info.role }}</SelectLabel>
+                                            <SelectItem v-for="(role, index) in team_role" :key="index" :value="role">
+                                                {{ role }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">
+                                    <i class="material-icons animate-spin text-sm">donut_large</i>Changing role
+                                </Button>
+
                             </div>
 
-                            <div class="flex flex-col">
+                            <div class="flex justify-between items-center">
                                 <span class="font-semibold text-sm">Permissions:</span>
                                 <div>
-                                    <span @click="member_permission_modal = !member_permission_modal" class="text-md text-blue-500 cursor-pointer font-semibold text-sm">
-                                        {{ `${Object.keys(selected_member.member_info.accessPermissions).length} Permissions` }}</span>
+                                    <span @click="member_permission_modal = !member_permission_modal"
+                                        class="text-md text-blue-500 cursor-pointer font-semibold text-sm">
+                                        {{ `${Object.keys(selected_member.member_info.accessPermissions).length}
+                                        Permissions` }}</span>
                                 </div>
                             </div>
 
                             <div class="flex flex-col">
                                 <div class="flex justify-between items-center">
                                     <span class="font-semibold text-sm">Revoke Access:</span>
-                                    <Switch :checked="selected_member.isDisabled" />
+                                    <Switch :checked="selected_member.member_info.isDisabled" />
 
                                 </div>
                                 <div class="flex justify-between items-center">
@@ -557,7 +601,10 @@ async function member_permission_modal_return(member_data:TeamMembersData|null) 
         loadingg....
     </div>
 
-    <MemberPermission :open_modal="member_permission_modal" :team_id='(team_id as string)' :member="selected_member.member_info" :member_name="selected_member.user_data ? selected_member.user_data.displayName:''" @return="member_permission_modal_return" />
+    <MemberPermission :open_modal="member_permission_modal" :team_id='(team_id as string)'
+        :member="selected_member.member_info"
+        :member_name="selected_member.user_data ? selected_member.user_data.displayName : ''"
+        @return="member_permission_modal_return" />
 </template>
 <style scoped>
 .page-container {
