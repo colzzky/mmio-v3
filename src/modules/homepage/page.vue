@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { authedUserName, workspaces } from './temporaries'
 import { Avatar, AvatarFallback, AvatarImage } from '@/core/components/ui/avatar'
-import { Button } from '@/core/components/ui/button'
+import AvatarDropdown from '@/core/components/ui/avatar-dropdown.vue'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -82,13 +82,10 @@ function new_team_return() {
     </DropdownMenu>
 
     <div class="flex items-center gap-x-2 self-start">
-      <Button variant="ghost" size="xs">
-        <i class="material-icons text-md">notifications</i>
-      </Button>
-      <Avatar class="size-8">
-        <AvatarImage src="https://placehold.co/48" />
-        <AvatarFallback>UI</AvatarFallback>
-      </Avatar>
+      <button type="button" class="size-8 rounded hover:bg-primary/5">
+        <i class="bx bx-bell text-xl" />
+      </button>
+      <AvatarDropdown />
     </div>
   </header>
 
