@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import { Card } from '@/core/components/ui/card'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from '@/core/components/ui/dropdown-menu'
 import Main from '@/core/components/ui/main.vue'
 import { ScrollArea } from '@/core/components/ui/scroll-area'
 import { useServicesStore } from '@/stores/servicesStore'
@@ -49,6 +55,18 @@ const servicesStore = useServicesStore()
               {{ service.pinned ? 'bookmark' : 'bookmark_outline' }}
             </i>
           </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <span class="sr-only">Open Service Menu</span>
+              <i class="bx bx-dots-vertical-rounded text-xl" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>Menu #1</DropdownMenuItem>
+              <DropdownMenuItem>Menu #2</DropdownMenuItem>
+              <DropdownMenuItem>Menu #3</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <button type="button" class="self-center leading-none">
             <i class="bx bx-dots-vertical-rounded text-xl" />
           </button>
