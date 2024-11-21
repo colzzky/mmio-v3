@@ -32,7 +32,7 @@ const selectedChat = computed(() => chatsMap.get(+(route.query.chatId ?? chats[0
             :key="chatId"
             :to="{ query: { chatId } }"
             :class="[
-              'grid grid-cols-[40px_minmax(0,1fr)] gap-x-1 p-2',
+              'grid grid-cols-[40px_minmax(0,1fr)] gap-x-1 rounded-md p-2',
               selectedChat?.id === chatId ? 'bg-primary/10' : 'hover:bg-primary/5',
             ]"
           >
