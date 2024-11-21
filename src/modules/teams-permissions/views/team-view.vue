@@ -9,7 +9,8 @@ import { toast } from '@/core/components/ui/toast';
 import Toaster from '@/core/components/ui/toast/Toaster.vue';
 import { user_data, type UserData } from '@/core/types/AuthUserTypes';
 import type { InvitationData } from '@/core/types/InvitationTypes';
-import type { TeamData, TeamInvitation, TeamMembersData } from '@/core/types/TeamTypes';
+import { default_access } from '@/core/types/PermissionTypes';
+import { team_data, TeamRole, type TeamData, type TeamInvitation, type TeamMembersData } from '@/core/types/TeamTypes';
 import { getWhereAny, postCollectionBatch } from '@/core/utils/firebase-collections';
 import { uiHelpers } from '@/core/utils/ui-helper';
 import router from '@/router';
@@ -20,13 +21,22 @@ import { reactive } from 'vue';
 import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { z, type ZodRawShape } from 'zod';
+import MemberPermission from '../components/team/memberPermission.vue';
+import Select from '@/core/components/ui/select/Select.vue';
+import SelectTrigger from '@/core/components/ui/select/SelectTrigger.vue';
+import SelectValue from '@/core/components/ui/select/SelectValue.vue';
+import SelectContent from '@/core/components/ui/select/SelectContent.vue';
+import SelectGroup from '@/core/components/ui/select/SelectGroup.vue';
+import SelectLabel from '@/core/components/ui/select/SelectLabel.vue';
+import SelectItem from '@/core/components/ui/select/SelectItem.vue';
 const route = useRoute();
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
 const invitationStore = useInvitationStore()
 const { invitation, createTeamInvite } = invitationStore
 const { user_auth, user, user_team_refs } = authStore
-const { team: team_model } = teamStore
+const { team: team_model, team_members } = teamStore
+const team_role = Object.values(TeamRole).filter(role => role !== TeamRole.OWNER);
 
 const team_id = route.params.team_id
 const pageLoad = ref<boolean>(true)
@@ -94,9 +104,10 @@ const current_team = reactive({
                 team_members.push({
                     uid: '',
                     member_id: member_uuid,
-                    permission: [],
+                    accessPermissions: JSON.parse(JSON.stringify(default_access)),
                     isDisabled: true,
                     isPending: true,
+                    role: TeamRole.MEMBER,
                     invitation: {
                         reference: invite_uuid,
                         email: email,
@@ -146,13 +157,10 @@ const selected_member = reactive({
     user_data: <UserData | null>null,
     member_info: <TeamMembersData | null>null,
     permission: '',
-    role: <string>'',
-    isDisabled: <boolean>false,
-    invitation: <TeamInvitation | null>null,
-    get_active_member(uid: string, isPending: boolean, member: TeamMembersData) {
+    change_role_load: <boolean>false,
+    set_active_member(uid: string, isPending: boolean, member: TeamMembersData) {
         this.member_info = member
-        this.permission = `${this.member_info.permission.length} permission/s`
-        this.isDisabled = this.member_info.isDisabled
+        this.permission = `${Object.keys(this.member_info.accessPermissions).length} permission/s`
         if (uid && !isPending) {
             this.user_data = current_team.members_info[uid]
         } else {
@@ -161,7 +169,23 @@ const selected_member = reactive({
                 this.user_data.email = member.invitation.email
             }
         }
+    },
+    async change_role() {
+        this.change_role_load = true
+        console.log(this.member_info?.role)
+        await this.save_update()
+        this.change_role_load = false
+    },
 
+    async save_update() {
+        if (this.member_info) {
+            team_members.reInit()
+            team_members.set(this.member_info)
+            const update_member = await team_members.createUpdate(team_id as string, "update")
+            if (update_member.status) {
+                this.member_info = update_member.data
+            }
+        }
     },
     reset() {
         this.user_data = null
@@ -264,8 +288,9 @@ async function fetch_validate_team() {
     pageLoad.value = false
 }
 
-async function copyLink(invi_id: string) {
+async function copyLink(type: 'member' | 'team', invi_id: string) {
     try {
+        if (type === 'member') await navigator.clipboard.writeText(`http://localhost:5173/member-invite/${invi_id}`);
         await navigator.clipboard.writeText(`http://localhost:5173/team-invite/${invi_id}`);
         toast({
             title: 'Invited link Copied',
@@ -289,6 +314,23 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
     }
     // Perform additional actions if needed when myData changes
 });
+
+const member_permission_modal = ref(false)
+async function member_permission_modal_return(member_data: TeamMembersData | null) {
+    member_permission_modal.value = false
+    if (member_data && current_team.data && current_team.data.team_members) {
+        selected_member.member_info = member_data
+        const member_index = current_team.data.team_members.findIndex(member => member.member_id === member_data.member_id)
+        if (member_index) {
+            current_team.data.team_members[member_index] = member_data
+            toast({
+                title: 'Permission successfully updated',
+                variant: 'success',
+                duration: 2000
+            })
+        }
+    }
+}
 
 </script>
 <template>
@@ -320,7 +362,7 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
                             <div class="flex flex-col space-y-4 py-4">
                                 <div v-for="member in current_team.data.team_members"
                                     class=" hover:bg-slate-100 rounded-lg transition-colors duration-100 cursor-pointer"
-                                    @click="selected_member.get_active_member(member.uid, member.isPending, member)"
+                                    @click="selected_member.set_active_member(member.uid, member.isPending, member)"
                                     :class="{ 'bg-slate-100': selected_member.member_info && selected_member.member_info.member_id === member.member_id }">
                                     <div v-if="!member.isPending && member.uid" class="flex items-center py-2 px-2">
                                         <div class="w-[50%] flex space-x-4 items-center">
@@ -341,11 +383,11 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
                                             </div>
                                         </div>
                                         <div class="w-[30%]">
-                                            <div class="text-sm">14 Permissions</div>
+                                            <div class="text-sm">{{ Object.keys(member.accessPermissions).length }}
+                                                Permissions</div>
                                         </div>
                                         <div class="w-[20%]">
-                                            <div class="text-sm">{{ member.uid === current_team.data.owner_uid ? 'Owner'
-                                                : 'Member' }}</div>
+                                            <div class="text-sm">{{ member.role }}</div>
                                         </div>
                                     </div>
                                     <div v-else-if="member.isPending && member.invitation"
@@ -365,14 +407,16 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
                                                     </p>
                                                     <div>
                                                         <Button class="text-blue-500 p-0 text-sm" size="sm"
-                                                            variant="ghost" @click="copyLink(member.invitation.reference)"><i
+                                                            variant="ghost"
+                                                            @click="copyLink('member', member.invitation.reference)"><i
                                                                 class="material-icons">link</i> Copy link</Button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="w-[30%]">
-                                            <div class="text-sm">14 Permissions</div>
+                                            <div class="text-sm">{{ Object.keys(member.accessPermissions).length }}
+                                                Permissions</div>
                                         </div>
                                         <div class="w-[20%]">
                                             <div class="text-sm">Member</div>
@@ -408,7 +452,7 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
                                     <span class="text-xs w-64 truncate">www.mmiv3.com/invite/{{
                                         current_team.data.inviteLink }}</span>
                                     <Button class="text-blue-500 p-0 text-sm" size="sm" variant="ghost"
-                                        @click="copyLink(current_team.data.inviteLink)"><i
+                                        @click="copyLink('team', current_team.data.inviteLink)"><i
                                             class="material-icons">link</i> Copy link</Button>
                                 </div>
                                 <div class="flex flex-col justify-end h-14">
@@ -495,24 +539,42 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
                                 </div>
                             </div>
 
-                            <div class="flex flex-col">
+                            <div class="flex justify-between items-center">
                                 <span class="font-semibold text-sm">Role:</span>
-                                <span class="text-md">{{ selected_member.user_data.uid === current_team.data.owner_uid ?
-                                    'Owner' : 'Member' }}</span>
+                                <Select v-if="!selected_member.change_role_load" v-model="selected_member.member_info.role"
+                                    @update:model-value="selected_member.change_role()">
+                                    <SelectTrigger class="w-[180px] h-[3vh] ">
+                                        <SelectValue :placeholder="selected_member.member_info.role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectGroup>
+                                            <SelectLabel>{{ selected_member.member_info.role }}</SelectLabel>
+                                            <SelectItem v-for="(role, index) in team_role" :key="index" :value="role">
+                                                {{ role }}
+                                            </SelectItem>
+                                        </SelectGroup>
+                                    </SelectContent>
+                                </Select>
+                                <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">
+                                    <i class="material-icons animate-spin text-sm">donut_large</i>Changing role
+                                </Button>
+
                             </div>
 
-                            <div class="flex flex-col">
+                            <div class="flex justify-between items-center">
                                 <span class="font-semibold text-sm">Permissions:</span>
                                 <div>
-                                    <span class="text-md text-blue-500 cursor-pointer font-semibold text-sm">{{
-                                        selected_member.permission }}</span>
+                                    <span @click="member_permission_modal = !member_permission_modal"
+                                        class="text-md text-blue-500 cursor-pointer font-semibold text-sm">
+                                        {{ `${Object.keys(selected_member.member_info.accessPermissions).length}
+                                        Permissions` }}</span>
                                 </div>
                             </div>
 
                             <div class="flex flex-col">
                                 <div class="flex justify-between items-center">
                                     <span class="font-semibold text-sm">Revoke Access:</span>
-                                    <Switch :checked="selected_member.isDisabled" />
+                                    <Switch :checked="selected_member.member_info.isDisabled" />
 
                                 </div>
                                 <div class="flex justify-between items-center">
@@ -538,6 +600,11 @@ watch(() => user_team_refs.isInitialized, async (initlized) => {
     <div v-else>
         loadingg....
     </div>
+
+    <MemberPermission :open_modal="member_permission_modal" :team_id='(team_id as string)'
+        :member="selected_member.member_info"
+        :member_name="selected_member.user_data ? selected_member.user_data.displayName : ''"
+        @return="member_permission_modal_return" />
 </template>
 <style scoped>
 .page-container {

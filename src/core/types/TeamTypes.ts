@@ -1,6 +1,14 @@
+import { default_access, type AccessStructure } from './PermissionTypes'
 import type { Timestamp, SubCollections } from './UniTypes'
 
 //Only use subcollection if a collection have a data that has multiple data like activity logs etc.
+
+export enum TeamRole {
+  OWNER = 'Owner',
+  ADMIN = 'Admin',
+  LEAD = 'Lead',
+  MEMBER = 'Member',
+}
 
 export interface TeamData extends SubCollections {
   tm_id: string
@@ -16,7 +24,8 @@ export interface TeamData extends SubCollections {
 export interface TeamMembersData extends SubCollections {
   member_id: string
   uid: string
-  permission: string[]
+  role:TeamRole
+  accessPermissions: AccessStructure
   isPending: boolean
   isDisabled: boolean
   createdAt: string
@@ -42,7 +51,8 @@ export const team_data: TeamData = {
 export const team_members_data: TeamMembersData = {
   member_id: '',
   uid: '',
-  permission: [],
+  role:TeamRole.MEMBER,
+  accessPermissions: {...default_access},
   isDisabled: false,
   isPending: false,
   createdAt: '',

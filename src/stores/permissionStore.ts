@@ -1,7 +1,7 @@
 import type { DocumentData } from 'firebase/firestore'
 import { getCollection, postCollection } from '@/core/utils/firebase-collections'
 import { defineStore } from 'pinia'
-import { default_permission, permission_data, type PermissionData} from '@/core/types/PermissionTypes'
+import { custom_access, default_access, permission_data, type PermissionData} from '@/core/types/PermissionTypes'
 import { useUserStore } from './userStore'
 
 interface FirebaseReturn {
@@ -18,7 +18,7 @@ interface Permission {
   data: PermissionData
   reInit: () => void
   set: (data: PermissionData) => void
-  get: (tm_id: string) => Promise<FSReturnData<PermissionData>>
+  get: (permission_id: string) => Promise<FSReturnData<PermissionData>>
   createUpdate: (type: 'new' | 'update') => Promise<FSReturnData<PermissionData>>
 }
 
@@ -30,9 +30,9 @@ interface FirebaseReturn {
 
 export const usePermissionStore = defineStore('permissionStore', () => {
   const permission = <Permission>({
-    data: { ...permission_data,  assignment:{...default_permission}},
+    data: { ...permission_data,  assignment:{...default_access}},
     reInit() {
-      this.data = { ...permission_data, assignment:{...default_permission}}
+      this.data = { ...permission_data, assignment:{...default_access}}
       //this is team
     },
     set(data: PermissionData) {

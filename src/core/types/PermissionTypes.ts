@@ -1,21 +1,20 @@
 import type { Timestamp, SubCollections } from './UniTypes'
 
-//Only use subcollection if a collection have a data that has multiple data like activity logs etc.
-export enum TeamRole {
-    OWNER = 'owner',
-    ADMIN = 'admin',
-    LEAD = 'lead',
-    MEMBER = 'member',
-}
-
 export enum Access_levels {
     FULL = 'full',
     READ = 'read',
     WRITE = 'write',
     DELETE = 'delete',
+    CUSTOM = 'custom',
 }
 
-interface CustomPermissions {
+export enum Permission_Services {
+    ChatBotFlow = 'Chatbot Flow Service',
+    CommentAutoReply = 'Comment Auto Reply',
+    EmailMarketing = 'Email Marketing',
+}
+
+export interface CustomPermissions {
     view: boolean;
     add: boolean;
     edit: boolean;
@@ -30,74 +29,70 @@ interface PermissionGroup {
 }
 
 // Define the overall permissions structure
-interface PermissionsStructure {
-    ChatBotFlow: PermissionGroup;
-    CommentAutoReply: PermissionGroup;
+export interface AccessStructure {
+    ChatBotFlow?: PermissionGroup;
+    CommentAutoReply?: PermissionGroup;
+    EmailMarketing?:PermissionGroup
 }
-
-
-export const default_permission: PermissionsStructure = {
-    ChatBotFlow: {
-        access: [Access_levels.READ],
-    },
-    CommentAutoReply: {
-        access: [Access_levels.READ],
-    }
-}
-const admin_permission: PermissionsStructure = {
-    ChatBotFlow: {
-        access: [Access_levels.FULL],
-    },
-    CommentAutoReply: {
-        access: [Access_levels.FULL],
-    }
-}
-
-const custom_permission_1: PermissionsStructure = {
-    ChatBotFlow: {
-        access: [Access_levels.READ, Access_levels.WRITE],
-        custom: {
-            view: true,
-            add: true,
-            edit: true,
-            delete: false,
-            publish: false
-        }
-    },
-    CommentAutoReply: {
-        access: [Access_levels.READ],
-        custom: {
-            view: true,
-            add: false,
-            edit: false,
-            delete: false,
-            publish: false
-        }
-    }
-}
-
-
-const User1MemberPermission = {
-    team_role: <TeamRole>TeamRole.MEMBER,
-    permission: custom_permission_1
-}
-
-
 
 export interface PermissionData extends SubCollections {
     permission_id:string
     owner_uid:string
     name:string
-    assignment:PermissionsStructure
+    assignment:AccessStructure
     createdAt:string
     updatedAt:string
+}
+
+//Use when adding a member this is the custom permission
+export const default_access: AccessStructure = {
+    ChatBotFlow: {
+        access: [Access_levels.READ],
+    },
+    CommentAutoReply: {
+        access: [Access_levels.READ],
+    }
+}
+
+//Use when setting member as the admin
+export const admin_access: AccessStructure = {
+    ChatBotFlow: {
+        access: [Access_levels.FULL],
+    },
+    CommentAutoReply: {
+        access: [Access_levels.FULL],
+    },
+    EmailMarketing: {
+        access: [Access_levels.READ],
+    }
+}
+
+//Use when updating cutom permission only
+export const custom_access: AccessStructure = {
+    ChatBotFlow: {
+        access: [Access_levels.READ],
+    },
+    CommentAutoReply: {
+        access: [Access_levels.READ],
+    },
+    EmailMarketing: {
+        access: [Access_levels.READ],
+    }
+}
+
+export const custom_permission:CustomPermissions = {
+    view:false,
+    add:false,
+    edit:false,
+    delete:false,
+    publish:false,
 }
 
 export const permission_data: PermissionData = {
     permission_id: '',
     owner_uid: '',
     name: 'Untitled Permission',
-    assignment: default_permission,
+    assignment: default_access,
     createdAt: '',
     updatedAt: '',
     subCollections: []
