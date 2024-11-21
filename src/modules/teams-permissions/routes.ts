@@ -38,8 +38,8 @@ const childrenRouteRecords: RouteRecord = {
         name: 'permission-view',
         component: () => import('./page.vue'),
       },
-    ]
-  }
+    ],
+  },
 }
 const childrenRoutes = Object.entries(childrenRouteRecords).map(([key, values]) => ({
   ...values,

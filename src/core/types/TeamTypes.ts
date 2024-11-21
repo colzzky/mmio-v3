@@ -24,7 +24,7 @@ export interface TeamData extends SubCollections {
 export interface TeamMembersData extends SubCollections {
   member_id: string
   uid: string
-  role:TeamRole
+  role: TeamRole
   accessPermissions: AccessStructure
   isPending: boolean
   isDisabled: boolean
@@ -51,8 +51,8 @@ export const team_data: TeamData = {
 export const team_members_data: TeamMembersData = {
   member_id: '',
   uid: '',
-  role:TeamRole.MEMBER,
-  accessPermissions: {...default_access},
+  role: TeamRole.MEMBER,
+  accessPermissions: { ...default_access },
   isDisabled: false,
   isPending: false,
   createdAt: '',
