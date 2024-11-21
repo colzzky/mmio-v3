@@ -178,12 +178,14 @@ const selected_member = reactive({
     },
 
     async save_update() {
-        if (this.member_info) {
+        if (this.member_info && current_team.data && current_team.data.team_members) {
             team_members.reInit()
             team_members.set(this.member_info)
             const update_member = await team_members.createUpdate(team_id as string, "update")
             if (update_member.status) {
                 this.member_info = update_member.data
+                const team_member_index = current_team.data.team_members.findIndex(member => member.member_id === update_member.data.member_id)
+                current_team.data.team_members[team_member_index] = update_member.data
             }
         }
     },
