@@ -10,11 +10,11 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const authStore = useAuthStore()
-const { user_auth, user, user_team_refs, fetch_team_list } = authStore
+const { user_auth, user, user_team_refs } = authStore
 
 onMounted(async () => {
   if (!user_team_refs.isInitialized) {
-    await fetch_team_list()
+    await user_team_refs.fetch_team_list()
   }
 })
 </script>

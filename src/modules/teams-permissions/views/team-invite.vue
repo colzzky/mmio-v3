@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { Access_levels, default_access } from '@/core/types/PermissionTypes';
 import { team_data, type TeamData, type TeamMembersData } from '@/core/types/TeamTypes';
 import { getWhereAny, postCollection } from '@/core/utils/firebase-collections';
 import { useAuthStore } from '@/stores/authStore';
@@ -96,7 +97,7 @@ async function accept_invite(team_id: string) {
             uid: user_auth.data.uid,
             isPending: false,
             isDisabled: false,
-            permission: ['read and write'],
+            accessPermissions: JSON.parse(JSON.stringify(default_access)),
         }
 
         //Add member function

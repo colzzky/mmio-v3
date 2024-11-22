@@ -14,6 +14,7 @@ import type { TeamData } from '@/core/types/TeamTypes'
 import type { PermissionData } from '@/core/types/PermissionTypes'
 import router from '@/router'
 import { uiHelpers } from '@/core/utils/ui-helper'
+import { usePlatformAPIStore } from './platformAPIStore'
 
 interface FirebaseReturn {
     status: boolean;
@@ -130,25 +131,45 @@ export const useAuthStore = defineStore('authStore', () => {
         isInitialized: <boolean>false,
         isLoading: <boolean>false,
         lastSnapshot: <any>'',
+        nextFetch: <string>'',
         resetData() {
             this.data = []
             this.isInitialized = false
             this.isLoading = false
             this.lastSnapshot = ''
+        },
+        async fetch_team_list() {
+            this.isLoading = true
+            const user_teams: string[] = []
+            if (user.data && user.data.team_refs) {
+                user.data.team_refs.forEach(team => {
+                    user_teams.push(team.tm_id)
+                })
+                const fetch_team = await getWhereAny('team', 'teams', {}, ['team_members'], [{
+                    fieldName: 'tm_id', operator: 'in', value: user_teams
+                }])
+                console.log(fetch_team)
+                if (fetch_team.status) {
+                    this.data = fetch_team.data
+                }
+            }
+            this.isLoading = false
+            this.isInitialized = true
         }
     })
+
 
     const user_created_permissions = reactive({
         data: <PermissionData[]>[],
         isInitialized: <boolean>false,
         isLoading: <boolean>false,
         lastSnapshot: <any>'',
-        nextFetch:<string>'',
-        generateNextFetch(){
+        nextFetch: <string>'',
+        generateNextFetch() {
             this.nextFetch = uiHelpers.generateExpirationDate(300)
         },
-        checkNextFetch(){
-            if(this.nextFetch){
+        checkNextFetch() {
+            if (this.nextFetch) {
                 const now = new Date();
                 const expireDate = new Date(this.nextFetch);
                 console.log(expireDate)
@@ -167,10 +188,9 @@ export const useAuthStore = defineStore('authStore', () => {
     //Store the information that needs persisting when moving to other page
     const user_details = reactive({
         team_owners_uid: <string[]>[],
-        team_owners:<{ [key: string]: UserData } | null>(null),
-        user_permissions:null
+        team_owners: <{ [key: string]: UserData } | null>(null),
+        user_permissions: null
     })
-
 
     //Called during initiali Registration
     async function createNewUserProfile(data: MutablePick<User, 'displayName' | 'email' | 'photoURL' | 'uid' | 'emailVerified'>) {
@@ -187,27 +207,15 @@ export const useAuthStore = defineStore('authStore', () => {
         }
     }
 
-    //called when initially fetching team refrence
-    async function fetch_team_list() {
-        console.log('fetching Team references.....')
-        user_team_refs.isLoading = true
-        const user_teams: string[] = []
-        if (user.data && user.data.team_refs) {
-            user.data.team_refs.forEach(team => {
-                user_teams.push(team.tm_id)
-            })
-            const fetch_team = await getWhereAny('team', 'teams', {}, ['team_members'], [{
-                fieldName: 'tm_id', operator: 'in', value: user_teams
-            }])
-            console.log(fetch_team)
-            if (fetch_team.status) {
-                user_team_refs.data = fetch_team.data
-            }
-        }
-        user_team_refs.isLoading = false
-        user_team_refs.isInitialized = true
+    async function after_auth_initialization() {
+        const platformApiStore = usePlatformAPIStore()
+        const { platform_api_list } = platformApiStore
+
+        await user_team_refs.fetch_team_list()
+        await platform_api_list.initializeAccountApis()
     }
 
+    //called when initially fetching team refrence
     async function resetAllStore() {
         const projectStore = useProjectStore()
         projectStore.reset_state()
@@ -219,9 +227,9 @@ export const useAuthStore = defineStore('authStore', () => {
         user,
         user_auth,
         user_team_refs,
-        fetch_team_list,
         user_details,
-        user_created_permissions
+        user_created_permissions,
+        after_auth_initialization
     }
 },
     {

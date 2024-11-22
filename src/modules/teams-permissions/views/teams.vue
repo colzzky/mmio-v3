@@ -6,16 +6,11 @@ import type { TeamData } from '@/core/types/TeamTypes';
 import { getWhereAny } from '@/core/utils/firebase-collections';
 import router from '@/router';
 import { useAuthStore } from '@/stores/authStore';
-import { useTeamStore } from '@/stores/teamStore';
 import CreateTeam from '@/modules/teams-permissions/components/team/CreateTeam.vue'
 import { onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
 
-const teamStore = useTeamStore()
 const authStore = useAuthStore()
 const { user_auth, user, user_team_refs, user_details: ud } = authStore
-const { team } = teamStore
-const route = useRoute()
 const pageLoad = ref<boolean>(true)
 
 const new_team_modal = ref(false)
@@ -59,7 +54,6 @@ onMounted(async () => {
   if (user_team_refs.isInitialized) {
     if (user_team_refs.data.length) {
       await fetch_owners()
-
     }
     pageLoad.value = false
   }

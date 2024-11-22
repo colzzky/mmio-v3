@@ -20,6 +20,7 @@ const routes = [
       },
       {
         path: 'workspace/:workspaceId',
+        name:'workspace',
         component: () => import('@/core/layouts/workspace.vue'),
         children: [
           {
@@ -55,16 +56,15 @@ const router = createRouter({
 router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
   const platformApiStore = usePlatformAPIStore()
-  const { user_auth, page_init } = authStore
-
-  const { platform_api_list } = platformApiStore
+  const { user_auth, page_init, after_auth_initialization } = authStore
+  
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const nonAuth = to.matched.some((record) => record.meta.nonAuth)
   if (!from.name) {
     page_init.initialize = false
     console.log('initializing....')
     await user_auth.initializeUser()
-    await platform_api_list.initializeAccountApis()
+    await after_auth_initialization()
     page_init.initialize = true
   }
   const check_if_userexist = await user_auth.check_user_auth()
