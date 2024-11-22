@@ -5,7 +5,7 @@ import DialogContent from '@/core/components/ui/dialog/DialogContent.vue'
 import DialogTitle from '@/core/components/ui/dialog/DialogTitle.vue';
 import Input from '@/core/components/ui/input/Input.vue';
 import type { TeamData } from '@/core/types/TeamTypes';
-import type { WorkspaceData } from '@/core/types/WorkSpaceTypes';
+import { workspace_data, type WorkspaceData } from '@/core/types/WorkSpaceTypes';
 import { getWhereAny } from '@/core/utils/firebase-collections';
 import { uiHelpers } from '@/core/utils/ui-helper';
 import { useAuthStore } from '@/stores/authStore';
@@ -88,7 +88,7 @@ const platforms: PlatformDisplay[] = [
 const props = defineProps<{ open_modal: boolean }>()
 
 const emit = defineEmits<{
-    (e: 'return', value: boolean): void
+    (e: 'return', value: WorkspaceData|null): void
 }>()
 
 watch(() => props.open_modal, (newTrigger) => {
@@ -140,6 +140,7 @@ const workspace_modal = reactive({
     isOpen: false,
     steps: <NewWorkspaceStep>NewWorkspaceStep.Create,
     data: {
+        workspace_data: <WorkspaceData | null>null,
         name: '',
         team: <TeamData | null>null,
     },
@@ -168,14 +169,17 @@ const workspace_modal = reactive({
         }
     },
     close() {
+        const pass_workspace_data = this.data.workspace_data?{...this.data.workspace_data}:null
+        console.log(pass_workspace_data)
         this.steps = NewWorkspaceStep.Create
         this.data = {
+            workspace_data: null,
             name: '',
             team: null,
         }
         workspace_create.reset()
         this.isOpen = false
-        emit('return', false)
+        emit('return', pass_workspace_data)
     },
     async createWorkspace() {
         this.processing_msg = 'Creating a new workspace'
@@ -188,8 +192,7 @@ const workspace_modal = reactive({
             const post = await ws_model.createUpdate('new')
             if (post.status) {
                 if (post.data.team_id) await this.create_workspace_team_refs(post.data)
-                ws_model.reInit()
-                this.steps = NewWorkspaceStep.Complete
+                this.data.workspace_data = post.data
                 this.close()
             }else{
                 console.log('Something wentwrong')
@@ -345,7 +348,7 @@ onMounted(async () => {
                                                             <div>
                                                                 <span class="font-bold">Available teams:</span>
                                                             </div>
-                                                            <div v-for="team, team_index in user_created_teams"
+                                                            <div v-if="user_created_teams.length > 0" v-for="team, team_index in user_created_teams"
                                                                 :key="team.tm_id"
                                                                 class="flex justify-between items-center hover:bg-gray-200 py-2 px-4 rounded-lg">
                                                                 <div class="flex items-center gap-x-4">

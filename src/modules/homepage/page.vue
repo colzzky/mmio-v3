@@ -35,15 +35,7 @@ const sharedWorkspaces = computed(() =>
 const allWorkspaceFilter = ref('Most Recent')
 const sharedWorkspaceFilter = ref('Most Recent')
 
-const newWorkspaceModal = ref(false)
-function newWorkspaceReturn() {
-  newWorkspaceModal.value = false
-}
 
-const new_team_modal = ref(false)
-function new_team_return() {
-  new_team_modal.value = false
-}
 
 const pageLoad = ref<boolean>(false)
 const dataLoad = ref<boolean>(false)
@@ -61,6 +53,20 @@ const user_teams = ref<TeamData[]>([]);
 const selected_team = ref<TeamData | null>(null)
 const selected_team_workspaces = ref<WorkspaceData[]>([])
 const selected_team_owner = ref<WorkspaceData[]>([])
+const newWorkspaceModal = ref(false)
+const new_team_modal = ref(false)
+
+function newWorkspaceReturn(workspace: WorkspaceData | null) {
+  if (workspace) {
+    console.log(workspace)
+    user_created_workspaces.value.push(workspace)
+  }
+  newWorkspaceModal.value = false
+}
+
+function new_team_return() {
+  new_team_modal.value = false
+}
 
 async function fetch_workspaces() {
   if (user_auth.data) {
@@ -132,13 +138,22 @@ async function select_team(team: TeamData | null) {
       if (team_workspace.data && team_workspace.status) {
         selected_team_workspaces.value = team_workspace.data
       }
-    }else{
+    } else {
       selected_team.value = null
     }
     selectTeamLoad.value = false
-  }else{
+  } else {
     selected_team.value = null
+    await fetch_all_workspaces()
+
   }
+}
+
+async function fetch_all_workspaces() {
+  dataLoad.value = true
+  await fetch_workspaces()
+  await fetch_workspace_owners()
+  dataLoad.value = false
 }
 
 onMounted(async () => {
@@ -146,10 +161,7 @@ onMounted(async () => {
   await fetch_teams()
   pageLoad.value = false
 
-  dataLoad.value = true
-  await fetch_workspaces()
-  await fetch_workspace_owners()
-  dataLoad.value = false
+  await fetch_all_workspaces()
 
 })
 
@@ -172,7 +184,8 @@ onMounted(async () => {
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent class="text-xs">
-          <DropdownMenuItem v-for="team in user_teams" :key="team.tm_id" class="grid grid-cols-[40px_1fr] gap-x-3" @click="select_team(team)">
+          <DropdownMenuItem v-for="team in user_teams" :key="team.tm_id" class="grid grid-cols-[40px_1fr] gap-x-3"
+            @click="select_team(team)">
             <Avatar class="size-6 justify-self-center">
               <AvatarImage src="https://placehold.co/24" />
               <AvatarFallback>UI</AvatarFallback>
@@ -348,7 +361,8 @@ onMounted(async () => {
               </div>
               <div class="flex flex-col items-center justify-between border-t py-3 text-sm">
                 <h3 class="font-medium">{{ workspace.name }}</h3>
-                <small>By: {{ workspace.owner_uid === user.data?.uid ? user.data?.displayName : workspace_owners[workspace.owner_uid].displayName }}</small>
+                <small>By: {{ workspace.owner_uid === user.data?.uid ? user.data?.displayName :
+                  workspace_owners[workspace.owner_uid].displayName }}</small>
               </div>
             </RouterLink>
 
