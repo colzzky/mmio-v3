@@ -57,7 +57,6 @@ router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
   const platformApiStore = usePlatformAPIStore()
   const { user_auth, page_init, after_auth_initialization } = authStore
-  
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const nonAuth = to.matched.some((record) => record.meta.nonAuth)
   if (!from.name) {

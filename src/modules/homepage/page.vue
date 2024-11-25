@@ -18,6 +18,8 @@ import type { TeamData } from '@/core/types/TeamTypes'
 import type { WorkspaceData } from '@/core/types/WorkSpaceTypes'
 import { getWhereAny } from '@/core/utils/firebase-collections'
 import CreateTeam from '@/modules/teams-permissions/components/team/CreateTeam.vue'
+import Workspaces from './components/Workspaces.vue'
+import WorkspacesLoad from './components/WorkspacesLoad.vue'
 import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { useWorkspaceStore } from '@/stores/WorkspaceStore'
@@ -38,12 +40,10 @@ const sharedWorkspaceFilter = ref('Most Recent')
 
 
 const pageLoad = ref<boolean>(false)
-const dataLoad = ref<boolean>(false)
-const selectTeamLoad = ref<boolean>(false)
+const dataLoad = ref<boolean>(true)
+const selectTeamLoad = ref<boolean>(true)
 const authStore = useAuthStore()
-const workspaceStore = useWorkspaceStore()
-const { user_team_refs, user_auth, user } = authStore
-const { workspace: wp_model } = workspaceStore
+const { user_team_refs, user_auth, user, page_init } = authStore
 const user_created_workspaces = ref<WorkspaceData[]>([])
 const shared_workspaces = ref<WorkspaceData[]>([])
 const workspace_owner_uid = ref<string[]>([])
@@ -52,17 +52,7 @@ const team_refs_id = <string[]>[]
 const user_teams = ref<TeamData[]>([]);
 const selected_team = ref<TeamData | null>(null)
 const selected_team_workspaces = ref<WorkspaceData[]>([])
-const selected_team_owner = ref<WorkspaceData[]>([])
-const newWorkspaceModal = ref(false)
 const new_team_modal = ref(false)
-
-function newWorkspaceReturn(workspace: WorkspaceData | null) {
-  if (workspace) {
-    console.log(workspace)
-    user_created_workspaces.value.push(workspace)
-  }
-  newWorkspaceModal.value = false
-}
 
 function new_team_return() {
   new_team_modal.value = false
@@ -151,6 +141,7 @@ async function select_team(team: TeamData | null) {
 
 async function fetch_all_workspaces() {
   dataLoad.value = true
+  await fetch_teams()
   await fetch_workspaces()
   await fetch_workspace_owners()
   dataLoad.value = false
@@ -158,7 +149,6 @@ async function fetch_all_workspaces() {
 
 onMounted(async () => {
   pageLoad.value = true
-  await fetch_teams()
   pageLoad.value = false
 
   await fetch_all_workspaces()
@@ -170,7 +160,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="!pageLoad">
+  <div v-if="page_init.initialize">
     <header class="flex items-center justify-between p-4">
       <DropdownMenu>
         <DropdownMenuTrigger class="flex items-center gap-x-1">
@@ -178,7 +168,7 @@ onMounted(async () => {
           <div class="flex flex-col items-start">
             <strong class="text-xl leading-none">Marketing Master IO</strong>
             <small class="flex items-center">
-              Team Workspace: All workspaces
+              Team Workspace: {{selected_team ? selected_team.name : 'All Workspace' }}
               <i class="material-icons">arrow_drop_down</i>
             </small>
           </div>
@@ -237,46 +227,14 @@ onMounted(async () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <div class="grid auto-rows-fr grid-cols-4 gap-8">
-            <button v-if="!dataLoad"
-              class="relative flex flex-col rounded-lg bg-white [--border-width:2px] before:absolute before:-inset-[var(--border-width)] before:-z-10 before:rounded-[calc(theme(borderRadius.lg)+var(--border-width))] before:bg-gradient-to-b before:from-gradient-purple before:to-gradient-red after:absolute after:-inset-[var(--border-width)] after:-z-10 after:rounded-[calc(theme(borderRadius.lg)+var(--border-width))] after:bg-gradient-to-b after:from-gradient-purple after:to-gradient-red after:blur-sm"
-              @click="newWorkspaceModal = !newWorkspaceModal">
-              <div class="self-center py-4">
-                <img src="@/assets/undraw_add_files.svg" alt="" class="size-16" />
-              </div>
-              <div class="flex w-full flex-col items-center justify-between border-t py-3 text-sm">
-                <h3 class="font-medium">Create a Workspace</h3>
-                <small class="flex items-center gap-x-1">
-                  <i class="bx bx-cog" /> Check out tutorial
-                </small>
-              </div>
-            </button>
+          <div>
+
+            <Transition name="fade" mode="out-in">
+              <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="user_created_workspaces" :is-shared="false"
+                :workspace-owners="null" />
+            </Transition>
 
 
-            <RouterLink :to="{ name: 'workspace', params: { workspaceId: `${workspace.ws_id}` } }" v-if="!dataLoad"
-              v-for="workspace, workspace_index in user_created_workspaces" :key="workspace.ws_id"
-              class="flex flex-col rounded-lg border border-gray-200 hover:bg-slate-100 bg-gray-50 cursor-pointer">
-              <div class="self-center py-4">
-                <Avatar class="size-16">
-                  <AvatarImage src="https://placehold.co/64" />
-                </Avatar>
-              </div>
-              <div class="flex flex-col items-center justify-between border-t py-3 text-sm">
-                <h3 class="font-medium">{{ workspace.name }}</h3>
-                <small>By: {{ user.data?.displayName }}</small>
-              </div>
-            </RouterLink>
-
-            <div v-else v-for="n in 7" :key="n"
-              class="flex flex-col rounded-lg border border-gray-100 border-primary/25 p-4">
-              <div class="flex flex-col items-center space-y-3">
-                <Skeleton class="h-[125px] w-[250px] rounded-xl" />
-                <div class="space-y-2">
-                  <Skeleton class="h-4 w-[250px]" />
-                  <Skeleton class="h-4 w-[200px]" />
-                </div>
-              </div>
-            </div>
           </div>
         </section>
         <section class="grid gap-y-6">
@@ -297,36 +255,13 @@ onMounted(async () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <div class="grid auto-rows-fr grid-cols-4 gap-8">
-            <RouterLink :to="{ name: 'workspace', params: { workspaceId: `${workspace.ws_id}` } }"
-              v-if="!dataLoad && shared_workspaces.length" v-for="workspace, workspace_index in shared_workspaces"
-              :key="workspace.ws_id"
-              class="flex flex-col rounded-lg border border-gray-200 hover:bg-slate-100 bg-gray-50 cursor-pointer">
-              <div class="self-center py-4">
-                <Avatar class="size-16">
-                  <AvatarImage src="https://placehold.co/64" />
-                </Avatar>
-              </div>
-              <div class="flex flex-col items-center justify-between border-t py-3 text-sm">
-                <h3 class="font-medium">{{ workspace.name }}</h3>
-                <small>By: {{ workspace_owners[workspace.owner_uid].displayName }}</small>
-              </div>
-            </RouterLink>
+          <div>
 
-            <div v-else-if="!dataLoad && !shared_workspaces.length" class="flex flex-col">
-              Nothing yet is shared with you
-            </div>
+            <Transition name="fade" mode="out-in">
+              <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="shared_workspaces" :is-shared="true"
+                :workspace-owners="workspace_owners" />
+            </Transition>
 
-            <div v-else v-for="n in 7" :key="n"
-              class="flex flex-col rounded-lg border border-gray-100 border-primary/25 p-4">
-              <div class="flex flex-col items-center space-y-3">
-                <Skeleton class="h-[125px] w-[250px] rounded-xl" />
-                <div class="space-y-2">
-                  <Skeleton class="h-4 w-[250px]" />
-                  <Skeleton class="h-4 w-[200px]" />
-                </div>
-              </div>
-            </div>
           </div>
         </section>
       </div>
@@ -334,7 +269,7 @@ onMounted(async () => {
         <section class="grid gap-y-6">
           <div class="flex flex-col items-start text-xs">
             <h1 class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent">
-              Team Workspaces
+              {{`${selected_team.name} Workspaces`}}
             </h1>
             <DropdownMenu>
               <DropdownMenuTrigger>
@@ -349,33 +284,11 @@ onMounted(async () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-          <div class="grid auto-rows-fr grid-cols-4 gap-8">
-            <RouterLink :to="{ name: 'workspace', params: { workspaceId: `${workspace.ws_id}` } }"
-              v-if="!selectTeamLoad" v-for="workspace, workspace_index in selected_team_workspaces"
-              :key="workspace.ws_id"
-              class="flex flex-col rounded-lg border border-gray-200 hover:bg-slate-100 bg-gray-50 cursor-pointer">
-              <div class="self-center py-4">
-                <Avatar class="size-16">
-                  <AvatarImage src="https://placehold.co/64" />
-                </Avatar>
-              </div>
-              <div class="flex flex-col items-center justify-between border-t py-3 text-sm">
-                <h3 class="font-medium">{{ workspace.name }}</h3>
-                <small>By: {{ workspace.owner_uid === user.data?.uid ? user.data?.displayName :
-                  workspace_owners[workspace.owner_uid].displayName }}</small>
-              </div>
-            </RouterLink>
-
-            <div v-else v-for="n in 7" :key="n"
-              class="flex flex-col rounded-lg border border-gray-100 border-primary/25 p-4">
-              <div class="flex flex-col items-center space-y-3">
-                <Skeleton class="h-[125px] w-[250px] rounded-xl" />
-                <div class="space-y-2">
-                  <Skeleton class="h-4 w-[250px]" />
-                  <Skeleton class="h-4 w-[200px]" />
-                </div>
-              </div>
-            </div>
+          <div>
+            <Transition name="fade" mode="out-in">
+              <component :is="selectTeamLoad ? WorkspacesLoad : Workspaces" :workspaces="selected_team_workspaces" :is-shared="true"
+                :workspace-owners="workspace_owners" />
+            </Transition>
           </div>
         </section>
       </div>
@@ -392,7 +305,17 @@ onMounted(async () => {
     </div>
   </div>
 
-
-  <CreateWorkspace :open_modal="newWorkspaceModal" @return="newWorkspaceReturn" />
   <CreateTeam :open_modal="new_team_modal" @return="new_team_return" />
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
