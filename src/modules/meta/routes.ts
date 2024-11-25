@@ -1,5 +1,7 @@
 import type { RouteRecordRaw } from 'vue-router'
 
+const platformName = 'meta'
+
 const servicesName = [
   'chatbot-flow-builder',
   'comment-auto-reply',
@@ -14,6 +16,7 @@ const servicesName = [
 ] as const
 
 const names = [
+  platformName,
   ...servicesName,
   'messenger-webview',
   'persistent-menu',
@@ -111,7 +114,10 @@ export const services = new Map(
 )
 
 type RouteRecord = Record<(typeof names)[number], Omit<RouteRecordRaw, 'path' | 'name'>>
-const childrenRouteRecords: RouteRecord = {
+const routeRecords: RouteRecord = {
+  meta: {
+    component: () => import('./services/dashboard/page.vue'),
+  },
   'chatbot-flow-builder': {
     component: () => import('./services/chatbot-flow-builder/page.vue'),
   },
@@ -168,22 +174,8 @@ const childrenRouteRecords: RouteRecord = {
   },
 }
 
-const childrenRoutes = Object.entries(childrenRouteRecords).map(([key, values]) => ({
+export const routes: RouteRecordRaw[] = Object.entries(routeRecords).map(([key, values]) => ({
   ...values,
-  name: `meta-${key}`,
+  name: key === 'meta' ? 'meta' : `meta-${key}`,
   path: key,
 })) as RouteRecordRaw[]
-
-export const routes: RouteRecordRaw[] = [
-  {
-    path: 'meta',
-    children: [
-      {
-        path: '',
-        name: 'meta',
-        component: () => import('./services/dashboard/page.vue'),
-      },
-      ...childrenRoutes,
-    ],
-  },
-]

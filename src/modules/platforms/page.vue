@@ -56,7 +56,7 @@ const servicesStore = useServicesStore()
             </i>
           </button>
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger class="self-center">
               <span class="sr-only">Open Service Menu</span>
               <i class="bx bx-dots-vertical-rounded text-xl" />
             </DropdownMenuTrigger>
@@ -66,10 +66,6 @@ const servicesStore = useServicesStore()
               <DropdownMenuItem>Menu #3</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-
-          <button type="button" class="self-center leading-none">
-            <i class="bx bx-dots-vertical-rounded text-xl" />
-          </button>
         </li>
       </ScrollArea>
     </Card>
