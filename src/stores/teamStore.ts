@@ -62,7 +62,7 @@ export const useTeamStore = defineStore('teamStore', () => {
       this.data = data
     },
     async get(tm_id: string): Promise<FSReturnData<TeamData>> {
-      const get = await getCollection('team', 'teams', {}, tm_id, [])
+      const get = await getCollection('team', 'teams', {}, tm_id, ['team_members'])
       return {
         status: get.status,
         data: get.data as TeamData,

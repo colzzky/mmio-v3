@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { authedUserName, workspaces } from './temporaries'
 import { Avatar, AvatarFallback, AvatarImage } from '@/core/components/ui/avatar'
 import AvatarDropdown from '@/core/components/ui/avatar-dropdown.vue'
 import {
@@ -12,7 +11,6 @@ import {
   DropdownMenuRadioItem,
 } from '@/core/components/ui/dropdown-menu'
 import { Input } from '@/core/components/ui/input'
-import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
 import type { UserData } from '@/core/types/AuthUserTypes'
 import type { TeamData } from '@/core/types/TeamTypes'
 import type { WorkspaceData } from '@/core/types/WorkSpaceTypes'
@@ -20,30 +18,16 @@ import { getWhereAny } from '@/core/utils/firebase-collections'
 import CreateTeam from '@/modules/teams-permissions/components/team/CreateTeam.vue'
 import Workspaces from './components/Workspaces.vue'
 import WorkspacesLoad from './components/WorkspacesLoad.vue'
-import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
-import { useWorkspaceStore } from '@/stores/WorkspaceStore'
-import CreateWorkspace from '@/views/components/CreateWorkspace.vue'
-import { computed, onMounted, ref } from 'vue'
-
-const workspacesRef = ref(workspaces)
-const userWorkspaces = computed(() =>
-  workspacesRef.value.filter(({ author }) => author === authedUserName),
-)
-const sharedWorkspaces = computed(() =>
-  workspacesRef.value.filter(({ author }) => author !== authedUserName),
-)
+import {onMounted, ref } from 'vue'
 
 const allWorkspaceFilter = ref('Most Recent')
 const sharedWorkspaceFilter = ref('Most Recent')
-
-
-
 const pageLoad = ref<boolean>(false)
 const dataLoad = ref<boolean>(true)
 const selectTeamLoad = ref<boolean>(true)
 const authStore = useAuthStore()
-const { user_team_refs, user_auth, user, page_init } = authStore
+const {user_auth, user, page_init } = authStore
 const user_created_workspaces = ref<WorkspaceData[]>([])
 const shared_workspaces = ref<WorkspaceData[]>([])
 const workspace_owner_uid = ref<string[]>([])
