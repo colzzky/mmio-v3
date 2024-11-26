@@ -104,4 +104,28 @@ export const uiHelpers = {
     date.setSeconds(date.getSeconds() + seconds) // Add the specified number of seconds
     return date.toISOString() // Convert to ISO string format
   },
+
+  //Create a deep copy of an object and retain function
+  deepCopy<T>(obj: T): T {
+    if (obj === null || typeof obj !== "object") {
+      return obj;
+    }
+
+    if (obj instanceof Date) {
+      return new Date(obj) as T;
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.deepCopy(item)) as unknown as T;
+    }
+
+    const copy: Partial<T> = {};
+    for (const key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        copy[key] = this.deepCopy(obj[key]);
+      }
+    }
+
+    return copy as T;
+  }
 }

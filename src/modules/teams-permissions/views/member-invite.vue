@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { InvitationData } from '@/core/types/InvitationTypes';
+import { default_access } from '@/core/types/PermissionTypes';
 import { team_data, type TeamData, type TeamInvitation, type TeamMembersData } from '@/core/types/TeamTypes';
 import { getExact, getWhereAny, postCollection } from '@/core/utils/firebase-collections';
 import { useAuthStore } from '@/stores/authStore';
@@ -100,7 +101,7 @@ async function accept_invite(invitation: InvitationData, team_id:string) {
                 uid: user_auth.data.uid,
                 isPending: false,
                 isDisabled: false,
-                permission: ['read and write'],
+                accessPermissions: JSON.parse(JSON.stringify(default_access)),
             }
 
             const validate_update = await team_members.createUpdate(team_id,type)

@@ -9,6 +9,7 @@ import type {
   TeamData,
   TeamMembersData,
   PermissionData,
+  TeamWorkspaceRefsData,
 } from '@/core/utils/types'
 
 export type SubCollectionKey<T extends SubCollections> = T['subCollections']
@@ -66,6 +67,15 @@ interface Team_Collection {
     path: 'teams/:tm_id/team_members'
     interface: TeamMembersData
     sub_col: SubCollectionKey<TeamMembersData>[]
+    sub_params: {
+      tm_id: string
+    } | null
+  }
+  team_workspace_refs: {
+    id: 'workspace_id'
+    path: 'teams/:tm_id/team_workspace_refs'
+    interface:TeamWorkspaceRefsData
+    sub_col: SubCollectionKey<TeamWorkspaceRefsData>[]
     sub_params: {
       tm_id: string
     } | null

@@ -23,6 +23,9 @@ import {
   where,
   type DocumentData,
   writeBatch,
+  onSnapshot,
+  DocumentSnapshot,
+  QuerySnapshot,
 } from 'firebase/firestore'
 
 type Collections = {
@@ -642,5 +645,82 @@ export async function getExact<T extends keyof CollectionsInterface>(
       error: `Error fetching data: ${error}`,
       data: undefined,
     }
+  }
+}
+
+export async function listenToCollection<T extends keyof CollectionsInterface>(
+  $col: T,
+  $path: CollectionsInterface[T]["path"],
+  $sub_params: CollectionsInterface[T]["sub_params"] | null = null,
+  id: string,
+  $sub_col: SubCollectionKey<CollectionsInterface[T]["interface"]> = [], // Array of subcollection names to check
+  onUpdate: (data: any) => void // Callback to handle updates
+): Promise<() => void> {
+  try {
+    let fullPath = $path as string;
+
+    if ($sub_params) {
+      Object.entries($sub_params).forEach(([key, value]) => {
+        fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
+      });
+    }
+
+    const docRef = doc(firestore, fullPath, id);
+
+    // Listener for the main document
+    const unsubscribeDoc = onSnapshot(docRef, async (docSnapshot: DocumentSnapshot) => {
+      if (docSnapshot.exists()) {
+        const data = {
+          id: docSnapshot.id,
+          ...docSnapshot.data(),
+          createdAt: docSnapshot.data()?.createdAt?.toDate().toISOString(),
+          updatedAt: docSnapshot.data()?.updatedAt?.toDate().toISOString(),
+        };
+
+        const subCollectionData: Record<string, any[]> = {};
+
+        // Listener for specified subcollections
+        const unsubscribeSubCollections = await Promise.all(
+          $sub_col.map(async (sub) => {
+            const subColRef = collection(firestore, `${fullPath}/${data.id}/${sub}`);
+            return onSnapshot(subColRef, (subSnapshot: QuerySnapshot) => {
+              subCollectionData[sub] = subSnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+                createdAt: doc.data()?.createdAt?.toDate().toISOString(),
+                updatedAt: doc.data()?.updatedAt?.toDate().toISOString(),
+              }));
+
+              // Notify with the updated data including subcollections
+              onUpdate({
+                ...data,
+                ...subCollectionData,
+              });
+            });
+          })
+        );
+
+        // Notify with initial data
+        onUpdate({
+          ...data,
+          ...subCollectionData,
+        });
+
+        // Return a function to unsubscribe both main and subcollection listeners
+        return () => {
+          unsubscribeDoc();
+          unsubscribeSubCollections.forEach((unsubscribe) => unsubscribe());
+        };
+      } else {
+        console.warn("Document does not exist.");
+        onUpdate(null); // Notify with null if the document doesn't exist
+      }
+    });
+
+    // Return unsubscribe function for the main document listener
+    return unsubscribeDoc;
+  } catch (error) {
+    console.error("Error setting up listener:", error);
+    throw error;
   }
 }

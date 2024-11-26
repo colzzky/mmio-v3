@@ -167,11 +167,13 @@ async function get_user_created_permission() {
             fieldName: 'owner_uid', operator: '==', value: user_auth.data.uid
         }])
         if (get.status && get.data.length) {
-            user_created_permissions.value = get.data
+            permissions.data = get.data
             permissions.generateNextFetch()
             console.log(permissions)
         }
     }
+    user_created_permissions.value = permissions.data
+    
     permissions.isLoading = false
 }
 
@@ -217,7 +219,7 @@ onMounted(async () => {
 
                             <div class="flex items-center justify-between">
                                 <span class="font-semibold cursor-pointer text-xs">Set Permission
-                                    to default/member</span>
+                                    to default/Admin</span>
                                 <Button @click="current_permission.set_permission('admin')" class="text-blue-500"
                                     variant="ghost" size="xs">
                                     Apply
@@ -226,7 +228,7 @@ onMounted(async () => {
 
                             <div class="flex items-center justify-between">
                                 <span class="font-semibold cursor-pointer text-xs">Set Permission
-                                    to default/member</span>
+                                    to default/Custom</span>
                                 <Button @click="current_permission.set_permission('custom')" class="text-blue-500"
                                     variant="ghost" size="xs">
                                     Apply

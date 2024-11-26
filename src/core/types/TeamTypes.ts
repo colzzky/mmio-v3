@@ -17,14 +17,21 @@ export interface TeamData extends SubCollections {
   inviteLink: string
   createdAt: string
   updatedAt: string
-  subCollections: 'team_members'[]
+  subCollections: ('team_members'|'team_workspace_refs')[]
   team_members?: TeamMembersData[]
+  workspace_refs?: TeamWorkspaceRefsData[]
 }
 
+export interface TeamWorkspaceRefsData extends SubCollections {
+  workspace_id: string
+  owner_uid: string
+  createdAt: string
+  updatedAt: string
+}
 export interface TeamMembersData extends SubCollections {
   member_id: string
   uid: string
-  role:TeamRole
+  role: TeamRole
   accessPermissions: AccessStructure
   isPending: boolean
   isDisabled: boolean
@@ -51,13 +58,21 @@ export const team_data: TeamData = {
 export const team_members_data: TeamMembersData = {
   member_id: '',
   uid: '',
-  role:TeamRole.MEMBER,
-  accessPermissions: {...default_access},
+  role: TeamRole.MEMBER,
+  accessPermissions: { ...default_access },
   isDisabled: false,
   isPending: false,
   createdAt: '',
   updatedAt: '',
   subCollections: [],
+}
+
+export const team_workspace_refs_data: TeamWorkspaceRefsData = {
+  workspace_id: '',
+  owner_uid: '',
+  createdAt: '',
+  updatedAt: '',
+  subCollections:[]
 }
 
 const invitation = {
