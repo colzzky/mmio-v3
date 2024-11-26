@@ -9,18 +9,16 @@ export enum Access_levels {
 }
 
 export enum Permission_Services {
-  ChatBotFlow = 'Chatbot Flow Service',
+  ChatBotFlow = 'Chatbot Flow',
   CommentAutoReply = 'Comment Auto Reply',
   EmailMarketing = 'Email Marketing',
 }
 
-export interface CustomPermissions {
-  view: boolean
-  add: boolean
-  edit: boolean
-  delete: boolean
-  publish: boolean
-}
+export const PermissionTypes = ['view', 'add', 'edit', 'delete','publish'] as const
+
+export type CustomPermissions = Record<typeof PermissionTypes[number], boolean>;
+export type AccessLevelPermissions = Record<Access_levels, (typeof PermissionTypes[number])[]>;
+
 
 // Define the structure for each permission group (e.g., ChatBotFlow, CommentAutoReply)
 interface PermissionGroup {
@@ -86,6 +84,14 @@ export const custom_permission: CustomPermissions = {
   edit: false,
   delete: false,
   publish: false,
+}
+
+export const access_level_permissions:AccessLevelPermissions =  {
+  [Access_levels.READ]: ['view'],
+  [Access_levels.WRITE]: ['add', 'edit','publish'],
+  [Access_levels.DELETE]: ['delete'],
+  [Access_levels.FULL]: ['add','edit','delete','view','publish'],
+  [Access_levels.CUSTOM]: [],
 }
 
 export const permission_data: PermissionData = {

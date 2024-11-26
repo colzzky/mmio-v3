@@ -323,7 +323,7 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
     if (member_data && current_team.data && current_team.data.team_members) {
         selected_member.member_info = member_data
         const member_index = current_team.data.team_members.findIndex(member => member.member_id === member_data.member_id)
-        if (member_index) {
+        if (member_index >= 0) {
             current_team.data.team_members[member_index] = member_data
             toast({
                 title: 'Permission successfully updated',
@@ -541,7 +541,7 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
                                 </div>
                             </div>
 
-                            <div class="flex justify-between items-center">
+                            <div v-if="selected_member.member_info.role !== TeamRole.OWNER" class="flex justify-between items-center">
                                 <span class="font-semibold text-sm">Role:</span>
                                 <Select v-if="!selected_member.change_role_load" v-model="selected_member.member_info.role"
                                     @update:model-value="selected_member.change_role()">
@@ -560,7 +560,11 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
                                 <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">
                                     <i class="material-icons animate-spin text-sm">donut_large</i>Changing role
                                 </Button>
+                            </div>
 
+                            <div v-else class="flex justify-between items-center">
+                                <span class="font-semibold text-sm">Role:</span>
+                                <span class="font-semibold text-sm">Owner</span>
                             </div>
 
                             <div class="flex justify-between items-center">

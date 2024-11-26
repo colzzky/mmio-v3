@@ -4,6 +4,7 @@ import ViewPostAutoRepliesModal from './components/view-post-auto-replies-modal.
 import ViewPostModal from './components/view-post-modal.vue'
 import { Avatar, AvatarImage } from '@/core/components/ui/avatar'
 import { Badge } from '@/core/components/ui/badge'
+import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +24,8 @@ import {
 } from '@/core/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { computed, provide, ref, useTemplateRef } from 'vue'
+import { computed, onMounted, provide, ref, useTemplateRef } from 'vue'
+import router from '@/router'
 
 // @temporary: can be extracted to another file
 export type AutoReply = {
@@ -104,6 +106,34 @@ const posts = ref(
     ],
   ]),
 )
+
+onMounted(async () => {
+  try {
+    await servicePermission.check('ChatBotFlow', 'view')
+  } catch (error: any) {
+    if (error instanceof PermissionAccessError) {
+      console.error(error.message);
+      router.back();
+    } else {
+      console.error('Unknown error:', error);
+    }
+  }
+
+})
+
+async function sampleCreate() {
+  try {
+    await servicePermission.check('ChatBotFlow', 'add')
+    //Nextt statement
+  } catch (error: any) {
+    if (error instanceof PermissionAccessError) {
+      console.error(error.message);
+    } else {
+      console.error('Unknown error:', error);
+    }
+  }
+
+}
 
 export type PostsMap = typeof posts
 provide('posts', posts)
@@ -277,12 +307,8 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                   <Avatar class="size-9">
                     <AvatarImage :src="post.user.image" />
                   </Avatar>
-                  <a
-                    :href="`http://example.com/${postId}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-blue-500 hover:underline"
-                  >
+                  <a :href="`http://example.com/${postId}`" target="_blank" rel="noopener noreferrer"
+                    class="text-blue-500 hover:underline">
                     Post ID: {{ postId }}
                   </a>
                 </div>
@@ -308,37 +334,28 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
-                      <DropdownMenuItem
-                        class="gap-x-3"
-                        @click="
-                          createEditAutoReplyModalRef?.modal.open({
-                            intent: 'create',
-                            postId,
-                          })
-                        "
-                      >
+                      <DropdownMenuItem class="gap-x-3" @click="
+                        // createEditAutoReplyModalRef?.modal.open({
+                        //   intent: 'create',
+                        //   postId,
+                        // })
+                        sampleCreate()
+                        ">
                         <i class="bx bx-message-square-add text-xl"></i>
                         Create
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        class="gap-x-3"
-                        @click="viewPostAutoRepliesModalRef?.modal.open({ ...post })"
-                      >
+                      <DropdownMenuItem class="gap-x-3" @click="viewPostAutoRepliesModalRef?.modal.open({ ...post })">
                         <i class="bx bx-list-ul text-xl"></i>
                         View All
                       </DropdownMenuItem>
 
-                      <DropdownMenuItem
-                        class="gap-x-3"
-                        @click="toggleAllAutoRepliesStatus({ postId, intent: 'activate' })"
-                      >
+                      <DropdownMenuItem class="gap-x-3"
+                        @click="toggleAllAutoRepliesStatus({ postId, intent: 'activate' })">
                         <i class="bx bx-play-circle text-xl"></i>
                         Activate All
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        class="gap-x-3"
-                        @click="toggleAllAutoRepliesStatus({ postId, intent: 'deactivate' })"
-                      >
+                      <DropdownMenuItem class="gap-x-3"
+                        @click="toggleAllAutoRepliesStatus({ postId, intent: 'deactivate' })">
                         <i class="bx bx-pause-circle text-xl"></i>
                         Deactivate All
                       </DropdownMenuItem>
@@ -371,12 +388,8 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                   <Avatar class="size-9">
                     <AvatarImage :src="posts.get(autoReply.postId)?.user.image ?? ''" />
                   </Avatar>
-                  <a
-                    :href="`http://example.com/${autoReply.postId}`"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-blue-500 hover:underline"
-                  >
+                  <a :href="`http://example.com/${autoReply.postId}`" target="_blank" rel="noopener noreferrer"
+                    class="text-blue-500 hover:underline">
                     Post ID: {{ autoReply.postId }}
                   </a>
                 </div>
@@ -398,33 +411,26 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuLabel>Auto Reply</DropdownMenuLabel>
-                      <DropdownMenuItem
-                        class="gap-x-3"
-                        @click="
-                          createEditAutoReplyModalRef?.modal.open({
-                            intent: 'edit',
-                            autoReplyId,
-                          })
-                        "
-                      >
+                      <DropdownMenuItem class="gap-x-3" @click="
+                        createEditAutoReplyModalRef?.modal.open({
+                          intent: 'edit',
+                          autoReplyId,
+                        })
+                        ">
                         <i class="bx bx-edit text-xl" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem class="gap-x-3" @click="toggleAutoReplyStatus(autoReplyId)">
-                        <i
-                          :class="[
-                            'bx text-xl',
-                            autoReply.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
-                          ]"
-                        />
+                        <i :class="[
+                          'bx text-xl',
+                          autoReply.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                        ]" />
                         Toggle Status
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuLabel>Post</DropdownMenuLabel>
-                      <DropdownMenuItem
-                        class="gap-x-3"
-                        @click="viewPostModalRef?.modal.open(posts.get(autoReply.postId)!)"
-                      >
+                      <DropdownMenuItem class="gap-x-3"
+                        @click="viewPostModalRef?.modal.open(posts.get(autoReply.postId)!)">
                         <i class="bx bx-show text-xl"></i>
                         View
                       </DropdownMenuItem>
@@ -441,22 +447,17 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
 
   <ViewPostModal ref="viewPostModal" />
 
-  <ViewPostAutoRepliesModal
-    ref="viewPostAutoRepliesModal"
-    @add-auto-reply-click="
-      createEditAutoReplyModalRef?.modal.open({
-        intent: 'create',
-        postId: $event,
-      })
-    "
-    @toggle-button-click="toggleAutoReplyStatus($event)"
-    @edit-auto-reply-click="
+  <ViewPostAutoRepliesModal ref="viewPostAutoRepliesModal" @add-auto-reply-click="
+    createEditAutoReplyModalRef?.modal.open({
+      intent: 'create',
+      postId: $event,
+    })
+    " @toggle-button-click="toggleAutoReplyStatus($event)" @edit-auto-reply-click="
       createEditAutoReplyModalRef?.modal.open({
         intent: 'edit',
         autoReplyId: $event,
       })
-    "
-  />
+      " />
 
   <CreateEditAutoReplyModal ref="createEditAutoReplyModal" />
 </template>
