@@ -22,7 +22,7 @@ interface CurrentMember {
   isOwner: boolean
   isInitialized: boolean
   isLoading: boolean
-  listener:(()=> void)|null
+  listener: (() => void) | null
   reset: () => void
   listen: (tm_id: string, member_id: string) => Promise<void>
 }
@@ -46,7 +46,7 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     isOwner: false,
     isInitialized: false,
     isLoading: false,
-    listener:null,
+    listener: null,
     reset() { },
     async listen(tm_id: string, member_id: string) {
       current_member.listener = await listenToCollection("team_members", "teams/:tm_id/team_members", { tm_id }, member_id, [],
@@ -56,13 +56,12 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
         }
       );
     }
-
   })
-  function returnHome(){
-    if(current_member.listener){
+  function returnHome() {
+    if (current_member.listener) {
       current_member.listener()
     }
-    
+
     current_member.listener = null
   }
 
@@ -75,4 +74,10 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     current_member,
     returnHome
   }
-})
+},
+  {
+    persist: {
+      
+    }
+  }
+)
