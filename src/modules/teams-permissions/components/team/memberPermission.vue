@@ -9,7 +9,7 @@ import Label from '@/core/components/ui/label/Label.vue';
 import RadioGroup from '@/core/components/ui/radio-group/RadioGroup.vue';
 import RadioGroupItem from '@/core/components/ui/radio-group/RadioGroupItem.vue';
 import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue';
-import { Access_levels, admin_access, custom_access as custom_permission_struct, custom_permission, default_access, Permission_Services, type AccessStructure, type CustomPermissions, type PermissionData } from '@/core/types/PermissionTypes'
+import { Access_levels, admin_access, custom_access as custom_permission_struct, custom_permission, default_access, PermissionServices, type AccessStructure, type CustomPermissions, type PermissionData, access_level_byservice, PermissionTypes } from '@/core/types/PermissionTypes'
 import { team_data, type TeamMembersData } from '@/core/types/TeamTypes'
 import { getWhereAny } from '@/core/utils/firebase-collections';
 import { useAuthStore } from '@/stores/authStore';
@@ -25,8 +25,8 @@ const { user_auth, user_created_permissions: permissions } = authStore
 const custom_access = <AccessStructure>JSON.parse(JSON.stringify(custom_permission_struct))
 const props = defineProps<{ open_modal: boolean, member: TeamMembersData | null, member_name: string | null, team_id: string }>()
 const componentLoad = ref<boolean>(false)
-const accessLevelsArray = Object.entries(Access_levels)
-const custom_order = <(keyof CustomPermissions)[]>['view', 'add', 'edit', 'delete', 'publish'];
+const accessLevelsArray = access_level_byservice
+const custom_order = [...PermissionTypes];
 const user_created_permissions = ref<PermissionData[]>([])
 
 const emit = defineEmits<{
@@ -107,7 +107,7 @@ const current_permission = reactive({
             } else {
                 if (access_level === Access_levels.CUSTOM) {
                     this.data[key].access = []
-                    this.data[key].custom = { ...custom_permission }
+                    this.data[key].custom = { ...custom_permission[key] }
                 }
                 if (custom !== -1) {
                     this.data[key].access.splice(custom, 1);
@@ -126,7 +126,9 @@ const current_permission = reactive({
     sortCustomPermission(custom: CustomPermissions) {
         const sortedPermissions: CustomPermissions = {} as CustomPermissions;
         custom_order.forEach(order => {
-            sortedPermissions[order] = custom[order];
+            if(order in custom){
+                sortedPermissions[order] = custom[order];
+            }
         });
         return sortedPermissions
     },
@@ -173,7 +175,7 @@ async function get_user_created_permission() {
         }
     }
     user_created_permissions.value = permissions.data
-    
+
     permissions.isLoading = false
 }
 
@@ -236,7 +238,8 @@ onMounted(async () => {
                             </div>
                         </div>
 
-                        <div class="bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col gap-4 min-h-[10%] max-h-[50%] overflow-scroll">
+                        <div
+                            class="bg-gray-100 border border-gray-200 rounded-lg p-4 flex flex-col gap-4 min-h-[10%] max-h-[50%] overflow-scroll">
                             <div class="text-sm font-semibold">Created Permissions:</div>
                             <div v-for="permission, index in user_created_permissions"
                                 class="flex items-center justify-between">
@@ -262,13 +265,14 @@ onMounted(async () => {
                                     <i class="material-icons text-sm animate-spin">donut_large</i>Save All
                                 </Button>
                             </div>
-                            <div class="bg-gray-100 border border-gray-200 rounded-lg py-4 max-h-[40vh] overflow-scroll">
+                            <div
+                                class="bg-gray-100 border border-gray-200 rounded-lg py-4 max-h-[40vh] overflow-scroll">
                                 <div v-if="!current_permission.saveLoad">
                                     <div v-for="(custom, key, index) in custom_access">
                                         <div
                                             v-if="current_permission.data && key in current_permission.data && current_permission.data[key]">
                                             <div class="px-5 py-5 space-y-4">
-                                                <div class="text-lg font-bold">{{ Permission_Services[key] }} Permissons
+                                                <div class="text-lg font-bold">{{ key }} Permissons
                                                 </div>
                                                 <div class="space-y-2">
                                                     <div class="grid grid-cols-6">
@@ -277,16 +281,18 @@ onMounted(async () => {
                                                         <div
                                                             class="col-span-4 flex space-x-4 items-cente justify-between">
                                                             <div class="flex space-x-2">
-                                                                <div v-for="([access_key, access_value], access_index) in accessLevelsArray"
-                                                                    :key="access_key"
-                                                                    class="flex items-center space-x-2">
-                                                                    <Checkbox
-                                                                        @update:checked="current_permission.add_remove_access(key, access_value)"
-                                                                        :checked="current_permission.data[key].access.includes(access_value)" />
-                                                                    <label for="terms"
-                                                                        class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                                                        {{ access_key }}
-                                                                    </label>
+                                                                <div v-for="(access_value, access_level, access_key) in accessLevelsArray[key]"
+                                                                    :key="access_key">
+                                                                    <div v-if="access_level"
+                                                                        class="flex items-center space-x-2">
+                                                                        <Checkbox
+                                                                            @update:checked="current_permission.add_remove_access(key, access_level)"
+                                                                            :checked="current_permission.data[key].access.includes(access_level)" />
+                                                                        <label for="terms"
+                                                                            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                                                            {{ access_level }}
+                                                                        </label>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -301,7 +307,7 @@ onMounted(async () => {
                                                                 class="grid grid-cols-6">
                                                                 <span class="col-span-2 text-sm font-semibold">{{
                                                                     custom_key
-                                                                }}:</span>
+                                                                    }}:</span>
                                                                 <div class="col-span-4">
                                                                     <RadioGroup
                                                                         :default-value="current_permission.data[key].custom[custom_key] ? 'Yes' : 'No'"
@@ -329,7 +335,7 @@ onMounted(async () => {
                                         <div v-else>
                                             <div class="px-5 py-5 space-y-4">
                                                 <div class="flex justify-between">
-                                                    <span class="text-lg font-bold">{{ Permission_Services[key] }}
+                                                    <span class="text-lg font-bold">{{ key }}
                                                         Permissons</span>
                                                     <Button class="text-red-500" variant="outline" size="xs"
                                                         @click="current_permission.add_permission(key)">

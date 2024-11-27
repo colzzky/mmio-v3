@@ -26,6 +26,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/t
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { computed, onMounted, provide, ref, useTemplateRef } from 'vue'
 import router from '@/router'
+import { PermissionServices } from '@/core/types/PermissionTypes'
 
 // @temporary: can be extracted to another file
 export type AutoReply = {
@@ -109,7 +110,7 @@ const posts = ref(
 
 onMounted(async () => {
   try {
-    await servicePermission.check('ChatBotFlow', 'view')
+    await servicePermission.check(PermissionServices.ChatBotFlow, ['view'])
   } catch (error: any) {
     if (error instanceof PermissionAccessError) {
       console.error(error.message);
@@ -123,7 +124,7 @@ onMounted(async () => {
 
 async function sampleCreate() {
   try {
-    await servicePermission.check('ChatBotFlow', 'add')
+    await servicePermission.check(PermissionServices.ChatBotFlow, 'add')
     //Nextt statement
   } catch (error: any) {
     if (error instanceof PermissionAccessError) {

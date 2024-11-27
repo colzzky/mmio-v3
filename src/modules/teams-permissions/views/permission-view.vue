@@ -8,7 +8,7 @@ import RadioGroupItem from '@/core/components/ui/radio-group/RadioGroupItem.vue'
 import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue';
 import { toast } from '@/core/components/ui/toast';
 import Toaster from '@/core/components/ui/toast/Toaster.vue';
-import { Access_levels, custom_access as custom_permission_struct, Permission_Services, type PermissionData, type AccessStructure, custom_permission, type CustomPermissions } from '@/core/types/PermissionTypes';
+import { Access_levels, custom_access as custom_permission_struct, PermissionServices, type PermissionData, type AccessStructure, custom_permission, type CustomPermissions, access_level_byservice } from '@/core/types/PermissionTypes';
 import router from '@/router';
 import { useAuthStore } from '@/stores/authStore';
 import { usePermissionStore } from '@/stores/permissionStore';
@@ -75,7 +75,7 @@ const selected_permission = reactive({
             } else {
                 if (access_level === Access_levels.CUSTOM) {
                     this.data.assignment[key].access = []
-                    this.data.assignment[key].custom = { ...custom_permission }
+                    this.data.assignment[key].custom = { ...custom_permission[key] }
                 }
                 if (custom !== -1) {
                     this.data.assignment[key].access.splice(custom, 1);
@@ -125,10 +125,12 @@ const selected_permission = reactive({
     sortCustomPermission(custom: CustomPermissions) {
         const sortedPermissions: CustomPermissions = {} as CustomPermissions;
         custom_order.forEach(order => {
-            sortedPermissions[order] = custom[order];
+            if(order in custom){
+                sortedPermissions[order] = custom[order];
+            }
         });
         return sortedPermissions
-    }
+    },
 })
 
 async function find_selected_permission() {
@@ -187,7 +189,7 @@ const name_form = reactive({
     }
 })
 
-const accessLevelsArray = Object.entries(Access_levels)
+const accessLevelsArray = access_level_byservice
 
 onMounted(async () => {
     pageLoad.value = true
@@ -237,21 +239,23 @@ onMounted(async () => {
                         <div
                             v-if="key in selected_permission.data.assignment && selected_permission.data.assignment[key]">
                             <div class="px-5 py-5 space-y-4">
-                                <div class="text-lg font-bold">{{ Permission_Services[key] }} Permissons</div>
+                                <div class="text-lg font-bold">{{ key }} Permissons</div>
                                 <div class="space-y-2">
                                     <div class="grid grid-cols-6">
                                         <span class="col-span-2 text-sm font-semibold">Default Access Level:</span>
                                         <div class="col-span-4 flex space-x-4 items-cente justify-between">
                                             <div class="flex space-x-2">
-                                                <div v-for="([access_key, access_value], access_index) in accessLevelsArray"
-                                                    :key="access_key" class="flex items-center space-x-2">
-                                                    <Checkbox
-                                                        @update:checked="selected_permission.add_remove_access(key, access_value)"
-                                                        :checked="selected_permission.data.assignment[key].access.includes(access_value)" />
-                                                    <label for="terms"
-                                                        class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                                        {{ access_key }}
-                                                    </label>
+                                                <div v-for="(access_value, access_level, access_key) in accessLevelsArray[key]"
+                                                    :key="access_key">
+                                                    <div v-if="access_level" class="flex items-center space-x-2">
+                                                        <Checkbox
+                                                            @update:checked="selected_permission.add_remove_access(key, access_level)"
+                                                            :checked="selected_permission.data.assignment[key].access.includes(access_level)" />
+                                                        <label for="terms"
+                                                            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                                            {{ access_level }}
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -292,7 +296,7 @@ onMounted(async () => {
                         <div v-else>
                             <div class="px-5 py-5 space-y-4">
                                 <div class="flex justify-between">
-                                    <span class="text-lg font-bold">{{ Permission_Services[key] }} Permissons</span>
+                                    <span class="text-lg font-bold">{{ key }} Permissons</span>
                                     <Button class="text-red-500" variant="outline" size="xs"
                                         @click="selected_permission.add_permission(key)">
                                         Add this permission
