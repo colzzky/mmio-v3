@@ -177,13 +177,13 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
       const currentDate = new Date();
 
       // Add 59 days
-      /** 
+      
       const expirationDate = new Date(currentDate);
       expirationDate.setDate(currentDate.getDate() + 59);
-      */
+      
 
       // Set to expire in 30mins for now
-      const expirationDate = new Date(currentDate.getTime() + 30 * 60 * 1000);
+      //const expirationDate = new Date(currentDate.getTime() + 30 * 60 * 1000);
 
       // Get expiration date as a Unix timestamp (in seconds)
       const expirationTimestamp = Math.floor(expirationDate.getTime() / 1000);

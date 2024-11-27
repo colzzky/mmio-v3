@@ -10,6 +10,7 @@ import type {
   TeamMembersData,
   PermissionData,
   TeamWorkspaceRefsData,
+  WSMetaPagesRefsData,
 } from '@/core/utils/types'
 
 export type SubCollectionKey<T extends SubCollections> = T['subCollections']
@@ -21,6 +22,15 @@ interface Workspace_Collection {
     interface: WorkspaceData
     sub_col: SubCollectionKey<WorkspaceData>[]
     sub_params: {} | null
+  }
+  WsMetaPagesRefs: {
+    id: 'mp_id'
+    path: 'workspaces/:ws_id/meta_pages_refs'
+    interface: WSMetaPagesRefsData
+    sub_col: SubCollectionKey<WSMetaPagesRefsData>[]
+    sub_params: {
+      ws_id:string
+    } | null
   }
 }
 

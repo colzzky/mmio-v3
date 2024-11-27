@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import DesktopSidebar from '@/core/components/sidebar/desktop-sidebar.vue'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import router from '@/router'
 import { useRoute } from 'vue-router';
 import { useWorkspaceStore } from '@/stores/WorkspaceStore';
@@ -24,11 +24,13 @@ const authWorkspaceStore = useAuthWorkspaceStore()
 const workspaceStore = useWorkspaceStore()
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
-const { active_workspace, active_team, current_member, returnHome } = authWorkspaceStore
+const { active_workspace, active_team, current_member, returnHome, current_meta_pages } = authWorkspaceStore
 const { workspace: wp_model } = workspaceStore
 const { team } = teamStore
 const { user_auth } = authStore
 const { workspaceOwner } = accessPermission
+const workspace_load = ref<boolean>(true)
+
 
 async function validateWorkspace() {
 
@@ -55,7 +57,7 @@ async function validateMemberOwner() {
 
   // Fetch team data
   const teamResponse = await team.get(teamId);
-  let teamData = <TeamData|null>null;
+  let teamData = <TeamData | null>null;
   let teamMembers = <TeamMembersData[]>[];
 
   // Check team data validity
@@ -87,17 +89,31 @@ async function validateMemberOwner() {
 }
 
 onMounted(async () => {
+  workspace_load.value = true
   await validateWorkspace()
   await validateMemberOwner()
+  workspace_load.value = false
 })
 
 
 </script>
 
 <template>
-  <Toaster/>
-  <DesktopSidebar />
-  <div class="lg:pl-72">
-    <RouterView />
+  <Toaster />
+  <div v-if="!workspace_load">
+    <DesktopSidebar />
+    <div class="lg:pl-72">
+      <RouterView />
+    </div>
+  </div>
+  <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
+    <div class="flex animate-pulse items-center gap-x-1">
+      <i class="material-icons text-4xl">pin</i>
+      <span class="text-xl font-extrabold">MMIO</span>
+    </div>
+    <div class="flex items-center justify-center space-x-2">
+      <i class="material-icons animate-spin text-sm">donut_large</i>
+      <div>Loading</div>
+    </div>
   </div>
 </template>

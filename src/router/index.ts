@@ -5,6 +5,7 @@ import { routes as teamsAndPermissionsRoutes } from '@/modules/teams-permissions
 import othersRoutes from '@/modules/try/routes'
 import { routes as workspaceSettingsRoutes } from '@/modules/workspace-settings/routes'
 import { useAuthStore } from '@/stores/authStore'
+import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { usePlatformAPIStore } from '@/stores/platformAPIStore'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
@@ -57,6 +58,7 @@ router.beforeEach(async (to, from) => {
   const authStore = useAuthStore()
   const platformApiStore = usePlatformAPIStore()
   const { user_auth, page_init, after_auth_initialization } = authStore
+  const authWorkspaceStore = useAuthWorkspaceStore()
   const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
   const nonAuth = to.matched.some((record) => record.meta.nonAuth)
   if (!from.name) {
