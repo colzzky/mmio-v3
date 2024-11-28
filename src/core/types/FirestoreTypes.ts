@@ -11,6 +11,7 @@ import type {
   PermissionData,
   TeamWorkspaceRefsData,
   WSMetaPagesRefsData,
+  ChatbotFlowServiceData,
 } from '@/core/utils/types'
 
 export type SubCollectionKey<T extends SubCollections> = T['subCollections']
@@ -28,6 +29,15 @@ interface Workspace_Collection {
     path: 'workspaces/:ws_id/meta_pages_refs'
     interface: WSMetaPagesRefsData
     sub_col: SubCollectionKey<WSMetaPagesRefsData>[]
+    sub_params: {
+      ws_id:string
+    } | null
+  }
+  WsChatbotFlow: {
+    id: 'cb_id'
+    path: 'workspaces/:ws_id/chatbot_flow_services'
+    interface: ChatbotFlowServiceData
+    sub_col: SubCollectionKey<ChatbotFlowServiceData>[]
     sub_params: {
       ws_id:string
     } | null

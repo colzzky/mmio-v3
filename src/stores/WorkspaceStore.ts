@@ -30,10 +30,8 @@ interface WsMetaPagesRefs {
   createUpdate: (ws_id:string, type: 'new' | 'update') => Promise<FSReturnData<WSMetaPagesRefsData>>
 }
 
-
-
 export const useWorkspaceStore = defineStore('workspaceStore', () => {
-  const workspace = <Workspace>({
+  const workspace = reactive<Workspace>({
     data: { ...workspace_data },
     reInit() {
       this.data = { ...workspace_data }
@@ -62,7 +60,7 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
     },
   })
 
-  const workspace_meta_pages_refs = <WsMetaPagesRefs>({
+  const workspace_meta_pages_refs = reactive<WsMetaPagesRefs>({
     data: { ...ws_meta_pages_refs_data },
     reInit() {
       this.data = { ...ws_meta_pages_refs_data }

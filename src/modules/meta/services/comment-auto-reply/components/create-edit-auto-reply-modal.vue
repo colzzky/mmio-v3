@@ -61,7 +61,6 @@ const modal = reactive<ModalInterface>({
         name: autoReply.name,
       }
     }
-
     this.isOpen = true
   },
   close() {

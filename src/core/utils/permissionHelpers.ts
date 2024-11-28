@@ -1,7 +1,6 @@
 import { toast } from '../components/ui/toast'
 import {
     access_level_byservice,
-    access_level_permissions,
     PermissionServices,
     type Access_levels,
     type AccessStructure,
@@ -34,9 +33,11 @@ export const servicePermission = {
      * @throws {PermissionAccessError} Insufficient permissions.
      */
     async check(service: PermissionServices, permission: TypeOfPermissionType | TypeOfPermissionType[]): Promise<Error | void> {
+        //Check if owner of workspace
         if (accessPermission.workspaceOwner(active_workspace.data)) return
         const member_access_permission = current_member.data?.accessPermissions
 
+        //Check Member access Level
         if (member_access_permission && member_access_permission[service]) {
             const getCurrentPermissions = (accessLevels: Access_levels[]): TypeOfPermissionType[] => {
                 return [
@@ -54,7 +55,7 @@ export const servicePermission = {
             if (common_permission) {
                 return
             } else {
-                //Check custom
+                //Check custom Permission
                 if (member_access_permission[service].custom) {
                     const current_custom_permission = member_access_permission[service].custom
                     const custom_permission = Array.isArray(permission)
@@ -65,7 +66,7 @@ export const servicePermission = {
             }
         }
         toast({
-            title: 'Permission Access Error',
+            title: 'Insufficient permissions',
             description: `You do not have enough permission in this Workspace to ${permission} in ${service} service.`,
             variant: 'destructive',
         })

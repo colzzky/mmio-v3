@@ -10,28 +10,24 @@ export enum PermissionServices {
   ChatBotFlow = 'Chatbot Flow',
   CommentAutoReply = 'Comment Auto Reply',
   EmailMarketing = 'Email Marketing',
+  WorskspaceSettings = 'Workspace Settings',
 }
 
+//Add more here if needed
 export enum Access_levels {
   FULL = 'full',
   READ = 'read',
   WRITE = 'write',
-  TEST= 'test',
+  TEST= 'test', //This is something i added
   CUSTOM = 'custom',
 }
 
-
+//Default Read and Write Value
 const READ = <TypeOfPermissionType[]>['view']
 const WRITE = <TypeOfPermissionType[]>['add', 'edit', 'publish', 'delete']
 const FULL = <TypeOfPermissionType[]>['add', 'edit', 'delete', 'view', 'publish']
 
 //Access Level vs What it can do
-export const access_level_permissions: AccessLevelPermissions = {
-  [Access_levels.READ]: READ,
-  [Access_levels.WRITE]: WRITE,
-  [Access_levels.FULL]: FULL,
-  [Access_levels.CUSTOM]: [],
-}
 export const access_level_byservice: Record<PermissionServices, Partial<Record<Access_levels, TypeOfPermissionType[]>>> = {
   [PermissionServices.ChatBotFlow]: {
     [Access_levels.READ]: ['view'],
@@ -54,8 +50,45 @@ export const access_level_byservice: Record<PermissionServices, Partial<Record<A
     [Access_levels.FULL]: FULL,
     [Access_levels.CUSTOM]: [],
   },
+  [PermissionServices.WorskspaceSettings]: {
+    [Access_levels.READ]: READ,
+    [Access_levels.WRITE]: WRITE,
+    [Access_levels.FULL]: FULL,
+    [Access_levels.CUSTOM]: [],
+  }
 }
-
+//This will be assigned whenever the admin/owner decided to set the permission to custom
+export const custom_permission: Record<PermissionServices, CustomPermissions> = {
+  [PermissionServices.ChatBotFlow]: {
+    view: false,
+    add: false,
+    edit: false,
+    delete: false,
+    publish: false,
+    clone: false,
+  },
+  [PermissionServices.CommentAutoReply]: {
+    view: false,
+    add: false,
+    edit: false,
+    delete: false,
+    publish: false,
+  },
+  [PermissionServices.EmailMarketing]: {
+    view: false,
+    add: false,
+    edit: false,
+    delete: false,
+    publish: false,
+  },
+  [PermissionServices.WorskspaceSettings]: {
+    view: false,
+    add: false,
+    edit: false,
+    delete: false,
+    publish: false,
+  }
+}
 
 //Up to here
 
@@ -119,33 +152,10 @@ export const custom_access: AccessStructure = {
   [PermissionServices.EmailMarketing]: {
     access: [Access_levels.READ],
   },
-}
-
-export const custom_permission: Record<PermissionServices, CustomPermissions> = {
-  [PermissionServices.ChatBotFlow]: {
-    view: false,
-    add: false,
-    edit: false,
-    delete: false,
-    publish: false,
-    clone: false,
+  [PermissionServices.WorskspaceSettings]: {
+    access: [Access_levels.READ],
   },
-  [PermissionServices.CommentAutoReply]: {
-    view: false,
-    add: false,
-    edit: false,
-    delete: false,
-    publish: false,
-  },
-  [PermissionServices.EmailMarketing]: {
-    view: false,
-    add: false,
-    edit: false,
-    delete: false,
-    publish: false,
-  }
 }
-
 
 export const permission_data: PermissionData = {
   permission_id: '',
