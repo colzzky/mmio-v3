@@ -19,15 +19,17 @@ import CreateTeam from '@/modules/teams-permissions/components/team/CreateTeam.v
 import Workspaces from './components/Workspaces.vue'
 import WorkspacesLoad from './components/WorkspacesLoad.vue'
 import { useAuthStore } from '@/stores/authStore'
-import {onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const allWorkspaceFilter = ref('Most Recent')
 const sharedWorkspaceFilter = ref('Most Recent')
 const pageLoad = ref<boolean>(false)
 const dataLoad = ref<boolean>(true)
 const selectTeamLoad = ref<boolean>(true)
 const authStore = useAuthStore()
-const {user_auth, user, page_init } = authStore
+const { user_auth, user, page_init } = authStore
 const user_created_workspaces = ref<WorkspaceData[]>([])
 const shared_workspaces = ref<WorkspaceData[]>([])
 const workspace_owner_uid = ref<string[]>([])
@@ -86,15 +88,21 @@ async function fetch_workspace_owners() {
 }
 
 async function fetch_teams() {
+  
   if (user_auth.data) {
+    console.log(user)
+    
     if (user.data && user.data.team_refs) {
+      console.log('ente2')
       user.data.team_refs.forEach((team) => {
         team_refs_id.push(team.tm_id)
       })
       const team = await getWhereAny('team', 'teams', {}, [], [
         { fieldName: 'tm_id', operator: 'in', value: team_refs_id }])
-
+        console.log('tesm list')
+        console.log(team)
       if (team.data && team.status) {
+        console.log('ente3')
         user_teams.value = team.data
       }
     }
@@ -132,11 +140,22 @@ async function fetch_all_workspaces() {
 }
 
 onMounted(async () => {
-  pageLoad.value = true
-  pageLoad.value = false
+  console.log(page_init.initialize)
+  if (page_init.initialize) {
+    console.log('test')
+    pageLoad.value = true
+    pageLoad.value = false
+    await fetch_all_workspaces()
+  }
+})
 
-  await fetch_all_workspaces()
-
+watch(() => page_init.initialize, async (new_val, old_val) => {
+  if (new_val) {
+    console.log('test2')
+    pageLoad.value = true
+    pageLoad.value = false
+    //await fetch_all_workspaces()
+  }
 })
 
 
@@ -144,7 +163,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="page_init.initialize">
+  <div v-if="!pageLoad">
     <header class="flex items-center justify-between p-4">
       <DropdownMenu>
         <DropdownMenuTrigger class="flex items-center gap-x-1">
@@ -152,7 +171,7 @@ onMounted(async () => {
           <div class="flex flex-col items-start">
             <strong class="text-xl leading-none">Marketing Master IO</strong>
             <small class="flex items-center">
-              Team Workspace: {{selected_team ? selected_team.name : 'All Workspace' }}
+              Team Workspace: {{ selected_team ? selected_team.name : 'All Workspace' }}
               <i class="material-icons">arrow_drop_down</i>
             </small>
           </div>
@@ -214,8 +233,8 @@ onMounted(async () => {
           <div>
 
             <Transition name="fade" mode="out-in">
-              <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="user_created_workspaces" :is-shared="false"
-                :workspace-owners="null" />
+              <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="user_created_workspaces"
+                :is-shared="false" :workspace-owners="null" />
             </Transition>
 
 
@@ -253,7 +272,7 @@ onMounted(async () => {
         <section class="grid gap-y-6">
           <div class="flex flex-col items-start text-xs">
             <h1 class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent">
-              {{`${selected_team.name} Workspaces`}}
+              {{ `${selected_team.name} Workspaces` }}
             </h1>
             <DropdownMenu>
               <DropdownMenuTrigger>
@@ -270,8 +289,8 @@ onMounted(async () => {
           </div>
           <div>
             <Transition name="fade" mode="out-in">
-              <component :is="selectTeamLoad ? WorkspacesLoad : Workspaces" :workspaces="selected_team_workspaces" :is-shared="true"
-                :workspace-owners="workspace_owners" />
+              <component :is="selectTeamLoad ? WorkspacesLoad : Workspaces" :workspaces="selected_team_workspaces"
+                :is-shared="true" :workspace-owners="workspace_owners" />
             </Transition>
           </div>
         </section>

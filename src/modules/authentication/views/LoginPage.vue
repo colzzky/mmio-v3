@@ -51,6 +51,7 @@ const loginUser = async (email: string, password: string): Promise<void> => {
             photoURL: auth.currentUser.photoURL,
             uid: auth.currentUser.uid,
           })
+          await user_auth.initializeUser()
           router.replace({ name: 'home' })
         }
       })
@@ -78,6 +79,7 @@ async function registerFacebook(): Promise<void> {
         photoURL: result.user.photoURL,
         uid: result.user.uid,
       })
+      await user_auth.initializeUser()
       router.replace({ name: 'home' })
     })
     .catch((error) => {

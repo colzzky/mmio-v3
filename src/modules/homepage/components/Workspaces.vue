@@ -19,8 +19,6 @@ function newWorkspaceReturn(workspace: WorkspaceData | null) {
     }
     newWorkspaceModal.value = false
 }
-
-
 </script>
 <template>
     <div>
