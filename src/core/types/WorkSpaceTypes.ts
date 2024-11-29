@@ -51,8 +51,8 @@ export const ws_meta_pages_refs_data: WSMetaPagesRefsData = {
 //Meta Services
 export interface ChatbotFlowServiceData extends SubCollections{
   cb_id: string
-  name: string
   connected_account_id:string //meta pages id
+  name: string
   botFlow: string // This is where flow data is needed
   status: string
   isEnabled: boolean
@@ -66,6 +66,32 @@ export const chatbot_flow_service_Data: ChatbotFlowServiceData = {
   botFlow: '', // This is where flow data is needed
   status: '',
   isEnabled: false,
+  createdAt: '',
+  updatedAt: '',
+  subCollections: []
+}
+export interface PostRandomizerServiceData extends SubCollections{
+  pr_id: string
+  connected_account_id:string //meta pages id
+  name: string
+  mediaSource:string
+  status: string
+  isEnabled: boolean
+  startDate:string
+  endDate:string
+  createdAt: string
+  updatedAt: string
+}
+
+export const post_randomizer_service_data: PostRandomizerServiceData = {
+  pr_id: '',
+  connected_account_id:'', //meta pages id
+  name: '',
+  mediaSource: '', // This is where flow data is needed
+  status: '',
+  isEnabled: false,
+  startDate: '',
+  endDate: '',
   createdAt: '',
   updatedAt: '',
   subCollections: []

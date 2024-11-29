@@ -23,13 +23,9 @@ import {
 import type { Modal } from '@/core/utils/types'
 import { inject, reactive } from 'vue'
 
-const campaigns = inject('campaigns') as CampaignsMap
-
 interface ModalInterface extends Omit<Modal, 'open'> {
   open(args: { intent: 'create' } | { intent: 'edit'; campaignId: Campaign['id'] }): void
-
   intent: 'create' | 'edit' | null
-  form: Omit<Campaign, 'status' | 'createdAt'>
   submitForm(): void
   createCampaign(): void
   editCampaign(): void
@@ -38,38 +34,15 @@ interface ModalInterface extends Omit<Modal, 'open'> {
 const modal = reactive<ModalInterface>({
   isOpen: false,
   intent: null,
-  form: {
-    id: 0,
-    mediaSource: '',
-    name: '',
-    publishedTo: {},
-    duration: {},
-  },
   initialState() {
     this.isOpen = false
     this.intent = null
-    this.form = {
-      id: 0,
-      mediaSource: '',
-      name: '',
-      publishedTo: {},
-      duration: {},
-    }
   },
   open(args) {
     this.intent = args.intent
 
     if (args.intent === 'edit') {
-      const campaign = campaigns.value.get(args.campaignId)
-      if (!campaign) throw new Error('Campaign not found')
-
-      this.form = {
-        id: campaign.id,
-        mediaSource: campaign.mediaSource,
-        name: campaign.name,
-        publishedTo: campaign.publishedTo,
-        duration: campaign.duration,
-      }
+      //
     }
 
     this.isOpen = true
@@ -82,24 +55,10 @@ const modal = reactive<ModalInterface>({
     this.close()
   },
   createCampaign() {
-    // @temporary: get the highest campaign id and increment it by 1
-    const newCampaignId = Math.max(...Array.from(campaigns.value.keys())) + 1
-    campaigns.value.set(newCampaignId, {
-      ...this.form,
-      id: newCampaignId,
-      status: 'inactive',
-      createdAt: new Date(),
-    })
+
   },
   editCampaign() {
-    const campaign = campaigns.value.get(this.form.id)
-    if (!campaign) throw new Error('Campaign not found')
 
-    campaigns.value.set(this.form.id, {
-      ...this.form,
-      status: campaign.status,
-      createdAt: campaign.createdAt,
-    })
   },
 })
 
@@ -126,7 +85,7 @@ defineExpose({
       <form id="form" class="flex flex-col gap-y-4" @submit.prevent="modal.submitForm()">
         <div class="flex flex-col gap-y-2">
           <Label for="mediaSource">Media Source</Label>
-          <Select id="mediaSource" v-model="modal.form.mediaSource" required>
+          <Select id="mediaSource" required>
             <SelectTrigger>
               <SelectValue placeholder="Select Source" />
             </SelectTrigger>
@@ -144,7 +103,6 @@ defineExpose({
           <Input
             type="text"
             id="name"
-            v-model="modal.form.name"
             name="name"
             placeholder="Input Name"
             required
@@ -152,7 +110,7 @@ defineExpose({
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="users">Instagram Business</Label>
-          <Select id="users" v-model="modal.form.publishedTo.users" required>
+          <Select id="users" required>
             <SelectTrigger>
               <SelectValue placeholder="Select Instagram Business" />
             </SelectTrigger>
@@ -167,7 +125,7 @@ defineExpose({
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="pages">Pages</Label>
-          <Select id="pages" v-model="modal.form.publishedTo.pages" required>
+          <Select id="pages"  required>
             <SelectTrigger>
               <SelectValue placeholder="Select Pages" />
             </SelectTrigger>
@@ -182,7 +140,7 @@ defineExpose({
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="groups">Groups</Label>
-          <Select id="groups" v-model="modal.form.publishedTo.groups" required>
+          <Select id="groups"  required>
             <SelectTrigger>
               <SelectValue placeholder="Select Groups" />
             </SelectTrigger>
@@ -199,15 +157,12 @@ defineExpose({
           <div class="flex flex-col gap-y-2">
             <Label as="span">Start Date</Label>
             <DatePicker
-              :initialValue="modal.form.duration.start"
-              @update:model-value="modal.form.duration.start = $event"
+              
             />
           </div>
           <div class="flex flex-col gap-y-2">
             <Label as="span">End Date</Label>
             <DatePicker
-              :initial-value="modal.form.duration.end"
-              @update:model-value="modal.form.duration.end = $event"
             />
           </div>
         </div>

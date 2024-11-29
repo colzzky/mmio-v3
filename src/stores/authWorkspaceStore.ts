@@ -1,51 +1,20 @@
 import type { UserData } from '@/core/types/AuthUserTypes'
 import type { MetaPageData } from '@/core/types/MetaTypes'
-import type { TeamData, TeamMembersData } from '@/core/types/TeamTypes'
-import { chatbot_flow_service_Data, workspace_data, type ChatbotFlowServiceData, type MetaPageRefs, type WorkspaceData, type WSMetaPagesRefsData } from '@/core/types/WorkSpaceTypes'
+import type { TeamMembersData } from '@/core/types/TeamTypes'
+import { chatbot_flow_service_Data, post_randomizer_service_data, type ChatbotFlowServiceData, type MetaPageRefs, type PostRandomizerServiceData } from '@/core/types/WorkSpaceTypes'
+import type {
+  FSReturnData,
+  ActiveWorkspace,
+  ActiveTeam,
+  CurrentMember,
+  ChatBotFlowService,
+  PostRandomizerService
+} from '../core/types/AuthWorkspaceTypes';
 import { getCollection, getWhereAny, listenToCollection, postCollection } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
-
-interface FirebaseReturn {
-  status: boolean;
-  data: DocumentData | undefined;
-  error: string;
-}
-type FirebaseReturnBase = Omit<FirebaseReturn, 'data'>;
-type FSReturnData<T> = FirebaseReturnBase & {
-  data: T;
-};
-
-interface ActiveWorkspace {
-  data: WorkspaceData | null,
-  isInitialized: boolean,
-  isLoading: boolean,
-  reset: () => void
-}
-interface ActiveTeam {
-  data: TeamData | null,
-  isInitialized: boolean,
-  isLoading: boolean,
-  reset: () => void
-}
-interface CurrentMember {
-  data: TeamMembersData | null
-  isOwner: boolean
-  isInitialized: boolean
-  isLoading: boolean
-  listener: (() => void) | null
-  reset: () => void
-  listen: (tm_id: string, member_id: string) => Promise<void>
-}
-interface ChatBotFlowService {
-  data: ChatbotFlowServiceData
-  reInit: () => void,
-  set: (data: ChatbotFlowServiceData) => void
-  get: (cb_id:string) => Promise<FSReturnData<ChatbotFlowServiceData>>
-  createUpdate: (type: 'new' | 'update') => Promise<FSReturnData<ChatbotFlowServiceData>>
-}
 
 
 export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
@@ -114,33 +83,37 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
             work_page_ids.push(wp.mp_id)
             imported_by_ids.push(wp.imported_by_uid)
           })
-          const fetch_meta_pages = await getWhereAny('meta_page', 'meta_pages', {}, [], [{
-            fieldName: 'mp_id', operator: 'in', value: work_page_ids
-          }])
-          if (fetch_meta_pages.status) {
-            this.data = fetch_meta_pages.data
-            const get_user_import = await getWhereAny('user', 'users', {}, [], [
-              { fieldName: 'uid', operator: 'in', value: imported_by_ids }
-            ])
-            const meta_page_reference = active_workspace.data.meta_pages_refs
-            this.data.forEach(data => {
-              const ref = meta_page_reference.find(ref => ref.mp_id = data.mp_id)
-              let user = <UserData | undefined>undefined
-              if (get_user_import.data.length > 0) {
-                user = get_user_import.data.find(user => user.uid = data.owner_uid)
-              }
-              if (ref) {
-                this.reference.push({
-                  mp_id: data.mp_id,
-                  imported_by: user && user.displayName ? user.displayName : '',
-                  image: data.picture ? data.picture.data.url : '',
-                  page_name: data.name,
-                  importedAt: ref.createdAt,
-                  updatedAt: ref.updatedAt,
-                })
-              }
-            })
+          if (work_page_ids.length > 0) {
+            const fetch_meta_pages = await getWhereAny('meta_page', 'meta_pages', {}, [], [{
+              fieldName: 'mp_id', operator: 'in', value: work_page_ids
+            }])
+
+            if (fetch_meta_pages.status && fetch_meta_pages.data.length > 0) {
+              this.data = fetch_meta_pages.data
+              const get_user_import = await getWhereAny('user', 'users', {}, [], [
+                { fieldName: 'uid', operator: 'in', value: imported_by_ids }
+              ])
+              const meta_page_reference = active_workspace.data.meta_pages_refs
+              this.data.forEach(data => {
+                const ref = meta_page_reference.find(ref => ref.mp_id = data.mp_id)
+                let user = <UserData | undefined>undefined
+                if (get_user_import.data.length > 0) {
+                  user = get_user_import.data.find(user => user.uid = data.owner_uid)
+                }
+                if (ref) {
+                  this.reference.push({
+                    mp_id: data.mp_id,
+                    imported_by: user && user.displayName ? user.displayName : '',
+                    image: data.picture ? data.picture.data.url : '',
+                    page_name: data.name,
+                    importedAt: ref.createdAt,
+                    updatedAt: ref.updatedAt,
+                  })
+                }
+              })
+            }
           }
+
         }
         this.generateNextFetch()
         this.isLoading = false
@@ -148,19 +121,20 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
       }
     }
   })
+
   const service_models = {
-    chatbot_flow:reactive<ChatBotFlowService>({
+    chatbot_flow: reactive<ChatBotFlowService>({
       data: { ...chatbot_flow_service_Data },
       reInit() {
-        this.data = { ...chatbot_flow_service_Data}
+        this.data = { ...chatbot_flow_service_Data }
         //this is team
       },
       set(data: ChatbotFlowServiceData) {
         this.data = data
       },
-      async get(cb_id:string): Promise<FSReturnData<ChatbotFlowServiceData>> {
-        const active_workspacse = active_workspace.data? active_workspace.data.ws_id : ''
-        const get = await getCollection('WsChatbotFlow', 'workspaces/:ws_id/chatbot_flow_services', {ws_id:active_workspacse}, cb_id, [])
+      async get(cb_id: string): Promise<FSReturnData<ChatbotFlowServiceData>> {
+        const active_workspacse = active_workspace.data ? active_workspace.data.ws_id : ''
+        const get = await getCollection('ws_chatbot_flow', 'workspaces/:ws_id/chatbot_flow_service', { ws_id: active_workspacse }, cb_id, [])
         return {
           status: get.status,
           data: get.data as ChatbotFlowServiceData,
@@ -168,10 +142,10 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
         }
       },
       async createUpdate(type): Promise<FSReturnData<ChatbotFlowServiceData>> {
-        const active_workspacse = active_workspace.data? active_workspace.data.ws_id : ''
+        const active_workspacse = active_workspace.data ? active_workspace.data.ws_id : ''
         const id = this.data.cb_id !== '' ? this.data.cb_id : crypto.randomUUID();
         this.data.cb_id = id
-        const post = await postCollection('WsChatbotFlow', 'workspaces/:ws_id/chatbot_flow_services', {ws_id:active_workspacse}, id, this.data, type)
+        const post = await postCollection('ws_chatbot_flow', 'workspaces/:ws_id/chatbot_flow_service', { ws_id: active_workspacse }, id, this.data, type)
         console.log(post)
         return {
           status: post.status,
@@ -179,10 +153,41 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
           error: post.error,
         }
       },
+    }),
+    post_randomizer: reactive<PostRandomizerService>({
+      data: { ...post_randomizer_service_data },
+      reInit() {
+        this.data = { ...post_randomizer_service_data }
+        //this is team
+      },
+      set(data) {
+        this.data = data
+      },
+      async get(pr_id){
+        const active_workspacse = active_workspace.data ? active_workspace.data.ws_id : ''
+        const get = await getCollection('ws_post_randomizer', 'workspaces/:ws_id/post_randomizer_service', { ws_id: active_workspacse }, pr_id, [])
+        return {
+          status: get.status,
+          data: get.data as PostRandomizerServiceData,
+          error: get.error,
+        }
+      },
+      async createUpdate(type){
+        const active_workspacse = active_workspace.data ? active_workspace.data.ws_id : ''
+        const id = this.data.pr_id !== '' ? this.data.pr_id : crypto.randomUUID();
+        this.data.pr_id = id
+        const post = await postCollection('ws_post_randomizer', 'workspaces/:ws_id/post_randomizer_service', { ws_id: active_workspacse }, id, this.data, type)
+        console.log(post)
+        return {
+          status: post.status,
+          data: post.data as PostRandomizerServiceData,
+          error: post.error,
+        }
+      },
     })
   }
   const workspace_service = {
-    chatbot_flow:reactive({
+    chatbot_flow: reactive({
       data: <ChatbotFlowServiceData[]>[],
       isInitialized: <boolean>false,
       isLoading: <boolean>false,
@@ -211,7 +216,7 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
           this.isLoading = true
           this.data = []
           if (active_workspace.data && active_workspace.data.meta_pages_refs) {
-            const fetch_chatbots = await getWhereAny('WsChatbotFlow', 'workspaces/:ws_id/chatbot_flow_services', {ws_id:active_workspace.data.ws_id}, [], [])
+            const fetch_chatbots = await getWhereAny('ws_chatbot_flow', 'workspaces/:ws_id/chatbot_flow_service', { ws_id: active_workspace.data.ws_id }, [], [])
             if (fetch_chatbots.status && fetch_chatbots.data.length > 0) {
               this.data = fetch_chatbots.data
             }
@@ -221,8 +226,54 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
           this.isInitialized = true
         }
       }
+    }),
+    post_randomizer: reactive({
+      data: <PostRandomizerServiceData[]>[],
+      isInitialized: <boolean>false,
+      isLoading: <boolean>false,
+      lastSnapshot: <string>'',
+      nextFetch: <string>'',
+      generateNextFetch() {
+        this.nextFetch = uiHelpers.generateExpirationDate(10)
+      },
+      checkNextFetch() {
+        if (this.nextFetch) {
+          const now = new Date();
+          const expireDate = new Date(this.nextFetch);
+          console.log(expireDate)
+          return now >= expireDate;
+        }
+        return true
+      },
+      resetData() {
+        this.data = []
+        this.isInitialized = false
+        this.isLoading = false
+        this.lastSnapshot = ''
+      },
+      async fetch_posts(isNext:boolean = false) {
+        if (this.checkNextFetch() || isNext) {
+          this.isLoading = true
+          if(!isNext){
+            this.data = []
+            this.lastSnapshot = ''
+          }
+          
+          if (active_workspace.data && active_workspace.data.meta_pages_refs) {
+            const fetch_data = await getWhereAny('ws_post_randomizer', 'workspaces/:ws_id/post_randomizer_service', { ws_id: active_workspace.data.ws_id }, [], [],[],10,this.lastSnapshot)
+            if (fetch_data.status && fetch_data.data.length > 0) {
+              this.data = fetch_data.data
+              this.lastSnapshot = this.data[this.data.length - 1].pr_id;
+            }
+          }
+          this.generateNextFetch()
+          this.isLoading = false
+          this.isInitialized = true
+        }
+      }
     })
   }
+
   function returnHome() {
     if (current_member.listener) {
       current_member.listener()
@@ -231,9 +282,6 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     current_member.listener = null
   }
 
-
-
-
   return {
     active_workspace,
     active_team,
@@ -241,7 +289,6 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     imported_meta_pages,
     workspace_service,
     service_models,
-
     returnHome
   }
 },

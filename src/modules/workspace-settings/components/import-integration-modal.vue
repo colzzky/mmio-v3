@@ -2,7 +2,7 @@
 import Checkbox from '@/core/components/ui/checkbox/Checkbox.vue'
 import { Button } from '@/core/components/ui/button'
 import { Dialog, DialogContent } from '@/core/components/ui/dialog'
-import { getWhereAny, postCollectionBatch } from '@/core/utils/firebase-collections'
+import { getWhereAny, postCollectionBatch, postCollectionBatchAtomic, postMultipleCollectionsAtmoic, postMultipleCollectionsBatchAtomic, type FSPostBatchCollection, type FSPostMultiCollectAtomic } from '@/core/utils/firebase-collections'
 import type { MetaPageData, Modal, WSMetaPagesRefsData } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useAuthStore } from '@/stores/authStore'
@@ -11,6 +11,7 @@ import { reactive, ref } from 'vue'
 import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
 import { useWorkspaceStore } from '@/stores/WorkspaceStore'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
+import type { CollectionsInterface } from '@/core/types/FirestoreTypes'
 
 
 const authStore = useAuthStore()
@@ -20,7 +21,7 @@ const workspaceStore = useWorkspaceStore()
 const { user_auth, user } = authStore
 const { meta_page } = metaStore
 const { workspace_meta_pages_refs } = workspaceStore
-const { active_workspace, current_meta_pages } = authWorkspaceStore
+const { active_workspace, imported_meta_pages } = authWorkspaceStore
 
 
 interface ModalInterface extends Omit<Modal, 'open'> {
@@ -87,6 +88,7 @@ const meta_import = reactive({
       const act_wsp = active_workspace.data
       const batch_ws_meta_refs = <WSMetaPagesRefsData[]>[]
       const batch_meta_page = <MetaPageData[]>[]
+      
       this.selected_meta_pages.forEach(page_id => {
         const selected_page = this.meta_pages.find(mp => mp.mp_id === page_id)
         if (selected_page) {
@@ -97,21 +99,37 @@ const meta_import = reactive({
           batch_meta_page.push(JSON.parse(JSON.stringify({ ...selected_page, isOnProject: true })))
         }
       });
-      const post_ws_refs_batch = await postCollectionBatch('WsMetaPagesRefs', 'workspaces/:ws_id/meta_pages_refs', { ws_id: act_wsp.ws_id }, this.selected_meta_pages, batch_ws_meta_refs)
-      const post_meta_pages = await postCollectionBatch('meta_page', 'meta_pages', {}, this.selected_meta_pages, batch_meta_page)
-      if (post_meta_pages.status && post_ws_refs_batch.status) {
-        batch_meta_page.forEach(mp => {
-          current_meta_pages.data.push(mp)
-        })
-        this.meta_pages = []
-        this.selected_meta_pages = []
-        modal.close()
+
+      if (batch_meta_page.length > 0 && batch_ws_meta_refs.length > 0) {
+        const post_batch = await postMultipleCollectionsBatchAtomic([
+          {
+            $col: 'ws_meta_pages_refs',
+            $path: 'workspaces/:ws_id/meta_pages_refs',
+            $sub_params: { ws_id: act_wsp.ws_id },
+            ids: this.selected_meta_pages,
+            data: batch_ws_meta_refs
+          },
+          {
+            $col: 'meta_page',
+            $path: 'meta_pages',
+            $sub_params: {},
+            ids: this.selected_meta_pages,
+            data: batch_meta_page
+          },
+        ])
+
+        if (post_batch.status) {
+          batch_meta_page.forEach(mp => {
+            imported_meta_pages.data.push(mp)
+          })
+          this.meta_pages = []
+          this.selected_meta_pages = []
+          modal.close()
+        }
       }
     }
   }
 })
-
-
 
 defineExpose({
   modal,

@@ -149,5 +149,5 @@ const createEditModalRef = useTemplateRef('createEditModal')
   </Main>
 
   <CreateEditModal ref="createEditModal" />
-  <DeleteModal ref="deleteModal" />
+  <!-- <DeleteModal ref="deleteModal" /> -->
 </template>

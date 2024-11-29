@@ -12,6 +12,7 @@ import type {
   TeamWorkspaceRefsData,
   WSMetaPagesRefsData,
   ChatbotFlowServiceData,
+  PostRandomizerServiceData,
 } from '@/core/utils/types'
 
 export type SubCollectionKey<T extends SubCollections> = T['subCollections']
@@ -24,7 +25,7 @@ interface Workspace_Collection {
     sub_col: SubCollectionKey<WorkspaceData>[]
     sub_params: {} | null
   }
-  WsMetaPagesRefs: {
+  ws_meta_pages_refs: {
     id: 'mp_id'
     path: 'workspaces/:ws_id/meta_pages_refs'
     interface: WSMetaPagesRefsData
@@ -33,11 +34,20 @@ interface Workspace_Collection {
       ws_id:string
     } | null
   }
-  WsChatbotFlow: {
+  ws_chatbot_flow: {
     id: 'cb_id'
-    path: 'workspaces/:ws_id/chatbot_flow_services'
+    path: 'workspaces/:ws_id/chatbot_flow_service'
     interface: ChatbotFlowServiceData
     sub_col: SubCollectionKey<ChatbotFlowServiceData>[]
+    sub_params: {
+      ws_id:string
+    } | null
+  }
+  ws_post_randomizer: {
+    id: 'pr_id'
+    path: 'workspaces/:ws_id/post_randomizer_service'
+    interface: PostRandomizerServiceData
+    sub_col: SubCollectionKey<PostRandomizerServiceData>[]
     sub_params: {
       ws_id:string
     } | null

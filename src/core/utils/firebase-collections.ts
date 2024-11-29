@@ -26,6 +26,7 @@ import {
   onSnapshot,
   DocumentSnapshot,
   QuerySnapshot,
+  runTransaction,
 } from 'firebase/firestore'
 
 type Collections = {
@@ -722,5 +723,296 @@ export async function listenToCollection<T extends keyof CollectionsInterface>(
   } catch (error) {
     console.error("Error setting up listener:", error);
     throw error;
+  }
+}
+
+//Atomic Post Collection
+
+export type FSPostBatchCollection<T extends keyof CollectionsInterface> = Array<{
+  $col: T;
+  $path: CollectionsInterface[T]['path'];
+  $sub_params: CollectionsInterface[T]['sub_params'] | null;
+  id: string;
+  data: Record<string, any>;
+  type: 'update' | 'new';
+}>;
+
+// Define the function with correct generics and return type
+export async function postMultipleCollectionsAtmoic<T extends keyof CollectionsInterface>(
+  operations: FSPostBatchCollection<T>
+): Promise<Array<FirebaseReturn>> {
+  try {
+    const results = await runTransaction(firestore, async (transaction) => {
+      const responseArray: Array<FirebaseReturn> = [];
+
+      for (const op of operations) {
+        let fullPath = op.$path as string;
+
+        // Replace dynamic placeholders in path with actual values
+        if (op.$sub_params) {
+          Object.entries(op.$sub_params).forEach(([key, value]) => {
+            fullPath = fullPath.replace(`:${key}`, value);
+          });
+        }
+
+        const docRef = doc(firestore, fullPath, op.id);
+
+        // Fetch the document inside the transaction
+        const docSnapshot = await transaction.get(docRef);
+
+        if (docSnapshot.exists()) {
+          if (op.type === 'update') {
+            const updatedData = {
+              ...op.data,
+              updatedAt: Timestamp.fromDate(new Date()),
+            };
+            transaction.update(docRef, updatedData);
+
+            responseArray.push({
+              status: true,
+              data: {
+                ...updatedData,
+                updatedAt: updatedData.updatedAt.toDate().toISOString(),
+              },
+              error: '',
+            });
+          } else {
+            throw new Error(`Document already exists. Use 'update' instead.`);
+          }
+        } else {
+          if (op.type === 'new') {
+            const newData = {
+              ...op.data,
+              createdAt: Timestamp.fromDate(new Date()),
+              updatedAt: Timestamp.fromDate(new Date()),
+            };
+            transaction.set(docRef, newData);
+
+            responseArray.push({
+              status: true,
+              data: {
+                ...newData,
+                createdAt: newData.createdAt.toDate().toISOString(),
+                updatedAt: newData.updatedAt.toDate().toISOString(),
+              },
+              error: '',
+            });
+          } else {
+            throw new Error(`Document does not exist. Use 'new' instead.`);
+          }
+        }
+      }
+
+      return responseArray;
+    });
+
+    return results;
+  } catch (error) {
+    console.error('Transaction failed:', error);
+    return operations.map(() => ({
+      status: false,
+      error: `Transaction failed: ${error}`,
+      data: undefined,
+    }));
+  }
+}
+
+interface FirebaseWhereReturnAtomic<T> {
+  status: boolean; // Indicates if the operation was successful
+  data: Array<T & { id?: string }> | []; // Include document IDs in data when applicable
+  error: string; // Error message if the operation fails
+  failedOperations?: Array<{ id: string; error: string }>; // Track failed operations in batch processes
+}
+
+export async function postCollectionBatchAtomic<T extends keyof CollectionsInterface>(
+  $col: T,
+  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
+  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
+  ids: string[], // Array of document IDs to update or create
+  data: CollectionsInterface[T]['interface'][],
+): Promise<FirebaseWhereReturnAtomic<CollectionsInterface[T]['interface']>> {
+  if (ids.length !== data.length) {
+    return {
+      status: false,
+      error: 'Mismatch between the number of IDs and data items.',
+      data: [],
+    };
+  }
+
+  const batch = writeBatch(firestore);
+  const results: FirebaseReturn[] = [];
+  const failedOperations: Array<{ id: string; error: string }> = [];
+
+  try {
+    for (let i = 0; i < ids.length; i++) {
+      const id = ids[i];
+      const docData = data[i];
+
+      let fullPath = $path as string;
+      if ($sub_params) {
+        Object.entries($sub_params).forEach(([key, value]) => {
+          fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
+        });
+      }
+
+      const docRef = doc(firestore, fullPath, id);
+
+      const postData = {
+        ...docData,
+        createdAt: docData.createdAt
+          ? Timestamp.fromDate(new Date(docData.createdAt))
+          : Timestamp.fromDate(new Date()),
+        updatedAt: Timestamp.fromDate(new Date()),
+      };
+
+      // Add the operation to the batch
+      batch.set(docRef, { ...postData }, { merge: true });
+
+      // Prepare the result for successful operation
+      results.push({
+        status: true,
+        data: {
+          ...postData,
+          createdAt: postData.createdAt.toDate().toISOString(),
+          updatedAt: postData.updatedAt.toDate().toISOString(),
+        },
+        error: '',
+      });
+    }
+
+    // Commit the batch atomically
+    await batch.commit();
+
+    // Ensure that data is always an array and never undefined
+    const nonUndefinedData = results.map((r) => r.data).filter((data) => data !== undefined);
+
+    // Type assertion to assert that the result matches the expected type
+    return {
+      status: true,
+      data: nonUndefinedData as (CollectionsInterface[T]["interface"] & { id?: string })[], // Assert the type here
+      error: '',
+    };
+  } catch (error: any) {
+    // If the batch fails, track the failed operations
+    const errorMessage = error.message || 'Unknown error occurred';
+    for (let i = 0; i < ids.length; i++) {
+      failedOperations.push({
+        id: ids[i],
+        error: `Error processing document: ${errorMessage}`,
+      });
+    }
+
+    return {
+      status: false,
+      error: `Batch operation failed: ${errorMessage}`,
+      data: [],
+      failedOperations,
+    };
+  }
+}
+
+
+export type FSPostMultiCollectAtomic<T extends keyof CollectionsInterface> = Array<{
+  $col: T;
+  $path: CollectionsInterface[T]['path'];
+  $sub_params: CollectionsInterface[T]['sub_params'] | null;
+  ids: string[]; // Array of document IDs to update or create
+  data: CollectionsInterface[T]['interface'][]; // Corresponding data for each document ID
+}>;
+
+export async function postMultipleCollectionsBatchAtomic<T extends keyof CollectionsInterface>(
+  operations: FSPostMultiCollectAtomic<T>
+): Promise<FirebaseWhereReturnAtomic<CollectionsInterface[T]['interface']>> {
+  const batch = writeBatch(firestore);
+  const results: FirebaseReturn[] = [];
+  const failedOperations: Array<{ id: string; error: string }> = [];
+
+  try {
+    for (let operation of operations) {
+      const { $col, $path, $sub_params, ids, data } = operation;
+
+      // Ensure ids and data arrays have the same length
+      if (ids.length !== data.length) {
+        return {
+          status: false,
+          error: `Mismatch between the number of IDs and data items for collection ${$col}`,
+          data: [],
+        };
+      }
+
+      // Iterate through each document to either create or update
+      for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        const docData = data[i];
+
+        let fullPath = $path as string;
+        if ($sub_params) {
+          Object.entries($sub_params).forEach(([key, value]) => {
+            fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
+          });
+        }
+
+        const docRef = doc(firestore, fullPath, id);
+
+        const postData = {
+          ...docData,
+          createdAt: docData.createdAt
+            ? Timestamp.fromDate(new Date(docData.createdAt))
+            : Timestamp.fromDate(new Date()),
+          updatedAt: Timestamp.fromDate(new Date()),
+        };
+
+        // Check if the document exists, and decide whether to create or update
+        const docSnapshot = await getDoc(docRef);
+        if (docSnapshot.exists()) {
+          // Document exists, update it
+          batch.update(docRef, { ...postData });
+        } else {
+          // Document does not exist, create it
+          batch.set(docRef, { ...postData });
+        }
+
+        // Prepare the result for successful operation
+        results.push({
+          status: true,
+          data: {
+            ...postData,
+            createdAt: postData.createdAt.toDate().toISOString(),
+            updatedAt: postData.updatedAt.toDate().toISOString(),
+          },
+          error: '',
+        });
+      }
+    }
+
+    // Commit the batch atomically
+    await batch.commit();
+
+    // Ensure that data is always an array and never undefined
+    const nonUndefinedData = results.map((r) => r.data).filter((data) => data !== undefined);
+
+    // Type assertion to assert that the result matches the expected type
+    return {
+      status: true,
+      data: nonUndefinedData as (CollectionsInterface[T]["interface"] & { id?: string })[], // Assert the type here
+      error: '',
+    };
+  } catch (error: any) {
+    // If the batch fails, track the failed operations
+    const errorMessage = error.message || 'Unknown error occurred';
+    for (let operation of operations) {
+      for (let i = 0; i < operation.ids.length; i++) {
+        failedOperations.push({
+          id: operation.ids[i],
+          error: `Error processing document: ${errorMessage}`,
+        });
+      }
+    }
+    return {
+      status: false,
+      error: `Batch operation failed: ${errorMessage}`,
+      data: [],
+      failedOperations,
+    };
   }
 }
