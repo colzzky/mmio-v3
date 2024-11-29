@@ -57,7 +57,10 @@ const createEditModalRef = useTemplateRef('createEditModal')
 <template>
   <Main class="flex flex-col gap-y-4">
     <template #heading>Chatbot Flow Builder</template>
-    <Button class="gap-x-2 self-end" @click="createEditModalRef?.modal.open({ intent: 'create', flowId: null })">
+    <Button
+      class="gap-x-2 self-end"
+      @click="createEditModalRef?.modal.open({ intent: 'create', flowId: null })"
+    >
       <i class="bx bx-plus text-xl" />
       Create Messenger Flow
     </Button>
@@ -82,7 +85,7 @@ const createEditModalRef = useTemplateRef('createEditModal')
               </TableCell>
               <TableCell class="whitespace-nowrap">{{
                 uiHelpers.timestampToDateTimeAgo(flow.updatedAt)
-                }}</TableCell>
+              }}</TableCell>
               <TableCell>
                 <div class="grid place-content-center">
                   <DropdownMenu>
@@ -90,17 +93,22 @@ const createEditModalRef = useTemplateRef('createEditModal')
                       <i class="material-icons text-md">more_vert</i>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem class="gap-x-3" @click="
-                        createEditModalRef?.modal.open({ intent: 'edit', flowId: flow.cb_id })
-                        ">>
+                      <DropdownMenuItem
+                        class="gap-x-3"
+                        @click="
+                          createEditModalRef?.modal.open({ intent: 'edit', flowId: flow.cb_id })
+                        "
+                        >>
                         <i class="bx bx-edit text-xl" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem class="gap-x-3">
-                        <i :class="[
-                          'bx text-xl',
-                          flow.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
-                        ]" />
+                        <i
+                          :class="[
+                            'bx text-xl',
+                            flow.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                          ]"
+                        />
                         Toggle Status
                       </DropdownMenuItem>
                       <DropdownMenuItem class="gap-x-3">
@@ -146,7 +154,6 @@ const createEditModalRef = useTemplateRef('createEditModal')
         </TableBody>
       </Table>
     </div>
-
   </Main>
 
   <CreateEditModal ref="createEditModal" />
