@@ -1,7 +1,5 @@
 <script setup lang="ts">
 import { Button } from '@/core/components/ui/button'
-import { uiHelpers } from '@/core/utils/ui-helper'
-import MainPage from '@/modules/teams-permissions/page.vue'
 import { sidebarLinks } from '@/modules/teams-permissions/routes'
 import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
@@ -16,10 +14,7 @@ const { page_init } = useAuth
 </script>
 
 <template>
-  <template
-    class="page-container h-screen overflow-hidden"
-    v-if="!layoutLoad && page_init.initialize"
-  >
+  <div class="page-container h-screen overflow-hidden" v-if="!layoutLoad && page_init.initialize">
     <div
       class="mx-auto grid w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-cols-[minmax(250px,275px)_1fr] gap-8 py-[var(--gutter)] [--gutter:theme(spacing.4)]"
     >
@@ -49,7 +44,7 @@ const { page_init } = useAuth
 
       <slot />
     </div>
-  </template>
+  </div>
 
   <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
     <div class="flex animate-pulse items-center gap-x-1">

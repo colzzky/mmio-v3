@@ -1,9 +1,13 @@
-import { workspace_data, ws_meta_pages_refs_data, type WorkspaceData, type WSMetaPagesRefsData } from '@/core/types/WorkSpaceTypes'
-import type { DocumentData } from 'firebase/firestore'
-import { useAuthStore } from './authStore'
-import { reactive } from 'vue'
+import {
+  workspace_data,
+  ws_meta_pages_refs_data,
+  type WorkspaceData,
+  type WSMetaPagesRefsData,
+} from '@/core/types/WorkSpaceTypes'
 import { getCollection, postCollection } from '@/core/utils/firebase-collections'
+import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
+import { reactive } from 'vue'
 
 interface FirebaseReturn {
   status: boolean
@@ -26,8 +30,11 @@ interface WsMetaPagesRefs {
   data: WSMetaPagesRefsData
   reInit: () => void
   set: (data: WSMetaPagesRefsData) => void
-  get: (mp_id: string, ws_id:string) => Promise<FSReturnData<WSMetaPagesRefsData>>
-  createUpdate: (ws_id:string, type: 'new' | 'update') => Promise<FSReturnData<WSMetaPagesRefsData>>
+  get: (mp_id: string, ws_id: string) => Promise<FSReturnData<WSMetaPagesRefsData>>
+  createUpdate: (
+    ws_id: string,
+    type: 'new' | 'update',
+  ) => Promise<FSReturnData<WSMetaPagesRefsData>>
 }
 
 export const useWorkspaceStore = defineStore('workspaceStore', () => {
@@ -48,7 +55,7 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
       }
     },
     async createUpdate(type): Promise<FSReturnData<WorkspaceData>> {
-      const id = this.data.ws_id !== '' ? this.data.ws_id : crypto.randomUUID();
+      const id = this.data.ws_id !== '' ? this.data.ws_id : crypto.randomUUID()
       this.data.ws_id = id
       const post = await postCollection('workspaces', 'workspaces', null, id, this.data, type)
       console.log(post)
@@ -69,7 +76,13 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
       this.data = data
     },
     async get(mp_id, ws_id): Promise<FSReturnData<WSMetaPagesRefsData>> {
-      const get = await getCollection('ws_meta_pages_refs', 'workspaces/:ws_id/meta_pages_refs', {ws_id}, mp_id, [])
+      const get = await getCollection(
+        'ws_meta_pages_refs',
+        'workspaces/:ws_id/meta_pages_refs',
+        { ws_id },
+        mp_id,
+        [],
+      )
       return {
         status: get.status,
         data: get.data as WSMetaPagesRefsData,
@@ -77,9 +90,16 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
       }
     },
     async createUpdate(ws_id, type): Promise<FSReturnData<WSMetaPagesRefsData>> {
-      const id = this.data.mp_id !== '' ? this.data.mp_id : crypto.randomUUID();
+      const id = this.data.mp_id !== '' ? this.data.mp_id : crypto.randomUUID()
       this.data.mp_id = id
-      const post = await postCollection('ws_meta_pages_refs', 'workspaces/:ws_id/meta_pages_refs', {ws_id}, id, this.data, type)
+      const post = await postCollection(
+        'ws_meta_pages_refs',
+        'workspaces/:ws_id/meta_pages_refs',
+        { ws_id },
+        id,
+        this.data,
+        type,
+      )
       console.log(post)
       return {
         status: post.status,
@@ -96,6 +116,6 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
   return {
     workspace,
     reset_state,
-    workspace_meta_pages_refs
+    workspace_meta_pages_refs,
   }
 })

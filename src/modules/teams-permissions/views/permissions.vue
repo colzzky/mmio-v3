@@ -1,13 +1,12 @@
 <script lang="ts" setup>
 import Button from '@/core/components/ui/button/Button.vue'
 import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
-import type { PermissionData } from '@/core/types/PermissionTypes'
 import { getWhereAny } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { usePermissionStore } from '@/stores/permissionStore'
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const permissionStore = usePermissionStore()
 const authStore = useAuthStore()

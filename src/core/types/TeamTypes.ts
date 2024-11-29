@@ -1,5 +1,5 @@
 import { default_access, type AccessStructure } from './PermissionTypes'
-import type { Timestamp, SubCollections } from './UniTypes'
+import type { SubCollections } from './UniTypes'
 
 //Only use subcollection if a collection have a data that has multiple data like activity logs etc.
 
@@ -17,7 +17,7 @@ export interface TeamData extends SubCollections {
   inviteLink: string
   createdAt: string
   updatedAt: string
-  subCollections: ('team_members'|'team_workspace_refs')[]
+  subCollections: ('team_members' | 'team_workspace_refs')[]
   team_members?: TeamMembersData[]
   workspace_refs?: TeamWorkspaceRefsData[]
 }
@@ -72,11 +72,5 @@ export const team_workspace_refs_data: TeamWorkspaceRefsData = {
   owner_uid: '',
   createdAt: '',
   updatedAt: '',
-  subCollections:[]
-}
-
-const invitation = {
-  reference: '',
-  email: '',
-  invitedBy: '',
+  subCollections: [],
 }

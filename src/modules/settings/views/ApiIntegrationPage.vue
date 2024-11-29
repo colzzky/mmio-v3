@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import MetaApiIntegration from '../components/APIIntegrationSettings/MetaApiIntegration.vue'
-import { uiHelpers } from '@/core/utils/ui-helper'
-import { useAuthStore } from '@/stores/authStore'
 import { usePlatformAPIStore } from '@/stores/platformAPIStore'
-import type { Timestamp } from 'firebase/firestore'
-import { onBeforeMount, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 
-const router = useRouter()
 const route = useRoute()
 const platformApiStore = usePlatformAPIStore()
 const { platform_api_list } = platformApiStore

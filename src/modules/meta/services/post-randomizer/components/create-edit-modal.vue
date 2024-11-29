@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Campaign, CampaignsMap } from '../page.vue'
+import type { Campaign } from '../page.vue'
 import { Button } from '@/core/components/ui/button'
 import DatePicker from '@/core/components/ui/date-picker.vue'
 import {
@@ -21,7 +21,7 @@ import {
   SelectValue,
 } from '@/core/components/ui/select'
 import type { Modal } from '@/core/utils/types'
-import { inject, reactive } from 'vue'
+import { reactive } from 'vue'
 
 interface ModalInterface extends Omit<Modal, 'open'> {
   open(args: { intent: 'create' } | { intent: 'edit'; campaignId: Campaign['id'] }): void
@@ -54,12 +54,8 @@ const modal = reactive<ModalInterface>({
     this.intent === 'create' ? this.createCampaign() : this.editCampaign()
     this.close()
   },
-  createCampaign() {
-
-  },
-  editCampaign() {
-
-  },
+  createCampaign() {},
+  editCampaign() {},
 })
 
 defineExpose({
@@ -100,13 +96,7 @@ defineExpose({
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="name">Name</Label>
-          <Input
-            type="text"
-            id="name"
-            name="name"
-            placeholder="Input Name"
-            required
-          />
+          <Input type="text" id="name" name="name" placeholder="Input Name" required />
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="users">Instagram Business</Label>
@@ -125,7 +115,7 @@ defineExpose({
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="pages">Pages</Label>
-          <Select id="pages"  required>
+          <Select id="pages" required>
             <SelectTrigger>
               <SelectValue placeholder="Select Pages" />
             </SelectTrigger>
@@ -140,7 +130,7 @@ defineExpose({
         </div>
         <div class="flex flex-col gap-y-2">
           <Label for="groups">Groups</Label>
-          <Select id="groups"  required>
+          <Select id="groups" required>
             <SelectTrigger>
               <SelectValue placeholder="Select Groups" />
             </SelectTrigger>
@@ -156,14 +146,11 @@ defineExpose({
         <div class="grid grid-cols-2 gap-x-4">
           <div class="flex flex-col gap-y-2">
             <Label as="span">Start Date</Label>
-            <DatePicker
-              
-            />
+            <DatePicker />
           </div>
           <div class="flex flex-col gap-y-2">
             <Label as="span">End Date</Label>
-            <DatePicker
-            />
+            <DatePicker />
           </div>
         </div>
       </form>

@@ -10,7 +10,7 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const authStore = useAuthStore()
-const { user_auth, user, user_team_refs } = authStore
+const { user_team_refs } = authStore
 
 onMounted(async () => {
   if (!user_team_refs.isInitialized) {

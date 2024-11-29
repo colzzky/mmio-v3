@@ -1,34 +1,43 @@
-import type { UserData } from '@/core/types/AuthUserTypes'
-import type { MetaPageData } from '@/core/types/MetaTypes'
-import type { TeamMembersData } from '@/core/types/TeamTypes'
-import { chatbot_flow_service_Data, post_randomizer_service_data, type ChatbotFlowServiceData, type MetaPageRefs, type PostRandomizerServiceData } from '@/core/types/WorkSpaceTypes'
 import type {
   FSReturnData,
   ActiveWorkspace,
   ActiveTeam,
   CurrentMember,
   ChatBotFlowService,
-  PostRandomizerService
-} from '../core/types/AuthWorkspaceTypes';
-import { getCollection, getWhereAny, listenToCollection, postCollection } from '@/core/utils/firebase-collections'
+  PostRandomizerService,
+} from '../core/types/AuthWorkspaceTypes'
+import type { UserData } from '@/core/types/AuthUserTypes'
+import type { MetaPageData } from '@/core/types/MetaTypes'
+import type { TeamMembersData } from '@/core/types/TeamTypes'
+import {
+  chatbot_flow_service_Data,
+  post_randomizer_service_data,
+  type ChatbotFlowServiceData,
+  type MetaPageRefs,
+  type PostRandomizerServiceData,
+} from '@/core/types/WorkSpaceTypes'
+import {
+  getCollection,
+  getWhereAny,
+  listenToCollection,
+  postCollection,
+} from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
-
 
 export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
   const active_workspace = reactive<ActiveWorkspace>({
     data: null,
     isInitialized: false,
     isLoading: false,
-    reset() { },
+    reset() {},
   })
   const active_team = reactive<ActiveTeam>({
     data: null,
     isInitialized: false,
     isLoading: false,
-    reset() { },
+    reset() {},
   })
   const current_member = reactive<CurrentMember>({
     data: null,
@@ -36,32 +45,37 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     isInitialized: false,
     isLoading: false,
     listener: null,
-    reset() { },
+    reset() {},
     async listen(tm_id: string, member_id: string) {
-      current_member.listener = await listenToCollection("team_members", "teams/:tm_id/team_members", { tm_id }, member_id, [],
+      current_member.listener = await listenToCollection(
+        'team_members',
+        'teams/:tm_id/team_members',
+        { tm_id },
+        member_id,
+        [],
         (data) => {
           console.log(data)
           this.data = data as TeamMembersData
-        }
-      );
-    }
+        },
+      )
+    },
   })
   const imported_meta_pages = reactive({
-    data: <MetaPageData[]>[],
-    reference: <MetaPageRefs[]>[],
-    isInitialized: <boolean>false,
-    isLoading: <boolean>false,
-    lastSnapshot: <any>'',
-    nextFetch: <string>'',
+    data: [] as MetaPageData[],
+    reference: [] as MetaPageRefs[],
+    isInitialized: false as boolean,
+    isLoading: false as boolean,
+    lastSnapshot: '' as string,
+    nextFetch: '' as string,
     generateNextFetch() {
       this.nextFetch = uiHelpers.generateExpirationDate(10)
     },
     checkNextFetch() {
       if (this.nextFetch) {
-        const now = new Date();
-        const expireDate = new Date(this.nextFetch);
+        const now = new Date()
+        const expireDate = new Date(this.nextFetch)
         console.log(expireDate)
-        return now >= expireDate;
+        return now >= expireDate
       }
       return true
     },
@@ -79,26 +93,40 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
         const work_page_ids: string[] = []
         const imported_by_ids: string[] = []
         if (active_workspace.data && active_workspace.data.meta_pages_refs) {
-          active_workspace.data.meta_pages_refs.forEach(wp => {
+          active_workspace.data.meta_pages_refs.forEach((wp) => {
             work_page_ids.push(wp.mp_id)
             imported_by_ids.push(wp.imported_by_uid)
           })
           if (work_page_ids.length > 0) {
-            const fetch_meta_pages = await getWhereAny('meta_page', 'meta_pages', {}, [], [{
-              fieldName: 'mp_id', operator: 'in', value: work_page_ids
-            }])
+            const fetch_meta_pages = await getWhereAny(
+              'meta_page',
+              'meta_pages',
+              {},
+              [],
+              [
+                {
+                  fieldName: 'mp_id',
+                  operator: 'in',
+                  value: work_page_ids,
+                },
+              ],
+            )
 
             if (fetch_meta_pages.status && fetch_meta_pages.data.length > 0) {
               this.data = fetch_meta_pages.data
-              const get_user_import = await getWhereAny('user', 'users', {}, [], [
-                { fieldName: 'uid', operator: 'in', value: imported_by_ids }
-              ])
+              const get_user_import = await getWhereAny(
+                'user',
+                'users',
+                {},
+                [],
+                [{ fieldName: 'uid', operator: 'in', value: imported_by_ids }],
+              )
               const meta_page_reference = active_workspace.data.meta_pages_refs
-              this.data.forEach(data => {
-                const ref = meta_page_reference.find(ref => ref.mp_id = data.mp_id)
-                let user = <UserData | undefined>undefined
+              this.data.forEach((data) => {
+                const ref = meta_page_reference.find((ref) => (ref.mp_id = data.mp_id))
+                let user: UserData | undefined = undefined
                 if (get_user_import.data.length > 0) {
-                  user = get_user_import.data.find(user => user.uid = data.owner_uid)
+                  user = get_user_import.data.find((user) => (user.uid = data.owner_uid))
                 }
                 if (ref) {
                   this.reference.push({
@@ -113,13 +141,12 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
               })
             }
           }
-
         }
         this.generateNextFetch()
         this.isLoading = false
         this.isInitialized = true
       }
-    }
+    },
   })
 
   const service_models = {
@@ -134,7 +161,13 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
       },
       async get(cb_id: string): Promise<FSReturnData<ChatbotFlowServiceData>> {
         const active_workspacse = active_workspace.data ? active_workspace.data.ws_id : ''
-        const get = await getCollection('ws_chatbot_flow', 'workspaces/:ws_id/chatbot_flow_service', { ws_id: active_workspacse }, cb_id, [])
+        const get = await getCollection(
+          'ws_chatbot_flow',
+          'workspaces/:ws_id/chatbot_flow_service',
+          { ws_id: active_workspacse },
+          cb_id,
+          [],
+        )
         return {
           status: get.status,
           data: get.data as ChatbotFlowServiceData,
@@ -143,9 +176,16 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
       },
       async createUpdate(type): Promise<FSReturnData<ChatbotFlowServiceData>> {
         const active_workspacse = active_workspace.data ? active_workspace.data.ws_id : ''
-        const id = this.data.cb_id !== '' ? this.data.cb_id : crypto.randomUUID();
+        const id = this.data.cb_id !== '' ? this.data.cb_id : crypto.randomUUID()
         this.data.cb_id = id
-        const post = await postCollection('ws_chatbot_flow', 'workspaces/:ws_id/chatbot_flow_service', { ws_id: active_workspacse }, id, this.data, type)
+        const post = await postCollection(
+          'ws_chatbot_flow',
+          'workspaces/:ws_id/chatbot_flow_service',
+          { ws_id: active_workspacse },
+          id,
+          this.data,
+          type,
+        )
         console.log(post)
         return {
           status: post.status,
@@ -163,20 +203,33 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
       set(data) {
         this.data = data
       },
-      async get(pr_id){
+      async get(pr_id) {
         const active_workspacse = active_workspace.data ? active_workspace.data.ws_id : ''
-        const get = await getCollection('ws_post_randomizer', 'workspaces/:ws_id/post_randomizer_service', { ws_id: active_workspacse }, pr_id, [])
+        const get = await getCollection(
+          'ws_post_randomizer',
+          'workspaces/:ws_id/post_randomizer_service',
+          { ws_id: active_workspacse },
+          pr_id,
+          [],
+        )
         return {
           status: get.status,
           data: get.data as PostRandomizerServiceData,
           error: get.error,
         }
       },
-      async createUpdate(type){
+      async createUpdate(type) {
         const active_workspacse = active_workspace.data ? active_workspace.data.ws_id : ''
-        const id = this.data.pr_id !== '' ? this.data.pr_id : crypto.randomUUID();
+        const id = this.data.pr_id !== '' ? this.data.pr_id : crypto.randomUUID()
         this.data.pr_id = id
-        const post = await postCollection('ws_post_randomizer', 'workspaces/:ws_id/post_randomizer_service', { ws_id: active_workspacse }, id, this.data, type)
+        const post = await postCollection(
+          'ws_post_randomizer',
+          'workspaces/:ws_id/post_randomizer_service',
+          { ws_id: active_workspacse },
+          id,
+          this.data,
+          type,
+        )
         console.log(post)
         return {
           status: post.status,
@@ -184,39 +237,45 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
           error: post.error,
         }
       },
-    })
+    }),
   }
   const workspace_service = {
     chatbot_flow: reactive({
-      data: <ChatbotFlowServiceData[]>[],
-      isInitialized: <boolean>false,
-      isLoading: <boolean>false,
-      lastSnapshot: <any>'',
-      nextFetch: <string>'',
-      generateNextFetch() {
+      data: [] as ChatbotFlowServiceData[],
+      isInitialized: false as boolean,
+      isLoading: false as boolean,
+      lastSnapshot: '' as string,
+      nextFetch: '' as string,
+      generateNextFetch(): void {
         this.nextFetch = uiHelpers.generateExpirationDate(10)
       },
-      checkNextFetch() {
+      checkNextFetch(): boolean {
         if (this.nextFetch) {
-          const now = new Date();
-          const expireDate = new Date(this.nextFetch);
+          const now = new Date()
+          const expireDate = new Date(this.nextFetch)
           console.log(expireDate)
-          return now >= expireDate;
+          return now >= expireDate
         }
         return true
       },
-      resetData() {
+      resetData(): void {
         this.data = []
         this.isInitialized = false
         this.isLoading = false
         this.lastSnapshot = ''
       },
-      async fetch_chatbots() {
+      async fetch_chatbots(): Promise<void> {
         if (this.checkNextFetch()) {
           this.isLoading = true
           this.data = []
           if (active_workspace.data && active_workspace.data.meta_pages_refs) {
-            const fetch_chatbots = await getWhereAny('ws_chatbot_flow', 'workspaces/:ws_id/chatbot_flow_service', { ws_id: active_workspace.data.ws_id }, [], [])
+            const fetch_chatbots = await getWhereAny(
+              'ws_chatbot_flow',
+              'workspaces/:ws_id/chatbot_flow_service',
+              { ws_id: active_workspace.data.ws_id },
+              [],
+              [],
+            )
             if (fetch_chatbots.status && fetch_chatbots.data.length > 0) {
               this.data = fetch_chatbots.data
             }
@@ -225,53 +284,62 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
           this.isLoading = false
           this.isInitialized = true
         }
-      }
+      },
     }),
     post_randomizer: reactive({
-      data: <PostRandomizerServiceData[]>[],
-      isInitialized: <boolean>false,
-      isLoading: <boolean>false,
-      lastSnapshot: <string>'',
-      nextFetch: <string>'',
-      generateNextFetch() {
+      data: [] as PostRandomizerServiceData[],
+      isInitialized: false as boolean,
+      isLoading: false as boolean,
+      lastSnapshot: '' as string,
+      nextFetch: '' as string,
+      generateNextFetch(): void {
         this.nextFetch = uiHelpers.generateExpirationDate(10)
       },
-      checkNextFetch() {
+      checkNextFetch(): boolean {
         if (this.nextFetch) {
-          const now = new Date();
-          const expireDate = new Date(this.nextFetch);
+          const now = new Date()
+          const expireDate = new Date(this.nextFetch)
           console.log(expireDate)
-          return now >= expireDate;
+          return now >= expireDate
         }
         return true
       },
-      resetData() {
+      resetData(): void {
         this.data = []
         this.isInitialized = false
         this.isLoading = false
         this.lastSnapshot = ''
       },
-      async fetch_posts(isNext:boolean = false) {
+      async fetch_posts(isNext: boolean = false): Promise<void> {
         if (this.checkNextFetch() || isNext) {
           this.isLoading = true
-          if(!isNext){
+          if (!isNext) {
             this.data = []
             this.lastSnapshot = ''
           }
-          
+
           if (active_workspace.data && active_workspace.data.meta_pages_refs) {
-            const fetch_data = await getWhereAny('ws_post_randomizer', 'workspaces/:ws_id/post_randomizer_service', { ws_id: active_workspace.data.ws_id }, [], [],[],10,this.lastSnapshot)
+            const fetch_data = await getWhereAny(
+              'ws_post_randomizer',
+              'workspaces/:ws_id/post_randomizer_service',
+              { ws_id: active_workspace.data.ws_id },
+              [],
+              [],
+              [],
+              10,
+              this.lastSnapshot,
+            )
             if (fetch_data.status && fetch_data.data.length > 0) {
               this.data = fetch_data.data
-              this.lastSnapshot = this.data[this.data.length - 1].pr_id;
+              this.lastSnapshot = this.data[this.data.length - 1].pr_id
             }
           }
           this.generateNextFetch()
           this.isLoading = false
           this.isInitialized = true
         }
-      }
-    })
+      },
+    }),
   }
 
   function returnHome() {
@@ -289,7 +357,6 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     imported_meta_pages,
     workspace_service,
     service_models,
-    returnHome
+    returnHome,
   }
-},
-)
+})

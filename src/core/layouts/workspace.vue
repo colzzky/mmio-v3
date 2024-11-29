@@ -1,90 +1,88 @@
 <script setup lang="ts">
+import Toaster from '../components/ui/toast/Toaster.vue'
+import type { TeamData, TeamMembersData } from '../types/TeamTypes'
+import { accessPermission } from '../utils/permissionHelpers'
 import DesktopSidebar from '@/core/components/sidebar/desktop-sidebar.vue'
-import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore';
-import { onMounted, ref } from 'vue';
 import router from '@/router'
-import { useRoute } from 'vue-router';
-import { useWorkspaceStore } from '@/stores/WorkspaceStore';
-import { useTeamStore } from '@/stores/teamStore';
-import { getWhereAny } from '../utils/firebase-collections';
-import { useAuthStore } from '@/stores/authStore';
-import { accessPermission } from '../utils/permissionHelpers';
-import Button from '../components/ui/button/Button.vue';
-import type { TeamData, TeamMembersData } from '../types/TeamTypes';
-import Toaster from '../components/ui/toast/Toaster.vue';
+import { useWorkspaceStore } from '@/stores/WorkspaceStore'
+import { useAuthStore } from '@/stores/authStore'
+import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
+import { useTeamStore } from '@/stores/teamStore'
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+
 /**
  * Step 1: Check and validated workspace id if it exists on the firestore
  * Step 2: If it exists Check If Member or if the user is part of the member. If not redirect to homepage
  * Step 3: If everything is validate. Populate AuthWorkspace.store regarding the information of the workspace
  * Total Firstore fetch: 3
  */
-const route = useRoute();
-const workspace_id = <string>route.params.workspaceId ? route.params.workspaceId : ''
+const route = useRoute()
+const workspace_id = route.params.workspaceId ? route.params.workspaceId : ('' as string)
 const authWorkspaceStore = useAuthWorkspaceStore()
 const workspaceStore = useWorkspaceStore()
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
 const { active_workspace, active_team, current_member } = authWorkspaceStore
-const { workspace: wp_model } = workspaceStore
+const { workspace } = workspaceStore
 const { team } = teamStore
 const { user_auth } = authStore
 const { workspaceOwner } = accessPermission
 const workspace_load = ref<boolean>(true)
-
+const wp_model = workspace
 
 async function validateWorkspace() {
-
   if (workspace_id) {
-    const get_workspace = await wp_model.get(workspace_id as string)
-    if (get_workspace.status) {
-      active_workspace.data = JSON.parse(JSON.stringify(get_workspace.data))
+    const getWorkspace = await wp_model.get(workspace_id as string)
+    if (getWorkspace.status) {
+      active_workspace.data = JSON.parse(JSON.stringify(getWorkspace.data))
     } else {
       await router.push({ name: 'home' })
     }
   }
-
 }
 
 async function validateMemberOwner() {
   // Check prerequisites
   if (!active_workspace.data || !user_auth.data) {
-    await router.push({ name: 'home' });
-    return;
+    await router.push({ name: 'home' })
+    return
   }
 
-  const userId = user_auth.data.uid;
-  const teamId = active_workspace.data.team_id;
+  const userId = user_auth.data.uid
+  const teamId = active_workspace.data.team_id
 
   // Fetch team data
-  const teamResponse = await team.get(teamId);
-  let teamData = <TeamData | null>null;
-  let teamMembers = <TeamMembersData[]>[];
+  const teamResponse = await team.get(teamId)
+  let teamData: TeamData | null = null
+  let teamMembers: TeamMembersData[] = []
 
   // Check team data validity
   if (teamResponse.status) {
     teamData = teamResponse.data
-    if (teamResponse.data && teamResponse.data.team_members) teamMembers = teamResponse.data.team_members
+    if (teamResponse.data && teamResponse.data.team_members)
+      teamMembers = teamResponse.data.team_members
   }
 
   // Check workspace ownership
   if (workspaceOwner(active_workspace.data)) {
-    active_team.data = teamData ? JSON.parse(JSON.stringify(teamData)) : null;
-    return; // Valid owner, exit function
+    active_team.data = teamData ? JSON.parse(JSON.stringify(teamData)) : null
+    return // Valid owner, exit function
   }
 
   if (teamData && teamMembers.length > 0) {
     // Find member
-    const member = teamMembers?.find((m) => m.uid === userId);
+    const member = teamMembers?.find((m) => m.uid === userId)
 
     // Check membership
     if (!member) {
-      await router.push({ name: 'home' });
-      return;
+      await router.push({ name: 'home' })
+      return
     }
 
     // Listen for current member updates
-    await current_member.listen(teamId, member.member_id);
-    active_team.data = JSON.parse(JSON.stringify(teamData));
+    await current_member.listen(teamId, member.member_id)
+    active_team.data = JSON.parse(JSON.stringify(teamData))
   }
 }
 
@@ -94,8 +92,6 @@ onMounted(async () => {
   await validateMemberOwner()
   workspace_load.value = false
 })
-
-
 </script>
 
 <template>

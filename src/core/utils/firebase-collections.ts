@@ -6,7 +6,6 @@ import type {
   PlatformApiData,
   MetaPageData,
   ChatBotFlowData,
-  TeamMembersData,
 } from '@/core/utils/types'
 import {
   collection,
@@ -188,35 +187,35 @@ export async function deleteCollection<T extends keyof CollectionsInterface>(
   $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
   id: string = '', // Document ID to delete
 ): Promise<FirebaseReturn> {
-  let fullPath = $path as string;
+  let fullPath = $path as string
 
   // Replace placeholders in the path (e.g., ':userId') with actual values
   if ($sub_params) {
     Object.entries($sub_params).forEach(([key, value]) => {
-      fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
-    });
+      fullPath = fullPath.replace(`:${key}`, value) // Replace :key with its corresponding value
+    })
   }
 
   // Create a reference to the document to delete
-  const docRef = doc(firestore, fullPath, id);
+  const docRef = doc(firestore, fullPath, id)
 
   try {
     // Attempt to delete the document
-    await deleteDoc(docRef);
+    await deleteDoc(docRef)
 
     return {
       status: true,
       data: undefined,
       error: '',
-    };
+    }
   } catch (error) {
-    console.error("Error deleting document:", error);
+    console.error('Error deleting document:', error)
 
     return {
       status: false,
       data: undefined,
       error: `Failed to delete document: ${error}`,
-    };
+    }
   }
 }
 
@@ -399,14 +398,6 @@ export async function getBySub(
       data: undefined,
     }
   }
-}
-
-type CollectionConfig<T> = {
-  id: string
-  path: string
-  interface: T
-  sub_col: string[]
-  sub_params: { key: string }[] | null // This can still be flexible
 }
 
 export async function getCollectionByField<T extends keyof Collections>(
@@ -634,8 +625,8 @@ export async function getExact<T extends keyof CollectionsInterface>(
 
     if (userSnapshot.exists()) {
       // Extract document data and format timestamps
+      const id_snap = userSnapshot.id
       const data = {
-        id: userSnapshot.id,
         ...userSnapshot.data(),
         createdAt: userSnapshot.data().createdAt.toDate().toISOString(),
         updatedAt: userSnapshot.data().updatedAt.toDate().toISOString(),
@@ -647,7 +638,7 @@ export async function getExact<T extends keyof CollectionsInterface>(
       // Fetch subcollections if provided
       if ($sub_col) {
         for (const sub of $sub_col) {
-          const subColRef = collection(firestore, `${$path}/${data.id}/${sub}`)
+          const subColRef = collection(firestore, `${$path}/${id_snap}/${sub}`)
           const subColSnapshot = await getDocs(subColRef)
 
           // Map and format subcollection data
@@ -660,7 +651,7 @@ export async function getExact<T extends keyof CollectionsInterface>(
       }
 
       // Remove the id from the data to keep it clean
-      const { id, ...new_data } = data
+      const { ...new_data } = data
 
       // Return the document data along with subcollection data if available
       return {
@@ -690,22 +681,22 @@ export async function getExact<T extends keyof CollectionsInterface>(
 
 export async function listenToCollection<T extends keyof CollectionsInterface>(
   $col: T,
-  $path: CollectionsInterface[T]["path"],
-  $sub_params: CollectionsInterface[T]["sub_params"] | null = null,
+  $path: CollectionsInterface[T]['path'],
+  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
   id: string,
-  $sub_col: SubCollectionKey<CollectionsInterface[T]["interface"]> = [], // Array of subcollection names to check
-  onUpdate: (data: any) => void // Callback to handle updates
+  $sub_col: SubCollectionKey<CollectionsInterface[T]['interface']> = [], // Array of subcollection names to check
+  onUpdate: (data: any) => void, // Callback to handle updates
 ): Promise<() => void> {
   try {
-    let fullPath = $path as string;
+    let fullPath = $path as string
 
     if ($sub_params) {
       Object.entries($sub_params).forEach(([key, value]) => {
-        fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
-      });
+        fullPath = fullPath.replace(`:${key}`, value) // Replace :key with its corresponding value
+      })
     }
 
-    const docRef = doc(firestore, fullPath, id);
+    const docRef = doc(firestore, fullPath, id)
 
     // Listener for the main document
     const unsubscribeDoc = onSnapshot(docRef, async (docSnapshot: DocumentSnapshot) => {
@@ -715,97 +706,97 @@ export async function listenToCollection<T extends keyof CollectionsInterface>(
           ...docSnapshot.data(),
           createdAt: docSnapshot.data()?.createdAt?.toDate().toISOString(),
           updatedAt: docSnapshot.data()?.updatedAt?.toDate().toISOString(),
-        };
+        }
 
-        const subCollectionData: Record<string, any[]> = {};
+        const subCollectionData: Record<string, any[]> = {}
 
         // Listener for specified subcollections
         const unsubscribeSubCollections = await Promise.all(
           $sub_col.map(async (sub) => {
-            const subColRef = collection(firestore, `${fullPath}/${data.id}/${sub}`);
+            const subColRef = collection(firestore, `${fullPath}/${data.id}/${sub}`)
             return onSnapshot(subColRef, (subSnapshot: QuerySnapshot) => {
               subCollectionData[sub] = subSnapshot.docs.map((doc) => ({
                 id: doc.id,
                 ...doc.data(),
                 createdAt: doc.data()?.createdAt?.toDate().toISOString(),
                 updatedAt: doc.data()?.updatedAt?.toDate().toISOString(),
-              }));
+              }))
 
               // Notify with the updated data including subcollections
               onUpdate({
                 ...data,
                 ...subCollectionData,
-              });
-            });
-          })
-        );
+              })
+            })
+          }),
+        )
 
         // Notify with initial data
         onUpdate({
           ...data,
           ...subCollectionData,
-        });
+        })
 
         // Return a function to unsubscribe both main and subcollection listeners
         return () => {
-          unsubscribeDoc();
-          unsubscribeSubCollections.forEach((unsubscribe) => unsubscribe());
-        };
+          unsubscribeDoc()
+          unsubscribeSubCollections.forEach((unsubscribe) => unsubscribe())
+        }
       } else {
-        console.warn("Document does not exist.");
-        onUpdate(null); // Notify with null if the document doesn't exist
+        console.warn('Document does not exist.')
+        onUpdate(null) // Notify with null if the document doesn't exist
       }
-    });
+    })
 
     // Return unsubscribe function for the main document listener
-    return unsubscribeDoc;
+    return unsubscribeDoc
   } catch (error) {
-    console.error("Error setting up listener:", error);
-    throw error;
+    console.error('Error setting up listener:', error)
+    throw error
   }
 }
 
 //Atomic Post Collection
 
 export type FSPostBatchCollection<T extends keyof CollectionsInterface> = Array<{
-  $col: T;
-  $path: CollectionsInterface[T]['path'];
-  $sub_params: CollectionsInterface[T]['sub_params'] | null;
-  id: string;
-  data: Record<string, any>;
-  type: 'update' | 'new';
-}>;
+  $col: T
+  $path: CollectionsInterface[T]['path']
+  $sub_params: CollectionsInterface[T]['sub_params'] | null
+  id: string
+  data: Record<string, any>
+  type: 'update' | 'new'
+}>
 
 // Define the function with correct generics and return type
 export async function postMultipleCollectionsAtmoic<T extends keyof CollectionsInterface>(
-  operations: FSPostBatchCollection<T>
+  operations: FSPostBatchCollection<T>,
 ): Promise<Array<FirebaseReturn>> {
   try {
     const results = await runTransaction(firestore, async (transaction) => {
-      const responseArray: Array<FirebaseReturn> = [];
+      const responseArray: Array<FirebaseReturn> = []
 
       for (const op of operations) {
-        let fullPath = op.$path as string;
+        let fullPath = op.$path as string
 
         // Replace dynamic placeholders in path with actual values
         if (op.$sub_params) {
           Object.entries(op.$sub_params).forEach(([key, value]) => {
-            fullPath = fullPath.replace(`:${key}`, value);
-          });
+            fullPath = fullPath.replace(`:${key}`, value)
+          })
         }
 
-        const docRef = doc(firestore, fullPath, op.id);
+        const docRef = doc(firestore, fullPath, op.id)
 
         // Fetch the document inside the transaction
-        const docSnapshot = await transaction.get(docRef);
+        const docSnapshot = await transaction.get(docRef)
 
         if (docSnapshot.exists()) {
           if (op.type === 'update') {
             const updatedData = {
               ...op.data,
               updatedAt: Timestamp.fromDate(new Date()),
-            };
-            transaction.update(docRef, updatedData);
+            }
+            transaction.update(docRef, updatedData)
 
             responseArray.push({
               status: true,
@@ -814,9 +805,9 @@ export async function postMultipleCollectionsAtmoic<T extends keyof CollectionsI
                 updatedAt: updatedData.updatedAt.toDate().toISOString(),
               },
               error: '',
-            });
+            })
           } else {
-            throw new Error(`Document already exists. Use 'update' instead.`);
+            throw new Error(`Document already exists. Use 'update' instead.`)
           }
         } else {
           if (op.type === 'new') {
@@ -824,8 +815,8 @@ export async function postMultipleCollectionsAtmoic<T extends keyof CollectionsI
               ...op.data,
               createdAt: Timestamp.fromDate(new Date()),
               updatedAt: Timestamp.fromDate(new Date()),
-            };
-            transaction.set(docRef, newData);
+            }
+            transaction.set(docRef, newData)
 
             responseArray.push({
               status: true,
@@ -835,32 +826,32 @@ export async function postMultipleCollectionsAtmoic<T extends keyof CollectionsI
                 updatedAt: newData.updatedAt.toDate().toISOString(),
               },
               error: '',
-            });
+            })
           } else {
-            throw new Error(`Document does not exist. Use 'new' instead.`);
+            throw new Error(`Document does not exist. Use 'new' instead.`)
           }
         }
       }
 
-      return responseArray;
-    });
+      return responseArray
+    })
 
-    return results;
+    return results
   } catch (error) {
-    console.error('Transaction failed:', error);
+    console.error('Transaction failed:', error)
     return operations.map(() => ({
       status: false,
       error: `Transaction failed: ${error}`,
       data: undefined,
-    }));
+    }))
   }
 }
 
 interface FirebaseWhereReturnAtomic<T> {
-  status: boolean; // Indicates if the operation was successful
-  data: Array<T & { id?: string }> | []; // Include document IDs in data when applicable
-  error: string; // Error message if the operation fails
-  failedOperations?: Array<{ id: string; error: string }>; // Track failed operations in batch processes
+  status: boolean // Indicates if the operation was successful
+  data: Array<T & { id?: string }> | [] // Include document IDs in data when applicable
+  error: string // Error message if the operation fails
+  failedOperations?: Array<{ id: string; error: string }> // Track failed operations in batch processes
 }
 
 export async function postCollectionBatchAtomic<T extends keyof CollectionsInterface>(
@@ -875,26 +866,26 @@ export async function postCollectionBatchAtomic<T extends keyof CollectionsInter
       status: false,
       error: 'Mismatch between the number of IDs and data items.',
       data: [],
-    };
+    }
   }
 
-  const batch = writeBatch(firestore);
-  const results: FirebaseReturn[] = [];
-  const failedOperations: Array<{ id: string; error: string }> = [];
+  const batch = writeBatch(firestore)
+  const results: FirebaseReturn[] = []
+  const failedOperations: Array<{ id: string; error: string }> = []
 
   try {
     for (let i = 0; i < ids.length; i++) {
-      const id = ids[i];
-      const docData = data[i];
+      const id = ids[i]
+      const docData = data[i]
 
-      let fullPath = $path as string;
+      let fullPath = $path as string
       if ($sub_params) {
         Object.entries($sub_params).forEach(([key, value]) => {
-          fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
-        });
+          fullPath = fullPath.replace(`:${key}`, value) // Replace :key with its corresponding value
+        })
       }
 
-      const docRef = doc(firestore, fullPath, id);
+      const docRef = doc(firestore, fullPath, id)
 
       const postData = {
         ...docData,
@@ -902,10 +893,10 @@ export async function postCollectionBatchAtomic<T extends keyof CollectionsInter
           ? Timestamp.fromDate(new Date(docData.createdAt))
           : Timestamp.fromDate(new Date()),
         updatedAt: Timestamp.fromDate(new Date()),
-      };
+      }
 
       // Add the operation to the batch
-      batch.set(docRef, { ...postData }, { merge: true });
+      batch.set(docRef, { ...postData }, { merge: true })
 
       // Prepare the result for successful operation
       results.push({
@@ -916,29 +907,29 @@ export async function postCollectionBatchAtomic<T extends keyof CollectionsInter
           updatedAt: postData.updatedAt.toDate().toISOString(),
         },
         error: '',
-      });
+      })
     }
 
     // Commit the batch atomically
-    await batch.commit();
+    await batch.commit()
 
     // Ensure that data is always an array and never undefined
-    const nonUndefinedData = results.map((r) => r.data).filter((data) => data !== undefined);
+    const nonUndefinedData = results.map((r) => r.data).filter((data) => data !== undefined)
 
     // Type assertion to assert that the result matches the expected type
     return {
       status: true,
-      data: nonUndefinedData as (CollectionsInterface[T]["interface"] & { id?: string })[], // Assert the type here
+      data: nonUndefinedData as (CollectionsInterface[T]['interface'] & { id?: string })[], // Assert the type here
       error: '',
-    };
+    }
   } catch (error: any) {
     // If the batch fails, track the failed operations
-    const errorMessage = error.message || 'Unknown error occurred';
+    const errorMessage = error.message || 'Unknown error occurred'
     for (let i = 0; i < ids.length; i++) {
       failedOperations.push({
         id: ids[i],
         error: `Error processing document: ${errorMessage}`,
-      });
+      })
     }
 
     return {
@@ -946,29 +937,28 @@ export async function postCollectionBatchAtomic<T extends keyof CollectionsInter
       error: `Batch operation failed: ${errorMessage}`,
       data: [],
       failedOperations,
-    };
+    }
   }
 }
 
-
 export type FSPostMultiCollectAtomic<T extends keyof CollectionsInterface> = Array<{
-  $col: T;
-  $path: CollectionsInterface[T]['path'];
-  $sub_params: CollectionsInterface[T]['sub_params'] | null;
-  ids: string[]; // Array of document IDs to update or create
-  data: CollectionsInterface[T]['interface'][]; // Corresponding data for each document ID
-}>;
+  $col: T
+  $path: CollectionsInterface[T]['path']
+  $sub_params: CollectionsInterface[T]['sub_params'] | null
+  ids: string[] // Array of document IDs to update or create
+  data: CollectionsInterface[T]['interface'][] // Corresponding data for each document ID
+}>
 
 export async function postMultipleCollectionsBatchAtomic<T extends keyof CollectionsInterface>(
-  operations: FSPostMultiCollectAtomic<T>
+  operations: FSPostMultiCollectAtomic<T>,
 ): Promise<FirebaseWhereReturnAtomic<CollectionsInterface[T]['interface']>> {
-  const batch = writeBatch(firestore);
-  const results: FirebaseReturn[] = [];
-  const failedOperations: Array<{ id: string; error: string }> = [];
+  const batch = writeBatch(firestore)
+  const results: FirebaseReturn[] = []
+  const failedOperations: Array<{ id: string; error: string }> = []
 
   try {
-    for (let operation of operations) {
-      const { $col, $path, $sub_params, ids, data } = operation;
+    for (const operation of operations) {
+      const { $col, $path, $sub_params, ids, data } = operation
 
       // Ensure ids and data arrays have the same length
       if (ids.length !== data.length) {
@@ -976,22 +966,22 @@ export async function postMultipleCollectionsBatchAtomic<T extends keyof Collect
           status: false,
           error: `Mismatch between the number of IDs and data items for collection ${$col}`,
           data: [],
-        };
+        }
       }
 
       // Iterate through each document to either create or update
       for (let i = 0; i < ids.length; i++) {
-        const id = ids[i];
-        const docData = data[i];
+        const id = ids[i]
+        const docData = data[i]
 
-        let fullPath = $path as string;
+        let fullPath = $path as string
         if ($sub_params) {
           Object.entries($sub_params).forEach(([key, value]) => {
-            fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
-          });
+            fullPath = fullPath.replace(`:${key}`, value) // Replace :key with its corresponding value
+          })
         }
 
-        const docRef = doc(firestore, fullPath, id);
+        const docRef = doc(firestore, fullPath, id)
 
         const postData = {
           ...docData,
@@ -999,16 +989,16 @@ export async function postMultipleCollectionsBatchAtomic<T extends keyof Collect
             ? Timestamp.fromDate(new Date(docData.createdAt))
             : Timestamp.fromDate(new Date()),
           updatedAt: Timestamp.fromDate(new Date()),
-        };
+        }
 
         // Check if the document exists, and decide whether to create or update
-        const docSnapshot = await getDoc(docRef);
+        const docSnapshot = await getDoc(docRef)
         if (docSnapshot.exists()) {
           // Document exists, update it
-          batch.update(docRef, { ...postData });
+          batch.update(docRef, { ...postData })
         } else {
           // Document does not exist, create it
-          batch.set(docRef, { ...postData });
+          batch.set(docRef, { ...postData })
         }
 
         // Prepare the result for successful operation
@@ -1020,31 +1010,31 @@ export async function postMultipleCollectionsBatchAtomic<T extends keyof Collect
             updatedAt: postData.updatedAt.toDate().toISOString(),
           },
           error: '',
-        });
+        })
       }
     }
 
     // Commit the batch atomically
-    await batch.commit();
+    await batch.commit()
 
     // Ensure that data is always an array and never undefined
-    const nonUndefinedData = results.map((r) => r.data).filter((data) => data !== undefined);
+    const nonUndefinedData = results.map((r) => r.data).filter((data) => data !== undefined)
 
     // Type assertion to assert that the result matches the expected type
     return {
       status: true,
-      data: nonUndefinedData as (CollectionsInterface[T]["interface"] & { id?: string })[], // Assert the type here
+      data: nonUndefinedData as (CollectionsInterface[T]['interface'] & { id?: string })[], // Assert the type here
       error: '',
-    };
+    }
   } catch (error: any) {
     // If the batch fails, track the failed operations
-    const errorMessage = error.message || 'Unknown error occurred';
-    for (let operation of operations) {
+    const errorMessage = error.message || 'Unknown error occurred'
+    for (const operation of operations) {
       for (let i = 0; i < operation.ids.length; i++) {
         failedOperations.push({
           id: operation.ids[i],
           error: `Error processing document: ${errorMessage}`,
-        });
+        })
       }
     }
     return {
@@ -1052,6 +1042,6 @@ export async function postMultipleCollectionsBatchAtomic<T extends keyof Collect
       error: `Batch operation failed: ${errorMessage}`,
       data: [],
       failedOperations,
-    };
+    }
   }
 }

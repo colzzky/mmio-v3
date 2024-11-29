@@ -1,4 +1,4 @@
-import type { Timestamp, SubCollections } from './UniTypes'
+import type { SubCollections } from './UniTypes'
 
 //Only use subcollection if a collection have a data that has multiple data like activity logs etc.
 
@@ -11,7 +11,7 @@ export interface WorkspaceData extends SubCollections {
   updatedAt: string
   team_id: string
   meta_pages_refs?: WSMetaPagesRefsData[]
-  subCollections: ('meta_pages_refs')[]
+  subCollections: 'meta_pages_refs'[]
 }
 export interface WSMetaPagesRefsData extends SubCollections {
   mp_id: string //same as the meta pages id
@@ -23,7 +23,7 @@ export interface MetaPageRefs {
   mp_id: string
   image: string
   imported_by: string
-  page_name:string
+  page_name: string
   importedAt: string
   updatedAt: string
 }
@@ -36,22 +36,21 @@ export const workspace_data: WorkspaceData = {
   status: 'Active',
   createdAt: '',
   updatedAt: '',
-  subCollections: ['meta_pages_refs']
+  subCollections: ['meta_pages_refs'],
 }
 
 export const ws_meta_pages_refs_data: WSMetaPagesRefsData = {
   mp_id: '',
-  imported_by_uid:'',
+  imported_by_uid: '',
   createdAt: '',
   updatedAt: '',
   subCollections: [],
 }
 
-
 //Meta Services
-export interface ChatbotFlowServiceData extends SubCollections{
+export interface ChatbotFlowServiceData extends SubCollections {
   cb_id: string
-  connected_account_id:string //meta pages id
+  connected_account_id: string //meta pages id
   name: string
   botFlow: string // This is where flow data is needed
   status: string
@@ -62,30 +61,30 @@ export interface ChatbotFlowServiceData extends SubCollections{
 export const chatbot_flow_service_Data: ChatbotFlowServiceData = {
   cb_id: '',
   name: '',
-  connected_account_id:'', //meta pages id
+  connected_account_id: '', //meta pages id
   botFlow: '', // This is where flow data is needed
   status: '',
   isEnabled: false,
   createdAt: '',
   updatedAt: '',
-  subCollections: []
+  subCollections: [],
 }
-export interface PostRandomizerServiceData extends SubCollections{
+export interface PostRandomizerServiceData extends SubCollections {
   pr_id: string
-  connected_account_id:string //meta pages id
+  connected_account_id: string //meta pages id
   name: string
-  mediaSource:string
+  mediaSource: string
   status: string
   isEnabled: boolean
-  startDate:string
-  endDate:string
+  startDate: string
+  endDate: string
   createdAt: string
   updatedAt: string
 }
 
 export const post_randomizer_service_data: PostRandomizerServiceData = {
   pr_id: '',
-  connected_account_id:'', //meta pages id
+  connected_account_id: '', //meta pages id
   name: '',
   mediaSource: '', // This is where flow data is needed
   status: '',
@@ -94,8 +93,5 @@ export const post_randomizer_service_data: PostRandomizerServiceData = {
   endDate: '',
   createdAt: '',
   updatedAt: '',
-  subCollections: []
+  subCollections: [],
 }
-
-
-

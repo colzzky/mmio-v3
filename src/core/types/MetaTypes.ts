@@ -1,5 +1,4 @@
 import type { SubCollections } from './UniTypes'
-import type { Timestamp } from 'firebase/firestore'
 
 export interface MetaPagesReturn {
   access_token: string

@@ -1,9 +1,9 @@
-import type { Timestamp, SubCollections } from './UniTypes'
+import type { SubCollections } from './UniTypes'
 
 //Change everything here
 //Add more permission type here if needed
 export const PermissionTypes = ['view', 'add', 'edit', 'delete', 'clone', 'publish'] as const
-export type TypeOfPermissionType = (typeof PermissionTypes[number])
+export type TypeOfPermissionType = (typeof PermissionTypes)[number]
 
 //Add More Services here if needed
 export enum PermissionServices {
@@ -18,17 +18,20 @@ export enum Access_levels {
   FULL = 'full',
   READ = 'read',
   WRITE = 'write',
-  TEST= 'test', //This is something i added
+  TEST = 'test', //This is something i added
   CUSTOM = 'custom',
 }
 
 //Default Read and Write Value
-const READ = <TypeOfPermissionType[]>['view']
-const WRITE = <TypeOfPermissionType[]>['add', 'edit', 'publish', 'delete']
-const FULL = <TypeOfPermissionType[]>['add', 'edit', 'delete', 'view', 'publish']
+const READ: TypeOfPermissionType[] = ['view']
+const WRITE: TypeOfPermissionType[] = ['add', 'edit', 'publish', 'delete']
+const FULL: TypeOfPermissionType[] = ['add', 'edit', 'delete', 'view', 'publish']
 
 //Access Level vs What it can do
-export const access_level_byservice: Record<PermissionServices, Partial<Record<Access_levels, TypeOfPermissionType[]>>> = {
+export const access_level_byservice: Record<
+  PermissionServices,
+  Partial<Record<Access_levels, TypeOfPermissionType[]>>
+> = {
   [PermissionServices.ChatBotFlow]: {
     [Access_levels.READ]: ['view'],
     [Access_levels.WRITE]: ['add', 'edit', 'publish', 'delete'],
@@ -55,7 +58,7 @@ export const access_level_byservice: Record<PermissionServices, Partial<Record<A
     [Access_levels.WRITE]: WRITE,
     [Access_levels.FULL]: FULL,
     [Access_levels.CUSTOM]: [],
-  }
+  },
 }
 //This will be assigned whenever the admin/owner decided to set the permission to custom
 export const custom_permission: Record<PermissionServices, CustomPermissions> = {
@@ -87,13 +90,10 @@ export const custom_permission: Record<PermissionServices, CustomPermissions> = 
     edit: false,
     delete: false,
     publish: false,
-  }
+  },
 }
 
 //Up to here
-
-
-
 
 // Define the structure for each permission group (e.g., ChatBotFlow, CommentAutoReply)
 //Use this if you want to extend custom permission
@@ -106,8 +106,8 @@ interface PermissionGroup<T = Access_levels> {
   custom?: CustomPermissions // Custom permissions (e.g., view, add, edit, delete, publish)
 }
 
-export type CustomPermissions = Partial<Record<TypeOfPermissionType, boolean>>;
-export type AccessLevelPermissions = Partial<Record<Access_levels, (TypeOfPermissionType)[]>>;
+export type CustomPermissions = Partial<Record<TypeOfPermissionType, boolean>>
+export type AccessLevelPermissions = Partial<Record<Access_levels, TypeOfPermissionType[]>>
 
 export interface PermissionData extends SubCollections {
   permission_id: string

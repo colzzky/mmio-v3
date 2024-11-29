@@ -26,7 +26,7 @@ import { usePlatformAPIStore } from '@/stores/platformAPIStore'
 import { onMounted, ref, watch } from 'vue'
 
 const useAuth = useAuthStore()
-const { user_auth, user } = useAuth
+const { user_auth } = useAuth
 const platformApiStore = usePlatformAPIStore()
 const metaRelatedStore = useMetaRelatedStore()
 const { platformAPI, facebook_integration, platform_api_list } = platformApiStore
@@ -205,7 +205,7 @@ async function processFacebookPages(fb_pages: MetaPagesReturn[] | null, owner_ui
         console.log(meta_page.data)
       } else {
         type = 'new'
-        meta_page.initialize()
+        meta_page.reInit()
       }
       if (meta_page.data) {
         try {

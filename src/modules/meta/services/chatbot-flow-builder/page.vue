@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import CreateEditModal from './components/create-edit-modal.vue'
-import DeleteModal from './components/delete-modal.vue'
 import { Badge } from '@/core/components/ui/badge'
 import { Button } from '@/core/components/ui/button'
 import {
@@ -24,7 +23,7 @@ import { PermissionAccessError, servicePermission } from '@/core/utils/permissio
 import { uiHelpers } from '@/core/utils/ui-helper'
 import router from '@/router'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
-import { onMounted, useTemplateRef, watch } from 'vue'
+import { onMounted, useTemplateRef } from 'vue'
 
 export type Flow = {
   id: string
@@ -34,13 +33,8 @@ export type Flow = {
 }
 
 const authWorkspaceStore = useAuthWorkspaceStore()
-const { service_models, workspace_service, imported_meta_pages } = authWorkspaceStore
+const { workspace_service, imported_meta_pages } = authWorkspaceStore
 const { chatbot_flow } = workspace_service
-const { chatbot_flow: chatbot_flow_md } = service_models
-
-function fetch_chatbot_flow() {
-
-}
 
 onMounted(async () => {
   try {
@@ -49,12 +43,11 @@ onMounted(async () => {
     await chatbot_flow.fetch_chatbots()
   } catch (error: any) {
     if (error instanceof PermissionAccessError) {
-      router.back();
+      router.back()
     } else {
-      console.error('Unknown error:', error);
+      console.error('Unknown error:', error)
     }
   }
-
 })
 
 const createEditModalRef = useTemplateRef('createEditModal')
@@ -68,84 +61,92 @@ const createEditModalRef = useTemplateRef('createEditModal')
       <i class="bx bx-plus text-xl" />
       Create Messenger Flow
     </Button>
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Flow Name</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Created</TableHead>
-          <TableHead class="text-center">Actions</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody v-if="!chatbot_flow.isLoading && !imported_meta_pages.isLoading">
-        <TableRow v-if="chatbot_flow.data.length > 0" v-for="flow in chatbot_flow.data" :key="flow.cb_id">
-          <TableCell>{{ flow.name }}</TableCell>
-          <TableCell>
-            <Badge>
-              {{ uiHelpers.toTitleCase(flow.status) }}
-            </Badge>
-          </TableCell>
-          <TableCell class="whitespace-nowrap">{{
-            uiHelpers.timestampToDateTimeAgo(flow.updatedAt)
-            }}</TableCell>
-          <TableCell>
-            <div class="grid place-content-center">
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <i class="material-icons text-md">more_vert</i>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem class="gap-x-3"
-                    @click="createEditModalRef?.modal.open({ intent: 'edit', flowId: flow.cb_id })">>
-                    <i class="bx bx-edit text-xl" />
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem class="gap-x-3">
-                    <i :class="[
-                      'bx text-xl',
-                      flow.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
-                    ]" />
-                    Toggle Status
-                  </DropdownMenuItem>
-                  <DropdownMenuItem class="gap-x-3">
-                    <i class="bx bx-copy text-xl" />
-                    Clone
-                  </DropdownMenuItem>
-                  <DropdownMenuItem class="gap-x-3" disabled>
-                    <i class="bx bx-share-alt text-xl" />
-                    Share
-                  </DropdownMenuItem>
-                  <DropdownMenuItem class="gap-x-3" disabled>
-                    <i class="bx bxs-error text-xl" />
-                    View Error Logs
-                  </DropdownMenuItem>
-                  <DropdownMenuItem class="gap-x-3">
-                    <i class="bx bx-trash text-xl" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </TableCell>
-        </TableRow>
-        <TableBody v-else>
-          No Available data
+    <div v-if="!chatbot_flow.isLoading && !imported_meta_pages.isLoading">
+      <div v-if="chatbot_flow.data.length > 0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Flow Name</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead class="text-center">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow v-for="flow in chatbot_flow.data" :key="flow.cb_id">
+              <TableCell>{{ flow.name }}</TableCell>
+              <TableCell>
+                <Badge>
+                  {{ uiHelpers.toTitleCase(flow.status) }}
+                </Badge>
+              </TableCell>
+              <TableCell class="whitespace-nowrap">{{
+                uiHelpers.timestampToDateTimeAgo(flow.updatedAt)
+                }}</TableCell>
+              <TableCell>
+                <div class="grid place-content-center">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <i class="material-icons text-md">more_vert</i>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem class="gap-x-3" @click="
+                        createEditModalRef?.modal.open({ intent: 'edit', flowId: flow.cb_id })
+                        ">>
+                        <i class="bx bx-edit text-xl" />
+                        Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem class="gap-x-3">
+                        <i :class="[
+                          'bx text-xl',
+                          flow.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                        ]" />
+                        Toggle Status
+                      </DropdownMenuItem>
+                      <DropdownMenuItem class="gap-x-3">
+                        <i class="bx bx-copy text-xl" />
+                        Clone
+                      </DropdownMenuItem>
+                      <DropdownMenuItem class="gap-x-3" disabled>
+                        <i class="bx bx-share-alt text-xl" />
+                        Share
+                      </DropdownMenuItem>
+                      <DropdownMenuItem class="gap-x-3" disabled>
+                        <i class="bx bxs-error text-xl" />
+                        View Error Logs
+                      </DropdownMenuItem>
+                      <DropdownMenuItem class="gap-x-3">
+                        <i class="bx bx-trash text-xl" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </div>
+      <div v-else>No Available Data</div>
+    </div>
+    <div v-else>
+      <Table>
+        <TableBody>
+          <TableRow>
+            <TableCell>
+              <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
+            </TableCell>
+            <TableCell>
+              <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
+            </TableCell>
+            <TableCell>
+              <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
+            </TableCell>
+          </TableRow>
         </TableBody>
-      </TableBody>
-      <TableBody v-else>
-        <TableRow>
-          <TableCell>
-            <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
-          </TableCell>
-          <TableCell>
-            <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
-          </TableCell>
-          <TableCell>
-            <Skeleton class="h-3 w-[300px] rounded-full bg-gray-300" />
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
+      </Table>
+    </div>
+
   </Main>
 
   <CreateEditModal ref="createEditModal" />

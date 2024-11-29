@@ -13,10 +13,15 @@ export interface Modal {
 }
 //Types
 export type { UserData, PlatformApiData } from '../types/AuthUserTypes'
-export type { WorkspaceData, WSMetaPagesRefsData, ChatbotFlowServiceData, PostRandomizerServiceData } from '../types/WorkSpaceTypes'
+export type {
+  WorkspaceData,
+  WSMetaPagesRefsData,
+  ChatbotFlowServiceData,
+  PostRandomizerServiceData,
+} from '../types/WorkSpaceTypes'
 export type { MetaPageData } from '../types/MetaTypes'
 export type { ChatBotFlowData } from '../types/MetaTypes'
-export type { TeamData, TeamMembersData,TeamWorkspaceRefsData } from '../types/TeamTypes'
+export type { TeamData, TeamMembersData, TeamWorkspaceRefsData } from '../types/TeamTypes'
 export type { InvitationData } from '../types/InvitationTypes'
 export type { PermissionData } from '../types/PermissionTypes'
 

@@ -19,7 +19,11 @@ import { reactive, ref } from 'vue'
 import { z, type ZodRawShape } from 'zod'
 
 interface ModalInterface extends Omit<Modal, 'open'> {
-  open(args: { intent: 'create', flowId: ChatbotFlowServiceData['cb_id'] | null } | { intent: 'edit'; flowId: ChatbotFlowServiceData['cb_id'] | null }): void
+  open(
+    args:
+      | { intent: 'create'; flowId: ChatbotFlowServiceData['cb_id'] | null }
+      | { intent: 'edit'; flowId: ChatbotFlowServiceData['cb_id'] | null },
+  ): void
   flowId: ChatbotFlowServiceData['cb_id'] | null
   intent: 'create' | 'edit' | null
   validated: boolean
@@ -30,17 +34,17 @@ interface ModalInterface extends Omit<Modal, 'open'> {
 type ChatbotflowFields = Pick<ChatbotFlowServiceData, 'name'>
 
 const authWorkspaceStore = useAuthWorkspaceStore()
-const { service_models, workspace_service, imported_meta_pages } = authWorkspaceStore
+const { service_models, workspace_service } = authWorkspaceStore
 const { chatbot_flow } = workspace_service
 const { chatbot_flow: chatbot_flow_md } = service_models
 const chatbot_flow_data = ref<ChatbotFlowServiceData | null>(null)
 
 const flow_form = reactive({
-  inputs: <ChatbotflowFields>{ name: '' },
-  errors: <ChatbotflowFields>{ name: '' },
-  schema: <ZodRawShape>{
+  inputs: { name: '' } as ChatbotflowFields,
+  errors: { name: '' } as ChatbotflowFields,
+  schema: {
     name: z.string().min(8, { message: 'Chatbot flow name must be at least 8 characters long' }),
-  },
+  } as ZodRawShape,
 
   validateSingleField(field: keyof ChatbotflowFields): void {
     const value = this.inputs[field]
@@ -69,7 +73,6 @@ const flow_form = reactive({
     }
   },
   initializeForm() {
-
     if (chatbot_flow_data.value) {
       this.inputs = { name: chatbot_flow_data.value.name }
     }
@@ -79,7 +82,7 @@ const flow_form = reactive({
   reset() {
     this.inputs = { name: '' }
     this.errors = { name: '' }
-  }
+  },
 })
 
 const modal = reactive<ModalInterface>({
@@ -96,13 +99,13 @@ const modal = reactive<ModalInterface>({
     try {
       //Check Permission
       await servicePermission.check(PermissionServices.ChatBotFlow, ['add', 'publish', 'edit'])
-      
+
       this.intent = args.intent
       this.flowId = args.flowId
       if (args.intent === 'edit' && this.flowId) {
-        const find_chatbot = chatbot_flow.data.find(flow => flow.cb_id == this.flowId)
+        const find_chatbot = chatbot_flow.data.find((flow) => flow.cb_id == this.flowId)
         if (!find_chatbot) {
-          return;
+          return
         } else {
           chatbot_flow_data.value = JSON.parse(JSON.stringify(find_chatbot))
         }
@@ -111,11 +114,10 @@ const modal = reactive<ModalInterface>({
       }
       flow_form.initializeForm()
       this.isOpen = true
-
     } catch (error: any) {
       if (error instanceof PermissionAccessError) {
         this.isOpen = false
-        return;
+        return
       }
     }
   },
@@ -123,13 +125,15 @@ const modal = reactive<ModalInterface>({
     chatbot_flow_data.value = null
     flow_form.reset()
     this.initialState()
-
   },
 
   async submitForm() {
     const validate = await flow_form.validateDataInput()
     if (validate) {
-      const updated_chatbot = <ChatbotFlowServiceData>{ ...chatbot_flow_data.value, ...flow_form.inputs }
+      const updated_chatbot = {
+        ...chatbot_flow_data.value,
+        ...flow_form.inputs,
+      } as ChatbotFlowServiceData
       chatbot_flow_data.value = updated_chatbot
       console.log(updated_chatbot)
       this.intent === 'create' ? await this.createFlow() : await this.editFlow()
@@ -147,7 +151,6 @@ const modal = reactive<ModalInterface>({
         chatbot_flow.data.push(chatbot_flow_md.data)
       }
     }
-
   },
   async editFlow() {
     if (chatbot_flow_data.value) {
@@ -155,7 +158,7 @@ const modal = reactive<ModalInterface>({
       chatbot_flow_md.set(chatbot_flow_data.value)
       const update = await chatbot_flow_md.createUpdate('update')
       if (update.status) {
-        const chatbot_index = chatbot_flow.data.findIndex(flow => flow.cb_id === this.flowId)
+        const chatbot_index = chatbot_flow.data.findIndex((flow) => flow.cb_id === this.flowId)
         if (chatbot_index >= 0) {
           chatbot_flow.data[chatbot_index] = JSON.parse(JSON.stringify(chatbot_flow_md.data))
         }
@@ -184,8 +187,19 @@ defineExpose({
       </DialogHeader>
       <div class="flex flex-col gap-y-2">
         <Label for="name">Name</Label>
-        <Input type="text" id="name" v-model="flow_form.inputs.name" name="name" placeholder="Input Name" required />
-        <div v-if="flow_form.errors.name" for="name" class="flex items-center gap-1 text-xs text-red-500">
+        <Input
+          type="text"
+          id="name"
+          v-model="flow_form.inputs.name"
+          name="name"
+          placeholder="Input Name"
+          required
+        />
+        <div
+          v-if="flow_form.errors.name"
+          for="name"
+          class="flex items-center gap-1 text-xs text-red-500"
+        >
           <i class="material-icons text-sm">error</i>
           {{ flow_form.errors.name }}
         </div>

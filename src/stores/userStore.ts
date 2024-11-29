@@ -1,14 +1,11 @@
-import { useProjectStore } from './projectStore'
 import type { TeamRefsData } from '@/core/types/AuthUserTypes'
 import { team_refs_data } from '@/core/types/AuthUserTypes'
-import {
-  postCollection,
-  getCollection,
-  getCollectionByField,
-} from '@/core/utils/firebase-collections'
+import { postCollection, getCollection } from '@/core/utils/firebase-collections'
 import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
+
+//Please read use this only for Referencing user when logged in by a different user
 
 interface FirebaseReturn {
   status: boolean

@@ -107,25 +107,25 @@ export const uiHelpers = {
 
   //Create a deep copy of an object and retain function
   deepCopy<T>(obj: T): T {
-    if (obj === null || typeof obj !== "object") {
-      return obj;
+    if (obj === null || typeof obj !== 'object') {
+      return obj
     }
 
     if (obj instanceof Date) {
-      return new Date(obj) as T;
+      return new Date(obj) as T
     }
 
     if (Array.isArray(obj)) {
-      return obj.map(item => this.deepCopy(item)) as unknown as T;
+      return obj.map((item) => this.deepCopy(item)) as unknown as T
     }
 
-    const copy: Partial<T> = {};
+    const copy: Partial<T> = {}
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        copy[key] = this.deepCopy(obj[key]);
+        copy[key] = this.deepCopy(obj[key])
       }
     }
 
-    return copy as T;
-  }
+    return copy as T
+  },
 }

@@ -4,7 +4,6 @@ import type {
   UserData,
   WorkspaceData,
   MetaPageData,
-  ChatBotFlowData,
   InvitationData,
   TeamData,
   TeamMembersData,
@@ -31,7 +30,7 @@ interface Workspace_Collection {
     interface: WSMetaPagesRefsData
     sub_col: SubCollectionKey<WSMetaPagesRefsData>[]
     sub_params: {
-      ws_id:string
+      ws_id: string
     } | null
   }
   ws_chatbot_flow: {
@@ -40,7 +39,7 @@ interface Workspace_Collection {
     interface: ChatbotFlowServiceData
     sub_col: SubCollectionKey<ChatbotFlowServiceData>[]
     sub_params: {
-      ws_id:string
+      ws_id: string
     } | null
   }
   ws_post_randomizer: {
@@ -49,7 +48,7 @@ interface Workspace_Collection {
     interface: PostRandomizerServiceData
     sub_col: SubCollectionKey<PostRandomizerServiceData>[]
     sub_params: {
-      ws_id:string
+      ws_id: string
     } | null
   }
 }
@@ -104,7 +103,7 @@ interface Team_Collection {
   team_workspace_refs: {
     id: 'workspace_id'
     path: 'teams/:tm_id/team_workspace_refs'
-    interface:TeamWorkspaceRefsData
+    interface: TeamWorkspaceRefsData
     sub_col: SubCollectionKey<TeamWorkspaceRefsData>[]
     sub_params: {
       tm_id: string

@@ -103,7 +103,6 @@ const inputField = reactive<InputField>({
   },
   async updateDisplayName(): Promise<void> {
     this.isLoading = true
-    user_auth.checkUser()
     if (user_auth.data) {
       await updateProfile(user_auth.data, { displayName: this.dataInput.displayName })
       toast({
