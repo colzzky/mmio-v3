@@ -27,6 +27,7 @@ import {
   DocumentSnapshot,
   QuerySnapshot,
   runTransaction,
+  deleteDoc,
 } from 'firebase/firestore'
 
 type Collections = {
@@ -178,6 +179,44 @@ export async function postCollection<T extends keyof CollectionsInterface>(
       error: `No data found with that id error! ${$col}.`,
       data: undefined,
     }
+  }
+}
+
+export async function deleteCollection<T extends keyof CollectionsInterface>(
+  $col: T,
+  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
+  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
+  id: string = '', // Document ID to delete
+): Promise<FirebaseReturn> {
+  let fullPath = $path as string;
+
+  // Replace placeholders in the path (e.g., ':userId') with actual values
+  if ($sub_params) {
+    Object.entries($sub_params).forEach(([key, value]) => {
+      fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
+    });
+  }
+
+  // Create a reference to the document to delete
+  const docRef = doc(firestore, fullPath, id);
+
+  try {
+    // Attempt to delete the document
+    await deleteDoc(docRef);
+
+    return {
+      status: true,
+      data: undefined,
+      error: '',
+    };
+  } catch (error) {
+    console.error("Error deleting document:", error);
+
+    return {
+      status: false,
+      data: undefined,
+      error: `Failed to delete document: ${error}`,
+    };
   }
 }
 

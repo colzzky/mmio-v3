@@ -88,7 +88,7 @@ const meta_import = reactive({
       const act_wsp = active_workspace.data
       const batch_ws_meta_refs = <WSMetaPagesRefsData[]>[]
       const batch_meta_page = <MetaPageData[]>[]
-      
+
       this.selected_meta_pages.forEach(page_id => {
         const selected_page = this.meta_pages.find(mp => mp.mp_id === page_id)
         if (selected_page) {
@@ -118,12 +118,28 @@ const meta_import = reactive({
           },
         ])
 
+
+
         if (post_batch.status) {
           batch_meta_page.forEach(mp => {
             imported_meta_pages.data.push(mp)
+            imported_meta_pages.reference.push(
+              {
+                page_name: mp.name,
+                image: mp.picture ? mp.picture.data.url : '',
+                imported_by: user.data && user.data.displayName ? user.data.displayName : '',
+                importedAt: post_batch.data[0].createdAt,
+                mp_id: mp.mp_id,
+                updatedAt: post_batch.data[0].updatedAt,
+              }
+            )
           })
+          console.log(batch_meta_page)
+          console.log(imported_meta_pages)
           this.meta_pages = []
           this.selected_meta_pages = []
+          console.log(batch_meta_page)
+          console.log(imported_meta_pages)
           modal.close()
         }
       }

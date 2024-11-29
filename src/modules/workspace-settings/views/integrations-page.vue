@@ -17,18 +17,24 @@ import {
   TableHeader,
   TableRow,
 } from '@/core/components/ui/table'
+import type { MetaPageData } from '@/core/types/MetaTypes'
 import { PermissionServices } from '@/core/types/PermissionTypes'
-import type { MetaPageRefs } from '@/core/types/WorkSpaceTypes'
+import type { MetaPageRefs, WSMetaPagesRefsData } from '@/core/types/WorkSpaceTypes'
 import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import router from '@/router'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
+import { useWorkspaceStore } from '@/stores/WorkspaceStore'
 import { identity } from '@vueuse/core'
 import { computed, reactive, useTemplateRef, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { deleteCollection } from '@/core/utils/firebase-collections'
+import { useMetaRelatedStore } from '@/stores/metaRelatedStore'
 
 const authWorkspaceStore = useAuthWorkspaceStore()
+const metaStore = useMetaRelatedStore()
 const { imported_meta_pages, active_workspace } = authWorkspaceStore
+const { meta_page: meta_page_md } = metaStore
 
 interface Identifier {
   identifier: string
@@ -68,6 +74,28 @@ function page_initialize() {
       })
     }
   }
+}
+async function testRemove(mp_id: string) {
+  if (active_workspace.data && active_workspace.data.meta_pages_refs) {
+    const workspace_meta_refs_index = active_workspace.data.meta_pages_refs.findIndex(mp => mp.mp_id === mp_id)
+    const meta_page_index = imported_meta_pages.data.findIndex(mp => mp.mp_id === mp_id)
+    const meta_page_refs_index = imported_meta_pages.reference.findIndex(mp => mp.mp_id === mp_id)
+    if (workspace_meta_refs_index >= 0 && meta_page_index >= 0 && meta_page_refs_index >= 0) {
+      meta_page_md.set(imported_meta_pages.data[meta_page_index])
+      if (meta_page_md.data) {
+        meta_page_md.data.isOnProject = false
+        await meta_page_md.createUpdate('update')
+      }
+      await deleteCollection('ws_meta_pages_refs', 'workspaces/:ws_id/meta_pages_refs', { ws_id: active_workspace.data.ws_id }, mp_id)
+
+      imported_meta_pages.data.splice(meta_page_index, 1);
+      imported_meta_pages.reference.splice(meta_page_refs_index, 1);
+      active_workspace.data.meta_pages_refs.splice(workspace_meta_refs_index, 1);
+    }
+  }
+
+
+
 }
 
 onMounted(async () => {
@@ -147,7 +175,7 @@ const importIntegrationModalRef = useTemplateRef('importIntegrationModal')
                         <i class="bx bx-log-in text-xl" />
                         Reauthenticate
                       </DropdownMenuItem>
-                      <DropdownMenuItem class="gap-x-3">
+                      <DropdownMenuItem class="gap-x-3" @click="testRemove(integration.mp_id)">
                         <i class="bx bx-trash text-xl" />
                         Remove
                       </DropdownMenuItem>
