@@ -38,7 +38,11 @@ export const useUserStore = defineStore(
         this.data = data
       },
       async get(tm_id: string): Promise<FSReturnData<TeamRefsData>> {
-        const get = await getCollection('team', 'teams', {}, tm_id, [])
+        const get = await getCollection('team',{
+          $path: 'teams',
+          $sub_params:{ tm_id: tm_id },
+          id:tm_id,
+        })
         return {
           status: get.status,
           data: get.data as TeamRefsData,
@@ -48,14 +52,15 @@ export const useUserStore = defineStore(
       async createUpdate(uid: string, type): Promise<FSReturnData<TeamRefsData>> {
         const id = this.data.team_refs_id !== '' ? this.data.team_refs_id : crypto.randomUUID()
         this.data.team_refs_id = id
-        const post = await postCollection(
-          'team_refs',
-          'users/:uid/team_refs',
-          { uid },
+
+        const post = await postCollection('team_refs',{
+          $path: 'users/:uid/team_refs',
+          $sub_params: { uid},
           id,
-          this.data,
+          data: this.data,
           type,
-        )
+        });
+      
         console.log(post)
         return {
           status: post.status,

@@ -74,8 +74,8 @@ const member_permission_modal = reactive({
   steps: '',
   data: {},
   processing_msg: '',
-  async continue() {},
-  previous() {},
+  async continue() { },
+  previous() { },
   async save_access_permission() {
     if (this.member && current_permission.data) {
       this.member.accessPermissions = current_permission.data
@@ -91,10 +91,10 @@ const member_permission_modal = reactive({
   close(isUpdate: boolean = false) {
     const pass_member_data = isUpdate ? this.member : null
     this.isOpen = false
-    ;(this.member_name = ''), (this.team_id = ''), (this.member = null), current_permission.reset()
+      ; (this.member_name = ''), (this.team_id = ''), (this.member = null), current_permission.reset()
     emit('return', pass_member_data)
   },
-  async createWorkspace() {},
+  async createWorkspace() { },
 })
 
 const current_permission = reactive({
@@ -178,19 +178,16 @@ async function get_user_created_permission() {
   console.log(checkFetch)
   if (user_auth.data && checkFetch) {
     permissions.data = []
-    const get = await getWhereAny(
-      'permission',
-      'permissions',
-      {},
-      [],
-      [
+    const get = await getWhereAny('permission', {
+      $path: 'permissions',
+      whereConditions: [
         {
           fieldName: 'owner_uid',
           operator: '==',
           value: user_auth.data.uid,
         },
       ],
-    )
+    })
     if (get.status && get.data.length) {
       permissions.data = get.data
       permissions.generateNextFetch()
@@ -219,9 +216,7 @@ onMounted(async () => {
           <div>
             <button
               class="right-0 top-0 cursor-pointer border-0 bg-transparent text-xl text-gray-500 hover:text-gray-700 focus:outline-none"
-              aria-label="Close"
-              @click="member_permission_modal.close()"
-            >
+              aria-label="Close" @click="member_permission_modal.close()">
               <i class="material-icons">close</i>
             </button>
           </div>
@@ -233,64 +228,38 @@ onMounted(async () => {
             <div class="flex flex-col gap-4 rounded-lg border border-gray-200 bg-gray-100 p-4">
               <div class="text-sm font-semibold">Default Permissions:</div>
               <div class="flex items-center justify-between">
-                <span class="cursor-pointer text-xs font-semibold"
-                  >Set Permission to default/member</span
-                >
-                <Button
-                  @click="current_permission.set_permission('default')"
-                  class="text-blue-500"
-                  variant="ghost"
-                  size="xs"
-                >
+                <span class="cursor-pointer text-xs font-semibold">Set Permission to default/member</span>
+                <Button @click="current_permission.set_permission('default')" class="text-blue-500" variant="ghost"
+                  size="xs">
                   Apply
                 </Button>
               </div>
 
               <div class="flex items-center justify-between">
-                <span class="cursor-pointer text-xs font-semibold"
-                  >Set Permission to default/Admin</span
-                >
-                <Button
-                  @click="current_permission.set_permission('admin')"
-                  class="text-blue-500"
-                  variant="ghost"
-                  size="xs"
-                >
+                <span class="cursor-pointer text-xs font-semibold">Set Permission to default/Admin</span>
+                <Button @click="current_permission.set_permission('admin')" class="text-blue-500" variant="ghost"
+                  size="xs">
                   Apply
                 </Button>
               </div>
 
               <div class="flex items-center justify-between">
-                <span class="cursor-pointer text-xs font-semibold"
-                  >Set Permission to default/Custom</span
-                >
-                <Button
-                  @click="current_permission.set_permission('custom')"
-                  class="text-blue-500"
-                  variant="ghost"
-                  size="xs"
-                >
+                <span class="cursor-pointer text-xs font-semibold">Set Permission to default/Custom</span>
+                <Button @click="current_permission.set_permission('custom')" class="text-blue-500" variant="ghost"
+                  size="xs">
                   Apply
                 </Button>
               </div>
             </div>
 
             <div
-              class="flex max-h-[50%] min-h-[10%] flex-col gap-4 overflow-scroll rounded-lg border border-gray-200 bg-gray-100 p-4"
-            >
+              class="flex max-h-[50%] min-h-[10%] flex-col gap-4 overflow-scroll rounded-lg border border-gray-200 bg-gray-100 p-4">
               <div class="text-sm font-semibold">Created Permissions:</div>
-              <div
-                v-for="permission in user_created_permissions"
-                :key="permission.permission_id"
-                class="flex items-center justify-between"
-              >
+              <div v-for="permission in user_created_permissions" :key="permission.permission_id"
+                class="flex items-center justify-between">
                 <span class="cursor-pointer text-xs font-semibold">{{ permission.name }}</span>
-                <Button
-                  @click="current_permission.set_custom_permission(permission.assignment)"
-                  class="text-blue-500"
-                  variant="outline"
-                  size="xs"
-                >
+                <Button @click="current_permission.set_custom_permission(permission.assignment)" class="text-blue-500"
+                  variant="outline" size="xs">
                   Apply
                 </Button>
               </div>
@@ -301,59 +270,39 @@ onMounted(async () => {
             <div class="space-y-3">
               <div class="flex items-center space-x-4">
                 <Input type="search" placeholder="Search Permissions..." class="" />
-                <Button
-                  v-if="!current_permission.saveLoad"
-                  variant="outline"
-                  size="sm"
-                  class="flex items-center gap-2"
-                  @click="member_permission_modal.save_access_permission()"
-                >
+                <Button v-if="!current_permission.saveLoad" variant="outline" size="sm" class="flex items-center gap-2"
+                  @click="member_permission_modal.save_access_permission()">
                   <i class="material-icons text-sm">save</i>Save All
                 </Button>
                 <Button v-else variant="outline" size="sm" class="flex items-center gap-2" disabled>
                   <i class="material-icons animate-spin text-sm">donut_large</i>Save All
                 </Button>
               </div>
-              <div
-                class="max-h-[40vh] overflow-scroll rounded-lg border border-gray-200 bg-gray-100 py-4"
-              >
+              <div class="max-h-[40vh] overflow-scroll rounded-lg border border-gray-200 bg-gray-100 py-4">
                 <div v-if="!current_permission.saveLoad">
                   <div v-for="(custom, key, index) in custom_access" :key="key">
-                    <div
-                      v-if="
-                        current_permission.data &&
-                        key in current_permission.data &&
-                        current_permission.data[key]
-                      "
-                    >
+                    <div v-if="
+                      current_permission.data &&
+                      key in current_permission.data &&
+                      current_permission.data[key]
+                    ">
                       <div class="space-y-4 px-5 py-5">
                         <div class="text-lg font-bold">{{ key }} Permissons</div>
                         <div class="space-y-2">
                           <div class="grid grid-cols-6">
-                            <span class="col-span-2 text-sm font-semibold"
-                              >Default Access Level:</span
-                            >
+                            <span class="col-span-2 text-sm font-semibold">Default Access Level:</span>
                             <div class="items-cente col-span-4 flex justify-between space-x-4">
                               <div class="flex space-x-2">
-                                <div
-                                  v-for="(
+                                <div v-for="(
                                     access_value, access_level, access_key
-                                  ) in accessLevelsArray[key]"
-                                  :key="access_key"
-                                >
+                                  ) in accessLevelsArray[key]" :key="access_key">
                                   <div v-if="access_level" class="flex items-center space-x-2">
-                                    <Checkbox
-                                      @update:checked="
-                                        current_permission.add_remove_access(key, access_level)
-                                      "
-                                      :checked="
-                                        current_permission.data[key].access.includes(access_level)
-                                      "
-                                    />
-                                    <label
-                                      for="terms"
-                                      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                    >
+                                    <Checkbox @update:checked="
+                                      current_permission.add_remove_access(key, access_level)
+                                      " :checked="current_permission.data[key].access.includes(access_level)
+                                        " />
+                                    <label for="terms"
+                                      class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                                       {{ access_level }}
                                     </label>
                                   </div>
@@ -361,39 +310,25 @@ onMounted(async () => {
                               </div>
                             </div>
                           </div>
-                          <div
-                            v-if="
-                              current_permission.data[key].custom &&
-                              current_permission.data[key].access.includes(Access_levels.CUSTOM)
-                            "
-                          >
+                          <div v-if="
+                            current_permission.data[key].custom &&
+                            current_permission.data[key].access.includes(Access_levels.CUSTOM)
+                          ">
                             <div class="pb-2 pt-4">
                               <span class="text-lg">Custom:</span>
                             </div>
                             <div class="space-y-2">
-                              <div
-                                v-for="(
+                              <div v-for="(
                                   custom_val, custom_key
                                 ) in current_permission.sortCustomPermission(
-                                  current_permission.data[key].custom,
-                                )"
-                                :key="custom_key"
-                                class="grid grid-cols-6"
-                              >
-                                <span class="col-span-2 text-sm font-semibold"
-                                  >{{ custom_key }}:</span
-                                >
+                                    current_permission.data[key].custom,
+                                  )" :key="custom_key" class="grid grid-cols-6">
+                                <span class="col-span-2 text-sm font-semibold">{{ custom_key }}:</span>
                                 <div class="col-span-4">
-                                  <RadioGroup
-                                    :default-value="
-                                      current_permission.data[key].custom[custom_key] ? 'Yes' : 'No'
-                                    "
-                                    orientation="horizontal"
-                                    @update:model-value="
+                                  <RadioGroup :default-value="current_permission.data[key].custom[custom_key] ? 'Yes' : 'No'
+                                    " orientation="horizontal" @update:model-value="
                                       current_permission.change_custom_permission(key, custom_key)
-                                    "
-                                    class="flex space-x-2"
-                                  >
+                                      " class="flex space-x-2">
                                     <div class="flex items-center space-x-2">
                                       <RadioGroupItem id="r1" value="Yes" />
                                       <Label for="r1">Yes</Label>
@@ -415,28 +350,19 @@ onMounted(async () => {
                       <div class="space-y-4 px-5 py-5">
                         <div class="flex justify-between">
                           <span class="text-lg font-bold">{{ key }} Permissons</span>
-                          <Button
-                            class="text-red-500"
-                            variant="outline"
-                            size="xs"
-                            @click="current_permission.add_permission(key)"
-                          >
+                          <Button class="text-red-500" variant="outline" size="xs"
+                            @click="current_permission.add_permission(key)">
                             Add this permission
                           </Button>
                         </div>
                       </div>
-                      <hr
-                        v-if="!(index === Object.keys(custom_access).length - 1)"
-                        class="border-gray-200"
-                      />
+                      <hr v-if="!(index === Object.keys(custom_access).length - 1)" class="border-gray-200" />
                     </div>
                   </div>
                 </div>
                 <div v-else class="flex justify-center p-4">
                   <div>
-                    <span class="animate-pulse font-bold"
-                      >Please wait while we save your permission</span
-                    >
+                    <span class="animate-pulse font-bold">Please wait while we save your permission</span>
                     <Skeleton class="h-1 w-full rounded-full bg-gray-300" />
                   </div>
                 </div>

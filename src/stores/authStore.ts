@@ -97,7 +97,12 @@ export const useAuthStore = defineStore(
       },
       async get() {
         const id = user_auth.data ? user_auth.data.uid : ''
-        const get = await getCollection('user', 'users', null, id, ['team_refs', 'platform_apis'])
+        const get = await getCollection('user',{
+          $path: 'users',
+          $sub_params: null,
+          id: id,
+          $sub_col: ['team_refs', 'platform_apis'],
+        })
         console.log(get)
         return {
           status: get.status,
@@ -108,7 +113,13 @@ export const useAuthStore = defineStore(
 
       async createUpdate(type): Promise<FSReturnData<UserData>> {
         const id = user_auth.data ? user_auth.data.uid : ''
-        const post = await postCollection('user', 'users', null, id, this.data, type)
+        const post = await postCollection('user',{
+          $path: 'users',
+          $sub_params: null,
+          id,
+          data: this.data,
+          type,
+        });
         return {
           status: post.status,
           data: post.data as UserData,
@@ -136,19 +147,19 @@ export const useAuthStore = defineStore(
           user.data.team_refs.forEach((team) => {
             user_teams.push(team.tm_id)
           })
-          const fetch_team = await getWhereAny(
-            'team',
-            'teams',
-            {},
-            ['team_members'],
-            [
+          const fetch_team = await getWhereAny('team', {
+            $path: 'teams',
+            $sub_params: {},
+            $sub_col: ['team_members'],
+            whereConditions: [
               {
                 fieldName: 'tm_id',
                 operator: 'in',
                 value: user_teams,
               },
             ],
-          )
+          })
+          
           console.log(fetch_team)
           if (fetch_team.status) {
             this.data = fetch_team.data

@@ -49,19 +49,16 @@ const set_fb_api = (metaApi: MetaAPIAccount, fbPlatform: PlatformApiData) => {
 const set_fb_pages = async (): Promise<void> => {
   fb_pages_load.value = true
 
-  const pages = await getWhereAny(
-    'meta_page',
-    'meta_pages',
-    null,
-    [],
-    [
+  const pages = await getWhereAny('meta_page', {
+    $path: 'meta_pages',
+    whereConditions: [
       {
         fieldName: 'owner_uid',
         operator: '==',
         value: user_auth.data?.uid,
       },
     ],
-  )
+  })
   console.log(pages)
   meta_pages_list.data = pages.data
   fb_pages_load.value = false
@@ -286,10 +283,8 @@ onMounted(async () => {
             <div v-if="fb_api_information" class="grid-gap-4">
               <div class="flex items-center space-x-4 rounded-md border p-4">
                 <Avatar>
-                  <AvatarImage
-                    :src="fb_api_information.picture ? fb_api_information.picture.data.url : ''"
-                    alt="@radix-vue"
-                  />
+                  <AvatarImage :src="fb_api_information.picture ? fb_api_information.picture.data.url : ''"
+                    alt="@radix-vue" />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
                 <div class="flex flex-col gap-3">
@@ -339,10 +334,8 @@ onMounted(async () => {
       <div class="flex items-center justify-between">
         <div>
           <div class="text-2xl font-semibold">Your Meta Pages</div>
-          <Label
-            >If you haven't find your pages please reauthenticate and check pagges you want to
-            use</Label
-          >
+          <Label>If you haven't find your pages please reauthenticate and check pagges you want to
+            use</Label>
         </div>
         <Button v-if="!fb_pages_load" size="xs" class="text-sm" @click="get_fb_pages">
           Export FB Pages
@@ -358,21 +351,15 @@ onMounted(async () => {
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                   <Avatar>
-                    <AvatarImage
-                      :src="page.picture ? page.picture.data.url : ''"
-                      alt="@radix-vue"
-                    />
+                    <AvatarImage :src="page.picture ? page.picture.data.url : ''" alt="@radix-vue" />
                     <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
                   <div class="flex flex-col gap-3">
                     <div class="flex-1 space-y-1.5">
                       <p class="text-sm font-medium leading-none">
                         {{ page.name }}
-                        <span
-                          v-if="page.voided"
-                          class="ml-2 rounded-xl border border-red-500 px-3 text-red-500"
-                          >Voided</span
-                        >
+                        <span v-if="page.voided"
+                          class="ml-2 rounded-xl border border-red-500 px-3 text-red-500">Voided</span>
                       </p>
                       <p class="text-sm text-muted-foreground">
                         {{ page.category }}
@@ -384,11 +371,8 @@ onMounted(async () => {
                   </div>
                 </div>
 
-                <Switch
-                  :disabled="page.voided || processing_isActive_switch"
-                  :checked="page.isActive"
-                  @update:checked="activate_fb_page(index)"
-                />
+                <Switch :disabled="page.voided || processing_isActive_switch" :checked="page.isActive"
+                  @update:checked="activate_fb_page(index)" />
               </div>
             </div>
           </Card>

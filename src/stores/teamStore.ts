@@ -67,7 +67,11 @@ export const useTeamStore = defineStore('teamStore', () => {
       this.data = data
     },
     async get(tm_id: string): Promise<FSReturnData<TeamData>> {
-      const get = await getCollection('team', 'teams', {}, tm_id, ['team_members'])
+      const get = await getCollection('team',{
+        $path: 'teams',
+        id: tm_id,
+        $sub_col: ['team_members'],
+      })
       return {
         status: get.status,
         data: get.data as TeamData,
@@ -77,7 +81,12 @@ export const useTeamStore = defineStore('teamStore', () => {
     async createUpdate(type): Promise<FSReturnData<TeamData>> {
       const id = this.data.tm_id !== '' ? this.data.tm_id : crypto.randomUUID()
       this.data.tm_id = id
-      const post = await postCollection('team', 'teams', null, id, this.data, type)
+      const post = await postCollection('team',{
+        $path: 'teams',
+        id,
+        data:this.data,
+        type
+      })
       console.log(post)
       return {
         status: post.status,
@@ -97,13 +106,11 @@ export const useTeamStore = defineStore('teamStore', () => {
       this.data = data
     },
     async get(tm_id: string, member_id: string): Promise<FSReturnData<TeamMembersData>> {
-      const get = await getCollection(
-        'team_members',
-        'teams/:tm_id/team_members',
-        { tm_id: tm_id },
-        member_id,
-        [],
-      )
+      const get = await getCollection('team_members',{
+        $path: 'teams/:tm_id/team_members',
+        $sub_params:{ tm_id: tm_id },
+        id:member_id,
+      })
       return {
         status: get.status,
         data: get.data as TeamMembersData,
@@ -113,14 +120,13 @@ export const useTeamStore = defineStore('teamStore', () => {
     async createUpdate(tm_id: string, type): Promise<FSReturnData<TeamMembersData>> {
       const id = this.data.member_id !== '' ? this.data.member_id : crypto.randomUUID()
       this.data.member_id = id
-      const post = await postCollection(
-        'team_members',
-        'teams/:tm_id/team_members',
-        { tm_id },
+      const post = await postCollection('team_members',{
+        $path: 'teams/:tm_id/team_members',
+        $sub_params: { tm_id },
         id,
-        this.data,
+        data: this.data,
         type,
-      )
+      });
       console.log(post)
       return {
         status: post.status,
@@ -140,13 +146,12 @@ export const useTeamStore = defineStore('teamStore', () => {
       this.data = data
     },
     async get(tm_id: string, workspace_id: string): Promise<FSReturnData<TeamWorkspaceRefsData>> {
-      const get = await getCollection(
-        'team_workspace_refs',
-        'teams/:tm_id/team_workspace_refs',
-        { tm_id: tm_id },
-        workspace_id,
-        [],
-      )
+      const get = await getCollection('team_workspace_refs',{
+        $path: 'teams/:tm_id/team_workspace_refs',
+        $sub_params:{ tm_id: tm_id },
+        id:workspace_id,
+      })
+
       return {
         status: get.status,
         data: get.data as TeamWorkspaceRefsData,
@@ -156,14 +161,14 @@ export const useTeamStore = defineStore('teamStore', () => {
     async createUpdate(tm_id: string, type): Promise<FSReturnData<TeamWorkspaceRefsData>> {
       const id = this.data.workspace_id !== '' ? this.data.workspace_id : crypto.randomUUID()
       this.data.workspace_id = id
-      const post = await postCollection(
-        'team_workspace_refs',
-        'teams/:tm_id/team_workspace_refs',
-        { tm_id },
+      const post = await postCollection('team_workspace_refs',{
+        $path: 'teams/:tm_id/team_workspace_refs',
+        $sub_params: { tm_id },
         id,
-        this.data,
+        data: this.data,
         type,
-      )
+      });
+      
       console.log(post)
       return {
         status: post.status,

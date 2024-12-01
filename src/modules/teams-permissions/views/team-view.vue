@@ -62,13 +62,17 @@ const current_team = reactive({
           this.member_email_list.push(member.invitation.email)
         }
       })
-      const members = await getWhereAny(
-        'user',
-        'users',
-        {},
-        [],
-        [{ fieldName: 'uid', operator: 'in', value: non_pending_members }],
-      )
+      const members = await getWhereAny('user', {
+        $path: 'users',
+        whereConditions: [
+          {
+            fieldName: 'uid',
+            operator: 'in',
+            value: non_pending_members,
+          },
+        ],
+      })
+
       if (members.status) {
         members.data.forEach((member) => {
           this.members_info[member.uid] = member
@@ -362,9 +366,8 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
   <div v-if="!pageLoad">
     <div v-if="current_team.data" class="space-y-4">
       <div class="flex items-center space-x-2">
-        <Button variant="ghost" class="flex" @click="router.push({ name: 'teams' })"
-          ><i class="material-icons text-md">arrow_back</i></Button
-        >
+        <Button variant="ghost" class="flex" @click="router.push({ name: 'teams' })"><i
+            class="material-icons text-md">arrow_back</i></Button>
         <span class="text-lg font-bold">{{ current_team.data.name }}</span>
       </div>
       <div class="grid grid-cols-12 gap-x-4">
@@ -373,9 +376,7 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
           <div class="rounded-lg">
             <div class="">
               <div class="relative mx-auto w-full max-w-screen-md">
-                <span
-                  class="absolute inset-y-1 left-1 grid aspect-square place-content-center bg-white"
-                >
+                <span class="absolute inset-y-1 left-1 grid aspect-square place-content-center bg-white">
                   <i class="bx bx-search" />
                 </span>
                 <Input type="search" placeholder="Search Members" class="ps-10" />
@@ -383,17 +384,13 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
             </div>
             <div class="max-h-[70vh] overflow-y-scroll">
               <div class="flex flex-col space-y-4 py-4">
-                <div
-                  v-for="member in current_team.data.team_members"
-                  :key="member.member_id"
+                <div v-for="member in current_team.data.team_members" :key="member.member_id"
                   class="cursor-pointer rounded-lg transition-colors duration-100 hover:bg-slate-100"
-                  @click="selected_member.set_active_member(member.uid, member.isPending, member)"
-                  :class="{
+                  @click="selected_member.set_active_member(member.uid, member.isPending, member)" :class="{
                     'bg-slate-100':
                       selected_member.member_info &&
                       selected_member.member_info.member_id === member.member_id,
-                  }"
-                >
+                  }">
                   <div v-if="!member.isPending && member.uid" class="flex items-center px-2 py-2">
                     <div class="flex w-[50%] items-center space-x-4">
                       <Avatar>
@@ -420,10 +417,7 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
                       <div class="text-sm">{{ member.role }}</div>
                     </div>
                   </div>
-                  <div
-                    v-else-if="member.isPending && member.invitation"
-                    class="flex items-center px-2 py-2"
-                  >
+                  <div v-else-if="member.isPending && member.invitation" class="flex items-center px-2 py-2">
                     <div class="flex w-[50%] items-center space-x-4">
                       <Avatar>
                         <AvatarImage src="" alt="@radix-vue" />
@@ -436,13 +430,9 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
                           </p>
                           <p class="text-xs leading-none">(Pending)</p>
                           <div>
-                            <Button
-                              class="p-0 text-sm text-blue-500"
-                              size="sm"
-                              variant="ghost"
-                              @click="copyLink('member', member.invitation.reference)"
-                              ><i class="material-icons">link</i> Copy link</Button
-                            >
+                            <Button class="p-0 text-sm text-blue-500" size="sm" variant="ghost"
+                              @click="copyLink('member', member.invitation.reference)"><i
+                                class="material-icons">link</i> Copy link</Button>
                           </div>
                         </div>
                       </div>
@@ -469,11 +459,8 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
                 <span class="text-sm font-semibold">Team Name:</span>
                 <div class="flex items-center justify-between">
                   <span>{{ current_team.data.name }}</span>
-                  <Button
-                    variant="ghost"
-                    class="p-0 text-sm font-bold text-blue-500 hover:text-blue-700"
-                    >Change name</Button
-                  >
+                  <Button variant="ghost" class="p-0 text-sm font-bold text-blue-500 hover:text-blue-700">Change
+                    name</Button>
                 </div>
               </div>
 
@@ -483,25 +470,17 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
                   <Switch />
                 </div>
                 <div class="flex items-center justify-between">
-                  <span class="w-64 truncate text-xs"
-                    >www.mmiv3.com/invite/{{ current_team.data.inviteLink }}</span
-                  >
-                  <Button
-                    class="p-0 text-sm text-blue-500"
-                    size="sm"
-                    variant="ghost"
-                    @click="copyLink('team', current_team.data.inviteLink)"
-                    ><i class="material-icons">link</i> Copy link</Button
-                  >
+                  <span class="w-64 truncate text-xs">www.mmiv3.com/invite/{{ current_team.data.inviteLink }}</span>
+                  <Button class="p-0 text-sm text-blue-500" size="sm" variant="ghost"
+                    @click="copyLink('team', current_team.data.inviteLink)"><i class="material-icons">link</i> Copy
+                    link</Button>
                 </div>
                 <div class="flex h-14 flex-col justify-end">
                   <div class="flex items-center justify-between">
-                    <Button class="p-0 text-red-500 hover:text-red-700" size="sm" variant="ghost"
-                      >Disassemble team</Button
-                    >
-                    <Button class="text-xs" size="xs" variant="destructive"
-                      ><i class="material-icons mr-2 text-sm">exit_to_app</i>Leave Team</Button
-                    >
+                    <Button class="p-0 text-red-500 hover:text-red-700" size="sm" variant="ghost">Disassemble
+                      team</Button>
+                    <Button class="text-xs" size="xs" variant="destructive"><i
+                        class="material-icons mr-2 text-sm">exit_to_app</i>Leave Team</Button>
                   </div>
                 </div>
               </div>
@@ -509,67 +488,39 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
             <div class="space-y-2">
               <div class="text-lg font-bold">Invite Users</div>
               <div class="rounded-lg border-2">
-                <div
-                  class="flex max-h-[10vh] flex-row flex-wrap items-center gap-2 overflow-y-scroll p-4 py-2"
-                >
-                  <div
-                    v-for="(email, index) in choose_member_form.emails"
-                    :id="email"
-                    :key="index"
-                    class="flex items-center space-x-2 self-start rounded-full bg-blue-500 p-2 px-3"
-                  >
+                <div class="flex max-h-[10vh] flex-row flex-wrap items-center gap-2 overflow-y-scroll p-4 py-2">
+                  <div v-for="(email, index) in choose_member_form.emails" :id="email" :key="index"
+                    class="flex items-center space-x-2 self-start rounded-full bg-blue-500 p-2 px-3">
                     <span class="text-xs font-semibold text-white">{{ email }}</span>
-                    <button
-                      @click="choose_member_form.removeEmail(index)"
-                      class="flex cursor-pointer items-center text-white focus:outline-none"
-                    >
+                    <button @click="choose_member_form.removeEmail(index)"
+                      class="flex cursor-pointer items-center text-white focus:outline-none">
                       <i class="material-icons text-sm">close</i>
                     </button>
                   </div>
 
                   <div class="rounded-full">
-                    <Input
-                      v-model="choose_member_form.dataInput.member_email"
-                      @blur="choose_member_form.addEmail()"
-                      @keyup.enter="choose_member_form.addEmail()"
-                      type="text"
-                      placeholder="User Email"
-                      class="rounded-none border-x-0 border-b border-t-0 text-sm focus-visible:border-blue-600 focus-visible:ring-0 focus-visible:ring-offset-0"
-                    />
+                    <Input v-model="choose_member_form.dataInput.member_email" @blur="choose_member_form.addEmail()"
+                      @keyup.enter="choose_member_form.addEmail()" type="text" placeholder="User Email"
+                      class="rounded-none border-x-0 border-b border-t-0 text-sm focus-visible:border-blue-600 focus-visible:ring-0 focus-visible:ring-offset-0" />
                   </div>
                 </div>
                 <div class="w-full">
-                  <Button
-                    :disabled="!choose_member_form.emails.length"
-                    class="rounded-t-non w-full"
-                    @click="current_team.inviteMembers()"
-                    size="xs"
-                    >Invite Users</Button
-                  >
+                  <Button :disabled="!choose_member_form.emails.length" class="rounded-t-non w-full"
+                    @click="current_team.inviteMembers()" size="xs">Invite Users</Button>
                 </div>
               </div>
-              <div
-                v-if="choose_member_form.errors.member_email"
-                for="name"
-                class="flex items-center gap-1 text-xs text-red-500"
-              >
+              <div v-if="choose_member_form.errors.member_email" for="name"
+                class="flex items-center gap-1 text-xs text-red-500">
                 <i class="material-icons text-sm">error</i>
                 {{ choose_member_form.errors.member_email }}
               </div>
             </div>
           </div>
-          <div
-            v-else-if="selected_member.user_data && selected_member.member_info"
-            class="space-y-4"
-          >
+          <div v-else-if="selected_member.user_data && selected_member.member_info" class="space-y-4">
             <div class="flex items-center justify-between">
               <div class="text-lg font-bold">Member Infoformation</div>
-              <Button
-                variant="ghost"
-                class="text-sm font-bold text-blue-500 hover:text-blue-700"
-                @click="selected_member.reset()"
-                >Settings</Button
-              >
+              <Button variant="ghost" class="text-sm font-bold text-blue-500 hover:text-blue-700"
+                @click="selected_member.reset()">Settings</Button>
             </div>
             <div class="space-y-3 rounded-lg border-2 border-gray-200 bg-gray-100 px-4 py-3">
               <div class="flex flex-col space-y-3">
@@ -578,10 +529,7 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
                     <AvatarImage src="" alt="@radix-vue" />
                     <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
-                  <div
-                    v-if="!selected_member.member_info.isPending"
-                    class="flex items-center justify-between gap-8"
-                  >
+                  <div v-if="!selected_member.member_info.isPending" class="flex items-center justify-between gap-8">
                     <div class="w-44 flex-1 space-y-1">
                       <p class="text-sm font-medium leading-none">
                         {{ selected_member.user_data.displayName }}
@@ -602,16 +550,10 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
                 </div>
               </div>
 
-              <div
-                v-if="selected_member.member_info.role !== TeamRole.OWNER"
-                class="flex items-center justify-between"
-              >
+              <div v-if="selected_member.member_info.role !== TeamRole.OWNER" class="flex items-center justify-between">
                 <span class="text-sm font-semibold">Role:</span>
-                <Select
-                  v-if="!selected_member.change_role_load"
-                  v-model="selected_member.member_info.role"
-                  @update:model-value="selected_member.change_role()"
-                >
+                <Select v-if="!selected_member.change_role_load" v-model="selected_member.member_info.role"
+                  @update:model-value="selected_member.change_role()">
                   <SelectTrigger class="h-[3vh] w-[180px]">
                     <SelectValue :placeholder="selected_member.member_info.role" />
                   </SelectTrigger>
@@ -637,15 +579,12 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
               <div class="flex items-center justify-between">
                 <span class="text-sm font-semibold">Permissions:</span>
                 <div>
-                  <span
-                    @click="member_permission_modal = !member_permission_modal"
-                    class="text-md cursor-pointer text-sm font-semibold text-blue-500"
-                  >
+                  <span @click="member_permission_modal = !member_permission_modal"
+                    class="text-md cursor-pointer text-sm font-semibold text-blue-500">
                     {{
                       `${Object.keys(selected_member.member_info.accessPermissions).length}
-                                        Permissions`
-                    }}</span
-                  >
+                    Permissions`
+                    }}</span>
                 </div>
               </div>
 
@@ -661,9 +600,7 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
               <div class="flex flex-col">
                 <div class="flex items-center justify-between">
                   <span class="text-sm font-semibold">Remove Member from Team:</span>
-                  <Button class="p-0 text-red-500 hover:text-red-700" size="sm" variant="ghost"
-                    >Remove</Button
-                  >
+                  <Button class="p-0 text-red-500 hover:text-red-700" size="sm" variant="ghost">Remove</Button>
                 </div>
               </div>
             </div>
@@ -676,13 +613,10 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
 
   <div v-else>loadingg....</div>
 
-  <MemberPermission
-    :open_modal="member_permission_modal"
-    :team_id="team_id as string"
+  <MemberPermission :open_modal="member_permission_modal" :team_id="team_id as string"
     :member="selected_member.member_info"
     :member_name="selected_member.user_data ? selected_member.user_data.displayName : ''"
-    @return="member_permission_modal_return"
-  />
+    @return="member_permission_modal_return" />
 </template>
 <style scoped>
 .page-container {

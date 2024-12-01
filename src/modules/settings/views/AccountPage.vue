@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import ChangePassword from '../components/AccountSettings/ChangePassword.vue'
+import ChangePassword from '../components/AccountSettings/changePassword.vue'
 import UpdateAccountName from '../components/AccountSettings/UpdateDisplayName.vue'
 import UpdateEmail from '../components/AccountSettings/VerifyEmail.vue'
 import { Avatar, AvatarFallback, AvatarImage } from '@/core/components/ui/avatar'

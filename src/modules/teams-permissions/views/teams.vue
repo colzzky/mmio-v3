@@ -35,19 +35,19 @@ async function fetch_owners() {
         }
       }
     })
-    const fetch_owners = await getWhereAny(
-      'user',
-      'users',
-      {},
-      [],
-      [
+    const fetch_owners = await getWhereAny('user', {
+      $path: 'users',
+      $sub_params: {},
+      $sub_col: [],
+      whereConditions: [
         {
           fieldName: 'uid',
           operator: 'in',
           value: ud.team_owners_uid,
         },
       ],
-    )
+    })
+
 
     if (fetch_owners.status) {
       const owners: { [key: string]: UserData } = {}
@@ -86,12 +86,8 @@ watch(
   <div>
     <div class="flex items-center justify-between">
       <div class="text-lg font-bold">Your Teams</div>
-      <Button
-        @click="new_team_modal = !new_team_modal"
-        variant="ghost"
-        class="font-bold text-blue-500"
-        >Create a team</Button
-      >
+      <Button @click="new_team_modal = !new_team_modal" variant="ghost" class="font-bold text-blue-500">Create a
+        team</Button>
     </div>
     <div>
       <div class="">
@@ -107,16 +103,10 @@ watch(
 
           <div v-if="!user_team_refs.isLoading && !pageLoad" class="py-2">
             <div v-if="user_team_refs.data.length && ud.team_owners">
-              <div
-                v-for="team in user_team_refs.data"
-                :key="team.tm_id"
-                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
-              >
+              <div v-for="team in user_team_refs.data" :key="team.tm_id"
+                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300">
                 <div class="grid grid-cols-12 items-center">
-                  <div
-                    class="col-span-6"
-                    @click="router.push({ name: 'team-view', params: { team_id: team.tm_id } })"
-                  >
+                  <div class="col-span-6" @click="router.push({ name: 'team-view', params: { team_id: team.tm_id } })">
                     <div class="flex items-center gap-x-3">
                       <i class="bx bx-google text-2xl"></i>
                       <div class="grid gap-0">
@@ -138,13 +128,11 @@ watch(
                     </span>
                     <span class="text-xs text-gray-600">{{
                       ud.team_owners[team.owner_uid].email
-                    }}</span>
+                      }}</span>
                   </div>
                   <div class="col-span-1 flex justify-end">
-                    <button
-                      type="button"
-                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                    >
+                    <button type="button"
+                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                       <i class="material-icons text-md">more_vert</i>
                     </button>
                   </div>

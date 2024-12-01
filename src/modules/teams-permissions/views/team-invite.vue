@@ -78,19 +78,18 @@ async function accept_invite(team_id: string) {
   let type: 'new' | 'update' = 'new'
   if (user_auth.data) {
     //Check if the user already exist first
-    const member = await getWhereAny(
-      'team_members',
-      'teams/:tm_id/team_members',
-      { tm_id: team_id },
-      [],
-      [
+    const member = await getWhereAny('team_members', {
+      $path: 'teams/:tm_id/team_members',
+      $sub_params: { tm_id: team_id },
+      whereConditions: [
         {
           fieldName: 'invitation.email',
           operator: '==',
           value: user_auth.data.email,
         },
       ],
-    )
+    })
+
     if (member.status && member.data[0]) {
       member_exist = member.data[0]
     }

@@ -36,7 +36,13 @@ export const useInvitationStore = defineStore('invitationStore', () => {
       this.data = data
     },
     async get(iv_id: string): Promise<FSReturnData<InvitationData>> {
-      const get = await getCollection('invitation', 'invitations', {}, iv_id, [])
+      const get = await getCollection('invitation',{
+        $path: 'invitations',
+        $sub_params: {},
+        id: iv_id,
+        $sub_col: [],
+      })
+      
       return {
         status: get.status,
         data: get.data as InvitationData,
@@ -46,7 +52,13 @@ export const useInvitationStore = defineStore('invitationStore', () => {
     async createUpdate(type): Promise<FSReturnData<InvitationData>> {
       const id = this.data.iv_id !== '' ? this.data.iv_id : crypto.randomUUID()
       this.data.iv_id = id
-      const post = await postCollection('invitation', 'invitations', null, id, this.data, type)
+      const post = await postCollection('invitation',{
+        $path: 'invitations',
+        $sub_params: null,
+        id,
+        data: this.data,
+        type,
+      });
       console.log(post)
       return {
         status: post.status,

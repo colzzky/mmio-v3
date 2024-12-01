@@ -87,24 +87,26 @@ export type FirebaseOrderCondition<T extends keyof Collections> = {
 
 type NestedKeyOf<ObjectType> = ObjectType extends object
   ? {
-      [Key in keyof ObjectType & (string | number)]: ObjectType[Key] extends object | undefined // Changed this line to handle optional objects
-        ? Key extends string | number
-          ? `${Key}` | `${Key}.${NestedKeyOf<Exclude<ObjectType[Key], undefined>>}`
-          : never
-        : Key extends string | number
-          ? `${Key}`
-          : never
-    }[keyof ObjectType & (string | number)]
+    [Key in keyof ObjectType & (string | number)]: ObjectType[Key] extends object | undefined // Changed this line to handle optional objects
+    ? Key extends string | number
+    ? `${Key}` | `${Key}.${NestedKeyOf<Exclude<ObjectType[Key], undefined>>}`
+    : never
+    : Key extends string | number
+    ? `${Key}`
+    : never
+  }[keyof ObjectType & (string | number)]
   : never
 
-export async function postCollection<T extends keyof CollectionsInterface>(
-  $col: T,
-  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
-  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
-  id: string = '',
-  data: any,
-  type: 'update' | 'new' = 'update',
-): Promise<FirebaseReturn> {
+export async function postCollection<T extends keyof CollectionsInterface>($col: T, $operation: {
+
+  $path: CollectionsInterface[T]['path'] // Path like 'collection/id'
+  $sub_params?: CollectionsInterface[T]['sub_params'] | null // Optional sub-params
+  id: string // Optional ID
+  data: any // Data to update or create
+  type?: 'update' | 'new' // Defaults to 'update'
+}): Promise<FirebaseReturn> {
+  const { $path, $sub_params = null, id = '', data, type = 'update' } = $operation
+
   let fullPath = $path as string
 
   if ($sub_params) {
@@ -117,24 +119,32 @@ export async function postCollection<T extends keyof CollectionsInterface>(
 
   try {
     const userSnapshot = await getDoc(userDocRef) // Fetch the document
+
     if (userSnapshot.exists()) {
-      // Get the document data
-      console.log(data.createdAt)
-      const postData = {
-        ...data,
-        createdAt: Timestamp.fromDate(new Date(data.createdAt)),
-        updatedAt: Timestamp.fromDate(new Date()),
+      if (type === 'update') {
+        const postData = {
+          ...data,
+          createdAt: Timestamp.fromDate(new Date(data.createdAt)),
+          updatedAt: Timestamp.fromDate(new Date()),
+        }
+
+        await updateDoc(userDocRef, { ...postData })
+
+        return {
+          status: true,
+          data: {
+            ...postData,
+            createdAt: postData.createdAt.toDate().toISOString(),
+            updatedAt: postData.updatedAt.toDate().toISOString(),
+          },
+          error: '',
+        }
       }
 
-      await updateDoc(userDocRef, { ...postData })
       return {
-        status: true,
-        data: {
-          ...postData,
-          createdAt: postData.createdAt.toDate().toISOString(),
-          updatedAt: postData.updatedAt.toDate().toISOString(),
-        },
-        error: '',
+        status: false,
+        error: `Document with ID already exists, use 'update' type instead.`,
+        data: undefined,
       }
     } else {
       if (type === 'new') {
@@ -144,15 +154,6 @@ export async function postCollection<T extends keyof CollectionsInterface>(
           updatedAt: Timestamp.fromDate(new Date()),
         }
 
-        // // Create a reference to the 'userStatuses' subcollection
-        // const userStatusRef = collection(userDocRef, 'shared_users');
-        // // Create a new document reference in the subcollection
-        // const statusDocRef = doc(userStatusRef, 'statusId');
-        // // Add the postData to the subcollection document
-        // await setDoc(statusDocRef, postData);
-        //await setDoc(userDocRef, { ...postData }, { merge: true });
-
-        // Optionally, you can also set additional data in the main document
         await setDoc(userDocRef, { ...postData })
 
         return {
@@ -165,6 +166,7 @@ export async function postCollection<T extends keyof CollectionsInterface>(
           error: '',
         }
       }
+
       return {
         status: false,
         error: `No data found with that id ${$col}.`,
@@ -172,10 +174,11 @@ export async function postCollection<T extends keyof CollectionsInterface>(
       }
     }
   } catch (error) {
-    console.log(error)
+    console.error(error)
+
     return {
       status: false,
-      error: `No data found with that id error! ${$col}.`,
+      error: `Error occurred while processing operation for ${$col}: ${error}`,
       data: undefined,
     }
   }
@@ -183,10 +186,13 @@ export async function postCollection<T extends keyof CollectionsInterface>(
 
 export async function deleteCollection<T extends keyof CollectionsInterface>(
   $col: T,
-  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
-  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
-  id: string = '', // Document ID to delete
+  $operation: {
+    $path: CollectionsInterface[T]['path'], // Path like 'collection/id'
+    $sub_params?: CollectionsInterface[T]['sub_params'] | null,
+    id: string, // Document ID to delete
+  }
 ): Promise<FirebaseReturn> {
+  const { $path, $sub_params = null, id } = $operation
   let fullPath = $path as string
 
   // Replace placeholders in the path (e.g., ':userId') with actual values
@@ -218,6 +224,7 @@ export async function deleteCollection<T extends keyof CollectionsInterface>(
     }
   }
 }
+
 
 export async function postCollectionBatch<T extends keyof CollectionsInterface>(
   $col: T,
@@ -284,11 +291,15 @@ export async function postCollectionBatch<T extends keyof CollectionsInterface>(
 
 export async function getCollection<T extends keyof CollectionsInterface>(
   $col: T,
-  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
-  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
-  id: string,
-  $sub_col: SubCollectionKey<CollectionsInterface[T]['interface']> = [], // Array of subcollection names to check
+  $operation: {
+    $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
+    $sub_params?: CollectionsInterface[T]['sub_params'] | null,
+    id: string,
+    $sub_col?: SubCollectionKey<CollectionsInterface[T]['interface']> // Array of subcollection names to check
+  }
 ): Promise<FirebaseReturn> {
+  const { $path, $sub_params = null, id, $sub_col = [] } = $operation
+
   try {
     let fullPath = $path as string
 
@@ -311,7 +322,7 @@ export async function getCollection<T extends keyof CollectionsInterface>(
       const subCollectionData: Record<string, any[]> = {} // To store subcollection data
 
       // Fetch specified subcollections
-      if ($sub_col) {
+      if ($sub_col.length > 0) {
         for (const sub of $sub_col) {
           const subColRef = collection(firestore, `${fullPath}/${data.id}/${sub}`)
           const subColSnapshot = await getDocs(subColRef)
@@ -402,13 +413,16 @@ export async function getBySub(
 
 export async function getCollectionByField<T extends keyof Collections>(
   $col: T,
-  $id: Collections[T],
-  // fieldName: F,
-  whereConditions: FirebaseWhereCondition<T>[],
-  limitResults?: number,
-  orderConditions?: FirebaseOrderCondition<T>[],
-  lastDocumentId?: string,
+  $operation: {
+    $id: Collections[T],
+    // fieldName: F,
+    whereConditions: FirebaseWhereCondition<T>[],
+    limitResults?: number,
+    orderConditions?: FirebaseOrderCondition<T>[],
+    lastDocumentId?: string,
+  }
 ): Promise<FirebaseReturn> {
+  const { $id, whereConditions = [], limitResults, orderConditions, lastDocumentId} = $operation
   const collectionRef = collection(firestore, $col)
 
   // Create a base query
@@ -480,38 +494,50 @@ export async function getCollectionByField<T extends keyof Collections>(
 
 export async function getWhereAny<T extends keyof CollectionsInterface>(
   $col: T, // Path like 'collection/id',
-  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
-  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
-  $sub_col: SubCollectionKey<CollectionsInterface[T]['interface']> = [], // Array of subcollection names to check
-  whereConditions: {
-    fieldName: NestedKeyOf<CollectionsInterface[T]['interface']>
-    operator: FirebaseOperators
-    value: any
-  }[] = [],
-  orderConditions?: {
-    fieldName: NestedKeyOf<CollectionsInterface[T]['interface']>
-    direction?: 'asc' | 'desc'
-  }[],
-
-  limitResult?: number,
-  lastDocumentId?: string,
+  $operation: {
+    $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
+    $sub_params?: CollectionsInterface[T]['sub_params'] | null,
+    $sub_col?: SubCollectionKey<CollectionsInterface[T]['interface']>, // Array of subcollection names to check
+    whereConditions?: {
+      fieldName: NestedKeyOf<CollectionsInterface[T]['interface']>
+      operator: FirebaseOperators
+      value: any
+    }[],
+    orderConditions?: {
+      fieldName: NestedKeyOf<CollectionsInterface[T]['interface']>
+      direction?: 'asc' | 'desc'
+    }[],
+    limitResult?: number,
+    lastDocumentId?: string,
+  }
 ): Promise<FirebaseWhereReturn<CollectionsInterface[T]['interface']>> {
+  // Destructure the $operation object
+  const {
+    $path,
+    $sub_params = null,
+    $sub_col = [],
+    whereConditions = [],
+    orderConditions,
+    limitResult,
+    lastDocumentId,
+  } = $operation;
+
   try {
-    let fullPath = $path as string
+    let fullPath = $path as string;
 
     if ($sub_params) {
       Object.entries($sub_params).forEach(([key, value]) => {
-        fullPath = fullPath.replace(`:${key}`, value) // Replace :key with its corresponding value
-      })
+        fullPath = fullPath.replace(`:${key}`, value); // Replace :key with its corresponding value
+      });
     }
 
     // Create a reference to the main collection
-    const collectionRef = collection(firestore, fullPath)
-    let q = query(collectionRef)
+    const collectionRef = collection(firestore, fullPath);
+    let q = query(collectionRef);
 
     // Apply where conditions
     for (const condition of whereConditions) {
-      q = query(q, where(condition.fieldName as string, condition.operator, condition.value))
+      q = query(q, where(condition.fieldName as string, condition.operator, condition.value));
     }
 
     // Apply orderBy condition if provided
@@ -521,43 +547,43 @@ export async function getWhereAny<T extends keyof CollectionsInterface>(
           q,
           orderBy(
             condition.fieldName as string,
-            !condition.direction ? 'asc' : condition.direction,
-          ),
-        )
+            !condition.direction ? 'asc' : condition.direction
+          )
+        );
       }
     }
+
     // Apply limit if specified
     if (limitResult) {
-      q = query(q, limit(limitResult))
+      q = query(q, limit(limitResult));
     }
 
     // Apply startAfter if a last document ID is provided
     if (lastDocumentId) {
-      const lastDocumentSnapshot = await getDoc(doc(firestore, fullPath, lastDocumentId))
+      const lastDocumentSnapshot = await getDoc(doc(firestore, fullPath, lastDocumentId));
       if (lastDocumentSnapshot.exists()) {
-        q = query(q, startAfter(lastDocumentSnapshot))
+        q = query(q, startAfter(lastDocumentSnapshot));
       } else {
-        console.warn(`Document with ID ${lastDocumentId} does not exist.`)
+        console.warn(`Document with ID ${lastDocumentId} does not exist.`);
       }
     }
 
-    const querySnapshot = await getDocs(q)
-    const data: any[] = [] // Array to hold documents with subcollection data
+    const querySnapshot = await getDocs(q);
+    const data: any[] = []; // Array to hold documents with subcollection data
 
     // Loop through each document and fetch subcollections
     for (const doc of querySnapshot.docs) {
       const docData: { [key: string]: any } = {
-        // Define a flexible type for docData
         id: doc.id,
         ...doc.data(),
         createdAt: doc.data().createdAt?.toDate().toISOString(),
         updatedAt: doc.data().updatedAt?.toDate().toISOString(),
-      }
+      };
 
       // Fetch data from each specified subcollection
       for (const sub of $sub_col) {
-        const subCollectionRef = collection(firestore, `${fullPath}/${doc.id}/${sub}`)
-        const subDocs = await getDocs(subCollectionRef)
+        const subCollectionRef = collection(firestore, `${fullPath}/${doc.id}/${sub}`);
+        const subDocs = await getDocs(subCollectionRef);
 
         if (!subDocs.empty) {
           // Append the subcollection data directly to the document
@@ -566,27 +592,28 @@ export async function getWhereAny<T extends keyof CollectionsInterface>(
             ...subDoc.data(),
             createdAt: subDoc.data().createdAt?.toDate().toISOString(),
             updatedAt: subDoc.data().updatedAt?.toDate().toISOString(),
-          }))
+          }));
         }
       }
 
-      data.push(docData) // Add the document with its subcollection data to the results
+      data.push(docData); // Add the document with its subcollection data to the results
     }
 
     return {
       status: true,
       data,
       error: '',
-    }
+    };
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return {
       status: false,
       error: `Error fetching data from subcollection path: ${error}`,
       data: [],
-    }
+    };
   }
 }
+
 
 /**
  * Fetches a specific document from Firestore and optionally its subcollections.
@@ -615,9 +642,14 @@ export async function getWhereAny<T extends keyof CollectionsInterface>(
  */
 export async function getExact<T extends keyof CollectionsInterface>(
   $col: T, // Collection key (e.g., 'meta_page', 'invitation')
-  $path: string, // Full path to the document (e.g., 'meta_pages/mp_id')
-  $sub_col: SubCollectionKey<CollectionsInterface[T]['interface']> = [], // Subcollection names (e.g., ['comments', 'logs'])
+  $operation: {
+    $path: string, // Full path to the document (e.g., 'meta_pages/mp_id')
+    $sub_col?: SubCollectionKey<CollectionsInterface[T]['interface']>, // Subcollection names (e.g., ['comments', 'logs'])
+  }
 ): Promise<FirebaseModelReturn<CollectionsInterface[T]['interface']>> {
+  // Destructure the $operation object
+  const { $path, $sub_col = [] } = $operation;
+
   try {
     // Reference to the document
     const docRef = doc(firestore, $path)
@@ -678,6 +710,7 @@ export async function getExact<T extends keyof CollectionsInterface>(
     }
   }
 }
+
 
 export async function listenToCollection<T extends keyof CollectionsInterface>(
   $col: T,
@@ -856,11 +889,15 @@ interface FirebaseWhereReturnAtomic<T> {
 
 export async function postCollectionBatchAtomic<T extends keyof CollectionsInterface>(
   $col: T,
-  $path: CollectionsInterface[T]['path'], // Path like 'collection/id',
-  $sub_params: CollectionsInterface[T]['sub_params'] | null = null,
-  ids: string[], // Array of document IDs to update or create
-  data: CollectionsInterface[T]['interface'][],
+  $operation: {
+    $path: CollectionsInterface[T]['path'], // Path like 'collection/id'
+    $sub_params?: CollectionsInterface[T]['sub_params'] | null, // Substitution params
+    ids: string[], // Array of document IDs to update or create
+    data: CollectionsInterface[T]['interface'][], // Data to post
+  }
 ): Promise<FirebaseWhereReturnAtomic<CollectionsInterface[T]['interface']>> {
+  const { $path, $sub_params = null, ids, data } = $operation;
+
   if (ids.length !== data.length) {
     return {
       status: false,
@@ -940,6 +977,7 @@ export async function postCollectionBatchAtomic<T extends keyof CollectionsInter
     }
   }
 }
+
 
 export type FSPostMultiCollectAtomic<T extends keyof CollectionsInterface> = Array<{
   $col: T

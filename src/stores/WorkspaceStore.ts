@@ -47,7 +47,11 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
       this.data = data
     },
     async get(ws_id: string): Promise<FSReturnData<WorkspaceData>> {
-      const get = await getCollection('workspaces', 'workspaces', {}, ws_id, ['meta_pages_refs'])
+      const get = await getCollection('workspaces', {
+        $path: 'workspaces',
+        id: ws_id,
+        $sub_col: ['meta_pages_refs']
+      })
       return {
         status: get.status,
         data: get.data as WorkspaceData,
@@ -57,7 +61,13 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
     async createUpdate(type): Promise<FSReturnData<WorkspaceData>> {
       const id = this.data.ws_id !== '' ? this.data.ws_id : crypto.randomUUID()
       this.data.ws_id = id
-      const post = await postCollection('workspaces', 'workspaces', null, id, this.data, type)
+      const post = await postCollection('workspaces', {
+        $path: 'workspaces',
+        $sub_params: null,
+        id,
+        data: this.data,
+        type,
+      });
       console.log(post)
       return {
         status: post.status,
@@ -76,13 +86,11 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
       this.data = data
     },
     async get(mp_id, ws_id): Promise<FSReturnData<WSMetaPagesRefsData>> {
-      const get = await getCollection(
-        'ws_meta_pages_refs',
-        'workspaces/:ws_id/meta_pages_refs',
-        { ws_id },
-        mp_id,
-        [],
-      )
+      const get = await getCollection('ws_meta_pages_refs', {
+        $path: 'workspaces/:ws_id/meta_pages_refs',
+        $sub_params: { ws_id },
+        id: mp_id,
+      })
       return {
         status: get.status,
         data: get.data as WSMetaPagesRefsData,
@@ -92,14 +100,13 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
     async createUpdate(ws_id, type): Promise<FSReturnData<WSMetaPagesRefsData>> {
       const id = this.data.mp_id !== '' ? this.data.mp_id : crypto.randomUUID()
       this.data.mp_id = id
-      const post = await postCollection(
-        'ws_meta_pages_refs',
-        'workspaces/:ws_id/meta_pages_refs',
-        { ws_id },
+      const post = await postCollection('ws_meta_pages_refs', {
+        $path: 'workspaces/:ws_id/meta_pages_refs',
+        $sub_params: { ws_id },
         id,
-        this.data,
+        data: this.data,
         type,
-      )
+      });
       console.log(post)
       return {
         status: post.status,

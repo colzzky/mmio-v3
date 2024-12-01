@@ -39,7 +39,13 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
       this.data = { ...meta_page_data }
     },
     async get(id: string) {
-      const get = await getCollection('meta_page', 'meta_pages', null, id)
+      const get = await getCollection('meta_page',{
+        $path: 'meta_pages',
+        $sub_params: null,
+        id: id,
+        $sub_col: [],
+      })
+      
       return {
         status: get.status,
         data: get.data as MetaPageData,
@@ -49,7 +55,13 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
     async createUpdate(type) {
       const id = this.data?.mp_id ? this.data.mp_id : crypto.randomUUID()
       if (this.data) this.data.mp_id = id
-      const post = await postCollection('meta_page', 'meta_pages', null, id, this.data, type)
+      const post = await postCollection('meta_page',{
+        $path: 'meta_pages',
+        $sub_params: null,
+        id,
+        data: this.data,
+        type,
+      });
       console.log(post)
       return {
         status: post.status,

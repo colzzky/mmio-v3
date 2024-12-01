@@ -85,7 +85,10 @@ async function accept_invite(invitation: InvitationData, team_id: string) {
   if (user_auth.data && team_reference) {
     //Check if the user already exist first
 
-    const member = await getExact('team_members', `${invitation.reference.path}`, [])
+    const member = await getExact('team_members', {
+      $path:'${invitation.reference.path}',
+      $sub_col:[]
+    })
     if (member.status && member.data && member.data.invitation) {
       //Validate if the invitation email matched with the user who is currently logged on
       const validate_email_user = member.data.invitation.email === user_auth.data.email

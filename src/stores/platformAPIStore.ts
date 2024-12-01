@@ -43,13 +43,12 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
       this.isInitialized = true
     },
     async get(uid: string, platform: Platforms) {
-      const get = await getCollection(
-        'platform_api',
-        'users/:uid/platform_apis',
-        { uid },
-        platform,
-        [],
-      )
+      const get = await getCollection('platform_api',{
+        $path: 'users/:uid/platform_apis',
+        $sub_params: {uid},
+        id: platform,
+        $sub_col: [],
+      })
       return {
         status: get.status,
         data: get.data as PlatformApiData,
@@ -57,14 +56,14 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
       }
     },
     async createUpdate(uid: string, type) {
-      const post = await postCollection(
-        'platform_api',
-        'users/:uid/platform_apis',
-        { uid },
-        this.data?.platform,
-        this.data,
-        type,
-      )
+      const post = await postCollection('platform_api',{
+        $path: 'users/:uid/platform_apis',
+        $sub_params: {uid},
+        id: this.data? this.data.platform:'',
+        data:this.data,
+        type
+      })
+
       return {
         status: post.status,
         data: post.data as PlatformApiData,
