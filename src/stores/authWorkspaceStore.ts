@@ -312,7 +312,7 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
         this.isLoading = false
         this.lastSnapshot = ''
       },
-      async fetch_posts(isNext: boolean = false): Promise<void> {
+      async fetch_campaigns(isNext: boolean = false): Promise<void> {
         if (this.checkNextFetch() || isNext) {
           this.isLoading = true
           if (!isNext) {

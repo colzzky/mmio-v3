@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import type { Campaign } from '../page.vue'
 import { Button } from '@/core/components/ui/button'
-import DatePicker from '@/core/components/ui/date-picker.vue'
 import {
   Dialog,
   DialogContent,
@@ -12,50 +10,161 @@ import {
 } from '@/core/components/ui/dialog'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/core/components/ui/select'
-import type { Modal } from '@/core/utils/types'
-import { reactive } from 'vue'
+import { PermissionServices } from '@/core/types/PermissionTypes'
+import { post_randomizer_service_data } from '@/core/types/WorkSpaceTypes'
+import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
+import type {Modal, PostRandomizerServiceData } from '@/core/utils/types'
+import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
+import { reactive, ref } from 'vue'
+import { z, type ZodRawShape } from 'zod'
 
 interface ModalInterface extends Omit<Modal, 'open'> {
-  open(args: { intent: 'create' } | { intent: 'edit'; campaignId: Campaign['id'] }): void
+  open(
+    args:
+      | { intent: 'create'; prId: PostRandomizerServiceData['pr_id'] | null }
+      | { intent: 'edit'; prId: PostRandomizerServiceData['pr_id'] | null },
+  ): void
+  prId: PostRandomizerServiceData['pr_id'] | null
   intent: 'create' | 'edit' | null
-  submitForm(): void
-  createCampaign(): void
-  editCampaign(): void
+  validated: boolean
+  submitForm(): Promise<void>
+  createFlow(): Promise<void>
+  editFlow(): Promise<void>
 }
+type PostRandomizerFields = Pick<PostRandomizerServiceData, 'name'>
+
+const authWorkspaceStore = useAuthWorkspaceStore()
+const { service_models, workspace_service } = authWorkspaceStore
+const { post_randomizer } = workspace_service
+const { post_randomizer: post_randomizer_md } = service_models
+const post_randomizer_data = ref<PostRandomizerServiceData | null>(null)
+
+const randomizer_form = reactive({
+  inputs: { name: '' } as PostRandomizerFields,
+  errors: { name: '' } as PostRandomizerFields,
+  schema: {
+    name: z.string().min(8, { message: 'Chatbot flow name must be at least 8 characters long' }),
+  } as ZodRawShape,
+
+  validateSingleField(field: keyof PostRandomizerFields): void {
+    const value = this.inputs[field]
+    this.errors[field] = ''
+    const result = z.object(this.schema as ZodRawShape).shape[field].safeParse(value)
+    if (!result.success) {
+      console.log(result.error.errors[0])
+      this.errors[field] = result.error.errors[0].message
+    }
+  },
+  async validateDataInput(): Promise<boolean> {
+    Object.keys(this.errors).forEach((key) => {
+      const field = key as keyof PostRandomizerFields
+      this.errors[field] = ''
+    })
+    const result = z.object(this.schema as ZodRawShape).safeParse(this.inputs)
+
+    if (!result.success) {
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as keyof PostRandomizerFields
+        this.errors[field] = err.message
+      })
+      return false
+    } else {
+      return true
+    }
+  },
+  initializeForm() {
+    if (post_randomizer_data.value) {
+      this.inputs = { name: post_randomizer_data.value.name }
+    }
+
+    this.errors = { name: '' }
+  },
+  reset() {
+    this.inputs = { name: '' }
+    this.errors = { name: '' }
+  },
+})
 
 const modal = reactive<ModalInterface>({
   isOpen: false,
   intent: null,
+  prId: null,
+  validated: false,
   initialState() {
     this.isOpen = false
     this.intent = null
+    this.prId = null
   },
-  open(args) {
-    this.intent = args.intent
+  async open(args) {
+    try {
+      //Check Permission
+      await servicePermission.check(PermissionServices.ChatBotFlow, ['add', 'publish', 'edit'])
 
-    if (args.intent === 'edit') {
-      //
+      this.intent = args.intent
+      this.prId = args.prId
+      if (args.intent === 'edit' && this.prId) {
+        const find_post_randomizer = post_randomizer.data.find((rand) => rand.pr_id == this.prId)
+        if (!find_post_randomizer) {
+          return
+        } else {
+          post_randomizer_data.value = JSON.parse(JSON.stringify(find_post_randomizer))
+        }
+      } else {
+        post_randomizer_data.value = JSON.parse(JSON.stringify(post_randomizer_service_data))
+      }
+      randomizer_form.initializeForm()
+      this.isOpen = true
+    } catch (error: any) {
+      if (error instanceof PermissionAccessError) {
+        this.isOpen = false
+        return
+      }
     }
-
-    this.isOpen = true
   },
   close() {
+    post_randomizer_data.value = null
+    randomizer_form.reset()
     this.initialState()
   },
-  submitForm() {
-    this.intent === 'create' ? this.createCampaign() : this.editCampaign()
-    this.close()
+
+  async submitForm() {
+    const validate = await randomizer_form.validateDataInput()
+    if (validate) {
+      const updated_post = {
+        ...post_randomizer_data.value,
+        ...randomizer_form.inputs,
+      } as PostRandomizerServiceData
+      post_randomizer_data.value = updated_post
+      console.log(updated_post)
+      this.intent === 'create' ? await this.createFlow() : await this.editFlow()
+      this.close()
+    } else {
+      console.log('not valid')
+    }
   },
-  createCampaign() {},
-  editCampaign() {},
+  async createFlow() {
+    if (post_randomizer_data.value) {
+      post_randomizer_md.reInit()
+      post_randomizer_md.set(post_randomizer_data.value)
+      const create = await post_randomizer_md.createUpdate('new')
+      if (create.status) {
+        post_randomizer.data.push(post_randomizer_md.data)
+      }
+    }
+  },
+  async editFlow() {
+    if (post_randomizer_data.value) {
+      post_randomizer_md.reInit()
+      post_randomizer_md.set(post_randomizer_data.value)
+      const update = await post_randomizer_md.createUpdate('update')
+      if (update.status) {
+        const post_randomizer_index = post_randomizer.data.findIndex((rand) => rand.pr_id === this.prId)
+        if (post_randomizer_index >= 0) {
+          post_randomizer.data[post_randomizer_index] = JSON.parse(JSON.stringify(post_randomizer_md.data))
+        }
+      }
+    }
+  },
 })
 
 defineExpose({
@@ -68,96 +177,40 @@ defineExpose({
     <DialogContent class="gap-y-8">
       <DialogHeader>
         <template v-if="modal.intent === 'create'">
-          <DialogTitle>Create Campaign</DialogTitle>
-          <DialogDescription>
-            Enter the campaign details to create a new campaign.
-          </DialogDescription>
+          <DialogTitle>Create Post Randomizer</DialogTitle>
+          <DialogDescription> Enter the post randomizer Name and we'll redirect you after. </DialogDescription>
         </template>
         <template v-else>
-          <DialogTitle>Edit Campaign</DialogTitle>
-          <DialogDescription> Enter the campaign details to edit this campaign. </DialogDescription>
+          <DialogTitle>Change Post Randomizer Name</DialogTitle>
+          <DialogDescription> Enter the flow details to edit this flow. </DialogDescription>
         </template>
       </DialogHeader>
-      <form id="form" class="flex flex-col gap-y-4" @submit.prevent="modal.submitForm()">
-        <div class="flex flex-col gap-y-2">
-          <Label for="mediaSource">Media Source</Label>
-          <Select id="mediaSource" required>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Source" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="Source Foo">Source Foo</SelectItem>
-                <SelectItem value="Source Bar">Source Bar</SelectItem>
-                <SelectItem value="Source Baz">Source Baz</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+      <div class="flex flex-col gap-y-2">
+        <Label for="name">Name</Label>
+        <Input
+          type="text"
+          id="name"
+          v-model="randomizer_form.inputs.name"
+          name="name"
+          placeholder="Input Name"
+          required
+        />
+        <div
+          v-if="randomizer_form.errors.name"
+          for="name"
+          class="flex items-center gap-1 text-xs text-red-500"
+        >
+          <i class="material-icons text-sm">error</i>
+          {{ randomizer_form.errors.name }}
         </div>
-        <div class="flex flex-col gap-y-2">
-          <Label for="name">Name</Label>
-          <Input type="text" id="name" name="name" placeholder="Input Name" required />
-        </div>
-        <div class="flex flex-col gap-y-2">
-          <Label for="users">Instagram Business</Label>
-          <Select id="users" required>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Instagram Business" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="User Foo">User Foo</SelectItem>
-                <SelectItem value="User Bar">User Bar</SelectItem>
-                <SelectItem value="User Baz">User Baz</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <div class="flex flex-col gap-y-2">
-          <Label for="pages">Pages</Label>
-          <Select id="pages" required>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Pages" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="Page Foo">Page Foo</SelectItem>
-                <SelectItem value="Page Bar">Page Bar</SelectItem>
-                <SelectItem value="Page Baz">Page Baz</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <div class="flex flex-col gap-y-2">
-          <Label for="groups">Groups</Label>
-          <Select id="groups" required>
-            <SelectTrigger>
-              <SelectValue placeholder="Select Groups" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="Group Foo">Group Foo</SelectItem>
-                <SelectItem value="Group Bar">Group Bar</SelectItem>
-                <SelectItem value="Group Baz">Group Baz</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <div class="grid grid-cols-2 gap-x-4">
-          <div class="flex flex-col gap-y-2">
-            <Label as="span">Start Date</Label>
-            <DatePicker />
-          </div>
-          <div class="flex flex-col gap-y-2">
-            <Label as="span">End Date</Label>
-            <DatePicker />
-          </div>
-        </div>
-      </form>
+      </div>
       <DialogFooter>
         <Button variant="secondary" @click="modal.close()">Cancel</Button>
-        <Button type="submit" form="form">
-          {{ modal.intent === 'create' ? 'Create' : 'Edit' }}
+        <Button v-if="modal.intent === 'create'" @click="modal.submitForm()" form="flowForm">
+          Create
+        </Button>
+        <Button v-else-if="modal.intent === 'edit'" @click="modal.submitForm()" form="flowForm">
+          Edit
         </Button>
       </DialogFooter>
     </DialogContent>

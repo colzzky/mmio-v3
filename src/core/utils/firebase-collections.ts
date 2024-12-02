@@ -422,7 +422,7 @@ export async function getCollectionByField<T extends keyof Collections>(
     lastDocumentId?: string,
   }
 ): Promise<FirebaseReturn> {
-  const { $id, whereConditions = [], limitResults, orderConditions, lastDocumentId} = $operation
+  const { whereConditions = [], limitResults, orderConditions, lastDocumentId} = $operation
   const collectionRef = collection(firestore, $col)
 
   // Create a base query
@@ -800,7 +800,6 @@ export type FSPostBatchCollection<T extends keyof CollectionsInterface> = Array<
   type: 'update' | 'new'
 }>
 
-// Define the function with correct generics and return type
 export async function postMultipleCollectionsAtmoic<T extends keyof CollectionsInterface>(
   operations: FSPostBatchCollection<T>,
 ): Promise<Array<FirebaseReturn>> {

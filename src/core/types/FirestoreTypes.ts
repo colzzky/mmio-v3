@@ -12,6 +12,7 @@ import type {
   WSMetaPagesRefsData,
   ChatbotFlowServiceData,
   PostRandomizerServiceData,
+  PostRandomizerPostsData,
 } from '@/core/utils/types'
 
 export type SubCollectionKey<T extends SubCollections> = T['subCollections']
@@ -51,7 +52,21 @@ interface Workspace_Collection {
       ws_id: string
     } | null
   }
+  ws_post_randomizer_posts: {
+    id: 'prp_id'
+    path: 'workspaces/:ws_id/post_randomizer_service/:pr_id/post_randomizer_posts'
+    interface: PostRandomizerPostsData
+    sub_col: SubCollectionKey<PostRandomizerServiceData>[]
+    sub_params: {
+      ws_id: string,
+      pr_id:string
+    } | null
+  }
 }
+
+
+
+
 
 interface User_Collection {
   user: {

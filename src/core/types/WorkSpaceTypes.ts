@@ -71,26 +71,50 @@ export const chatbot_flow_service_Data: ChatbotFlowServiceData = {
 }
 export interface PostRandomizerServiceData extends SubCollections {
   pr_id: string
-  connected_account_id: string //meta pages id
+  metaPages:string[],
+  metaGroups:string[],
+  igAccounts:string[],
   name: string
-  mediaSource: string
-  status: string
   isEnabled: boolean
+  status: string
+  frequency: 'Daily'|'Weekly'|'Monthly'
+  isRepeat:boolean
   startDate: string
   endDate: string
   createdAt: string
   updatedAt: string
+  subCollections: 'post_randomizer_posts'[]
 }
 
 export const post_randomizer_service_data: PostRandomizerServiceData = {
   pr_id: '',
-  connected_account_id: '', //meta pages id
+  metaPages:[],
+  metaGroups:[],
+  igAccounts:[],
   name: '',
-  mediaSource: '', // This is where flow data is needed
   status: '',
   isEnabled: false,
+  isRepeat:false,
+  frequency: 'Daily',
   startDate: '',
   endDate: '',
+  createdAt: '',
+  updatedAt: '',
+  subCollections: ['post_randomizer_posts'],
+}
+
+export interface PostRandomizerPostsData extends SubCollections {
+  prp_id: string
+  postName: string
+  content: string
+  createdAt: string
+  updatedAt: string
+}
+
+export const post_randomizer_posts_data: PostRandomizerPostsData = {
+  prp_id: '',
+  postName:'',
+  content:'',
   createdAt: '',
   updatedAt: '',
   subCollections: [],
