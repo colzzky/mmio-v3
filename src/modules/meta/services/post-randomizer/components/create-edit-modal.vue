@@ -148,7 +148,7 @@ const modal = reactive<ModalInterface>({
       post_randomizer_md.set(post_randomizer_data.value)
       const create = await post_randomizer_md.createUpdate('new')
       if (create.status) {
-        post_randomizer.data.push(post_randomizer_md.data)
+        post_randomizer.data.push({...create.data})
       }
     }
   },

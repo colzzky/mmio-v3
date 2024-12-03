@@ -1,4 +1,4 @@
-import type { SubCollections } from './UniTypes'
+import type { Days, Months, SubCollections } from './UniTypes'
 
 //Only use subcollection if a collection have a data that has multiple data like activity logs etc.
 
@@ -71,14 +71,18 @@ export const chatbot_flow_service_Data: ChatbotFlowServiceData = {
 }
 export interface PostRandomizerServiceData extends SubCollections {
   pr_id: string
-  metaPages:string[],
-  metaGroups:string[],
-  igAccounts:string[],
+  metaPages: string[],
+  metaGroups: string[],
+  igAccounts: string[],
   name: string
   isEnabled: boolean
+  timezone: string
   status: string
-  frequency: 'Daily'|'Weekly'|'Monthly'
-  isRepeat:boolean
+  time: string[]
+  frequency: 'Daily' | 'Weekly' | 'Monthly'
+  weekly: Days[]
+  monthly: Months[]
+  isRepeat: boolean
   startDate: string
   endDate: string
   createdAt: string
@@ -88,16 +92,20 @@ export interface PostRandomizerServiceData extends SubCollections {
 
 export const post_randomizer_service_data: PostRandomizerServiceData = {
   pr_id: '',
-  metaPages:[],
-  metaGroups:[],
-  igAccounts:[],
+  metaPages: [],
+  metaGroups: [],
+  igAccounts: [],
   name: '',
   status: '',
+  timezone: '',
   isEnabled: false,
-  isRepeat:false,
+  isRepeat: false,
   frequency: 'Daily',
+  time: [],
   startDate: '',
   endDate: '',
+  weekly: [],
+  monthly: [],
   createdAt: '',
   updatedAt: '',
   subCollections: ['post_randomizer_posts'],
@@ -113,8 +121,8 @@ export interface PostRandomizerPostsData extends SubCollections {
 
 export const post_randomizer_posts_data: PostRandomizerPostsData = {
   prp_id: '',
-  postName:'',
-  content:'',
+  postName: '',
+  content: '',
   createdAt: '',
   updatedAt: '',
   subCollections: [],
