@@ -185,8 +185,8 @@ export const uiHelpers = {
       text: timezone.text,
       offset: timezone.offset,
     }));
-
   },
+
   formatToCurrency(input: number) {
     return new Intl.NumberFormat('en-PH', {
       style: 'currency',
@@ -207,5 +207,4 @@ export const uiHelpers = {
       : updaterOrValue
 
   }
-
 }
