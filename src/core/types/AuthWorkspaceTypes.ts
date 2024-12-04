@@ -1,6 +1,8 @@
+import type { UserData } from './AuthUserTypes'
 import type { TeamData, TeamMembersData } from './TeamTypes'
 import type {
   ChatbotFlowServiceData,
+  PostRandomizerPostsData,
   PostRandomizerServiceData,
   WorkspaceData,
 } from './WorkSpaceTypes'
@@ -16,14 +18,22 @@ type FSReturnData<T> = FirebaseReturnBase & {
   data: T
 }
 
+interface MembersInfo extends TeamMembersData {
+  displayName:string,
+  email:string,
+  picture:string,
+}
+
 interface ActiveWorkspace {
   data: WorkspaceData | null
   isInitialized: boolean
   isLoading: boolean
   reset: () => void
 }
+
 interface ActiveTeam {
   data: TeamData | null
+  members: { [key: TeamMembersData['uid']]: MembersInfo}
   isInitialized: boolean
   isLoading: boolean
   reset: () => void
@@ -53,6 +63,14 @@ interface PostRandomizerService {
   createUpdate: (type: 'new' | 'update') => Promise<FSReturnData<PostRandomizerServiceData>>
 }
 
+interface PostRandomizerPosts {
+  data: PostRandomizerPostsData
+  reInit: () => void
+  set: (data: PostRandomizerPostsData) => void
+  get: (pr_id: string, prp_id:string) => Promise<FSReturnData<PostRandomizerPostsData>>
+  createUpdate: (pr_id: string, type: 'new' | 'update') => Promise<FSReturnData<PostRandomizerPostsData>>
+}
+
 export type {
   FirebaseReturn,
   FirebaseReturnBase,
@@ -62,4 +80,6 @@ export type {
   CurrentMember,
   ChatBotFlowService,
   PostRandomizerService,
+  PostRandomizerPosts,
+  MembersInfo
 }

@@ -28,8 +28,8 @@ interface ModalInterface extends Omit<Modal, 'open'> {
   intent: 'create' | 'edit' | null
   validated: boolean
   submitForm(): Promise<void>
-  createFlow(): Promise<void>
-  editFlow(): Promise<void>
+  createCampaign(): Promise<void>
+    editCampaign(): Promise<void>
 }
 type PostRandomizerFields = Pick<PostRandomizerServiceData, 'name'>
 
@@ -136,13 +136,13 @@ const modal = reactive<ModalInterface>({
       } as PostRandomizerServiceData
       post_randomizer_data.value = updated_post
       console.log(updated_post)
-      this.intent === 'create' ? await this.createFlow() : await this.editFlow()
+      this.intent === 'create' ? await this.createCampaign() : await this.editCampaign()
       this.close()
     } else {
       console.log('not valid')
     }
   },
-  async createFlow() {
+  async createCampaign() {
     if (post_randomizer_data.value) {
       post_randomizer_md.reInit()
       post_randomizer_md.set(post_randomizer_data.value)
@@ -152,7 +152,7 @@ const modal = reactive<ModalInterface>({
       }
     }
   },
-  async editFlow() {
+  async editCampaign() {
     if (post_randomizer_data.value) {
       post_randomizer_md.reInit()
       post_randomizer_md.set(post_randomizer_data.value)
@@ -177,7 +177,7 @@ defineExpose({
     <DialogContent class="gap-y-8">
       <DialogHeader>
         <template v-if="modal.intent === 'create'">
-          <DialogTitle>Create Post Randomizer</DialogTitle>
+          <DialogTitle>Create Post Randomizer Campaign</DialogTitle>
           <DialogDescription> Enter the post randomizer Name and we'll redirect you after. </DialogDescription>
         </template>
         <template v-else>

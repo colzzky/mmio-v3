@@ -10,6 +10,7 @@ import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { getWhereAny } from '../utils/firebase-collections'
 
 /**
  * Step 1: Check and validated workspace id if it exists on the firestore
@@ -67,6 +68,7 @@ async function validateMemberOwner() {
   // Check workspace ownership
   if (workspaceOwner(active_workspace.data)) {
     active_team.data = teamData ? JSON.parse(JSON.stringify(teamData)) : null
+    await populateTeamMembers()
     return // Valid owner, exit function
   }
 
@@ -83,6 +85,43 @@ async function validateMemberOwner() {
     // Listen for current member updates
     await current_member.listen(teamId, member.member_id)
     active_team.data = JSON.parse(JSON.stringify(teamData))
+    await populateTeamMembers()
+    return
+  }
+}
+
+async function populateTeamMembers() {
+  if (active_team.data && active_team.data.team_members) {
+    const members_uid: string[] = []
+    active_team.data.team_members.forEach((member) => {
+      active_team.members[member.uid] = {
+        ...member,
+        displayName: '',
+        email: '',
+        picture:''
+      }
+      members_uid.push(member.uid)
+    })
+
+    const find_members_info = await getWhereAny('user', {
+      $path: 'users',
+      whereConditions: [{
+        fieldName: 'uid',
+        operator: 'in',
+        value: members_uid
+      }]
+    })
+
+    if (find_members_info.status && find_members_info.data.length > 0) {
+      Object.keys(active_team.members).forEach((member_uid) => {
+        const member = find_members_info.data.find((m) => m.uid === member_uid)
+        if (member) {
+          active_team.members[member_uid].displayName = member.displayName ? member.displayName : ''
+          active_team.members[member_uid].email = member.email ? member.email : ''
+          active_team.members[member_uid].picture = member.photoURL ? member.photoURL : ''
+        }
+      })
+    }
   }
 }
 

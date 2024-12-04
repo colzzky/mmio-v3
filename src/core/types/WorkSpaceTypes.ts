@@ -114,6 +114,8 @@ export const post_randomizer_service_data: PostRandomizerServiceData = {
 export interface PostRandomizerPostsData extends SubCollections {
   prp_id: string
   postName: string
+  mediaSource:string[] //location of media
+  createdBy:string //location of media
   content: string
   createdAt: string
   updatedAt: string
@@ -123,6 +125,8 @@ export const post_randomizer_posts_data: PostRandomizerPostsData = {
   prp_id: '',
   postName: '',
   content: '',
+  mediaSource: [],
+  createdBy: '',
   createdAt: '',
   updatedAt: '',
   subCollections: [],
