@@ -50,7 +50,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Main class="flex flex-col gap-y-4">
+  <Main class="container mx-auto flex flex-col gap-y-4">
     <template #heading>Post Randomizer</template>
     <Button
       class="gap-x-2 self-end"
@@ -65,11 +65,8 @@ onMounted(async () => {
           <TableHeader>
             <TableRow>
               <TableHead>Campaign Name</TableHead>
-              <TableHead>Source Name</TableHead>
-              <TableHead>Published To</TableHead>
-              <TableHead>Duration</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Date Range</TableHead>
+              <TableHead>Last Update</TableHead>
               <TableHead class="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -95,9 +92,7 @@ onMounted(async () => {
                 uiHelpers.formatDateTimeAgo(campaign.createdAt)
               }}</TableCell>
               <!-- @temporary: can be changed to a `<Switch />` component -->
-              <TableCell>
-                <Badge>{{ uiHelpers.toTitleCase(campaign.status) }}</Badge>
-              </TableCell>
+
               <TableCell>
                 <div class="grid place-content-center">
                   <DropdownMenu>
