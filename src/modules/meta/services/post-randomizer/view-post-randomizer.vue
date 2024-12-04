@@ -39,7 +39,6 @@ const campaign = reactive<PostRandomizer>({
         this.fetchLoad = true
         if (workspace_service.post_randomizer.data) {
             const find_campaign = workspace_service.post_randomizer.data.find(campaign => campaign.pr_id === randomizer_id)
-            console.log(find_campaign)
             if (find_campaign) {
                 this.data = { ...find_campaign }
                 this.fetchLoad = false
@@ -53,7 +52,6 @@ const campaign = reactive<PostRandomizer>({
             return;
         } else {
             this.fetchLoad = false
-            console.log('Error fetching or show this data is not available')
         }
     }
 })
