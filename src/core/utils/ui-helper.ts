@@ -1,5 +1,7 @@
-
 import { type TransformedTimezone, type OriginalTimezone } from '@/core/types/UniTypes';
+import type { Updater } from "@tanstack/vue-table"
+import type { Ref } from "vue"
+
 export const uiHelpers = {
   formatDateTimeAgo(dateString: string, locale: string = 'en-US'): string {
     const date = new Date(dateString)
@@ -131,6 +133,7 @@ export const uiHelpers = {
     return copy as T
   },
 
+
   shallowPick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
     const result = {} as Pick<T, K>;
     keys.forEach((key) => {
@@ -161,5 +164,26 @@ export const uiHelpers = {
       text: timezone.text,
       offset: timezone.offset,
     }));
+
+  formatToCurrency(input: number) {
+    return new Intl.NumberFormat('en-PH', {
+      style: 'currency',
+      currency: 'PHP',
+    }).format(input)
+  },
+
+  formatToPercentage(input: number) {
+    return new Intl.NumberFormat('en-PH', {
+      style: 'percent',
+      currency: 'PHP',
+    }).format(input)
+  },
+
+  valueUpdater<T extends Updater<any>>(updaterOrValue: T, ref: Ref) {
+    ref.value = typeof updaterOrValue === 'function'
+      ? updaterOrValue(ref.value)
+      : updaterOrValue
+
   }
+
 }
