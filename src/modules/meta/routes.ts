@@ -13,6 +13,7 @@ const servicesName = [
   'growth-tools',
   'chat-broadcast',
   'chat-sequences',
+  'ads-analytics',
 ] as const
 
 const names = [
@@ -102,6 +103,13 @@ const servicesRecord: ServiceRecord = {
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
+  'ads-analytics': {
+    icon: 'bx-bar-chart-alt',
+    label: 'Ads Analytics',
+    pinned: true,
+    description:
+      'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
+  },
 }
 
 export const services = new Map(
@@ -148,6 +156,9 @@ const routeRecords: RouteRecord = {
   },
   'chat-sequences': {
     component: () => import('./services/chat-sequence/page.vue'),
+  },
+  'ads-analytics': {
+    component: () => import('./services/ads-analytics/page.vue'),
   },
   'messenger-webview': {
     component: () => import('./views/MetaHomePage.vue'),
