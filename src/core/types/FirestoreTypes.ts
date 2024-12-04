@@ -4,12 +4,15 @@ import type {
   UserData,
   WorkspaceData,
   MetaPageData,
-  ChatBotFlowData,
   InvitationData,
   TeamData,
   TeamMembersData,
   PermissionData,
   TeamWorkspaceRefsData,
+  WSMetaPagesRefsData,
+  ChatbotFlowServiceData,
+  PostRandomizerServiceData,
+  PostRandomizerPostsData,
 } from '@/core/utils/types'
 
 export type SubCollectionKey<T extends SubCollections> = T['subCollections']
@@ -22,7 +25,48 @@ interface Workspace_Collection {
     sub_col: SubCollectionKey<WorkspaceData>[]
     sub_params: {} | null
   }
+  ws_meta_pages_refs: {
+    id: 'mp_id'
+    path: 'workspaces/:ws_id/meta_pages_refs'
+    interface: WSMetaPagesRefsData
+    sub_col: SubCollectionKey<WSMetaPagesRefsData>[]
+    sub_params: {
+      ws_id: string
+    } | null
+  }
+  ws_chatbot_flow: {
+    id: 'cb_id'
+    path: 'workspaces/:ws_id/chatbot_flow_service'
+    interface: ChatbotFlowServiceData
+    sub_col: SubCollectionKey<ChatbotFlowServiceData>[]
+    sub_params: {
+      ws_id: string
+    } | null
+  }
+  ws_post_randomizer: {
+    id: 'pr_id'
+    path: 'workspaces/:ws_id/post_randomizer_service'
+    interface: PostRandomizerServiceData
+    sub_col: SubCollectionKey<PostRandomizerServiceData>[]
+    sub_params: {
+      ws_id: string
+    } | null
+  }
+  ws_post_randomizer_posts: {
+    id: 'prp_id'
+    path: 'workspaces/:ws_id/post_randomizer_service/:pr_id/post_randomizer_posts'
+    interface: PostRandomizerPostsData
+    sub_col: SubCollectionKey<PostRandomizerServiceData>[]
+    sub_params: {
+      ws_id: string,
+      pr_id:string
+    } | null
+  }
 }
+
+
+
+
 
 interface User_Collection {
   user: {
@@ -74,7 +118,7 @@ interface Team_Collection {
   team_workspace_refs: {
     id: 'workspace_id'
     path: 'teams/:tm_id/team_workspace_refs'
-    interface:TeamWorkspaceRefsData
+    interface: TeamWorkspaceRefsData
     sub_col: SubCollectionKey<TeamWorkspaceRefsData>[]
     sub_params: {
       tm_id: string

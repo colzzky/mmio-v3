@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import DesktopSidebar from '../components/sidebar/desktop-sidebar.vue'
 // import MobileSidebar from '../components/sidebar/mobile-sidebar.vue'
 import { Toaster } from '@/core/components/ui/toast'
-import ProjectCenter from '@/modules/try/components/ProjectCenter.vue'
 import { useAuthStore } from '@/stores/authStore'
 import { useSidebarStore } from '@/stores/sidebarStore'
 import { Bars3Icon } from '@heroicons/vue/24/outline'

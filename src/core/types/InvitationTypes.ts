@@ -1,4 +1,4 @@
-import type { Timestamp, SubCollections } from './UniTypes'
+import type { SubCollections } from './UniTypes'
 
 //Only use subcollection if a collection have a data that has multiple data like activity logs etc.
 

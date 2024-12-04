@@ -1,16 +1,16 @@
 <script lang="ts" setup>
 import Button from '@/core/components/ui/button/Button.vue'
-import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue';
-import type { UserData } from '@/core/types/AuthUserTypes';
-import type { TeamData } from '@/core/types/TeamTypes';
-import { getWhereAny } from '@/core/utils/firebase-collections';
-import router from '@/router';
-import { useAuthStore } from '@/stores/authStore';
+import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
+import type { UserData } from '@/core/types/AuthUserTypes'
+import type { TeamData } from '@/core/types/TeamTypes'
+import { getWhereAny } from '@/core/utils/firebase-collections'
 import CreateTeam from '@/modules/teams-permissions/components/team/CreateTeam.vue'
+import router from '@/router'
+import { useAuthStore } from '@/stores/authStore'
 import { onMounted, ref, watch } from 'vue'
 
 const authStore = useAuthStore()
-const { user_auth, user, user_team_refs, user_details: ud } = authStore
+const { user_auth, user_team_refs, user_details: ud } = authStore
 const pageLoad = ref<boolean>(true)
 
 const new_team_modal = ref(false)
@@ -28,22 +28,32 @@ async function fetch_owners() {
   pageLoad.value = true
   if (!ud.team_owners) {
     console.log('refetching again')
-    user_team_refs.data.forEach(team => {
+    user_team_refs.data.forEach((team) => {
       if (!ud.team_owners_uid.includes(team.owner_uid)) {
-        if (!ud.team_owners_uid.find(uid => uid === team.owner_uid)) {
+        if (!ud.team_owners_uid.find((uid) => uid === team.owner_uid)) {
           ud.team_owners_uid.push(team.owner_uid)
         }
       }
     })
-    const fetch_owners = await getWhereAny('user', 'users', {}, [], [{
-      fieldName: 'uid', operator: 'in', value: ud.team_owners_uid
-    }])
+    const fetch_owners = await getWhereAny('user', {
+      $path: 'users',
+      $sub_params: {},
+      $sub_col: [],
+      whereConditions: [
+        {
+          fieldName: 'uid',
+          operator: 'in',
+          value: ud.team_owners_uid,
+        },
+      ],
+    })
+
 
     if (fetch_owners.status) {
-      const owners = <{ [key: string]: UserData }>{}
+      const owners: { [key: string]: UserData } = {}
       fetch_owners.data.forEach((data) => {
-        owners[data.uid] = data;
-      });
+        owners[data.uid] = data
+      })
       ud.team_owners = { ...owners }
     }
   }
@@ -57,7 +67,6 @@ onMounted(async () => {
     }
     pageLoad.value = false
   }
-
 })
 
 watch(
@@ -99,7 +108,7 @@ watch(
                 <div class="grid grid-cols-12 items-center">
                   <div class="col-span-6" @click="router.push({ name: 'team-view', params: { team_id: team.tm_id } })">
                     <div class="flex items-center gap-x-3">
-                      <i class="bx text-2xl bx-google"></i>
+                      <i class="bx bx-google text-2xl"></i>
                       <div class="grid gap-0">
                         <span class="text-sm">{{ team.name }}</span>
                         <span class="text-xs">{{ team.team_members?.length }} Members</span>
@@ -110,12 +119,15 @@ watch(
                     {{ `read and write` }}
                   </div>
                   <div class="col-span-2 flex flex-col">
-                    <span class="font-bold text-sm">
-                      {{ ud.team_owners[team.owner_uid].uid === user_auth.data?.uid ?
-                        `${ud.team_owners[team.owner_uid].displayName} (You)` :
-                        ud.team_owners[team.owner_uid].displayName }}
+                    <span class="text-sm font-bold">
+                      {{
+                        ud.team_owners[team.owner_uid].uid === user_auth.data?.uid
+                          ? `${ud.team_owners[team.owner_uid].displayName} (You)`
+                          : ud.team_owners[team.owner_uid].displayName
+                      }}
                     </span>
-                    <span class="text-xs text-gray-600">{{ ud.team_owners[team.owner_uid].email
+                    <span class="text-xs text-gray-600">{{
+                      ud.team_owners[team.owner_uid].email
                       }}</span>
                   </div>
                   <div class="col-span-1 flex justify-end">
@@ -127,9 +139,7 @@ watch(
                 </div>
               </div>
             </div>
-            <div v-else>
-              No available data.
-            </div>
+            <div v-else>No available data.</div>
           </div>
 
           <div v-else class="rounded-xl px-2 py-4">

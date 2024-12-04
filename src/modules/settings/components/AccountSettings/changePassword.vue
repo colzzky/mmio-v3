@@ -123,7 +123,6 @@ const changePasswordField = reactive<ChangePasswordField>({
     this.changePasswordModal = !this.changePasswordModal
   },
   async changePasswordFirebase(): Promise<void> {
-    user_auth.checkUser()
     if (user_auth.data) {
       let errorMsg
       const userEmail = user_auth.data.email ? user_auth.data.email : ''

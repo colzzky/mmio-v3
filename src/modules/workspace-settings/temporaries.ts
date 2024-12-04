@@ -1,4 +1,9 @@
-export const options = [
+export const options: {
+  identifier: string
+  title: string
+  icon: string
+  description: string
+}[] = [
   {
     identifier: 'meta_pages',
     title: 'Meta Pages',

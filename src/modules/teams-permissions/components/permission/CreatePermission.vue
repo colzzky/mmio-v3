@@ -3,7 +3,6 @@ import Button from '@/core/components/ui/button/Button.vue'
 import Dialog from '@/core/components/ui/dialog/Dialog.vue'
 import DialogContent from '@/core/components/ui/dialog/DialogContent.vue'
 import DialogTitle from '@/core/components/ui/dialog/DialogTitle.vue'
-import Input from '@/core/components/ui/input/Input.vue'
 import { reactive, watch } from 'vue'
 
 const props = defineProps<{ open_modal: boolean }>()

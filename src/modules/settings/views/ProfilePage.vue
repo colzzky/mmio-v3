@@ -4,7 +4,6 @@ import BasicInformation from '../components/ProfileSettings/BasicInformation.vue
 import { Button } from '@/core/components/ui/button'
 import { Label } from '@/core/components/ui/label'
 import { Switch } from '@/core/components/ui/switch'
-import { getCollection, getWhereAny } from '@/core/utils/firebase-collections'
 import { useAuthStore } from '@/stores/authStore'
 import { onMounted } from 'vue'
 

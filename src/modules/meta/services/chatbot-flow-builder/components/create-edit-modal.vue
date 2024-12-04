@@ -10,36 +10,79 @@ import {
 } from '@/core/components/ui/dialog'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
-import type { ChatBotFlowData } from '@/core/types/MetaTypes'
-import type { Modal } from '@/core/utils/types'
-import { useMetaRelatedStore } from '@/stores/metaRelatedStore'
-import { useProjectStore } from '@/stores/projectStore'
-import { reactive } from 'vue'
-import { z } from 'zod'
-
-const metaStore = useMetaRelatedStore()
-const useProject = useProjectStore()
-const { chat_bot_flow, chat_bot_flow_list } = metaStore
-const { project_data } = useProject
-
-type SelectedFormKey = Pick<ChatBotFlowData, 'name'>
+import { PermissionServices } from '@/core/types/PermissionTypes'
+import { chatbot_flow_service_Data } from '@/core/types/WorkSpaceTypes'
+import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
+import type { ChatbotFlowServiceData, Modal } from '@/core/utils/types'
+import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
+import { reactive, ref } from 'vue'
+import { z, type ZodRawShape } from 'zod'
 
 interface ModalInterface extends Omit<Modal, 'open'> {
-  open(args: { intent: 'create' } | { intent: 'edit'; flowId: ChatBotFlowData['cb_id'] }): void
-  flowId: ChatBotFlowData['cb_id'] | null
+  open(
+    args:
+      | { intent: 'create'; flowId: ChatbotFlowServiceData['cb_id'] | null }
+      | { intent: 'edit'; flowId: ChatbotFlowServiceData['cb_id'] | null },
+  ): void
+  flowId: ChatbotFlowServiceData['cb_id'] | null
   intent: 'create' | 'edit' | null
-  form: SelectedFormKey
-  errors: SelectedFormKey
   validated: boolean
-  validateForm: () => void
-  validateSingleField: (field: keyof SelectedFormKey) => void
   submitForm(): Promise<void>
   createFlow(): Promise<void>
   editFlow(): Promise<void>
 }
+type ChatbotflowFields = Pick<ChatbotFlowServiceData, 'name'>
 
-const schema = z.object({
-  name: z.string().min(8, { message: 'Name must be at least 8 characters long' }),
+const authWorkspaceStore = useAuthWorkspaceStore()
+const { service_models, workspace_service } = authWorkspaceStore
+const { chatbot_flow } = workspace_service
+const { chatbot_flow: chatbot_flow_md } = service_models
+const chatbot_flow_data = ref<ChatbotFlowServiceData | null>(null)
+
+const flow_form = reactive({
+  inputs: { name: '' } as ChatbotflowFields,
+  errors: { name: '' } as ChatbotflowFields,
+  schema: {
+    name: z.string().min(8, { message: 'Chatbot flow name must be at least 8 characters long' }),
+  } as ZodRawShape,
+
+  validateSingleField(field: keyof ChatbotflowFields): void {
+    const value = this.inputs[field]
+    this.errors[field] = ''
+    const result = z.object(this.schema as ZodRawShape).shape[field].safeParse(value)
+    if (!result.success) {
+      console.log(result.error.errors[0])
+      this.errors[field] = result.error.errors[0].message
+    }
+  },
+  async validateDataInput(): Promise<boolean> {
+    Object.keys(this.errors).forEach((key) => {
+      const field = key as keyof ChatbotflowFields
+      this.errors[field] = ''
+    })
+    const result = z.object(this.schema as ZodRawShape).safeParse(this.inputs)
+
+    if (!result.success) {
+      result.error.errors.forEach((err) => {
+        const field = err.path[0] as keyof ChatbotflowFields
+        this.errors[field] = err.message
+      })
+      return false
+    } else {
+      return true
+    }
+  },
+  initializeForm() {
+    if (chatbot_flow_data.value) {
+      this.inputs = { name: chatbot_flow_data.value.name }
+    }
+
+    this.errors = { name: '' }
+  },
+  reset() {
+    this.inputs = { name: '' }
+    this.errors = { name: '' }
+  },
 })
 
 const modal = reactive<ModalInterface>({
@@ -47,97 +90,80 @@ const modal = reactive<ModalInterface>({
   intent: null,
   flowId: null,
   validated: false,
-  form: {
-    name: '',
-  },
-  errors: {
-    name: '',
-  },
   initialState() {
     this.isOpen = false
     this.intent = null
     this.flowId = null
-    this.form = { ...this.form }
-    this.errors = { ...this.errors }
   },
-  open(args) {
-    this.intent = args.intent
-    if (args.intent === 'edit') {
-      // const flow = flows.value.get(args.flowId)
-      // if (!flow) throw new Error('Flow not found')
+  async open(args) {
+    try {
+      //Check Permission
+      await servicePermission.check(PermissionServices.ChatBotFlow, ['add', 'publish', 'edit'])
 
-      // this.flowId = args.flowId
-      // this.form = { ...flow }
-
-      console.log('this is edit')
+      this.intent = args.intent
+      this.flowId = args.flowId
+      if (args.intent === 'edit' && this.flowId) {
+        const find_chatbot = chatbot_flow.data.find((flow) => flow.cb_id == this.flowId)
+        if (!find_chatbot) {
+          return
+        } else {
+          chatbot_flow_data.value = JSON.parse(JSON.stringify(find_chatbot))
+        }
+      } else {
+        chatbot_flow_data.value = JSON.parse(JSON.stringify(chatbot_flow_service_Data))
+      }
+      flow_form.initializeForm()
+      this.isOpen = true
+    } catch (error: any) {
+      if (error instanceof PermissionAccessError) {
+        this.isOpen = false
+        return
+      }
     }
-
-    this.isOpen = true
   },
   close() {
+    chatbot_flow_data.value = null
+    flow_form.reset()
     this.initialState()
   },
 
-  validateForm(): void {
-    Object.keys(this.errors).forEach((key) => {
-      const field = key as keyof SelectedFormKey
-      this.errors[field] = ''
-    })
-
-    const result = schema.safeParse(this.form)
-
-    this.validated = result.success
-
-    if (!result.success) {
-      result.error.errors.forEach((err) => {
-        const field = err.path[0] as keyof SelectedFormKey
-        this.errors[field] = err.message
-      })
-    }
-    if (this.validated) {
-      //Submit or show
-    }
-  },
-  validateSingleField(field: keyof SelectedFormKey): void {
-    const value = this.form[field]
-    this.errors[field] = ''
-    const result = schema.shape[field].safeParse(value)
-    if (!result.success) {
-      console.log(result.error.errors[0])
-      this.errors[field] = result.error.errors[0].message
-    }
-  },
-
   async submitForm() {
-    this.intent === 'create' ? await this.createFlow() : await this.editFlow()
-    this.close()
+    const validate = await flow_form.validateDataInput()
+    if (validate) {
+      const updated_chatbot = {
+        ...chatbot_flow_data.value,
+        ...flow_form.inputs,
+      } as ChatbotFlowServiceData
+      chatbot_flow_data.value = updated_chatbot
+      console.log(updated_chatbot)
+      this.intent === 'create' ? await this.createFlow() : await this.editFlow()
+      this.close()
+    } else {
+      console.log('not valid')
+    }
   },
   async createFlow() {
-    // @temporary: get the highest flow id and increment it by 1
-    // const newFlowId = Math.max(...Array.from(flows.value.keys())) + 1
-    // flows.value.set(newFlowId, {
-    //   ...this.form,
-    //   status: 'inactive',
-    //   createdAt: new Date(),
-    // })
-    chat_bot_flow.initialize()
-    if (chat_bot_flow.data && project_data.data) {
-      chat_bot_flow.data.name = this.form.name
-      chat_bot_flow.data.pj_id = project_data.data.pj_id
-      const create_flow = await chat_bot_flow.createUpdate('new')
-      if (create_flow.status) {
-        chat_bot_flow_list.data.push(create_flow.data)
-        console.log(chat_bot_flow_list.data)
-      } else {
-        console.log('something went wrong adding chatbot flow -' + create_flow.error)
+    if (chatbot_flow_data.value) {
+      chatbot_flow_md.reInit()
+      chatbot_flow_md.set(chatbot_flow_data.value)
+      const create = await chatbot_flow_md.createUpdate('new')
+      if (create.status) {
+        chatbot_flow.data.push(chatbot_flow_md.data)
       }
     }
   },
   async editFlow() {
-    // if (!this.flowId) throw new Error('No Flow ID value')
-    // const flow = flows.value.get(this.flowId)
-    // if (!flow) throw new Error('Flow not found')
-    // flows.value.set(this.flowId, { ...flow, name: this.form.name })
+    if (chatbot_flow_data.value) {
+      chatbot_flow_md.reInit()
+      chatbot_flow_md.set(chatbot_flow_data.value)
+      const update = await chatbot_flow_md.createUpdate('update')
+      if (update.status) {
+        const chatbot_index = chatbot_flow.data.findIndex((flow) => flow.cb_id === this.flowId)
+        if (chatbot_index >= 0) {
+          chatbot_flow.data[chatbot_index] = JSON.parse(JSON.stringify(chatbot_flow_md.data))
+        }
+      }
+    }
   },
 })
 
@@ -164,11 +190,19 @@ defineExpose({
         <Input
           type="text"
           id="name"
-          v-model="modal.form.name"
+          v-model="flow_form.inputs.name"
           name="name"
           placeholder="Input Name"
           required
         />
+        <div
+          v-if="flow_form.errors.name"
+          for="name"
+          class="flex items-center gap-1 text-xs text-red-500"
+        >
+          <i class="material-icons text-sm">error</i>
+          {{ flow_form.errors.name }}
+        </div>
       </div>
       <DialogFooter>
         <Button variant="secondary" @click="modal.close()">Cancel</Button>

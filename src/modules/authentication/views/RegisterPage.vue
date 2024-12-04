@@ -141,6 +141,7 @@ const registrationField = reactive<RegistrationField>({
               photoURL: auth.currentUser.photoURL,
               uid: auth.currentUser.uid,
             })
+            await user_auth.initializeUser()
             router.push({ name: 'home' })
           }
         })
@@ -165,6 +166,7 @@ const registrationField = reactive<RegistrationField>({
           photoURL: result.user.photoURL,
           uid: result.user.uid,
         })
+        await user_auth.initializeUser()
         router.replace({ name: 'home' })
       })
       .catch((error) => {

@@ -22,8 +22,11 @@ import {
   TableRow,
 } from '@/core/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs'
+import { PermissionServices } from '@/core/types/PermissionTypes'
+import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { computed, provide, ref, useTemplateRef } from 'vue'
+import router from '@/router'
+import { computed, onMounted, provide, ref, useTemplateRef } from 'vue'
 
 // @temporary: can be extracted to another file
 export type AutoReply = {
@@ -104,6 +107,32 @@ const posts = ref(
     ],
   ]),
 )
+
+onMounted(async () => {
+  try {
+    await servicePermission.check(PermissionServices.ChatBotFlow, ['view'])
+  } catch (error: any) {
+    if (error instanceof PermissionAccessError) {
+      console.error(error.message)
+      router.back()
+    } else {
+      console.error('Unknown error:', error)
+    }
+  }
+})
+
+async function sampleCreate() {
+  try {
+    await servicePermission.check(PermissionServices.ChatBotFlow, 'add')
+    //Nextt statement
+  } catch (error: any) {
+    if (error instanceof PermissionAccessError) {
+      console.error(error.message)
+    } else {
+      console.error('Unknown error:', error)
+    }
+  }
+}
 
 export type PostsMap = typeof posts
 provide('posts', posts)
@@ -311,10 +340,11 @@ const createEditAutoReplyModalRef = useTemplateRef('createEditAutoReplyModal')
                       <DropdownMenuItem
                         class="gap-x-3"
                         @click="
-                          createEditAutoReplyModalRef?.modal.open({
-                            intent: 'create',
-                            postId,
-                          })
+                          // createEditAutoReplyModalRef?.modal.open({
+                          //   intent: 'create',
+                          //   postId,
+                          // })
+                          sampleCreate()
                         "
                       >
                         <i class="bx bx-message-square-add text-xl"></i>
