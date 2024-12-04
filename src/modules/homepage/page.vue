@@ -18,12 +18,16 @@ import type { TeamData } from '@/core/types/TeamTypes'
 import type { WorkspaceData } from '@/core/types/WorkSpaceTypes'
 import { getWhereAny } from '@/core/utils/firebase-collections'
 import CreateTeam from '@/modules/teams-permissions/components/team/CreateTeam.vue'
+import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+
+const routes = useRoute()
 
 const allWorkspaceFilter = ref('Most Recent')
 const sharedWorkspaceFilter = ref('Most Recent')
-const pageLoad = ref<boolean>(false)
+const pageLoad = ref<boolean>(true)
 const dataLoad = ref<boolean>(true)
 const selectTeamLoad = ref<boolean>(true)
 const authStore = useAuthStore()
@@ -157,26 +161,27 @@ async function fetch_all_workspaces() {
 }
 
 onMounted(async () => {
+  const check_if_userexist = user_auth.check_user_auth();
   console.log(page_init.initialize)
   if (page_init.initialize) {
-    console.log('test')
-    pageLoad.value = true
-    pageLoad.value = false
+    pageLoad.value = true;
+    
+    pageLoad.value = false;
     await fetch_all_workspaces()
   }
 })
 
 watch(
-  () => page_init.initialize,
-  async (new_val) => {
-    if (new_val) {
-      console.log('test2')
-      pageLoad.value = true
-      pageLoad.value = false
-      //await fetch_all_workspaces()
+  () => authStore.page_init.initialize,
+  async (newVal) => {
+    if (newVal) {
+      pageLoad.value = false;
+      const check_if_userexist = await user_auth.check_user_auth();
+      await fetch_all_workspaces()
     }
-  },
-)
+  }
+);
+
 </script>
 
 <template>
@@ -194,12 +199,8 @@ watch(
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent class="text-xs">
-          <DropdownMenuItem
-            v-for="team in user_teams"
-            :key="team.tm_id"
-            class="grid grid-cols-[40px_1fr] gap-x-3"
-            @click="select_team(team)"
-          >
+          <DropdownMenuItem v-for="team in user_teams" :key="team.tm_id" class="grid grid-cols-[40px_1fr] gap-x-3"
+            @click="select_team(team)">
             <Avatar class="size-6 justify-self-center">
               <AvatarImage src="https://placehold.co/24" />
               <AvatarFallback>UI</AvatarFallback>
@@ -210,10 +211,7 @@ watch(
           <DropdownMenuItem class="flex items-center gap-x-1" @click="select_team(null)">
             All Workspace
           </DropdownMenuItem>
-          <DropdownMenuItem
-            class="flex items-center gap-x-1"
-            @click="new_team_modal = !new_team_modal"
-          >
+          <DropdownMenuItem class="flex items-center gap-x-1" @click="new_team_modal = !new_team_modal">
             Create a Team
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -238,8 +236,7 @@ watch(
         <section class="grid gap-y-6">
           <div class="flex flex-col items-start text-xs">
             <h1
-              class="bg-gradient-to-r from-gradient-purple to-gradient-red bg-clip-text text-xl font-bold text-transparent"
-            >
+              class="bg-gradient-to-r from-gradient-purple to-gradient-red bg-clip-text text-xl font-bold text-transparent">
               Your Workspaces
             </h1>
             <DropdownMenu>
@@ -257,20 +254,14 @@ watch(
           </div>
           <div>
             <Transition name="fade" mode="out-in">
-              <component
-                :is="dataLoad ? WorkspacesLoad : Workspaces"
-                :workspaces="user_created_workspaces"
-                :is-shared="false"
-                :workspace-owners="null"
-              />
+              <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="user_created_workspaces"
+                :is-shared="false" :workspace-owners="null" />
             </Transition>
           </div>
         </section>
         <section class="grid gap-y-6">
           <div class="flex flex-col items-start text-xs">
-            <h1
-              class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent"
-            >
+            <h1 class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent">
               Shared Workspaces
             </h1>
             <DropdownMenu>
@@ -288,12 +279,8 @@ watch(
           </div>
           <div>
             <Transition name="fade" mode="out-in">
-              <component
-                :is="dataLoad ? WorkspacesLoad : Workspaces"
-                :workspaces="shared_workspaces"
-                :is-shared="true"
-                :workspace-owners="workspace_owners"
-              />
+              <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="shared_workspaces" :is-shared="true"
+                :workspace-owners="workspace_owners" />
             </Transition>
           </div>
         </section>
@@ -301,9 +288,7 @@ watch(
       <div v-else>
         <section class="grid gap-y-6">
           <div class="flex flex-col items-start text-xs">
-            <h1
-              class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent"
-            >
+            <h1 class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent">
               {{ `${selected_team.name} Workspaces` }}
             </h1>
             <DropdownMenu>
@@ -321,12 +306,8 @@ watch(
           </div>
           <div>
             <Transition name="fade" mode="out-in">
-              <component
-                :is="selectTeamLoad ? WorkspacesLoad : Workspaces"
-                :workspaces="selected_team_workspaces"
-                :is-shared="true"
-                :workspace-owners="workspace_owners"
-              />
+              <component :is="selectTeamLoad ? WorkspacesLoad : Workspaces" :workspaces="selected_team_workspaces"
+                :is-shared="true" :workspace-owners="workspace_owners" />
             </Transition>
           </div>
         </section>

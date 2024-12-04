@@ -9,7 +9,7 @@ import { useWorkspaceStore } from '@/stores/WorkspaceStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { useTeamStore } from '@/stores/teamStore'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 /**
@@ -128,11 +128,28 @@ async function populateTeamMembers() {
 }
 
 onMounted(async () => {
-  workspace_load.value = true
-  await validateWorkspace()
-  await validateMemberOwner()
-  workspace_load.value = false
+  if (authStore.page_init.initialize) {
+    workspace_load.value = true
+    await validateWorkspace()
+    await validateMemberOwner()
+    workspace_load.value = false
+  }
 })
+
+watch(
+  () => authStore.page_init.initialize,
+  async (newVal) => {
+    if (newVal) {
+      const check_if_userexist = user_auth.check_user_auth();
+      if (!check_if_userexist) {
+        return router.push({ name: 'login' })
+      }
+      await validateWorkspace()
+      await validateMemberOwner()
+      workspace_load.value = false;
+    }
+  }
+);
 </script>
 
 <template>
@@ -150,7 +167,7 @@ onMounted(async () => {
     </div>
     <div class="flex items-center justify-center space-x-2">
       <i class="material-icons animate-spin text-sm">donut_large</i>
-      <div>Loading</div>
+      <div>Loading Workspace. Please wait.</div>
     </div>
   </div>
 </template>

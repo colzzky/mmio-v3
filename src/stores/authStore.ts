@@ -44,37 +44,34 @@ export const useAuthStore = defineStore(
         this.data = currentUser
       },
       async initializeUser(): Promise<boolean> {
-        this.isInitializing = true
-        const authStatePromise = new Promise((resolve) => {
-          onAuthStateChanged(auth, (user: User | null) => {
-            resolve(user)
-          })
-        })
-        const uid = user_auth.data ? user_auth.data.uid : ''
-        const fetch_user = await user.get(uid)
-        if (fetch_user.status) {
-          user.set(fetch_user.data)
-        }
-
-        const check = await authStatePromise.then((user: any) => {
-          this.setUser(user)
-          if (this.data) {
-            return true
-          } else {
-            return false
+        if (this.data) {
+          const uid = user_auth.data ? user_auth.data.uid : ''
+          const fetch_user = await user.get(uid)
+          if (fetch_user.status) {
+            user.set(fetch_user.data)
           }
-        })
-        this.isInitializing = false
-        return check
-      },
-
-      async check_user_auth() {
-        const user = auth.currentUser
-        if (this.data && user) {
           return true
         } else {
           return false
         }
+      },
+
+      isUserAuthenticated(): boolean {
+        return this.data != null && typeof this.data === 'object' && 'uid' in this.data && 'email' in this.data;
+      },
+
+      check_user_auth(): Promise<boolean> {
+        return new Promise((resolve, reject) => {
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              this.setUser(user)
+              resolve(true); // User is signed in
+            } else {
+              this.setUser(null)
+              resolve(false); // No user is signed in
+            }
+          });
+        });
       },
 
       async signOut() {
