@@ -1,56 +1,59 @@
 <script lang="ts" setup>
-import Button from '@/core/components/ui/button/Button.vue';
-import DatePicker from '@/core/components/ui/date-picker.vue';
-import Input from '@/core/components/ui/input/Input.vue';
-import Label from '@/core/components/ui/label/Label.vue';
-import Select from '@/core/components/ui/select/Select.vue';
-import SelectContent from '@/core/components/ui/select/SelectContent.vue';
-import SelectGroup from '@/core/components/ui/select/SelectGroup.vue';
-import SelectItem from '@/core/components/ui/select/SelectItem.vue';
-import SelectTrigger from '@/core/components/ui/select/SelectTrigger.vue';
-import SelectValue from '@/core/components/ui/select/SelectValue.vue';
-import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue';
-import { toast } from '@/core/components/ui/toast';
-import { days, months, type Days, type Months, type TransformedTimezone } from '@/core/types/UniTypes';
-import { post_randomizer_service_data, type PostRandomizerServiceData } from '@/core/types/WorkSpaceTypes';
-import { uiHelpers } from '@/core/utils/ui-helper';
-import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore';
-import { onBeforeUnmount } from 'vue';
-import { onMounted, reactive, ref } from 'vue';
-import { useRoute } from 'vue-router';
-import { z, type ZodRawShape } from 'zod';
+import Button from '@/core/components/ui/button/Button.vue'
+import DatePicker from '@/core/components/ui/date-picker.vue'
+import Input from '@/core/components/ui/input/Input.vue'
+import Label from '@/core/components/ui/label/Label.vue'
+import Select from '@/core/components/ui/select/Select.vue'
+import SelectContent from '@/core/components/ui/select/SelectContent.vue'
+import SelectGroup from '@/core/components/ui/select/SelectGroup.vue'
+import SelectItem from '@/core/components/ui/select/SelectItem.vue'
+import SelectTrigger from '@/core/components/ui/select/SelectTrigger.vue'
+import SelectValue from '@/core/components/ui/select/SelectValue.vue'
+import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
+import { toast } from '@/core/components/ui/toast'
 import {
-    DateFormatter,
-    type DateValue,
-    getLocalTimeZone,
-} from '@internationalized/date'
+    days,
+    months,
+    type Days,
+    type Months,
+    type TransformedTimezone,
+} from '@/core/types/UniTypes'
+import {
+    post_randomizer_service_data,
+    type PostRandomizerServiceData,
+} from '@/core/types/WorkSpaceTypes'
+import { uiHelpers } from '@/core/utils/ui-helper'
+import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
+import { onBeforeUnmount } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { z, type ZodRawShape } from 'zod'
 
-type PostRandomizerFields = Pick<PostRandomizerServiceData, 'name' | 'frequency' | 'time' | 'monthly' | 'weekly' | 'timezone'> & {
-    startDate: Date;
-    endDate: Date;
-};
+type PostRandomizerFields = Pick<
+    PostRandomizerServiceData,
+    'name' | 'frequency' | 'time' | 'monthly' | 'weekly' | 'timezone'
+> & {
+    startDate: Date
+    endDate: Date
+}
 
 type PostRandomizerErrors = {
     [Key in keyof Pick<
         PostRandomizerServiceData,
         'name' | 'frequency' | 'time' | 'monthly' | 'weekly' | 'startDate' | 'endDate' | 'timezone'
-    >]: string;
-};
-
+    >]: string
+}
 
 const route = useRoute()
 const authWorkspaceStore = useAuthWorkspaceStore()
-const { service_models, workspace_service } = authWorkspaceStore
+const { service_models } = authWorkspaceStore
 const randomizer_id: string = route.params.randomizer_id as string
 const time_selection = ref<string>('')
 const timezoneList = ref<TransformedTimezone[]>([])
 const timezoneString = () => {
-    return [...timezoneList.value.map(timezone => timezone.text)] as const;
-};
+    return [...timezoneList.value.map((timezone) => timezone.text)] as const
+}
 const component_load = ref<boolean>(false)
-const df = new DateFormatter('en-us', {
-    dateStyle: 'full'
-})
 const emit = defineEmits<{
     (e: 'return', value: PostRandomizerServiceData | null): void
 }>()
@@ -58,12 +61,13 @@ const emit = defineEmits<{
 const props = defineProps<{ campaign_data: PostRandomizerServiceData }>()
 
 const campaign_form = reactive({
-    inputs: uiHelpers.shallowPick(post_randomizer_service_data, ['name', 'frequency', 'time', 'monthly', 'weekly', 'startDate', 'endDate', 'timezone'],
+    inputs: uiHelpers.shallowPick(
+        post_randomizer_service_data,
+        ['name', 'frequency', 'time', 'monthly', 'weekly', 'startDate', 'endDate', 'timezone'],
         {
-
             startDate: () => new Date(),
             endDate: () => new Date(),
-        }
+        },
     ) as PostRandomizerFields,
     errors: {
         name: '',
@@ -83,52 +87,77 @@ const campaign_form = reactive({
         return {
             name: z.string().min(5, { message: 'Campaign name must be at least 5 characters long' }),
             frequency: z.enum(['Daily', 'Weekly', 'Monthly'], {
-                errorMap: () => ({ message: 'Frequency must be one of: Daily, Weekly, or Monthly' })
+                errorMap: () => ({ message: 'Frequency must be one of: Daily, Weekly, or Monthly' }),
             }),
-            time: z.array(z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'Time must be in the format hh:mm' })
-            ).nonempty({ message: 'Time is required and must have at least one value.' }),
+            time: z
+                .array(
+                    z
+                        .string()
+                        .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, { message: 'Time must be in the format hh:mm' }),
+                )
+                .nonempty({ message: 'Time is required and must have at least one value.' }),
 
             timezone: z.enum(timezoneString() as unknown as [string, ...string[]], {
                 errorMap: () => ({ message: 'Invalid Timezone. Must be a valid timezone.' }),
             }),
-            monthly: z.array(z.enum([...months], {
-                errorMap: () => ({ message: 'Invalid Month. Must be a valid Month.' }),
-            })).optional(),
-            weekly: z.array(z.enum([...days], {
-                errorMap: () => ({ message: 'Invalid day. Must be a valid day of the week.' }),
-            })).optional(),
+            monthly: z
+                .array(
+                    z.enum([...months], {
+                        errorMap: () => ({ message: 'Invalid Month. Must be a valid Month.' }),
+                    }),
+                )
+                .optional(),
+            weekly: z
+                .array(
+                    z.enum([...days], {
+                        errorMap: () => ({ message: 'Invalid day. Must be a valid day of the week.' }),
+                    }),
+                )
+                .optional(),
             startDate: z
                 .date() // Expecting a Date object
-                .refine((value) => {
-                    const today = new Date().setHours(0, 0, 0, 0); // Today's date at midnight
-                    const startDate = value.setHours(0, 0, 0, 0); // Provided start date at midnight
-                    return startDate >= today;
-                }, {
-                    message: 'Start date cannot be earlier than today'
-                })
-                .refine((value) => {
-                    const startDate = value.setHours(0, 0, 0, 0); // Provided start date at midnight
-                    const endDate = new Date(campaign_form.inputs.endDate).setHours(0, 0, 0, 0); // Provided end date at midnight
-                    return startDate <= endDate;
-                }, {
-                    message: 'Start date cannot be later than end date'
-                }),
+                .refine(
+                    (value) => {
+                        const today = new Date().setHours(0, 0, 0, 0) // Today's date at midnight
+                        const startDate = value.setHours(0, 0, 0, 0) // Provided start date at midnight
+                        return startDate >= today
+                    },
+                    {
+                        message: 'Start date cannot be earlier than today',
+                    },
+                )
+                .refine(
+                    (value) => {
+                        const startDate = value.setHours(0, 0, 0, 0) // Provided start date at midnight
+                        const endDate = new Date(campaign_form.inputs.endDate).setHours(0, 0, 0, 0) // Provided end date at midnight
+                        return startDate <= endDate
+                    },
+                    {
+                        message: 'Start date cannot be later than end date',
+                    },
+                ),
             endDate: z
                 .date()
-                .refine((value) => {
-                    const today = new Date().setHours(0, 0, 0, 0);
-                    const endDate = value.setHours(0, 0, 0, 0);
-                    return endDate >= today;
-                }, {
-                    message: 'End date cannot be earlier than today'
-                })
-                .refine((value) => {
-                    const endDate = value.setHours(0, 0, 0, 0);
-                    const startDate = new Date(campaign_form.inputs.startDate).setHours(0, 0, 0, 0);
-                    return endDate >= startDate;
-                }, {
-                    message: 'End date cannot be earlier than start date'
-                })
+                .refine(
+                    (value) => {
+                        const today = new Date().setHours(0, 0, 0, 0)
+                        const endDate = value.setHours(0, 0, 0, 0)
+                        return endDate >= today
+                    },
+                    {
+                        message: 'End date cannot be earlier than today',
+                    },
+                )
+                .refine(
+                    (value) => {
+                        const endDate = value.setHours(0, 0, 0, 0)
+                        const startDate = new Date(campaign_form.inputs.startDate).setHours(0, 0, 0, 0)
+                        return endDate >= startDate
+                    },
+                    {
+                        message: 'End date cannot be earlier than start date',
+                    },
+                ),
         }
     },
     removeFrequencyAnswer() {
@@ -136,8 +165,7 @@ const campaign_form = reactive({
         if (this.inputs.frequency === 'Daily') {
             this.inputs.weekly = []
             this.inputs.monthly = []
-        }
-        else if (this.inputs.frequency) {
+        } else if (this.inputs.frequency) {
             this.inputs.monthly = []
         }
     },
@@ -154,7 +182,7 @@ const campaign_form = reactive({
         if (!this.inputs.time) {
             this.inputs.time = [`${time_selection.value}`]
         }
-        const check_exist = this.inputs.time.find(t => t === time_selection.value)
+        const check_exist = this.inputs.time.find((t) => t === time_selection.value)
         if (!check_exist) {
             this.inputs.time.push(time_selection.value)
         }
@@ -194,18 +222,22 @@ const campaign_form = reactive({
         }
     },
     initializeForm() {
-        this.inputs = uiHelpers.shallowPick(props.campaign_data, ['name', 'frequency', 'time', 'monthly', 'weekly', 'startDate', 'endDate', 'timezone'],
+        this.inputs = uiHelpers.shallowPick(
+            props.campaign_data,
+            ['name', 'frequency', 'time', 'monthly', 'weekly', 'startDate', 'endDate', 'timezone'],
             {
-                startDate: (value) => value ? new Date(value as string) : new Date(),
-                endDate: (value) => value ? new Date(value as string) : new Date(),
-            }) as PostRandomizerFields
+                startDate: (value) => (value ? new Date(value as string) : new Date()),
+                endDate: (value) => (value ? new Date(value as string) : new Date()),
+            },
+        ) as PostRandomizerFields
     },
     reset() {
-        this.inputs = uiHelpers.shallowPick(post_randomizer_service_data, ['name', 'frequency', 'time', 'monthly', 'weekly', 'startDate', 'endDate', 'timezone'], {
-            startDate: () => new Date(),
-            endDate: () => new Date(),
-        }) as PostRandomizerFields,
-            this.errors = {
+        this.inputs = uiHelpers.shallowPick(post_randomizer_service_data, ['name', 'frequency', 'time', 'monthly', 'weekly', 'startDate', 'endDate', 'timezone'],
+            {
+                startDate: () => new Date(),
+                endDate: () => new Date(),
+            }) as PostRandomizerFields,
+            (this.errors = {
                 name: '',
                 frequency: '',
                 time: '',
@@ -214,7 +246,7 @@ const campaign_form = reactive({
                 startDate: '',
                 timezone: '',
                 endDate: '',
-            }
+            })
         emit('return', null)
     },
     async save() {
@@ -228,7 +260,7 @@ const campaign_form = reactive({
                 ...this.inputs,
                 startDate: new Date(this.inputs.startDate).toLocaleDateString(),
                 endDate: new Date(this.inputs.endDate).toLocaleDateString(),
-                pr_id: randomizer_id
+                pr_id: randomizer_id,
             }
             const campaign_post = await randomizer_model.createUpdate('update')
             if (campaign_post.status) {
@@ -244,27 +276,29 @@ const campaign_form = reactive({
             }
         }
         this.postLoad = false
-    }
+    },
 })
 
 const daysDropdownContainer = ref<HTMLElement | null>(null)
 const monthsDropdownContainer = ref<HTMLElement | null>(null)
 function handleMouseDownOutside(event: MouseEvent) {
     if (daysDropdownContainer.value && !daysDropdownContainer.value.contains(event.target as Node)) {
-        days_dropdown.dropdown = false;
+        days_dropdown.dropdown = false
     }
-    if (monthsDropdownContainer.value && !monthsDropdownContainer.value.contains(event.target as Node)) {
-        monthly_dropdown.dropdown = false;
+    if (
+        monthsDropdownContainer.value &&
+        !monthsDropdownContainer.value.contains(event.target as Node)
+    ) {
+        monthly_dropdown.dropdown = false
     }
 }
 const days_dropdown = reactive({
     days: [...days],
     dropdown: false,
     toggle() {
-        this.dropdown = !this.dropdown;
+        this.dropdown = !this.dropdown
     },
     selectDays(day: Days) {
-
         if (!campaign_form.inputs.weekly) {
             campaign_form.inputs.weekly = [`${day}`]
         }
@@ -274,8 +308,7 @@ const days_dropdown = reactive({
         if (!validate) {
             campaign_form.inputs.weekly.pop()
         }
-        this.dropdown = false; // Close dropdown after selection
-
+        this.dropdown = false // Close dropdown after selection
     },
 })
 
@@ -283,10 +316,9 @@ const monthly_dropdown = reactive({
     months: [...months],
     dropdown: false,
     toggle() {
-        this.dropdown = !this.dropdown;
+        this.dropdown = !this.dropdown
     },
     selectMonth(month: Months) {
-
         if (!campaign_form.inputs.monthly) {
             campaign_form.inputs.monthly = [`${month}`]
         }
@@ -296,35 +328,33 @@ const monthly_dropdown = reactive({
         if (!validate) {
             campaign_form.inputs.weekly.pop()
         }
-        this.dropdown = false; // Close dropdown after selection
-    }
+        this.dropdown = false // Close dropdown after selection
+    },
 })
 
 onMounted(async () => {
     component_load.value = true
     timezoneList.value = await uiHelpers.timezoneList()
     campaign_form.initializeForm()
-    document.addEventListener("mousedown", handleMouseDownOutside);
+    document.addEventListener('mousedown', handleMouseDownOutside)
     component_load.value = false
 })
 onBeforeUnmount(() => {
-    document.removeEventListener("mousedown", handleMouseDownOutside);
-});
-
-
+    document.removeEventListener('mousedown', handleMouseDownOutside)
+})
 </script>
 <template>
     <div class="space-y-4">
-        <div class="flex space-x-2 items-center">
+        <div class="flex items-center space-x-2">
             <Button variant="ghost" @click="campaign_form.reset()">
                 <i class="material-icons text-md">arrow_back</i>
             </Button>
-            <span class="font-bold text-lg">Update Campaign</span>
+            <span class="text-lg font-bold">Update Campaign</span>
         </div>
         <div v-if="!component_load" class="grid grid-cols-2 gap-8">
             <div class="flex flex-col gap-y-4">
-                <div class="flex space-x-2 items-center">
-                    <span class="font-bold text-lg">Update Information</span>
+                <div class="flex items-center space-x-2">
+                    <span class="text-lg font-bold">Update Information</span>
                 </div>
                 <div class="flex flex-col gap-y-2">
                     <Label for="name">Name</Label>
@@ -344,7 +374,8 @@ onBeforeUnmount(() => {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
-                                <SelectItem v-for="timezone in timezoneList" :value="timezone.text">
+                                <SelectItem v-for="timezone in timezoneList" :value="timezone.text"
+                                    :key="timezone.text">
                                     {{ timezone.text }}</SelectItem>
                             </SelectGroup>
                         </SelectContent>
@@ -375,16 +406,16 @@ onBeforeUnmount(() => {
 
                     <div class="relative" ref="daysDropdownContainer">
                         <!-- Button to trigger dropdown -->
-                        <div class="flex justify-between items-center p-2 border rounded-md cursor-pointer text-sm"
+                        <div class="flex cursor-pointer items-center justify-between rounded-md border p-2 text-sm"
                             @click="days_dropdown.toggle">
                             <div>
                                 <div v-if="campaign_form.inputs.weekly && campaign_form.inputs.weekly.length > 0"
                                     class="flex w-full flex-row flex-wrap items-center gap-2 rounded-lg">
                                     <div v-for="(day, index) in campaign_form.inputs.weekly" :key="day"
-                                        class="flex items-center space-x-2 self-start rounded-full bg-gray-100 border border-gray-200 p-1 px-3 text-xs">
+                                        class="flex items-center space-x-2 self-start rounded-full border border-gray-200 bg-gray-100 p-1 px-3 text-xs">
                                         <span class="text-sm font-semibold">{{ day }}</span>
                                         <button @click="campaign_form.removeDay(index)"
-                                            class="flex cursor-pointer items-center text-color focus:outline-none">
+                                            class="text-color flex cursor-pointer items-center focus:outline-none">
                                             <i class="material-icons text-sm">close</i>
                                         </button>
                                     </div>
@@ -397,12 +428,15 @@ onBeforeUnmount(() => {
                         <!-- Dropdown list with transition -->
                         <Transition>
                             <div v-show="days_dropdown.dropdown"
-                                class="absolute left-0 w-full bg-white border rounded-md shadow-md z-10 text-sm transition-all duration-200 ease-in-out transform opacity-0 h-[20vh] overflow-scroll"
-                                :class="{ 'opacity-100 translate-y-2': days_dropdown.dropdown, 'opacity-0 translate-y-0': !days_dropdown.dropdown }">
+                                class="absolute left-0 z-10 h-[20vh] w-full transform overflow-scroll rounded-md border bg-white text-sm opacity-0 shadow-md transition-all duration-200 ease-in-out"
+                                :class="{
+                                    'translate-y-2 opacity-100': days_dropdown.dropdown,
+                                    'translate-y-0 opacity-0': !days_dropdown.dropdown,
+                                }">
                                 <ul>
                                     <li v-for="day in days_dropdown.days" :key="day"
                                         @click="days_dropdown.selectDays(day)"
-                                        class="p-2 px-8 cursor-pointer hover:bg-gray-200">
+                                        class="cursor-pointer p-2 px-8 hover:bg-gray-200">
                                         {{ day }}
                                     </li>
                                 </ul>
@@ -413,29 +447,27 @@ onBeforeUnmount(() => {
                         <i class="material-icons text-sm">error</i>
                         {{ campaign_form.errors.weekly }}
                     </div>
-
                 </div>
                 <div v-if="campaign_form.inputs.frequency === 'Monthly'" class="flex flex-col gap-y-2">
                     <Label>Monthly</Label>
 
                     <div class="relative" ref="monthsDropdownContainer">
                         <!-- Button to trigger dropdown -->
-                        <div class="flex justify-between items-center p-2 border rounded-md cursor-pointer text-sm"
+                        <div class="flex cursor-pointer items-center justify-between rounded-md border p-2 text-sm"
                             @click="monthly_dropdown.toggle">
                             <div>
                                 <div v-if="campaign_form.inputs.monthly && campaign_form.inputs.monthly.length > 0"
                                     class="flex w-full flex-row flex-wrap items-center gap-2 rounded-lg">
                                     <div v-for="(month, index) in campaign_form.inputs.monthly" :key="month"
-                                        class="flex items-center space-x-2 self-start rounded-full bg-gray-100 border border-gray-200 p-1 px-3 text-xs">
+                                        class="flex items-center space-x-2 self-start rounded-full border border-gray-200 bg-gray-100 p-1 px-3 text-xs">
                                         <span class="text-sm font-semibold">{{ month }}</span>
                                         <button @click="campaign_form.removeMonth(index)"
-                                            class="flex cursor-pointer items-center text-color focus:outline-none">
+                                            class="text-color flex cursor-pointer items-center focus:outline-none">
                                             <i class="material-icons text-sm">close</i>
                                         </button>
                                     </div>
                                 </div>
                                 <div v-else>Choose a month</div>
-
                             </div>
                             <i class="material-icons text-md">arrow_drop_down</i>
                         </div>
@@ -443,12 +475,15 @@ onBeforeUnmount(() => {
                         <!-- Dropdown list with transition -->
                         <Transition>
                             <div v-show="monthly_dropdown.dropdown"
-                                class="absolute left-0 w-full bg-white border rounded-md shadow-md z-10 text-sm transition-all duration-200 ease-in-out transform opacity-0 h-[20vh] overflow-scroll"
-                                :class="{ 'opacity-100 translate-y-2': monthly_dropdown.dropdown, 'opacity-0 translate-y-0': !monthly_dropdown.dropdown }">
+                                class="absolute left-0 z-10 h-[20vh] w-full transform overflow-scroll rounded-md border bg-white text-sm opacity-0 shadow-md transition-all duration-200 ease-in-out"
+                                :class="{
+                                    'translate-y-2 opacity-100': monthly_dropdown.dropdown,
+                                    'translate-y-0 opacity-0': !monthly_dropdown.dropdown,
+                                }">
                                 <ul>
                                     <li v-for="month in monthly_dropdown.months" :key="month"
                                         @click="monthly_dropdown.selectMonth(month)"
-                                        class="p-2 px-8 cursor-pointer hover:bg-gray-200">
+                                        class="cursor-pointer p-2 px-8 hover:bg-gray-200">
                                         {{ month }}
                                     </li>
                                 </ul>
@@ -459,15 +494,15 @@ onBeforeUnmount(() => {
                         <i class="material-icons text-sm">error</i>
                         {{ campaign_form.errors.monthly }}
                     </div>
-
                 </div>
                 <div class="flex flex-col gap-y-2">
                     <Label>Time to Post</Label>
                     <div class="flex w-full flex-row flex-wrap items-center gap-2 rounded-lg border p-4">
                         <div v-for="(time, index) in campaign_form.inputs.time" :key="time"
-                            class="flex items-center space-x-2 self-start rounded-full bg-blue-500 py-1 px-3">
+                            class="flex items-center space-x-2 self-start rounded-full bg-blue-500 px-3 py-1">
                             <span v-if="time" class="text-sm font-semibold text-white">{{
-                                uiHelpers.convertTimeToReadableFormat(time) }}</span>
+                                uiHelpers.convertTimeToReadableFormat(time)
+                            }}</span>
                             <button @click="campaign_form.removeTime(index)"
                                 class="flex cursor-pointer items-center text-white focus:outline-none">
                                 <i class="material-icons text-sm">close</i>
@@ -476,9 +511,8 @@ onBeforeUnmount(() => {
 
                         <div class="w-[20vh] rounded-full">
                             <input v-model="time_selection" type="time" @blur="campaign_form.addTime()"
-                                @keyup.enter="campaign_form.addTime()" placeholder="Add Time" class="h-10 w-full border border-input bg-background px-3 py-1 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50
-                                    rounded-none border-x-0 border-b border-t-0 text-sm focus-visible:border-blue-600 focus-visible:ring-0 focus-visible:ring-offset-0
-                                    " />
+                                @keyup.enter="campaign_form.addTime()" placeholder="Add Time"
+                                class="h-10 w-full rounded-none border border-x-0 border-b border-t-0 border-input bg-background px-3 py-1 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-blue-600 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50" />
                         </div>
                     </div>
                     <div v-if="campaign_form.errors.time" class="flex items-center gap-1 text-xs text-red-500">
@@ -505,7 +539,7 @@ onBeforeUnmount(() => {
                         class="flex items-center gap-1 text-xs text-red-500">
                         <i class="material-icons text-sm">error</i>
                         {{ `${campaign_form.errors.startDate}` }}
-                        <br>
+                        <br />
                         {{ `${campaign_form.errors.endDate}` }}
                     </div>
                 </div>
@@ -520,7 +554,7 @@ onBeforeUnmount(() => {
             </div>
             <div class="flex flex-col gap-y-4">
                 <div>
-                    <span class="font-bold text-lg">What platform to use</span>
+                    <span class="text-lg font-bold">What platform to use</span>
                 </div>
                 <div class="flex flex-col gap-y-2">
                     <Label for="users">Instagram Business</Label>
@@ -568,9 +602,7 @@ onBeforeUnmount(() => {
                     </Select>
                 </div>
                 <div class="flex">
-                    <Button :disabled="campaign_form.postLoad">
-                        Update Platforms
-                    </Button>
+                    <Button :disabled="campaign_form.postLoad"> Update Platforms </Button>
                 </div>
             </div>
         </div>

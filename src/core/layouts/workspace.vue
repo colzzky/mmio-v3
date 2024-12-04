@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Toaster from '../components/ui/toast/Toaster.vue'
 import type { TeamData, TeamMembersData } from '../types/TeamTypes'
+import { getWhereAny } from '../utils/firebase-collections'
 import { accessPermission } from '../utils/permissionHelpers'
 import DesktopSidebar from '@/core/components/sidebar/desktop-sidebar.vue'
 import router from '@/router'
@@ -10,7 +11,6 @@ import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { getWhereAny } from '../utils/firebase-collections'
 
 /**
  * Step 1: Check and validated workspace id if it exists on the firestore
@@ -98,18 +98,20 @@ async function populateTeamMembers() {
         ...member,
         displayName: '',
         email: '',
-        picture:''
+        picture: '',
       }
       members_uid.push(member.uid)
     })
 
     const find_members_info = await getWhereAny('user', {
       $path: 'users',
-      whereConditions: [{
-        fieldName: 'uid',
-        operator: 'in',
-        value: members_uid
-      }]
+      whereConditions: [
+        {
+          fieldName: 'uid',
+          operator: 'in',
+          value: members_uid,
+        },
+      ],
     })
 
     if (find_members_info.status && find_members_info.data.length > 0) {

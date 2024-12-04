@@ -97,7 +97,7 @@ export const useAuthStore = defineStore(
       },
       async get() {
         const id = user_auth.data ? user_auth.data.uid : ''
-        const get = await getCollection('user',{
+        const get = await getCollection('user', {
           $path: 'users',
           $sub_params: null,
           id: id,
@@ -113,13 +113,13 @@ export const useAuthStore = defineStore(
 
       async createUpdate(type): Promise<FSReturnData<UserData>> {
         const id = user_auth.data ? user_auth.data.uid : ''
-        const post = await postCollection('user',{
+        const post = await postCollection('user', {
           $path: 'users',
           $sub_params: null,
           id,
           data: this.data,
           type,
-        });
+        })
         return {
           status: post.status,
           data: post.data as UserData,
@@ -159,7 +159,7 @@ export const useAuthStore = defineStore(
               },
             ],
           })
-          
+
           console.log(fetch_team)
           if (fetch_team.status) {
             this.data = fetch_team.data

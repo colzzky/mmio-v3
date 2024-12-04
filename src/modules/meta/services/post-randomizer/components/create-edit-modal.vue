@@ -13,7 +13,7 @@ import { Label } from '@/core/components/ui/label'
 import { PermissionServices } from '@/core/types/PermissionTypes'
 import { post_randomizer_service_data } from '@/core/types/WorkSpaceTypes'
 import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
-import type {Modal, PostRandomizerServiceData } from '@/core/utils/types'
+import type { Modal, PostRandomizerServiceData } from '@/core/utils/types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { reactive, ref } from 'vue'
 import { z, type ZodRawShape } from 'zod'
@@ -29,7 +29,7 @@ interface ModalInterface extends Omit<Modal, 'open'> {
   validated: boolean
   submitForm(): Promise<void>
   createCampaign(): Promise<void>
-    editCampaign(): Promise<void>
+  editCampaign(): Promise<void>
 }
 type PostRandomizerFields = Pick<PostRandomizerServiceData, 'name'>
 
@@ -148,7 +148,7 @@ const modal = reactive<ModalInterface>({
       post_randomizer_md.set(post_randomizer_data.value)
       const create = await post_randomizer_md.createUpdate('new')
       if (create.status) {
-        post_randomizer.data.push({...create.data})
+        post_randomizer.data.push({ ...create.data })
       }
     }
   },
@@ -158,9 +158,13 @@ const modal = reactive<ModalInterface>({
       post_randomizer_md.set(post_randomizer_data.value)
       const update = await post_randomizer_md.createUpdate('update')
       if (update.status) {
-        const post_randomizer_index = post_randomizer.data.findIndex((rand) => rand.pr_id === this.prId)
+        const post_randomizer_index = post_randomizer.data.findIndex(
+          (rand) => rand.pr_id === this.prId,
+        )
         if (post_randomizer_index >= 0) {
-          post_randomizer.data[post_randomizer_index] = JSON.parse(JSON.stringify(post_randomizer_md.data))
+          post_randomizer.data[post_randomizer_index] = JSON.parse(
+            JSON.stringify(post_randomizer_md.data),
+          )
         }
       }
     }
@@ -178,7 +182,9 @@ defineExpose({
       <DialogHeader>
         <template v-if="modal.intent === 'create'">
           <DialogTitle>Create Post Randomizer Campaign</DialogTitle>
-          <DialogDescription> Enter the post randomizer Name and we'll redirect you after. </DialogDescription>
+          <DialogDescription>
+            Enter the post randomizer Name and we'll redirect you after.
+          </DialogDescription>
         </template>
         <template v-else>
           <DialogTitle>Change Post Randomizer Name</DialogTitle>

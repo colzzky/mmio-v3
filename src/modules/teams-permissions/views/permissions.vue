@@ -78,8 +78,13 @@ onMounted(async () => {
   <div>
     <div class="flex items-center justify-between">
       <div class="text-lg font-bold">Your Created Permissions</div>
-      <Button v-if="!create_permission_load" @click="create_permission" variant="ghost"
-        class="font-bold text-blue-500">Create new Permission</Button>
+      <Button
+        v-if="!create_permission_load"
+        @click="create_permission"
+        variant="ghost"
+        class="font-bold text-blue-500"
+        >Create new Permission</Button
+      >
       <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">
         <i class="material-icons animate-spin text-sm">donut_large</i>Creating your permission
       </Button>
@@ -98,15 +103,21 @@ onMounted(async () => {
 
           <div v-if="!permissions.isLoading && !pageLoad" class="py-2">
             <div v-if="permissions.data.length">
-              <div v-for="permission in permissions.data" :key="permission.permission_id"
-                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300">
+              <div
+                v-for="permission in permissions.data"
+                :key="permission.permission_id"
+                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
+              >
                 <div class="grid grid-cols-12 items-center">
-                  <div class="col-span-7" @click="
-                    router.push({
-                      name: 'permission-view',
-                      params: { permission_id: permission.permission_id },
-                    })
-                    ">
+                  <div
+                    class="col-span-7"
+                    @click="
+                      router.push({
+                        name: 'permission-view',
+                        params: { permission_id: permission.permission_id },
+                      })
+                    "
+                  >
                     <div class="flex items-center gap-x-3">
                       <i class="bx bx-google text-2xl"></i>
                       <div class="grid gap-0">
@@ -122,8 +133,10 @@ onMounted(async () => {
                     {{ uiHelpers.formatDateTimeAgo(permission.updatedAt) }}
                   </div>
                   <div class="col-span-1 flex justify-end">
-                    <button type="button"
-                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                    <button
+                      type="button"
+                      class="flex h-8 w-8 items-center justify-center rounded-full text-black duration-100 hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                    >
                       <i class="material-icons text-md">more_vert</i>
                     </button>
                   </div>

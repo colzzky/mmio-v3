@@ -67,11 +67,8 @@ async function fetch_workspaces() {
       $path: 'workspaces',
       $sub_params: {},
       $sub_col: [],
-      whereConditions: [
-        { fieldName: 'owner_uid', operator: '==', value: user_auth.data.uid },
-      ],
+      whereConditions: [{ fieldName: 'owner_uid', operator: '==', value: user_auth.data.uid }],
     })
-
 
     if (personal_workspace.data && personal_workspace.status) {
       user_created_workspaces.value = personal_workspace.data
@@ -88,9 +85,7 @@ async function fetch_workspace_owners() {
       $path: 'users',
       $sub_params: {},
       $sub_col: [],
-      whereConditions: [
-        { fieldName: 'uid', operator: 'in', value: workspace_owner_uid.value },
-      ],
+      whereConditions: [{ fieldName: 'uid', operator: 'in', value: workspace_owner_uid.value }],
     })
 
     if (get_users.status) {
@@ -116,9 +111,7 @@ async function fetch_teams() {
       })
       const team = await getWhereAny('team', {
         $path: 'teams',
-        whereConditions: [
-          { fieldName: 'tm_id', operator: 'in', value: team_refs_id },
-        ],
+        whereConditions: [{ fieldName: 'tm_id', operator: 'in', value: team_refs_id }],
       })
       console.log('tesm list')
       console.log(team)
@@ -201,8 +194,12 @@ watch(
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent class="text-xs">
-          <DropdownMenuItem v-for="team in user_teams" :key="team.tm_id" class="grid grid-cols-[40px_1fr] gap-x-3"
-            @click="select_team(team)">
+          <DropdownMenuItem
+            v-for="team in user_teams"
+            :key="team.tm_id"
+            class="grid grid-cols-[40px_1fr] gap-x-3"
+            @click="select_team(team)"
+          >
             <Avatar class="size-6 justify-self-center">
               <AvatarImage src="https://placehold.co/24" />
               <AvatarFallback>UI</AvatarFallback>
@@ -213,7 +210,10 @@ watch(
           <DropdownMenuItem class="flex items-center gap-x-1" @click="select_team(null)">
             All Workspace
           </DropdownMenuItem>
-          <DropdownMenuItem class="flex items-center gap-x-1" @click="new_team_modal = !new_team_modal">
+          <DropdownMenuItem
+            class="flex items-center gap-x-1"
+            @click="new_team_modal = !new_team_modal"
+          >
             Create a Team
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -238,7 +238,8 @@ watch(
         <section class="grid gap-y-6">
           <div class="flex flex-col items-start text-xs">
             <h1
-              class="bg-gradient-to-r from-gradient-purple to-gradient-red bg-clip-text text-xl font-bold text-transparent">
+              class="bg-gradient-to-r from-gradient-purple to-gradient-red bg-clip-text text-xl font-bold text-transparent"
+            >
               Your Workspaces
             </h1>
             <DropdownMenu>
@@ -256,14 +257,20 @@ watch(
           </div>
           <div>
             <Transition name="fade" mode="out-in">
-              <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="user_created_workspaces"
-                :is-shared="false" :workspace-owners="null" />
+              <component
+                :is="dataLoad ? WorkspacesLoad : Workspaces"
+                :workspaces="user_created_workspaces"
+                :is-shared="false"
+                :workspace-owners="null"
+              />
             </Transition>
           </div>
         </section>
         <section class="grid gap-y-6">
           <div class="flex flex-col items-start text-xs">
-            <h1 class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent">
+            <h1
+              class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent"
+            >
               Shared Workspaces
             </h1>
             <DropdownMenu>
@@ -281,8 +288,12 @@ watch(
           </div>
           <div>
             <Transition name="fade" mode="out-in">
-              <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="shared_workspaces" :is-shared="true"
-                :workspace-owners="workspace_owners" />
+              <component
+                :is="dataLoad ? WorkspacesLoad : Workspaces"
+                :workspaces="shared_workspaces"
+                :is-shared="true"
+                :workspace-owners="workspace_owners"
+              />
             </Transition>
           </div>
         </section>
@@ -290,7 +301,9 @@ watch(
       <div v-else>
         <section class="grid gap-y-6">
           <div class="flex flex-col items-start text-xs">
-            <h1 class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent">
+            <h1
+              class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent"
+            >
               {{ `${selected_team.name} Workspaces` }}
             </h1>
             <DropdownMenu>
@@ -308,8 +321,12 @@ watch(
           </div>
           <div>
             <Transition name="fade" mode="out-in">
-              <component :is="selectTeamLoad ? WorkspacesLoad : Workspaces" :workspaces="selected_team_workspaces"
-                :is-shared="true" :workspace-owners="workspace_owners" />
+              <component
+                :is="selectTeamLoad ? WorkspacesLoad : Workspaces"
+                :workspaces="selected_team_workspaces"
+                :is-shared="true"
+                :workspace-owners="workspace_owners"
+              />
             </Transition>
           </div>
         </section>

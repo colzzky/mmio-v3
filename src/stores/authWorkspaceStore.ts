@@ -34,14 +34,14 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     data: null,
     isInitialized: false,
     isLoading: false,
-    reset() { },
+    reset() {},
   })
   const active_team = reactive<ActiveTeam>({
     data: null,
-    members:{},
+    members: {},
     isInitialized: false,
     isLoading: false,
-    reset() { },
+    reset() {},
   })
   const current_member = reactive<CurrentMember>({
     data: null,
@@ -49,7 +49,7 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     isInitialized: false,
     isLoading: false,
     listener: null,
-    reset() { },
+    reset() {},
     async listen(tm_id: string, member_id: string) {
       current_member.listener = await listenToCollection(
         'team_members',
@@ -63,10 +63,6 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
         },
       )
     },
-  })
-
-  const team_members = reactive({
-    
   })
 
   const imported_meta_pages = reactive({
@@ -120,16 +116,13 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
               ],
             })
 
-
             if (fetch_meta_pages.status && fetch_meta_pages.data.length > 0) {
               this.data = fetch_meta_pages.data
               const get_user_import = await getWhereAny('user', {
                 $path: 'users',
                 $sub_params: {},
                 $sub_col: [],
-                whereConditions: [
-                  { fieldName: 'uid', operator: 'in', value: imported_by_ids },
-                ],
+                whereConditions: [{ fieldName: 'uid', operator: 'in', value: imported_by_ids }],
               })
 
               const meta_page_reference = active_workspace.data.meta_pages_refs
@@ -289,7 +282,7 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
           error: post.error,
         }
       },
-    })
+    }),
   }
   const workspace_service = {
     chatbot_flow: reactive({
@@ -400,10 +393,6 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     }
 
     current_member.listener = null
-  }
-
-  function find_member() {
-    active_team.data?.team_members
   }
 
   return {

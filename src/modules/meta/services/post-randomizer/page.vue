@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import CreateEditModal from './components/create-edit-modal.vue'
-import DeleteModal from './components/delete-modal.vue'
 import Badge from '@/core/components/ui/badge/Badge.vue'
 import { Button } from '@/core/components/ui/button'
 import {
@@ -22,8 +21,7 @@ import {
 import { uiHelpers } from '@/core/utils/ui-helper'
 import router from '@/router'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
-import { onMounted, provide, ref, useTemplateRef } from 'vue'
-
+import { onMounted, ref, useTemplateRef } from 'vue'
 
 // TOGGLE CAMPAIGN STATUS
 // function handleToggleCampaignStatus(campaignId: Campaign['id']) {
@@ -37,13 +35,11 @@ import { onMounted, provide, ref, useTemplateRef } from 'vue'
 // }
 
 const authWorkspaceStore = useAuthWorkspaceStore()
-const { workspace_service, service_models } = authWorkspaceStore
+const { workspace_service } = authWorkspaceStore
 const { post_randomizer } = workspace_service
 
 const createEditModalRef = useTemplateRef('createEditModal')
-const deleteModalRef = useTemplateRef('deleteModal')
 const pageLoad = ref(false)
-
 
 onMounted(async () => {
   pageLoad.value = true
@@ -51,13 +47,15 @@ onMounted(async () => {
   pageLoad.value = false
   await post_randomizer.fetch_campaigns()
 })
-
 </script>
 
 <template>
   <Main class="flex flex-col gap-y-4">
     <template #heading>Post Randomizer</template>
-    <Button class="gap-x-2 self-end" @click="createEditModalRef?.modal.open({ intent: 'create', prId: null })">
+    <Button
+      class="gap-x-2 self-end"
+      @click="createEditModalRef?.modal.open({ intent: 'create', prId: null })"
+    >
       <i class="bx bx-plus text-xl" />
       Create Campaign
     </Button>
@@ -76,7 +74,10 @@ onMounted(async () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            <TableRow v-for="campaign, campaign_index in post_randomizer.data" :key="campaign_index">
+            <TableRow
+              v-for="(campaign, campaign_index) in post_randomizer.data"
+              :key="campaign_index"
+            >
               <TableCell>{{ campaign.name }}</TableCell>
               <TableCell>
                 <div class="flex flex-col gap-y-0.5">
@@ -92,7 +93,7 @@ onMounted(async () => {
               </TableCell>
               <TableCell class="whitespace-nowrap">{{
                 uiHelpers.formatDateTimeAgo(campaign.createdAt)
-                }}</TableCell>
+              }}</TableCell>
               <!-- @temporary: can be changed to a `<Switch />` component -->
               <TableCell>
                 <Badge>{{ uiHelpers.toTitleCase(campaign.status) }}</Badge>
@@ -104,21 +105,34 @@ onMounted(async () => {
                       <i class="material-icons text-md">more_vert</i>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem class="gap-x-3"
-                        @click="router.push({ name: 'post-randomizer-view', params: { randomizer_id: campaign.pr_id } })">
+                      <DropdownMenuItem
+                        class="gap-x-3"
+                        @click="
+                          router.push({
+                            name: 'post-randomizer-view',
+                            params: { randomizer_id: campaign.pr_id },
+                          })
+                        "
+                      >
                         <i class="bx bx-edit text-xl" />
                         View
                       </DropdownMenuItem>
-                      <DropdownMenuItem class="gap-x-3"
-                        @click="createEditModalRef?.modal.open({ intent: 'edit', prId: campaign.pr_id })">
+                      <DropdownMenuItem
+                        class="gap-x-3"
+                        @click="
+                          createEditModalRef?.modal.open({ intent: 'edit', prId: campaign.pr_id })
+                        "
+                      >
                         <i class="bx bx-edit text-xl" />
                         Edit
                       </DropdownMenuItem>
                       <DropdownMenuItem class="gap-x-3">
-                        <i :class="[
-                          'bx text-xl',
-                          campaign.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
-                        ]" />
+                        <i
+                          :class="[
+                            'bx text-xl',
+                            campaign.status === 'active' ? 'bx-toggle-left' : 'bxs-toggle-right',
+                          ]"
+                        />
                         Toggle Status
                       </DropdownMenuItem>
                       <DropdownMenuItem class="gap-x-3" disabled>
@@ -159,5 +173,4 @@ onMounted(async () => {
   </Main>
 
   <CreateEditModal ref="createEditModal" />
-  <DeleteModal ref="deleteModal" />
 </template>
