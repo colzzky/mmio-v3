@@ -1,5 +1,6 @@
 
 import { type TransformedTimezone, type OriginalTimezone } from '@/core/types/UniTypes';
+type TransformFunction<T> = (value: T) => any;
 export const uiHelpers = {
   formatDateTimeAgo(dateString: string, locale: string = 'en-US'): string {
     const date = new Date(dateString)
@@ -131,11 +132,31 @@ export const uiHelpers = {
     return copy as T
   },
 
-  shallowPick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
+
+  shallowPick<T, K extends keyof T>(
+    obj: T,
+    keys: K[],
+    transforms: Partial<Record<K, (value: T[K]) => any>> = {}
+  ): Pick<T, K> {
     const result = {} as Pick<T, K>;
+  
     keys.forEach((key) => {
-      result[key] = obj[key];
+      let value = obj[key];
+  
+      // Apply transformation if a transform function is provided for the key
+      if (transforms[key]) {
+        value = transforms[key]!(value);
+      } else if (Array.isArray(value)) {
+        // Create a shallow copy of the array
+        value = [...value] as T[K];
+      } else if (value && typeof value === "object") {
+        // Create a shallow copy of the object
+        value = { ...value } as T[K];
+      }
+  
+      result[key] = value;
     });
+  
     return result;
   },
 

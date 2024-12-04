@@ -409,12 +409,9 @@ async function copyLink() {
       <div>
         <div class="flex justify-end">
           <div>
-            <button
-              v-if="!create_team_modal.isLoading"
+            <button v-if="!create_team_modal.isLoading"
               class="right-0 top-0 cursor-pointer border-0 bg-transparent text-xl text-gray-500 hover:text-gray-700 focus:outline-none"
-              aria-label="Close"
-              @click="create_team_modal.close()"
-            >
+              aria-label="Close" @click="create_team_modal.close()">
               <i class="material-icons">close</i>
             </button>
           </div>
@@ -424,11 +421,7 @@ async function copyLink() {
           <div class="grid grid-cols-1 gap-5">
             <div class="col-span-1">
               <div class="flex flex-col items-center justify-center space-y-2">
-                <img
-                  src="@/assets/undraw_team_spirit_re_yl1v.svg"
-                  alt="Centered SVG"
-                  class="h-[20vh] w-[20vh]"
-                />
+                <img src="@/assets/undraw_team_spirit_re_yl1v.svg" alt="Centered SVG" class="h-[20vh] w-[20vh]" />
               </div>
             </div>
             <div class="col-span-1">
@@ -437,8 +430,7 @@ async function copyLink() {
                   <span class="font-bold text-gray-600">1 of 2</span>
                 </div>
                 <div
-                  class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent"
-                >
+                  class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent">
                   Let's create you a Team
                 </div>
                 <div>
@@ -446,38 +438,19 @@ async function copyLink() {
                 </div>
 
                 <div class="flex flex-col items-center space-y-2 pt-5">
-                  <Input
-                    v-model="team_name_form.dataInput.name"
-                    :disabled="create_team_modal.isLoading"
-                    @blur="team_name_form.validateSingleField('name')"
-                    type="text"
-                    placeholder="Team Name"
-                    class="w-[50vh] rounded-none border-x-0 border-b-2 border-t-0 text-center text-4xl font-thin focus-visible:border-blue-600 focus-visible:ring-0 focus-visible:ring-offset-0"
-                  />
-                  <div
-                    v-if="team_name_form.errors.name"
-                    for="name"
-                    class="flex items-center gap-1 text-xs text-red-500"
-                  >
+                  <Input v-model="team_name_form.dataInput.name" :disabled="create_team_modal.isLoading"
+                    @blur="team_name_form.validateSingleField('name')" type="text" placeholder="Team Name"
+                    class="w-[50vh] rounded-none border-x-0 border-b-2 border-t-0 text-center text-4xl font-thin focus-visible:border-blue-600 focus-visible:ring-0 focus-visible:ring-offset-0" />
+                  <div v-if="team_name_form.errors.name" for="name"
+                    class="flex items-center gap-1 text-xs text-red-500">
                     <i class="material-icons text-sm">error</i>
                     {{ team_name_form.errors.name }}
                   </div>
                 </div>
                 <div>
-                  <Button
-                    v-if="!create_team_modal.isLoading"
-                    @click="create_team_modal.continue()"
-                    class="bg-red-500 px-10 text-white hover:bg-red-700"
-                    size="sm"
-                    >Create Team</Button
-                  >
-                  <Button
-                    v-else
-                    variant="outline"
-                    size="xs"
-                    disabled
-                    class="flex items-center gap-2"
-                  >
+                  <Button v-if="!create_team_modal.isLoading" @click="create_team_modal.continue()"
+                    class="bg-red-500 px-10 text-white hover:bg-red-700" size="sm">Create Team</Button>
+                  <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">
                     <i class="material-icons animate-spin text-sm">donut_large</i>Creating you a
                     team...
                   </Button>
@@ -490,11 +463,7 @@ async function copyLink() {
           <div class="grid grid-cols-1 gap-5">
             <div class="col-span-1">
               <div class="flex flex-col items-center justify-center space-y-2">
-                <img
-                  src="@/assets/undraw_team_spirit_re_yl1v.svg"
-                  alt="Centered SVG"
-                  class="h-[20vh] w-[20vh]"
-                />
+                <img src="@/assets/undraw_team_spirit_re_yl1v.svg" alt="Centered SVG" class="h-[20vh] w-[20vh]" />
               </div>
             </div>
             <div class="col-span-1">
@@ -503,8 +472,7 @@ async function copyLink() {
                   <span class="font-bold text-gray-600">2 of 2</span>
                 </div>
                 <div
-                  class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent"
-                >
+                  class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent">
                   Who do you want to work with?
                 </div>
                 <div>
@@ -515,79 +483,42 @@ async function copyLink() {
                   <div class="space-y-2">
                     <div class="flex items-center justify-between">
                       <span>Invite up to 40 teammates: </span>
-                      <Button
-                        v-if="!create_team_modal.isLoading"
-                        class="text-blue-500"
-                        size="sm"
-                        variant="ghost"
-                        @click="copyLink()"
-                      >
+                      <Button v-if="!create_team_modal.isLoading" class="text-blue-500" size="sm" variant="ghost"
+                        @click="copyLink()">
                         <i class="material-icons pr-2">link</i>
-                        Copy link</Button
-                      >
+                        Copy link</Button>
                     </div>
-                    <div
-                      class="flex w-[70vh] flex-row flex-wrap items-center gap-2 rounded-lg border-2 p-4"
-                    >
-                      <div
-                        v-for="(email, index) in choose_member_form.emails"
-                        :key="email"
-                        class="flex items-center space-x-2 self-start rounded-full bg-blue-500 p-2 px-3"
-                      >
+                    <div class="flex w-[70vh] flex-row flex-wrap items-center gap-2 rounded-lg border-2 p-4">
+                      <div v-for="(email, index) in choose_member_form.emails" :key="email"
+                        class="flex items-center space-x-2 self-start rounded-full bg-blue-500 p-2 px-3">
                         <span class="text-sm font-semibold text-white">{{ email }}</span>
-                        <button
-                          @click="choose_member_form.removeEmail(index)"
-                          class="flex cursor-pointer items-center text-white focus:outline-none"
-                        >
+                        <button @click="choose_member_form.removeEmail(index)"
+                          class="flex cursor-pointer items-center text-white focus:outline-none">
                           <i class="material-icons text-md">close</i>
                         </button>
                       </div>
 
                       <div class="w-[30vh] rounded-full">
-                        <Input
-                          v-model="choose_member_form.dataInput.member_email"
-                          :disabled="create_team_modal.isLoading"
-                          @blur="choose_member_form.addEmail()"
-                          @keyup.enter="choose_member_form.addEmail()"
-                          type="text"
-                          placeholder="User Email"
-                          class="rounded-none border-x-0 border-b border-t-0 text-sm focus-visible:border-blue-600 focus-visible:ring-0 focus-visible:ring-offset-0"
-                        />
+                        <Input v-model="choose_member_form.dataInput.member_email"
+                          :disabled="create_team_modal.isLoading" @blur="choose_member_form.addEmail()"
+                          @keyup.enter="choose_member_form.addEmail()" type="text" placeholder="User Email"
+                          class="rounded-none border-x-0 border-b border-t-0 text-sm focus-visible:border-blue-600 focus-visible:ring-0 focus-visible:ring-offset-0" />
                       </div>
                     </div>
                   </div>
-                  <div
-                    v-if="choose_member_form.errors.member_email"
-                    for="name"
-                    class="flex items-center gap-1 text-xs text-red-500"
-                  >
+                  <div v-if="choose_member_form.errors.member_email" for="name"
+                    class="flex items-center gap-1 text-xs text-red-500">
                     <i class="material-icons text-sm">error</i>
                     {{ choose_member_form.errors.member_email }}
                   </div>
                 </div>
                 <div class="flex items-center justify-between gap-x-2">
-                  <Button
-                    v-if="!create_team_modal.isLoading"
-                    @click="create_team_modal.continue()"
-                    class="px-10 text-red-500 hover:text-red-700"
-                    size="sm"
-                    variant="ghost"
-                    >Invite later</Button
-                  >
-                  <Button
-                    v-if="!create_team_modal.isLoading"
-                    @click="create_team_modal.continue()"
-                    class="bg-red-500 px-10 text-white hover:bg-red-700"
-                    size="sm"
-                    >Invite Users</Button
-                  >
-                  <Button
-                    v-if="create_team_modal.isLoading"
-                    variant="outline"
-                    size="xs"
-                    disabled
-                    class="flex items-center gap-2"
-                  >
+                  <Button v-if="!create_team_modal.isLoading" @click="create_team_modal.continue()"
+                    class="px-10 text-red-500 hover:text-red-700" size="sm" variant="ghost">Invite later</Button>
+                  <Button v-if="!create_team_modal.isLoading" @click="create_team_modal.continue()"
+                    class="bg-red-500 px-10 text-white hover:bg-red-700" size="sm">Invite Users</Button>
+                  <Button v-if="create_team_modal.isLoading" variant="outline" size="xs" disabled
+                    class="flex items-center gap-2">
                     <i class="material-icons animate-spin text-sm">donut_large</i>Creating you a
                     team...
                   </Button>
@@ -596,32 +527,22 @@ async function copyLink() {
             </div>
           </div>
         </div>
-        <div
-          v-if="create_team_modal.steps === CreateTeamSteps.Complete"
-          class="container mx-auto pt-10"
-        >
+        <div v-if="create_team_modal.steps === CreateTeamSteps.Complete" class="container mx-auto pt-10">
           <div class="grid grid-cols-1 gap-5">
             <div class="col-span-1">
               <div class="flex items-center justify-center">
                 <div
-                  class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent"
-                >
+                  class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent">
                   You have successfuly created a team!
                 </div>
               </div>
             </div>
             <div class="col-span-1 pt-20">
               <div class="flex flex-col items-center justify-center space-y-2">
-                <img
-                  src="@/assets/undraw_vintage_414k.svg"
-                  alt="Centered SVG"
-                  class="h-[25vh] w-[25vh]"
-                />
+                <img src="@/assets/undraw_vintage_414k.svg" alt="Centered SVG" class="h-[25vh] w-[25vh]" />
                 <div class="flex items-center gap-x-2">
                   <i class="material-icons text-md animate-spin">donut_large</i>
-                  <span class="text-md font-semibold"
-                    >Please wait while we redirect you to your team workspace</span
-                  >
+                  <span class="text-md font-semibold">Please wait while we redirect you to your team workspace</span>
                 </div>
               </div>
             </div>
