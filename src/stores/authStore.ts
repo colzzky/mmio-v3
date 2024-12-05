@@ -62,7 +62,7 @@ export const useAuthStore = defineStore(
         return this.data != null && typeof this.data === 'object' && 'uid' in this.data && 'email' in this.data;
       },
 
-      check_user_auth(): Promise<boolean> | boolean {
+      user_auth_initialization(): Promise<boolean> | boolean {
         console.log(this.isAuthListenerActive)
         if (this.isAuthListenerActive) {
           return this.data !== null;

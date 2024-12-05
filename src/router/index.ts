@@ -65,8 +65,10 @@ router.beforeEach(async(to, from) => {
       console.log('Initializing...');
       // Mark initialization as in progress
       page_init.initialize = false;
+      //Refresh the auth firebase listener when you refresh the page
       user_auth.listener_refresh()
-      check_if_userexist = await user_auth.check_user_auth();
+      // Initialize user first step
+      check_if_userexist = await user_auth.user_auth_initialization();
       // Mark initialization as complete
       page_init.initialize = true;
     })();
