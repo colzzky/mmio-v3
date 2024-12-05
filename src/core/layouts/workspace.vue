@@ -140,10 +140,6 @@ watch(
   () => authStore.page_init.initialize,
   async (newVal) => {
     if (newVal) {
-      const check_if_userexist = user_auth.check_user_auth();
-      if (!check_if_userexist) {
-        return router.push({ name: 'login' })
-      }
       await validateWorkspace()
       await validateMemberOwner()
       workspace_load.value = false;

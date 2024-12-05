@@ -18,12 +18,9 @@ import type { TeamData } from '@/core/types/TeamTypes'
 import type { WorkspaceData } from '@/core/types/WorkSpaceTypes'
 import { getWhereAny } from '@/core/utils/firebase-collections'
 import CreateTeam from '@/modules/teams-permissions/components/team/CreateTeam.vue'
-import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-
-const routes = useRoute()
 
 const allWorkspaceFilter = ref('Most Recent')
 const sharedWorkspaceFilter = ref('Most Recent')
