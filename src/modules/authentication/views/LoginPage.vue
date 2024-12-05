@@ -15,7 +15,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
 } from 'firebase/auth'
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, watch, onMounted } from 'vue'
 
 const authStore = useAuthStore()
 const { user_auth, createNewUserProfile, after_auth_initialization } = authStore
@@ -51,8 +51,6 @@ const loginUser = async (email: string, password: string): Promise<void> => {
             photoURL: auth.currentUser.photoURL,
             uid: auth.currentUser.uid,
           })
-          await user_auth.initializeUser()
-          await after_auth_initialization()
           router.replace({ name: 'home' })
         }
       })
@@ -80,8 +78,6 @@ async function registerFacebook(): Promise<void> {
         photoURL: result.user.photoURL,
         uid: result.user.uid,
       })
-      await user_auth.initializeUser()
-      await after_auth_initialization()
       router.replace({ name: 'home' })
     })
     .catch((error) => {
@@ -96,14 +92,17 @@ async function registerFacebook(): Promise<void> {
 
 const pageLoad = ref<boolean>(true)
 
+
+
+// Watch for changes in authStore.page_init.initialize
 watch(
   () => authStore.page_init.initialize,
   async (newVal) => {
     if (newVal) {
-
       pageLoad.value = false;
     }
-  }
+  },
+  { immediate: true }
 );
 
 </script>

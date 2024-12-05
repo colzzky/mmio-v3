@@ -7,7 +7,7 @@ import type { MutablePick } from '@/core/types/UniTypes'
 import { auth } from '@/core/utils/firebase-client'
 import { postCollection, getCollection, getWhereAny } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
+import { onAuthStateChanged, signOut, type Unsubscribe, type User } from 'firebase/auth'
 import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
@@ -40,6 +40,8 @@ export const useAuthStore = defineStore(
     const user_auth = reactive({
       data: null as User | null,
       isInitializing: false as boolean,
+      isAuthListenerActive: false as boolean,
+      authListener: null as (() => Unsubscribe | void) | null,
       setUser(currentUser: User | null) {
         this.data = currentUser
       },
@@ -60,23 +62,43 @@ export const useAuthStore = defineStore(
         return this.data != null && typeof this.data === 'object' && 'uid' in this.data && 'email' in this.data;
       },
 
-      check_user_auth(): Promise<boolean> {
-        return new Promise((resolve, reject) => {
-          onAuthStateChanged(auth, (user) => {
+      check_user_auth(): Promise<boolean> | boolean {
+        console.log(this.isAuthListenerActive)
+        if (this.isAuthListenerActive) {
+          return this.data !== null;
+        }
+
+        // Set the flag to true and initialize the listener
+        this.isAuthListenerActive = true;
+
+        return new Promise((resolve) => {
+          this.authListener = onAuthStateChanged(auth, async (user) => {
             if (user) {
-              this.setUser(user)
+              console.log('signed in')
+              this.setUser(user);
+              await user_auth.initializeUser();
+              await after_auth_initialization();
               resolve(true); // User is signed in
             } else {
-              this.setUser(null)
+              this.setUser(null);
+              console.log('You have been logged out');
               resolve(false); // No user is signed in
             }
           });
         });
       },
 
+      listener_refresh() {
+        this.isAuthListenerActive = false;
+        if (this.authListener !== null) {
+          this.authListener()
+        }
+        this.authListener = null
+      },
+
       async signOut() {
         await signOut(auth)
-        await resetAllStore()
+      await resetAllStore()
       },
     })
 

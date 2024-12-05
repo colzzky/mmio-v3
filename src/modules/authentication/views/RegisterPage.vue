@@ -16,11 +16,11 @@ import {
   signInWithPopup,
   updateProfile,
 } from 'firebase/auth'
-import { reactive } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import { z } from 'zod'
 
 const authStore = useAuthStore()
-const { user_auth, createNewUserProfile } = authStore
+const { user_auth, createNewUserProfile, after_auth_initialization } = authStore
 const { toast } = useToast()
 
 // REGISTER USER
@@ -141,7 +141,6 @@ const registrationField = reactive<RegistrationField>({
               photoURL: auth.currentUser.photoURL,
               uid: auth.currentUser.uid,
             })
-            await user_auth.initializeUser()
             router.push({ name: 'home' })
           }
         })
@@ -166,7 +165,6 @@ const registrationField = reactive<RegistrationField>({
           photoURL: result.user.photoURL,
           uid: result.user.uid,
         })
-        await user_auth.initializeUser()
         router.replace({ name: 'home' })
       })
       .catch((error) => {
@@ -182,10 +180,21 @@ const registrationField = reactive<RegistrationField>({
     this.errors = { ...inputStructure }
   },
 })
+const pageLoad = ref<boolean>(true)
+watch(
+  () => authStore.page_init.initialize,
+  async (newVal) => {
+    console.log('hello');
+    if (newVal) {
+      pageLoad.value = false;
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
-  <main
+  <main v-if="!pageLoad"
     class="mx-auto grid min-h-svh w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl grid-rows-[48px_1fr] gap-8 py-[var(--gutter)] [--gutter:1rem] lg:grid-cols-5 lg:[--gutter:2rem]"
   >
     <img
@@ -318,5 +327,15 @@ const registrationField = reactive<RegistrationField>({
       <img src="@/assets/login.png" alt="" />
     </div>
   </main>
+  <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
+    <div class="flex animate-pulse items-center gap-x-1">
+      <i class="material-icons text-4xl">pin</i>
+      <span class="text-xl font-extrabold">MMIO</span>
+    </div>
+    <div class="flex items-center justify-center space-x-2">
+      <i class="material-icons animate-spin text-sm">donut_large</i>
+      <div>Loading</div>
+    </div>
+  </div>
   <Toaster />
 </template>

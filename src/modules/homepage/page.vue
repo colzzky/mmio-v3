@@ -161,8 +161,6 @@ async function fetch_all_workspaces() {
 }
 
 onMounted(async () => {
-  const check_if_userexist = user_auth.check_user_auth();
-  console.log(page_init.initialize)
   if (page_init.initialize) {
     pageLoad.value = true;
     
@@ -176,10 +174,9 @@ watch(
   async (newVal) => {
     if (newVal) {
       pageLoad.value = false;
-      const check_if_userexist = await user_auth.check_user_auth();
       await fetch_all_workspaces()
     }
-  }
+  },{immediate:true}
 );
 
 </script>
@@ -313,6 +310,7 @@ watch(
         </section>
       </div>
     </main>
+    <CreateTeam :open_modal="new_team_modal" @return="new_team_return" />
   </div>
   <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
     <div class="flex animate-pulse items-center gap-x-1">
@@ -325,7 +323,7 @@ watch(
     </div>
   </div>
 
-  <CreateTeam :open_modal="new_team_modal" @return="new_team_return" />
+  
 </template>
 
 <style scoped>

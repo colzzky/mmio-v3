@@ -148,7 +148,7 @@ watch(
       await validateMemberOwner()
       workspace_load.value = false;
     }
-  }
+  },{immediate:true}
 );
 </script>
 

@@ -63,20 +63,24 @@ router.beforeEach(async(to, from) => {
   if (!from.name) {
     (async () => {
       console.log('Initializing...');
-      page_init.initialize = false; // Mark initialization as in progress
+      // Mark initialization as in progress
+      page_init.initialize = false;
+      user_auth.listener_refresh()
       check_if_userexist = await user_auth.check_user_auth();
-      if(check_if_userexist){
-        await user_auth.initializeUser();
-        await after_auth_initialization();
-      }
-
-      page_init.initialize = true; // Mark initialization as complete
+      // Mark initialization as complete
+      page_init.initialize = true;
     })();
     // Redirect to home to display the loading state
   }
   const check_auth = user_auth.isUserAuthenticated()
-  if (requiresAuth && !check_if_userexist && !check_auth) return { name: 'login' };
-  if (nonAuth && check_if_userexist && check_auth) return { name: 'home' };
+  if (requiresAuth && !check_if_userexist && !check_auth){
+    console.log('not loggedin')
+    return { name: 'login' }
+  } 
+  if (nonAuth && check_if_userexist && check_auth) {
+    console.log('logged in')
+    return { name: 'home' }
+  }
 
   return true;
 });
