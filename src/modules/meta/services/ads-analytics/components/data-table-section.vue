@@ -8,7 +8,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/core/components/ui/select'
-import DataTable from '@/modules/meta/services/ad-analytics/components/data-table.vue'
+import DataTable from '@/modules/meta/services/ads-analytics/components/data-table.vue'
 import { ref } from 'vue'
 
 const data = ref<Analytics[]>(analytics)

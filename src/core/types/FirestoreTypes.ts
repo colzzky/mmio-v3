@@ -58,15 +58,11 @@ interface Workspace_Collection {
     interface: PostRandomizerPostsData
     sub_col: SubCollectionKey<PostRandomizerServiceData>[]
     sub_params: {
-      ws_id: string,
-      pr_id:string
+      ws_id: string
+      pr_id: string
     } | null
   }
 }
-
-
-
-
 
 interface User_Collection {
   user: {

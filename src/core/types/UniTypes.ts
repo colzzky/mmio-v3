@@ -22,24 +22,45 @@ export type Platforms =
   | 'OmniChannel'
   | ''
 
-export const months = ['January' , 'February' , 'March' , 'April' , 'May' , 'June' , 'July' , 'August' , 'September' , 'October' , 'November','December'] as const
-export const days = ['Monday' , 'Tuesday' , 'Wednesday' , 'Thursday' , 'Friday' , 'Saturday' , 'Sunday'] as const
+export const months = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+] as const
+export const days = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+] as const
 
 export type Months = (typeof months)[number]
 export type Days = (typeof days)[number]
 
 export interface OriginalTimezone {
-  value: string;
-  abbr: string;
-  offset: number;
-  isdst: boolean;
-  text: string;
-  utc: string[];
+  value: string
+  abbr: string
+  offset: number
+  isdst: boolean
+  text: string
+  utc: string[]
 }
 
 export interface TransformedTimezone {
-  name: string;
-  abr: string;
-  text: string;
-  offset: number;
+  name: string
+  abr: string
+  text: string
+  offset: number
 }

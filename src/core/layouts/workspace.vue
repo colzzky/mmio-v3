@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Toaster from '../components/ui/toast/Toaster.vue'
 import type { TeamData, TeamMembersData } from '../types/TeamTypes'
+import { getWhereAny } from '../utils/firebase-collections'
 import { accessPermission } from '../utils/permissionHelpers'
 import DesktopSidebar from '@/core/components/sidebar/desktop-sidebar.vue'
 import router from '@/router'
@@ -8,7 +9,7 @@ import { useWorkspaceStore } from '@/stores/WorkspaceStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { useTeamStore } from '@/stores/teamStore'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 /**
@@ -67,6 +68,7 @@ async function validateMemberOwner() {
   // Check workspace ownership
   if (workspaceOwner(active_workspace.data)) {
     active_team.data = teamData ? JSON.parse(JSON.stringify(teamData)) : null
+    await populateTeamMembers()
     return // Valid owner, exit function
   }
 
@@ -83,15 +85,71 @@ async function validateMemberOwner() {
     // Listen for current member updates
     await current_member.listen(teamId, member.member_id)
     active_team.data = JSON.parse(JSON.stringify(teamData))
+    await populateTeamMembers()
+    return
+  }
+}
+
+async function populateTeamMembers() {
+  if (active_team.data && active_team.data.team_members) {
+    const members_uid: string[] = []
+    active_team.data.team_members.forEach((member) => {
+      active_team.members[member.uid] = {
+        ...member,
+        displayName: '',
+        email: '',
+        picture: '',
+      }
+      members_uid.push(member.uid)
+    })
+
+    const find_members_info = await getWhereAny('user', {
+      $path: 'users',
+      whereConditions: [
+        {
+          fieldName: 'uid',
+          operator: 'in',
+          value: members_uid,
+        },
+      ],
+    })
+
+    if (find_members_info.status && find_members_info.data.length > 0) {
+      Object.keys(active_team.members).forEach((member_uid) => {
+        const member = find_members_info.data.find((m) => m.uid === member_uid)
+        if (member) {
+          active_team.members[member_uid].displayName = member.displayName ? member.displayName : ''
+          active_team.members[member_uid].email = member.email ? member.email : ''
+          active_team.members[member_uid].picture = member.photoURL ? member.photoURL : ''
+        }
+      })
+    }
   }
 }
 
 onMounted(async () => {
-  workspace_load.value = true
-  await validateWorkspace()
-  await validateMemberOwner()
-  workspace_load.value = false
+  if (authStore.page_init.initialize) {
+    workspace_load.value = true
+    await validateWorkspace()
+    await validateMemberOwner()
+    workspace_load.value = false
+  }
 })
+
+watch(
+  () => authStore.page_init.initialize,
+  async (newVal) => {
+    if (newVal) {
+      const check_if_userexist = user_auth.check_user_auth();
+      if (!check_if_userexist) {
+        return router.push({ name: 'login' })
+      }
+      await validateWorkspace()
+      await validateMemberOwner()
+      workspace_load.value = false;
+    }
+  },{immediate:true}
+);
 </script>
 
 <template>
@@ -109,7 +167,7 @@ onMounted(async () => {
     </div>
     <div class="flex items-center justify-center space-x-2">
       <i class="material-icons animate-spin text-sm">donut_large</i>
-      <div>Loading</div>
+      <div>Loading Workspace. Please wait.</div>
     </div>
   </div>
 </template>

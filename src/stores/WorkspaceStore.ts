@@ -50,7 +50,7 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
       const get = await getCollection('workspaces', {
         $path: 'workspaces',
         id: ws_id,
-        $sub_col: ['meta_pages_refs']
+        $sub_col: ['meta_pages_refs'],
       })
       return {
         status: get.status,
@@ -67,7 +67,7 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
         id,
         data: this.data,
         type,
-      });
+      })
       console.log(post)
       return {
         status: post.status,
@@ -106,7 +106,7 @@ export const useWorkspaceStore = defineStore('workspaceStore', () => {
         id,
         data: this.data,
         type,
-      });
+      })
       console.log(post)
       return {
         status: post.status,

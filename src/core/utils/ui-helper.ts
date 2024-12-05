@@ -1,6 +1,6 @@
-import { type TransformedTimezone, type OriginalTimezone } from '@/core/types/UniTypes';
-import type { Updater } from "@tanstack/vue-table"
-import type { Ref } from "vue"
+import { type TransformedTimezone } from '@/core/types/UniTypes'
+import type { Updater } from '@tanstack/vue-table'
+import type { Ref } from 'vue'
 
 export const uiHelpers = {
   formatDateTimeAgo(dateString: string, locale: string = 'en-US'): string {
@@ -133,37 +133,56 @@ export const uiHelpers = {
     return copy as T
   },
 
+  shallowPick<T, K extends keyof T>(
+    obj: T,
+    keys: K[],
+    transforms: Partial<Record<K, (value: T[K]) => any>> = {},
+  ): Pick<T, K> {
+    const result = {} as Pick<T, K>
 
-  shallowPick<T, K extends keyof T>(obj: T, keys: K[]): Pick<T, K> {
-    const result = {} as Pick<T, K>;
     keys.forEach((key) => {
-      result[key] = obj[key];
-    });
-    return result;
+      let value = obj[key]
+
+      // Apply transformation if a transform function is provided for the key
+      if (transforms[key]) {
+        value = transforms[key]!(value)
+      } else if (Array.isArray(value)) {
+        // Create a shallow copy of the array
+        value = [...value] as T[K]
+      } else if (value && typeof value === 'object') {
+        // Create a shallow copy of the object
+        value = { ...value } as T[K]
+      }
+
+      result[key] = value
+    })
+
+    return result
   },
 
   convertTimeToReadableFormat(time: string): string {
-    const [hour, minute] = time.split(":").map(Number);
-    const period = hour >= 12 ? "PM" : "AM";
+    const [hour, minute] = time.split(':').map(Number)
+    const period = hour >= 12 ? 'PM' : 'AM'
 
     // Convert hour to 12-hour format
-    const readableHour = hour % 12 || 12; // Converts 0 to 12 for 12:00 AM
-    const readableMinute = minute.toString().padStart(2, "0"); // Ensure two digits for minute
+    const readableHour = hour % 12 || 12 // Converts 0 to 12 for 12:00 AM
+    const readableMinute = minute.toString().padStart(2, '0') // Ensure two digits for minute
 
-    return `${readableHour}:${readableMinute} ${period}`;
+    return `${readableHour}:${readableMinute} ${period}`
   },
 
   async timezoneList(): Promise<TransformedTimezone[]> {
-    const data = await import('@/assets/timezone_utils.json'); // Dynamically import the JSON
-    const timezones = data.default || data; // Use `default` if the data is wrapped in it
-  
+    const data = await import('@/assets/timezone_utils.json') // Dynamically import the JSON
+    const timezones = data.default || data // Use `default` if the data is wrapped in it
+
     // Assuming timezones is an array of objects like { value, abbr, text, offset }
     return timezones.map((timezone: any) => ({
       name: timezone.value,
       abr: timezone.abbr,
       text: timezone.text,
       offset: timezone.offset,
-    }));
+    }))
+  },
 
   formatToCurrency(input: number) {
     return new Intl.NumberFormat('en-PH', {
@@ -180,10 +199,6 @@ export const uiHelpers = {
   },
 
   valueUpdater<T extends Updater<any>>(updaterOrValue: T, ref: Ref) {
-    ref.value = typeof updaterOrValue === 'function'
-      ? updaterOrValue(ref.value)
-      : updaterOrValue
-
-  }
-
+    ref.value = typeof updaterOrValue === 'function' ? updaterOrValue(ref.value) : updaterOrValue
+  },
 }

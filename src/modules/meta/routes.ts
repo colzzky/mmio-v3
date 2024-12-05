@@ -29,7 +29,6 @@ const names = [
   'marketing-messages',
 ] as const
 
-
 export type Service = { icon: string; label: string; pinned: boolean; description: string }
 type ServiceRecord = Record<(typeof servicesName)[number], Service>
 const servicesRecord: ServiceRecord = {
@@ -193,10 +192,10 @@ const routes: RouteRecordRaw[] = Object.entries(routeRecords).map(([key, values]
 })) as RouteRecordRaw[]
 
 //Children here
-routes.push ({
+routes.push({
   name: 'post-randomizer-view',
   path: 'post-randomizer/:randomizer_id',
   component: () => import('./services/post-randomizer/view-post-randomizer.vue'),
 })
 
-export {routes}
+export { routes }

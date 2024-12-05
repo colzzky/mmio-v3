@@ -15,10 +15,10 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
 } from 'firebase/auth'
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch, onMounted } from 'vue'
 
 const authStore = useAuthStore()
-const { user_auth, createNewUserProfile } = authStore
+const { user_auth, createNewUserProfile, after_auth_initialization } = authStore
 const { toast } = useToast()
 
 // USER SIGNIN WITH EMAIL AND PASSWORD
@@ -51,7 +51,6 @@ const loginUser = async (email: string, password: string): Promise<void> => {
             photoURL: auth.currentUser.photoURL,
             uid: auth.currentUser.uid,
           })
-          await user_auth.initializeUser()
           router.replace({ name: 'home' })
         }
       })
@@ -79,7 +78,6 @@ async function registerFacebook(): Promise<void> {
         photoURL: result.user.photoURL,
         uid: result.user.uid,
       })
-      await user_auth.initializeUser()
       router.replace({ name: 'home' })
     })
     .catch((error) => {
@@ -91,14 +89,29 @@ async function registerFacebook(): Promise<void> {
     })
   loginLoad.value = false
 }
+
+const pageLoad = ref<boolean>(true)
+
+
+
+// Watch for changes in authStore.page_init.initialize
+watch(
+  () => authStore.page_init.initialize,
+  async (newVal) => {
+    if (newVal) {
+      pageLoad.value = false;
+    }
+  },
+  { immediate: true }
+);
+
 </script>
 
 <template>
   <Toaster />
-  <main
+  <div v-if="!pageLoad"
     class="mx-auto flex w-[calc(100svw-calc(var(--gutter)*2))] max-w-screen-xl flex-col gap-y-8 py-[var(--gutter)] [--gutter:1rem] lg:[--gutter:2rem]"
-    :class="{ 'cursor-not-allowed': loginLoad }"
-  >
+    :class="{ 'cursor-not-allowed': loginLoad }">
     <img class="h-12 w-auto self-start" src="@/assets/logo.png" alt="marketingmaster.io logo" />
     <template v-if="!isSignInCredentialsFormVisible">
       <section class="flex flex-col gap-y-2 text-center">
@@ -110,10 +123,7 @@ async function registerFacebook(): Promise<void> {
           </Button>
         </p>
       </section>
-      <section
-        v-if="!loginLoad"
-        class="flex w-[calc(100svw-2rem)] max-w-xs flex-col gap-y-2 self-center"
-      >
+      <section v-if="!loginLoad" class="flex w-[calc(100svw-2rem)] max-w-xs flex-col gap-y-2 self-center">
         <Button variant="secondary" class="relative" @click="toggleSignInCredentialsForm">
           <Icon icon="ic:baseline-email" class="absolute left-4 top-1/2 size-5 -translate-y-1/2" />
           Email
@@ -139,49 +149,25 @@ async function registerFacebook(): Promise<void> {
         <h1 class="text-4xl/none font-bold">Login with your Email</h1>
         <p class="text-sm">
           You can also use
-          <Button
-            variant="link"
-            class="h-[unset] p-0 text-blue-500"
-            @click="toggleSignInCredentialsForm"
-          >
+          <Button variant="link" class="h-[unset] p-0 text-blue-500" @click="toggleSignInCredentialsForm">
             Facebook or Google
           </Button>
           to login
         </p>
       </section>
-      <form
-        class="flex w-[calc(100svw-2rem)] max-w-lg flex-col gap-y-4 self-center"
-        @submit.prevent="handleLoginUser"
-      >
+      <form class="flex w-[calc(100svw-2rem)] max-w-lg flex-col gap-y-4 self-center" @submit.prevent="handleLoginUser">
         <div class="flex flex-col gap-y-2">
           <Label for="email">Email Address</Label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            placeholder="johndoe@gmail.com"
-            autocomplete="email"
-            required
-            v-model="form.email"
-            :disabled="loginLoad"
-          />
+          <Input id="email" name="email" type="email" placeholder="johndoe@gmail.com" autocomplete="email" required
+            v-model="form.email" :disabled="loginLoad" />
         </div>
         <div class="grid grid-cols-2 gap-y-1">
           <Label for="password">Password</Label>
           <Button variant="link" as-child class="h-[unset] justify-self-end p-0 text-blue-500">
             <RouterLink to="/forgot-password">Forgot your password?</RouterLink>
           </Button>
-          <Input
-            id="password"
-            name="password"
-            type="password"
-            placeholder="********"
-            autocomplete="password"
-            class="col-span-2"
-            required
-            v-model="form.password"
-            :disabled="loginLoad"
-          />
+          <Input id="password" name="password" type="password" placeholder="********" autocomplete="password"
+            class="col-span-2" required v-model="form.password" :disabled="loginLoad" />
         </div>
         <Button v-if="!loginLoad" type="submit">Sign in</Button>
         <Button v-else variant="outline" size="xs" disabled class="flex items-center gap-2">
@@ -189,5 +175,15 @@ async function registerFacebook(): Promise<void> {
         </Button>
       </form>
     </template>
-  </main>
+  </div>
+  <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
+    <div class="flex animate-pulse items-center gap-x-1">
+      <i class="material-icons text-4xl">pin</i>
+      <span class="text-xl font-extrabold">MMIO</span>
+    </div>
+    <div class="flex items-center justify-center space-x-2">
+      <i class="material-icons animate-spin text-sm">donut_large</i>
+      <div>Loading</div>
+    </div>
+  </div>
 </template>

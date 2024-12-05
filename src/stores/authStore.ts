@@ -7,7 +7,7 @@ import type { MutablePick } from '@/core/types/UniTypes'
 import { auth } from '@/core/utils/firebase-client'
 import { postCollection, getCollection, getWhereAny } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
+import { onAuthStateChanged, signOut, type Unsubscribe, type User } from 'firebase/auth'
 import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
@@ -40,46 +40,65 @@ export const useAuthStore = defineStore(
     const user_auth = reactive({
       data: null as User | null,
       isInitializing: false as boolean,
+      isAuthListenerActive: false as boolean,
+      authListener: null as (() => Unsubscribe | void) | null,
       setUser(currentUser: User | null) {
         this.data = currentUser
       },
       async initializeUser(): Promise<boolean> {
-        this.isInitializing = true
-        const authStatePromise = new Promise((resolve) => {
-          onAuthStateChanged(auth, (user: User | null) => {
-            resolve(user)
-          })
-        })
-        const uid = user_auth.data ? user_auth.data.uid : ''
-        const fetch_user = await user.get(uid)
-        if (fetch_user.status) {
-          user.set(fetch_user.data)
-        }
-
-        const check = await authStatePromise.then((user: any) => {
-          this.setUser(user)
-          if (this.data) {
-            return true
-          } else {
-            return false
+        if (this.data) {
+          const uid = user_auth.data ? user_auth.data.uid : ''
+          const fetch_user = await user.get(uid)
+          if (fetch_user.status) {
+            user.set(fetch_user.data)
           }
-        })
-        this.isInitializing = false
-        return check
-      },
-
-      async check_user_auth() {
-        const user = auth.currentUser
-        if (this.data && user) {
           return true
         } else {
           return false
         }
       },
 
+      isUserAuthenticated(): boolean {
+        return this.data != null && typeof this.data === 'object' && 'uid' in this.data && 'email' in this.data;
+      },
+
+      check_user_auth(): Promise<boolean> | boolean {
+        console.log(this.isAuthListenerActive)
+        if (this.isAuthListenerActive) {
+          return this.data !== null;
+        }
+
+        // Set the flag to true and initialize the listener
+        this.isAuthListenerActive = true;
+
+        return new Promise((resolve) => {
+          this.authListener = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+              console.log('signed in')
+              this.setUser(user);
+              await user_auth.initializeUser();
+              await after_auth_initialization();
+              resolve(true); // User is signed in
+            } else {
+              this.setUser(null);
+              console.log('You have been logged out');
+              resolve(false); // No user is signed in
+            }
+          });
+        });
+      },
+
+      listener_refresh() {
+        this.isAuthListenerActive = false;
+        if (this.authListener !== null) {
+          this.authListener()
+        }
+        this.authListener = null
+      },
+
       async signOut() {
         await signOut(auth)
-        await resetAllStore()
+      await resetAllStore()
       },
     })
 
@@ -97,7 +116,7 @@ export const useAuthStore = defineStore(
       },
       async get() {
         const id = user_auth.data ? user_auth.data.uid : ''
-        const get = await getCollection('user',{
+        const get = await getCollection('user', {
           $path: 'users',
           $sub_params: null,
           id: id,
@@ -113,13 +132,13 @@ export const useAuthStore = defineStore(
 
       async createUpdate(type): Promise<FSReturnData<UserData>> {
         const id = user_auth.data ? user_auth.data.uid : ''
-        const post = await postCollection('user',{
+        const post = await postCollection('user', {
           $path: 'users',
           $sub_params: null,
           id,
           data: this.data,
           type,
-        });
+        })
         return {
           status: post.status,
           data: post.data as UserData,
@@ -159,7 +178,7 @@ export const useAuthStore = defineStore(
               },
             ],
           })
-          
+
           console.log(fetch_team)
           if (fetch_team.status) {
             this.data = fetch_team.data

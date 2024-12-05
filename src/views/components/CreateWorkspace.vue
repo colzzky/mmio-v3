@@ -232,7 +232,6 @@ async function get_user_team() {
           value: user_auth.data.uid,
         },
       ],
-      
     })
 
     console.log(get)
@@ -250,8 +249,11 @@ onMounted(async () => {
 </script>
 <template>
   <Dialog v-model:open="workspace_modal.isOpen">
-    <DialogContent @escape-key-down="(e) => e.preventDefault()" @interact-outside="(e) => e.preventDefault()"
-      class="min-h-[75%] sm:max-w-[75%]">
+    <DialogContent
+      @escape-key-down="(e) => e.preventDefault()"
+      @interact-outside="(e) => e.preventDefault()"
+      class="min-h-[75%] sm:max-w-[75%]"
+    >
       <div v-if="!componentLoad">
         <div>
           <VisuallyHidden>
@@ -261,27 +263,37 @@ onMounted(async () => {
         <div>
           <div class="flex justify-end">
             <div>
-              <button v-if="
-                workspace_modal.steps != NewWorkspaceStep.Processing &&
-                workspace_modal.steps != NewWorkspaceStep.Complete
-              "
+              <button
+                v-if="
+                  workspace_modal.steps != NewWorkspaceStep.Processing &&
+                  workspace_modal.steps != NewWorkspaceStep.Complete
+                "
                 class="right-0 top-0 cursor-pointer border-0 bg-transparent text-xl text-gray-500 hover:text-gray-700 focus:outline-none"
-                aria-label="Close" @click="workspace_modal.close()">
+                aria-label="Close"
+                @click="workspace_modal.close()"
+              >
                 <i class="material-icons">close</i>
               </button>
             </div>
           </div>
           <!-- This part is changing -->
-          <div v-if="workspace_modal.steps === NewWorkspaceStep.Create" class="container mx-auto pt-10">
+          <div
+            v-if="workspace_modal.steps === NewWorkspaceStep.Create"
+            class="container mx-auto pt-10"
+          >
             <div class="grid grid-cols-2 gap-5">
               <div class="col-span-1 space-y-10">
                 <div
-                  class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent">
+                  class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent"
+                >
                   Let’s create your new workspace!
                 </div>
                 <div class="grid grid-cols-2">
-                  <div v-for="platform in platforms" :key="platform.name"
-                    class="transition-duration: 150ms; group flex cursor-pointer items-center gap-x-3 rounded-md p-2 text-sm leading-6 transition-all hover:bg-gray-200">
+                  <div
+                    v-for="platform in platforms"
+                    :key="platform.name"
+                    class="transition-duration: 150ms; group flex cursor-pointer items-center gap-x-3 rounded-md p-2 text-sm leading-6 transition-all hover:bg-gray-200"
+                  >
                     <i class="bx text-2xl" :class="platform.icon"></i>
                     <div class="flex flex-col gap-y-0">
                       <span class="font-semibold">{{ platform.name }}</span>
@@ -291,19 +303,31 @@ onMounted(async () => {
                 </div>
                 <div class="pt-5">
                   <div class="space-y-4">
-                    <Input v-model="workspace_create.dataInput.name"
-                      @blur="workspace_create.validateSingleField('name')" type="text" placeholder="Workspace Name"
-                      class="rounded-none border-x-0 border-b-2 border-t-0 text-4xl font-thin focus-visible:border-blue-600 focus-visible:ring-0 focus-visible:ring-offset-0" />
-                    <div v-if="workspace_create.errors.name" for="name"
-                      class="flex items-center gap-1 text-xs text-red-500">
+                    <Input
+                      v-model="workspace_create.dataInput.name"
+                      @blur="workspace_create.validateSingleField('name')"
+                      type="text"
+                      placeholder="Workspace Name"
+                      class="rounded-none border-x-0 border-b-2 border-t-0 text-4xl font-thin focus-visible:border-blue-600 focus-visible:ring-0 focus-visible:ring-offset-0"
+                    />
+                    <div
+                      v-if="workspace_create.errors.name"
+                      for="name"
+                      class="flex items-center gap-1 text-xs text-red-500"
+                    >
                       <i class="material-icons text-sm">error</i>
                       {{ workspace_create.errors.name }}
                     </div>
                     <div class="flex justify-between">
-                      <span class="w-96 flex-none">Upon creation of new workspace it mean you agreed to our
-                        <span class="font-bold text-blue-500">terms and conditions.</span></span>
-                      <Button @click="workspace_modal.continue()"
-                        class="bg-red-500 text-white hover:bg-red-700">Continue</Button>
+                      <span class="w-96 flex-none"
+                        >Upon creation of new workspace it mean you agreed to our
+                        <span class="font-bold text-blue-500">terms and conditions.</span></span
+                      >
+                      <Button
+                        @click="workspace_modal.continue()"
+                        class="bg-red-500 text-white hover:bg-red-700"
+                        >Continue</Button
+                      >
                     </div>
                   </div>
                 </div>
@@ -315,11 +339,15 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-          <div v-if="workspace_modal.steps === NewWorkspaceStep.Team" class="container mx-auto pt-10">
+          <div
+            v-if="workspace_modal.steps === NewWorkspaceStep.Team"
+            class="container mx-auto pt-10"
+          >
             <div class="grid grid-cols-2 gap-5">
               <div class="col-span-1 space-y-4">
                 <div
-                  class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent">
+                  class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent"
+                >
                   Choose a team for your workspace!
                 </div>
                 <div class="grid grid-cols-2"></div>
@@ -335,16 +363,22 @@ onMounted(async () => {
                             <div class="f">{{ workspace_selected_team.name }}</div>
                           </div>
                         </div>
-                        <span class="cursor-pointer font-bold text-blue-500 hover:text-blue-700"
-                          @click="select_team(null)">I prefer to work alone</span>
+                        <span
+                          class="cursor-pointer font-bold text-blue-500 hover:text-blue-700"
+                          @click="select_team(null)"
+                          >I prefer to work alone</span
+                        >
                       </div>
 
                       <div class->
                         <div class="w-full rounded-md border border-gray-200 bg-gray-100">
                           <div class="flex items-center p-2">
                             <i class="bx bx-search text-2xl"></i>
-                            <Input type="text" placeholder="Search"
-                              class="h-4 rounded-none border-x-0 border-y-0 bg-gray-100 focus-visible:ring-0 focus-visible:ring-offset-0" />
+                            <Input
+                              type="text"
+                              placeholder="Search"
+                              class="h-4 rounded-none border-x-0 border-y-0 bg-gray-100 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            />
                           </div>
                           <hr />
                           <div class="p-2 py-4">
@@ -353,24 +387,34 @@ onMounted(async () => {
                                 <span class="font-bold">Available teams:</span>
                               </div>
                               <div v-if="user_created_teams.length > 0">
-                                <div v-for="team in user_created_teams" :key="team.tm_id"
-                                  class="flex items-center justify-between rounded-lg px-4 py-2 hover:bg-gray-200">
+                                <div
+                                  v-for="team in user_created_teams"
+                                  :key="team.tm_id"
+                                  class="flex items-center justify-between rounded-lg px-4 py-2 hover:bg-gray-200"
+                                >
                                   <div class="flex items-center gap-x-4">
                                     <div class="h-10 w-10 rounded-full bg-blue-500"></div>
                                     <div class="f">{{ team.name }}</div>
                                   </div>
                                   <div>
-                                    <Button @click="select_team(team)"
-                                      class="font-bold text-blue-500 hover:text-blue-700" variant="ghost">Choose
-                                      team</Button>
+                                    <Button
+                                      @click="select_team(team)"
+                                      class="font-bold text-blue-500 hover:text-blue-700"
+                                      variant="ghost"
+                                      >Choose team</Button
+                                    >
                                   </div>
                                 </div>
                               </div>
                               <div>
-                                <span>Cant find your team?
-                                  <RouterLink :to="{ name: 'teams' }"
-                                    class="cursor-pointer font-bold text-blue-500 hover:text-blue-700">
-                                    create a team</RouterLink>
+                                <span
+                                  >Cant find your team?
+                                  <RouterLink
+                                    :to="{ name: 'teams' }"
+                                    class="cursor-pointer font-bold text-blue-500 hover:text-blue-700"
+                                  >
+                                    create a team</RouterLink
+                                  >
                                   first before proceeding
                                 </span>
                               </div>
@@ -380,10 +424,17 @@ onMounted(async () => {
                       </div>
                     </div>
                     <div class="flex justify-between">
-                      <Button @click="workspace_modal.previous()" class="text-red-500 hover:text-red-700"
-                        variant="ghost">Previous</Button>
-                      <Button @click="workspace_modal.continue()" class="bg-red-500 text-white hover:bg-red-700">Create
-                        Workspace</Button>
+                      <Button
+                        @click="workspace_modal.previous()"
+                        class="text-red-500 hover:text-red-700"
+                        variant="ghost"
+                        >Previous</Button
+                      >
+                      <Button
+                        @click="workspace_modal.continue()"
+                        class="bg-red-500 text-white hover:bg-red-700"
+                        >Create Workspace</Button
+                      >
                     </div>
                   </div>
                 </div>
@@ -395,44 +446,64 @@ onMounted(async () => {
               </div>
             </div>
           </div>
-          <div v-if="workspace_modal.steps === NewWorkspaceStep.Processing" class="container mx-auto pt-10">
+          <div
+            v-if="workspace_modal.steps === NewWorkspaceStep.Processing"
+            class="container mx-auto pt-10"
+          >
             <div class="grid grid-cols-1 gap-5">
               <div class="col-span-1">
                 <div class="flex items-center justify-center">
                   <div
-                    class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent">
+                    class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent"
+                  >
                     Some random quotes here...
                   </div>
                 </div>
               </div>
               <div class="col-span-1 pt-20">
                 <div class="flex flex-col items-center justify-center space-y-2">
-                  <img src="@/assets/undraw_loading_re_5axr.svg" alt="Centered SVG" class="h-[25vh] w-[25vh]" />
+                  <img
+                    src="@/assets/undraw_loading_re_5axr.svg"
+                    alt="Centered SVG"
+                    class="h-[25vh] w-[25vh]"
+                  />
                   <div class="flex items-center gap-x-2">
                     <i class="material-icons text-md animate-spin">donut_large</i>
-                    <span class="text-md font-semibold">Please wait while we prepare your workspace</span>
+                    <span class="text-md font-semibold"
+                      >Please wait while we prepare your workspace</span
+                    >
                   </div>
                   <span class="text-xs">{{ workspace_modal.processing_msg }}</span>
                 </div>
               </div>
             </div>
           </div>
-          <div v-if="workspace_modal.steps === NewWorkspaceStep.Complete" class="container mx-auto pt-10">
+          <div
+            v-if="workspace_modal.steps === NewWorkspaceStep.Complete"
+            class="container mx-auto pt-10"
+          >
             <div class="grid grid-cols-1 gap-5">
               <div class="col-span-1">
                 <div class="flex items-center justify-center">
                   <div
-                    class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent">
+                    class="text bg-gradient-to-r from-[#FB1A1E] to-[#B25FEE] bg-clip-text text-5xl font-bold text-transparent"
+                  >
                     Workspace successfuly Created!
                   </div>
                 </div>
               </div>
               <div class="col-span-1 pt-20">
                 <div class="flex flex-col items-center justify-center space-y-2">
-                  <img src="@/assets/undraw_vintage_414k.svg" alt="Centered SVG" class="h-[25vh] w-[25vh]" />
+                  <img
+                    src="@/assets/undraw_vintage_414k.svg"
+                    alt="Centered SVG"
+                    class="h-[25vh] w-[25vh]"
+                  />
                   <div class="flex items-center gap-x-2">
                     <i class="material-icons text-md animate-spin">donut_large</i>
-                    <span class="text-md font-semibold">Please wait while we redirect you to your workspace</span>
+                    <span class="text-md font-semibold"
+                      >Please wait while we redirect you to your workspace</span
+                    >
                   </div>
                 </div>
               </div>
@@ -445,11 +516,17 @@ onMounted(async () => {
           <div class="grid grid-cols-1 gap-5">
             <div class="col-span-1">
               <div class="flex flex-col items-center justify-center space-y-2">
-                <img src="@/assets/undraw_vintage_414k.svg" alt="Centered SVG" class="h-[25vh] w-[25vh]" />
+                <img
+                  src="@/assets/undraw_vintage_414k.svg"
+                  alt="Centered SVG"
+                  class="h-[25vh] w-[25vh]"
+                />
                 <div class="flex items-center gap-x-2">
                   <i class="material-icons text-md animate-spin">donut_large</i>
-                  <span class="text-md font-semibold">Please wait while we initialize the first step on creating your
-                    workspace.</span>
+                  <span class="text-md font-semibold"
+                    >Please wait while we initialize the first step on creating your
+                    workspace.</span
+                  >
                 </div>
               </div>
             </div>

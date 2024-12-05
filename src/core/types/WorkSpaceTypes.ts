@@ -71,9 +71,9 @@ export const chatbot_flow_service_Data: ChatbotFlowServiceData = {
 }
 export interface PostRandomizerServiceData extends SubCollections {
   pr_id: string
-  metaPages: string[],
-  metaGroups: string[],
-  igAccounts: string[],
+  metaPages: string[]
+  metaGroups: string[]
+  igAccounts: string[]
   name: string
   isEnabled: boolean
   timezone: string
@@ -114,6 +114,8 @@ export const post_randomizer_service_data: PostRandomizerServiceData = {
 export interface PostRandomizerPostsData extends SubCollections {
   prp_id: string
   postName: string
+  mediaSource: string[] //location of media
+  createdBy: string //location of media
   content: string
   createdAt: string
   updatedAt: string
@@ -123,6 +125,8 @@ export const post_randomizer_posts_data: PostRandomizerPostsData = {
   prp_id: '',
   postName: '',
   content: '',
+  mediaSource: [],
+  createdBy: '',
   createdAt: '',
   updatedAt: '',
   subCollections: [],

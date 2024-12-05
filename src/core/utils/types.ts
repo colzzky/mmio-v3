@@ -18,7 +18,7 @@ export type {
   WSMetaPagesRefsData,
   ChatbotFlowServiceData,
   PostRandomizerServiceData,
-  PostRandomizerPostsData
+  PostRandomizerPostsData,
 } from '../types/WorkSpaceTypes'
 export type { MetaPageData } from '../types/MetaTypes'
 export type { ChatBotFlowData } from '../types/MetaTypes'

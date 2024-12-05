@@ -18,12 +18,16 @@ import type { TeamData } from '@/core/types/TeamTypes'
 import type { WorkspaceData } from '@/core/types/WorkSpaceTypes'
 import { getWhereAny } from '@/core/utils/firebase-collections'
 import CreateTeam from '@/modules/teams-permissions/components/team/CreateTeam.vue'
+import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+
+const routes = useRoute()
 
 const allWorkspaceFilter = ref('Most Recent')
 const sharedWorkspaceFilter = ref('Most Recent')
-const pageLoad = ref<boolean>(false)
+const pageLoad = ref<boolean>(true)
 const dataLoad = ref<boolean>(true)
 const selectTeamLoad = ref<boolean>(true)
 const authStore = useAuthStore()
@@ -67,11 +71,8 @@ async function fetch_workspaces() {
       $path: 'workspaces',
       $sub_params: {},
       $sub_col: [],
-      whereConditions: [
-        { fieldName: 'owner_uid', operator: '==', value: user_auth.data.uid },
-      ],
+      whereConditions: [{ fieldName: 'owner_uid', operator: '==', value: user_auth.data.uid }],
     })
-
 
     if (personal_workspace.data && personal_workspace.status) {
       user_created_workspaces.value = personal_workspace.data
@@ -88,9 +89,7 @@ async function fetch_workspace_owners() {
       $path: 'users',
       $sub_params: {},
       $sub_col: [],
-      whereConditions: [
-        { fieldName: 'uid', operator: 'in', value: workspace_owner_uid.value },
-      ],
+      whereConditions: [{ fieldName: 'uid', operator: 'in', value: workspace_owner_uid.value }],
     })
 
     if (get_users.status) {
@@ -116,9 +115,7 @@ async function fetch_teams() {
       })
       const team = await getWhereAny('team', {
         $path: 'teams',
-        whereConditions: [
-          { fieldName: 'tm_id', operator: 'in', value: team_refs_id },
-        ],
+        whereConditions: [{ fieldName: 'tm_id', operator: 'in', value: team_refs_id }],
       })
       console.log('tesm list')
       console.log(team)
@@ -164,26 +161,24 @@ async function fetch_all_workspaces() {
 }
 
 onMounted(async () => {
-  console.log(page_init.initialize)
   if (page_init.initialize) {
-    console.log('test')
-    pageLoad.value = true
-    pageLoad.value = false
+    pageLoad.value = true;
+    
+    pageLoad.value = false;
     await fetch_all_workspaces()
   }
 })
 
 watch(
-  () => page_init.initialize,
-  async (new_val) => {
-    if (new_val) {
-      console.log('test2')
-      pageLoad.value = true
-      pageLoad.value = false
-      //await fetch_all_workspaces()
+  () => authStore.page_init.initialize,
+  async (newVal) => {
+    if (newVal) {
+      pageLoad.value = false;
+      await fetch_all_workspaces()
     }
-  },
-)
+  },{immediate:true}
+);
+
 </script>
 
 <template>
@@ -315,6 +310,7 @@ watch(
         </section>
       </div>
     </main>
+    <CreateTeam :open_modal="new_team_modal" @return="new_team_return" />
   </div>
   <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
     <div class="flex animate-pulse items-center gap-x-1">
@@ -327,7 +323,7 @@ watch(
     </div>
   </div>
 
-  <CreateTeam :open_modal="new_team_modal" @return="new_team_return" />
+  
 </template>
 
 <style scoped>

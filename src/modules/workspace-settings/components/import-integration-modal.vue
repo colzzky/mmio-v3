@@ -146,7 +146,8 @@ defineExpose({
     <DialogContent class="max-w-screen-md p-12">
       <section class="grid gap-y-12">
         <h2
-          class="text-balance bg-gradient-to-r from-gradient-purple to-gradient-red bg-clip-text text-center text-5xl font-bold text-transparent">
+          class="text-balance bg-gradient-to-r from-gradient-purple to-gradient-red bg-clip-text text-center text-5xl font-bold text-transparent"
+        >
           Choose the {{ modal.integrationName }} you want to import
         </h2>
         <div class="w-full py-4">
@@ -162,12 +163,17 @@ defineExpose({
 
           <div v-if="!meta_import.isLoading" class="py-2">
             <div v-if="meta_import.meta_pages.length > 0">
-              <div v-for="page in meta_import.meta_pages" :key="page.mp_id"
-                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300">
+              <div
+                v-for="page in meta_import.meta_pages"
+                :key="page.mp_id"
+                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
+              >
                 <div class="grid grid-cols-12 items-center">
                   <div class="col-span-1">
-                    <Checkbox @update:checked="meta_import.select_page(page)"
-                      :checked="meta_import.selected_meta_pages.includes(page.mp_id)" />
+                    <Checkbox
+                      @update:checked="meta_import.select_page(page)"
+                      :checked="meta_import.selected_meta_pages.includes(page.mp_id)"
+                    />
                   </div>
 
                   <div class="col-span-7">
