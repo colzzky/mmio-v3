@@ -72,7 +72,7 @@ export const servicePermission = {
       variant: 'destructive',
     })
     throw new PermissionAccessError('Insufficient permissions')
-  },
+  }
 }
 
 export const accessPermission = {

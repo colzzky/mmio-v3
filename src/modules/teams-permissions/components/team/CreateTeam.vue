@@ -225,9 +225,18 @@ const create_team_modal = reactive({
       //Create a new team
       team_model.reInit()
       console.log(team_model.data)
-      team_model.data.name = this.data.name
-      team_model.data.inviteLink = this.data.invite_link
-      team_model.data.owner_uid = user_auth.data.uid
+
+      
+      team_model.data = {
+        ...team_model.data,
+        name: this.data.name,
+        inviteLink: this.data.invite_link,
+        owner_uid: user_auth.data.uid,
+        
+      }
+      // team_model.data.name = this.data.name
+      // team_model.data.inviteLink = this.data.invite_link
+      // team_model.data.owner_uid = user_auth.data.uid
 
       const post = await team_model.createUpdate('new')
       if (post.status) {

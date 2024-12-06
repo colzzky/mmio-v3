@@ -101,7 +101,6 @@ export const useAuthStore = defineStore(
       await resetAllStore()
       },
     })
-
     const user = reactive<AuthUser>({
       data: null,
       isInitialized: false,
@@ -146,7 +145,6 @@ export const useAuthStore = defineStore(
         }
       },
     })
-
     const user_team_refs = reactive({
       data: [] as TeamData[],
       isInitialized: false as boolean,
@@ -188,7 +186,6 @@ export const useAuthStore = defineStore(
         this.isInitialized = true
       },
     })
-
     const user_created_permissions = reactive({
       data: [] as PermissionData[],
       isInitialized: false as boolean,

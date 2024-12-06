@@ -4,13 +4,14 @@ import type { SubCollections } from './UniTypes'
 //Add more permission type here if needed
 export const PermissionTypes = ['view', 'add', 'edit', 'delete', 'clone', 'publish'] as const
 export type TypeOfPermissionType = (typeof PermissionTypes)[number]
+export type GeneralPermission = `${PermissionServices}::${(typeof PermissionTypes)[number]}`[]
 
 //Add More Services here if needed
 export enum PermissionServices {
-  ChatBotFlow = 'Chatbot Flow',
-  CommentAutoReply = 'Comment Auto Reply',
-  EmailMarketing = 'Email Marketing',
-  WorskspaceSettings = 'Workspace Settings',
+  ChatBotFlow = 'ChatbotFlow',
+  CommentAutoReply = 'CommentAutoReply',
+  EmailMarketing = 'EmailMarketing',
+  WorskspaceSettings = 'WorkspaceSettings',
 }
 
 //Add more here if needed
@@ -114,6 +115,7 @@ export interface PermissionData extends SubCollections {
   owner_uid: string
   name: string
   assignment: AccessStructure
+  generalPermission: GeneralPermission
   createdAt: string
   updatedAt: string
 }
@@ -127,6 +129,9 @@ export const default_access: AccessStructure = {
     access: [Access_levels.READ],
   },
 }
+export const default_access_general: GeneralPermission = [
+  'ChatbotFlow::view','CommentAutoReply::view'
+]
 
 //Use when setting member as the admin
 export const admin_access: AccessStructure = {
@@ -162,6 +167,7 @@ export const permission_data: PermissionData = {
   owner_uid: '',
   name: 'Untitled Permission',
   assignment: default_access,
+  generalPermission: default_access_general,
   createdAt: '',
   updatedAt: '',
   subCollections: [],

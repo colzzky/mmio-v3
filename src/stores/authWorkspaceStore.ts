@@ -58,8 +58,8 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
         member_id,
         [],
         (data) => {
-          console.log(data)
           this.data = data as TeamMembersData
+          console.log(data)
         },
       )
     },
