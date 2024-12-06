@@ -1,11 +1,44 @@
 <script setup lang="ts" generic="TData, TValue">
-import type { Analytics, ColumnsSelected, RowsSelected } from '../temporaries'
+import {
+  metricLabels,
+  metrics,
+  type Analytics,
+  type ColumnsSelected,
+  type RowsSelected,
+} from '../temporaries'
+import { Button } from '@/core/components/ui/button'
 import { Checkbox } from '@/core/components/ui/checkbox'
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from '@/core/components/ui/dialog'
+import { Label } from '@/core/components/ui/label'
+import { Popover, PopoverTrigger, PopoverContent } from '@/core/components/ui/popover'
+import { ScrollArea } from '@/core/components/ui/scroll-area'
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from '@/core/components/ui/select'
+import { Separator } from '@/core/components/ui/separator'
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/core/components/ui/table'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import type { ColumnDef, ColumnPinningState, SortingState } from '@tanstack/vue-table'
+import type {
+  ColumnDef,
+  ColumnPinningState,
+  SortingState,
+  VisibilityState,
+} from '@tanstack/vue-table'
 import { FlexRender, getCoreRowModel, getSortedRowModel, useVueTable } from '@tanstack/vue-table'
-import { inject, ref, watch, type Ref } from 'vue'
+import { computed, inject, ref, watch, type Ref } from 'vue'
 
 const props = defineProps<{
   columns: ColumnDef<TData, TValue>[]
@@ -18,6 +51,7 @@ const columnPinning = ref<ColumnPinningState>({
   left: [],
   right: [],
 })
+const columnVisibility = ref<VisibilityState>()
 
 const table = useVueTable({
   get data() {
@@ -31,6 +65,8 @@ const table = useVueTable({
   onSortingChange: (updaterOrValue) => uiHelpers.valueUpdater(updaterOrValue, sorting),
   onRowSelectionChange: (updaterOrValue) => uiHelpers.valueUpdater(updaterOrValue, rowSelection),
   onColumnPinningChange: (updaterOrValue) => uiHelpers.valueUpdater(updaterOrValue, columnPinning),
+  onColumnVisibilityChange: (updaterOrValue) =>
+    uiHelpers.valueUpdater(updaterOrValue, columnVisibility),
   columnResizeMode: 'onChange',
   columnResizeDirection: 'ltr',
   state: {
@@ -43,8 +79,10 @@ const table = useVueTable({
     get columnPinning() {
       return columnPinning.value
     },
+    get columnVisibility() {
+      return columnVisibility.value
+    },
   },
-  debugAll: true,
 })
 
 const rowsSelected = inject('rowsSelected') as Ref<RowsSelected<TData>>
@@ -70,9 +108,97 @@ function handleColumnsCheckboxChange({
 
   columnsSelected.value.delete(headerId)
 }
+
+const visibleTableColumns = computed(() =>
+  table.getAllColumns().filter((column) => column.getIsVisible()),
+)
 </script>
 
 <template>
+  <div class="flex items-center gap-x-2">
+    <Select disabled>
+      <SelectTrigger class="w-max">
+        <SelectValue placeholder="Custom" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="one">Item #1</SelectItem>
+        <SelectItem value="two">Item #2</SelectItem>
+        <SelectItem value="three">Item #3</SelectItem>
+      </SelectContent>
+    </Select>
+    <Popover>
+      <PopoverTrigger as-child>
+        <Button variant="outline" size="sm" class="text-xs">Table Settings</Button>
+      </PopoverTrigger>
+      <PopoverContent class="grid p-0 text-sm">
+        <ScrollArea as="ul" class="h-80 px-4 py-2">
+          <template v-for="column in visibleTableColumns" :key="column.id">
+            <li v-if="column.id !== 'post'" class="flex items-center justify-between">
+              {{ metricLabels[column.id as (typeof metrics)[number]] }}
+              <button
+                type="button"
+                class="p-1 leading-none"
+                @click="column.toggleVisibility(false)"
+              >
+                <i class="bx bx-x text-sm" />
+              </button>
+            </li>
+          </template>
+        </ScrollArea>
+        <Separator />
+
+        <div class="p-1">
+          <Dialog>
+            <DialogTrigger as-child>
+              <Button variant="ghost" size="sm" class="flex w-full justify-start gap-x-2">
+                <i class="bx bx-plus text-lg" />
+                Add Metrics
+              </Button>
+            </DialogTrigger>
+            <DialogContent class="text-sm">
+              <DialogHeader>
+                <DialogTitle>Show / Hide KPIs</DialogTitle>
+                <DialogDescription
+                  >Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptas,
+                  voluptatibus?</DialogDescription
+                >
+              </DialogHeader>
+              <ScrollArea as="ul" class="h-80 [&>div>div]:grid [&>div>div]:gap-y-3">
+                <template v-for="column in table.getAllColumns()" :key="column.id">
+                  <li v-if="column.id !== 'post'" class="flex items-center gap-x-3">
+                    <Checkbox
+                      :id="column.id"
+                      :checked="column.getIsVisible()"
+                      @update:checked="(value) => column.toggleVisibility(value)"
+                    />
+                    <Label :for="column.id" class="font-normal">
+                      {{ metricLabels[column.id as (typeof metrics)[number]] }}
+                    </Label>
+                  </li>
+                </template>
+              </ScrollArea>
+              <Separator />
+              <DialogFooter>
+                <DialogClose as-child>
+                  <Button variant="secondary">Cancel</Button>
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </PopoverContent>
+    </Popover>
+    <Select disabled>
+      <SelectTrigger class="w-max">
+        <SelectValue placeholder="Table Settings" />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="one">Item #1</SelectItem>
+        <SelectItem value="two">Item #2</SelectItem>
+        <SelectItem value="three">Item #3</SelectItem>
+      </SelectContent>
+    </Select>
+  </div>
   <div class="relative w-full overflow-auto rounded-md border">
     <table
       class="w-full caption-bottom text-xs"
