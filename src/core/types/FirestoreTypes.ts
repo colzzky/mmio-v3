@@ -122,25 +122,6 @@ interface Team_Collection {
   }
 }
 
-interface Team_Collection {
-  team: {
-    id: 'tm_id'
-    path: 'teams'
-    interface: TeamData
-    sub_col: SubCollectionKey<TeamData>[]
-    sub_params: {} | null
-  }
-  team_members: {
-    id: 'member_id'
-    path: 'teams/:tm_id/team_members'
-    interface: TeamMembersData
-    sub_col: SubCollectionKey<TeamMembersData>[]
-    sub_params: {
-      tm_id: string
-    } | null
-  }
-}
-
 export type CollectionsInterface = {
   meta_page: {
     id: 'mp_id'

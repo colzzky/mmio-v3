@@ -111,6 +111,7 @@ export const useTeamStore = defineStore('teamStore', () => {
         $sub_params: { tm_id: tm_id },
         id: member_id,
       })
+
       return {
         status: get.status,
         data: get.data as TeamMembersData,
