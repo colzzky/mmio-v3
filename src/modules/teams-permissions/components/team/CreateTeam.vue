@@ -7,7 +7,7 @@ import Input from '@/core/components/ui/input/Input.vue'
 import { toast } from '@/core/components/ui/toast'
 import Toaster from '@/core/components/ui/toast/Toaster.vue'
 import type { InvitationData } from '@/core/types/InvitationTypes'
-import { admin_access, default_access } from '@/core/types/PermissionTypes'
+import { admin_access, default_access, default_access_general } from '@/core/types/PermissionTypes'
 import { TeamRole, type TeamData, type TeamMembersData } from '@/core/types/TeamTypes'
 import { postCollectionBatch, postCollectionBatchAtomic } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
@@ -288,6 +288,7 @@ const create_team_modal = reactive({
         uid: '',
         member_id: member_uuid,
         accessPermissions: JSON.parse(JSON.stringify(default_access)),
+        generalPermissions: JSON.parse(JSON.stringify(default_access_general)),
         isDisabled: true,
         isPending: true,
         role: TeamRole.MEMBER,

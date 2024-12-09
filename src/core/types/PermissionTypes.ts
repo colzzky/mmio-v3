@@ -11,8 +11,15 @@ export enum PermissionServices {
   ChatBotFlow = 'ChatbotFlow',
   CommentAutoReply = 'CommentAutoReply',
   EmailMarketing = 'EmailMarketing',
-  WorskspaceSettings = 'WorkspaceSettings',
+  WorkspaceSettings = 'WorkspaceSettings',
 }
+
+export const permissionNames: Record<PermissionServices, string> = {
+  [PermissionServices.ChatBotFlow]: 'Chatbot Flow Service',
+  [PermissionServices.CommentAutoReply]: 'Comment Auto Reply Service',
+  [PermissionServices.EmailMarketing]: 'Email Marketing Service',
+  [PermissionServices.WorkspaceSettings]: 'Workspace Settings',
+};
 
 //Add more here if needed
 export enum Access_levels {
@@ -36,7 +43,7 @@ export const access_level_byservice: Record<
   [PermissionServices.ChatBotFlow]: {
     [Access_levels.READ]: ['view'],
     [Access_levels.WRITE]: ['add', 'edit', 'publish', 'delete'],
-    [Access_levels.FULL]: FULL,
+    [Access_levels.FULL]: [...FULL, 'clone'],
     [Access_levels.TEST]: ['publish', 'delete'],
     [Access_levels.CUSTOM]: [],
   },
@@ -54,7 +61,7 @@ export const access_level_byservice: Record<
     [Access_levels.FULL]: FULL,
     [Access_levels.CUSTOM]: [],
   },
-  [PermissionServices.WorskspaceSettings]: {
+  [PermissionServices.WorkspaceSettings]: {
     [Access_levels.READ]: READ,
     [Access_levels.WRITE]: WRITE,
     [Access_levels.FULL]: FULL,
@@ -85,7 +92,7 @@ export const custom_permission: Record<PermissionServices, CustomPermissions> = 
     delete: false,
     publish: false,
   },
-  [PermissionServices.WorskspaceSettings]: {
+  [PermissionServices.WorkspaceSettings]: {
     view: false,
     add: false,
     edit: false,
@@ -102,7 +109,7 @@ export type AccessStructure = {
   [K in PermissionServices]?: PermissionGroup
 }
 
-interface PermissionGroup<T = Access_levels> {
+export interface PermissionGroup<T = Access_levels> {
   access: T[] // Array of Access_levels (e.g., READ, WRITE)
   custom?: CustomPermissions // Custom permissions (e.g., view, add, edit, delete, publish)
 }
@@ -157,7 +164,7 @@ export const custom_access: AccessStructure = {
   [PermissionServices.EmailMarketing]: {
     access: [Access_levels.READ],
   },
-  [PermissionServices.WorskspaceSettings]: {
+  [PermissionServices.WorkspaceSettings]: {
     access: [Access_levels.READ],
   },
 }

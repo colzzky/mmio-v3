@@ -17,7 +17,7 @@ import { toast } from '@/core/components/ui/toast'
 import Toaster from '@/core/components/ui/toast/Toaster.vue'
 import { user_data, type UserData } from '@/core/types/AuthUserTypes'
 import type { InvitationData } from '@/core/types/InvitationTypes'
-import { default_access } from '@/core/types/PermissionTypes'
+import { default_access, default_access_general } from '@/core/types/PermissionTypes'
 import { TeamRole, type TeamData, type TeamMembersData } from '@/core/types/TeamTypes'
 import { getWhereAny, postCollectionBatch } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
@@ -109,6 +109,7 @@ const current_team = reactive({
           uid: '',
           member_id: member_uuid,
           accessPermissions: JSON.parse(JSON.stringify(default_access)),
+          generalPermissions:JSON.parse(JSON.stringify(default_access_general)),
           isDisabled: true,
           isPending: true,
           role: TeamRole.MEMBER,
@@ -171,11 +172,10 @@ const current_team = reactive({
 const selected_member = reactive({
   user_data: null as UserData | null,
   member_info: null as TeamMembersData | null,
-  permission: '',
   change_role_load: false as boolean,
   set_active_member(uid: string, isPending: boolean, member: TeamMembersData) {
+    console.log(member)
     this.member_info = member
-    this.permission = `${Object.keys(this.member_info.accessPermissions).length} permission/s`
     if (uid && !isPending) {
       this.user_data = current_team.members_info[uid]
     } else {
@@ -417,7 +417,7 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
                     </div>
                     <div class="w-[30%]">
                       <div class="text-sm">
-                        {{ Object.keys(member.accessPermissions).length }} Permissions
+                        {{ member.accessPermissions ? Object.keys(member.accessPermissions).length : 0 }} Permissions
                       </div>
                     </div>
                     <div class="w-[20%]">
@@ -646,7 +646,7 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
                     class="text-md cursor-pointer text-sm font-semibold text-blue-500"
                   >
                     {{
-                      `${Object.keys(selected_member.member_info.accessPermissions).length}
+                      `${selected_member.member_info.accessPermissions ? Object.keys(selected_member.member_info.accessPermissions).length : 0}
                     Permissions`
                     }}</span
                   >

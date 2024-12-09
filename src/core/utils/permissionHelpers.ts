@@ -3,6 +3,7 @@ import {
   access_level_byservice,
   PermissionServices,
   type Access_levels,
+  type GeneralPermission,
   type TypeOfPermissionType,
 } from '../types/PermissionTypes'
 import type { WorkspaceData } from './types'
@@ -69,6 +70,22 @@ export const servicePermission = {
     toast({
       title: 'Insufficient permissions',
       description: `You do not have enough permission in this Workspace to ${permission} in ${service} service.`,
+      variant: 'destructive',
+    })
+    throw new PermissionAccessError('Insufficient permissions')
+  },
+  async general(generalPermission: GeneralPermission) {
+    if (accessPermission.workspaceOwner(active_workspace.data)) return
+    if (current_member.data) {
+      const member_general_permission = current_member.data?.generalPermissions
+      if (generalPermission.length > 0 && member_general_permission?.length > 0) {
+        if(generalPermission.every((p) => member_general_permission.includes(p))) return
+      }
+    }
+
+    toast({
+      title: 'Insufficient General permissions',
+      description: `You do not have enough permission in this Workspace to make changes to this service.`,
       variant: 'destructive',
     })
     throw new PermissionAccessError('Insufficient permissions')

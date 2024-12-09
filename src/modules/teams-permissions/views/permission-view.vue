@@ -16,8 +16,7 @@ import {
   custom_permission,
   type CustomPermissions,
   access_level_byservice,
-  type GeneralPermission,
-  PermissionTypes,
+  permissionNames,
 } from '@/core/types/PermissionTypes'
 import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
@@ -77,27 +76,12 @@ const selected_permission = reactive({
     }
   },
   add_remove_access(key: keyof AccessStructure, access_level: Access_levels) {
-
     if (this.data && this.data.assignment[key]) {
       const data = this.data
-
-
-      //this.data.generalPermission = this.data.generalPermission.filter(permission => !permission.startsWith(key));
-
-
-      const generl_permission: GeneralPermission = []
-
       this.isPermissionChanged = true
       const index = this.data.assignment[key].access.indexOf(access_level)
       const custom = this.data.assignment[key].access.indexOf(Access_levels.CUSTOM)
       if (index !== -1) {
-        const current_access = this.data.assignment[key].access
-
-
-        //In current access  save all
-        //Then delete this.data.generalPermission that = key
-        // 
-
         //Remove General Permission
         this.data.generalPermission = this.data.generalPermission.filter(permission => !permission.startsWith(key))
         //Remove Access
@@ -113,14 +97,6 @@ const selected_permission = reactive({
             })
           }
         })
-
-
-        
-
-
-        //console.log(current_access)
-
-
       } else {
         if (access_level === Access_levels.CUSTOM) {
           this.data.assignment[key].access = []
@@ -150,25 +126,11 @@ const selected_permission = reactive({
             }
           })
         }
-
-
-
-        // if (this.data.assignment[key].access.includes(Access_levels.CUSTOM) && this.data.assignment[key].custom) {
-        //   const custom = this.data.assignment[key].custom
-        //   Object.keys(custom).forEach((permission) => {
-        //     console.log(permission)
-        //     const permissionTypes = permission as (typeof PermissionTypes)[number]
-        //     generl_permission.push(`${key}::${permissionTypes}`)
-        //   })
-        // }
       }
-
-      console.log(this.data.generalPermission)
     }
   },
   change_custom_permission(key: keyof AccessStructure, custom_key: keyof CustomPermissions) {
     if (this.data && this.data.assignment[key] && this.data.assignment[key].custom) {
-      const generl_permission: GeneralPermission = []
       this.isPermissionChanged = true
       this.data.assignment[key].custom[custom_key] = !this.data.assignment[key].custom[custom_key]
 
@@ -334,7 +296,7 @@ onMounted(async () => {
               selected_permission.data.assignment[key]
             ">
               <div class="space-y-4 px-5 py-5">
-                <div class="text-lg font-bold">{{ key }} Permissons</div>
+                <div class="text-lg font-bold">{{ permissionNames[key] }}</div>
                 <div class="space-y-2">
                   <div class="grid grid-cols-6">
                     <span class="col-span-2 text-sm font-semibold">Default Access Level:</span>
