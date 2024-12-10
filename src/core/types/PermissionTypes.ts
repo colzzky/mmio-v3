@@ -4,14 +4,22 @@ import type { SubCollections } from './UniTypes'
 //Add more permission type here if needed
 export const PermissionTypes = ['view', 'add', 'edit', 'delete', 'clone', 'publish'] as const
 export type TypeOfPermissionType = (typeof PermissionTypes)[number]
+export type GeneralPermission = `${PermissionServices}::${(typeof PermissionTypes)[number]}`[]
 
 //Add More Services here if needed
 export enum PermissionServices {
-  ChatBotFlow = 'Chatbot Flow',
-  CommentAutoReply = 'Comment Auto Reply',
-  EmailMarketing = 'Email Marketing',
-  WorskspaceSettings = 'Workspace Settings',
+  ChatBotFlow = 'ChatbotFlow',
+  CommentAutoReply = 'CommentAutoReply',
+  EmailMarketing = 'EmailMarketing',
+  WorkspaceSettings = 'WorkspaceSettings',
 }
+
+export const permissionNames: Record<PermissionServices, string> = {
+  [PermissionServices.ChatBotFlow]: 'Chatbot Flow Service',
+  [PermissionServices.CommentAutoReply]: 'Comment Auto Reply Service',
+  [PermissionServices.EmailMarketing]: 'Email Marketing Service',
+  [PermissionServices.WorkspaceSettings]: 'Workspace Settings',
+};
 
 //Add more here if needed
 export enum Access_levels {
@@ -35,7 +43,7 @@ export const access_level_byservice: Record<
   [PermissionServices.ChatBotFlow]: {
     [Access_levels.READ]: ['view'],
     [Access_levels.WRITE]: ['add', 'edit', 'publish', 'delete'],
-    [Access_levels.FULL]: FULL,
+    [Access_levels.FULL]: [...FULL, 'clone'],
     [Access_levels.TEST]: ['publish', 'delete'],
     [Access_levels.CUSTOM]: [],
   },
@@ -53,7 +61,7 @@ export const access_level_byservice: Record<
     [Access_levels.FULL]: FULL,
     [Access_levels.CUSTOM]: [],
   },
-  [PermissionServices.WorskspaceSettings]: {
+  [PermissionServices.WorkspaceSettings]: {
     [Access_levels.READ]: READ,
     [Access_levels.WRITE]: WRITE,
     [Access_levels.FULL]: FULL,
@@ -84,7 +92,7 @@ export const custom_permission: Record<PermissionServices, CustomPermissions> = 
     delete: false,
     publish: false,
   },
-  [PermissionServices.WorskspaceSettings]: {
+  [PermissionServices.WorkspaceSettings]: {
     view: false,
     add: false,
     edit: false,
@@ -101,7 +109,7 @@ export type AccessStructure = {
   [K in PermissionServices]?: PermissionGroup
 }
 
-interface PermissionGroup<T = Access_levels> {
+export interface PermissionGroup<T = Access_levels> {
   access: T[] // Array of Access_levels (e.g., READ, WRITE)
   custom?: CustomPermissions // Custom permissions (e.g., view, add, edit, delete, publish)
 }
@@ -114,6 +122,7 @@ export interface PermissionData extends SubCollections {
   owner_uid: string
   name: string
   assignment: AccessStructure
+  generalPermission: GeneralPermission
   createdAt: string
   updatedAt: string
 }
@@ -127,6 +136,9 @@ export const default_access: AccessStructure = {
     access: [Access_levels.READ],
   },
 }
+export const default_access_general: GeneralPermission = [
+  'ChatbotFlow::view','CommentAutoReply::view'
+]
 
 //Use when setting member as the admin
 export const admin_access: AccessStructure = {
@@ -152,7 +164,7 @@ export const custom_access: AccessStructure = {
   [PermissionServices.EmailMarketing]: {
     access: [Access_levels.READ],
   },
-  [PermissionServices.WorskspaceSettings]: {
+  [PermissionServices.WorkspaceSettings]: {
     access: [Access_levels.READ],
   },
 }
@@ -162,6 +174,7 @@ export const permission_data: PermissionData = {
   owner_uid: '',
   name: 'Untitled Permission',
   assignment: default_access,
+  generalPermission: default_access_general,
   createdAt: '',
   updatedAt: '',
   subCollections: [],

@@ -62,7 +62,7 @@ export const useAuthStore = defineStore(
         return this.data != null && typeof this.data === 'object' && 'uid' in this.data && 'email' in this.data;
       },
 
-      check_user_auth(): Promise<boolean> | boolean {
+      user_auth_initialization(): Promise<boolean> | boolean {
         console.log(this.isAuthListenerActive)
         if (this.isAuthListenerActive) {
           return this.data !== null;
@@ -101,7 +101,6 @@ export const useAuthStore = defineStore(
       await resetAllStore()
       },
     })
-
     const user = reactive<AuthUser>({
       data: null,
       isInitialized: false,
@@ -146,7 +145,6 @@ export const useAuthStore = defineStore(
         }
       },
     })
-
     const user_team_refs = reactive({
       data: [] as TeamData[],
       isInitialized: false as boolean,
@@ -188,7 +186,6 @@ export const useAuthStore = defineStore(
         this.isInitialized = true
       },
     })
-
     const user_created_permissions = reactive({
       data: [] as PermissionData[],
       isInitialized: false as boolean,

@@ -1,4 +1,4 @@
-import { default_access, type AccessStructure } from './PermissionTypes'
+import { default_access, default_access_general, type AccessStructure, type GeneralPermission } from './PermissionTypes'
 import type { SubCollections } from './UniTypes'
 
 //Only use subcollection if a collection have a data that has multiple data like activity logs etc.
@@ -33,6 +33,7 @@ export interface TeamMembersData extends SubCollections {
   uid: string
   role: TeamRole
   accessPermissions: AccessStructure
+  generalPermissions: GeneralPermission
   isPending: boolean
   isDisabled: boolean
   createdAt: string
@@ -60,6 +61,7 @@ export const team_members_data: TeamMembersData = {
   uid: '',
   role: TeamRole.MEMBER,
   accessPermissions: { ...default_access },
+  generalPermissions: [...default_access_general ],
   isDisabled: false,
   isPending: false,
   createdAt: '',

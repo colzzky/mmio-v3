@@ -38,7 +38,8 @@ const { chatbot_flow } = workspace_service
 
 onMounted(async () => {
   try {
-    await servicePermission.check(PermissionServices.ChatBotFlow, ['view'])
+    //await servicePermission.check(PermissionServices.ChatBotFlow, ['clone'])
+    await servicePermission.general(['ChatbotFlow::view'])
     await imported_meta_pages.fetch_meta_pages()
     await chatbot_flow.fetch_chatbots()
   } catch (error: any) {

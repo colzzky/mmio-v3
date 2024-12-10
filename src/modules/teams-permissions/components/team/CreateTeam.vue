@@ -7,9 +7,9 @@ import Input from '@/core/components/ui/input/Input.vue'
 import { toast } from '@/core/components/ui/toast'
 import Toaster from '@/core/components/ui/toast/Toaster.vue'
 import type { InvitationData } from '@/core/types/InvitationTypes'
-import { admin_access, default_access } from '@/core/types/PermissionTypes'
+import { admin_access, default_access, default_access_general } from '@/core/types/PermissionTypes'
 import { TeamRole, type TeamData, type TeamMembersData } from '@/core/types/TeamTypes'
-import { postCollectionBatch } from '@/core/utils/firebase-collections'
+import { postCollectionBatch, postCollectionBatchAtomic } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useAuthStore } from '@/stores/authStore'
 import { useInvitationStore } from '@/stores/invitationStore'
@@ -225,9 +225,18 @@ const create_team_modal = reactive({
       //Create a new team
       team_model.reInit()
       console.log(team_model.data)
-      team_model.data.name = this.data.name
-      team_model.data.inviteLink = this.data.invite_link
-      team_model.data.owner_uid = user_auth.data.uid
+
+      
+      team_model.data = {
+        ...team_model.data,
+        name: this.data.name,
+        inviteLink: this.data.invite_link,
+        owner_uid: user_auth.data.uid,
+        
+      }
+      // team_model.data.name = this.data.name
+      // team_model.data.inviteLink = this.data.invite_link
+      // team_model.data.owner_uid = user_auth.data.uid
 
       const post = await team_model.createUpdate('new')
       if (post.status) {
@@ -279,6 +288,7 @@ const create_team_modal = reactive({
         uid: '',
         member_id: member_uuid,
         accessPermissions: JSON.parse(JSON.stringify(default_access)),
+        generalPermissions: JSON.parse(JSON.stringify(default_access_general)),
         isDisabled: true,
         isPending: true,
         role: TeamRole.MEMBER,
@@ -313,19 +323,25 @@ const create_team_modal = reactive({
       })
       member_invite_ids.push(invite_uuid)
     }
-    const add_members = await postCollectionBatch(
+    const add_members = await postCollectionBatchAtomic(
       'team_members',
-      'teams/:tm_id/team_members',
-      { tm_id: team_model.data.tm_id },
-      team_members_ids,
-      team_members,
+      {
+        $path:'teams/:tm_id/team_members',
+        $sub_params:{
+          tm_id: team_model.data.tm_id
+        },
+        ids:team_members_ids,
+        data:team_members
+      }
     )
-    const send_invites = await postCollectionBatch(
+    const send_invites = await postCollectionBatchAtomic(
       'invitation',
-      'invitations',
-      null,
-      member_invite_ids,
-      member_invite,
+      {
+        $path:'invitations',
+      $sub_params:null,
+      ids:member_invite_ids,
+      data:member_invite
+      }
     )
     console.log(add_members)
     console.log(send_invites)

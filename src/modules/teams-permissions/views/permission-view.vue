@@ -16,6 +16,7 @@ import {
   custom_permission,
   type CustomPermissions,
   access_level_byservice,
+  permissionNames,
 } from '@/core/types/PermissionTypes'
 import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
@@ -71,25 +72,60 @@ const selected_permission = reactive({
       this.data.assignment[key] = {
         access: [Access_levels.READ],
       }
+      this.data.generalPermission.push(`${key}::view`)
     }
   },
   add_remove_access(key: keyof AccessStructure, access_level: Access_levels) {
     if (this.data && this.data.assignment[key]) {
+      const data = this.data
       this.isPermissionChanged = true
       const index = this.data.assignment[key].access.indexOf(access_level)
       const custom = this.data.assignment[key].access.indexOf(Access_levels.CUSTOM)
       if (index !== -1) {
+        //Remove General Permission
+        this.data.generalPermission = this.data.generalPermission.filter(permission => !permission.startsWith(key))
+        //Remove Access
         this.data.assignment[key].access.splice(index, 1)
+
+        //Repopulate general permission
+        this.data.assignment[key].access.forEach(access_level => {
+          if (accessLevelsArray[key][access_level]) {
+            accessLevelsArray[key][access_level].forEach(tx => {
+              if(!(data.generalPermission.includes(`${key}::${tx}`))){
+                  data.generalPermission.push(`${key}::${tx}`)
+                }
+            })
+          }
+        })
       } else {
         if (access_level === Access_levels.CUSTOM) {
           this.data.assignment[key].access = []
           this.data.assignment[key].custom = { ...custom_permission[key] }
+          this.data.generalPermission = this.data.generalPermission.filter(permission => !permission.startsWith(key))
         }
         if (custom !== -1) {
           this.data.assignment[key].access.splice(custom, 1)
           delete this.data.assignment[key].custom
         }
         this.data.assignment[key].access.push(access_level)
+
+        if (!(this.data.assignment[key].access.includes(Access_levels.CUSTOM))) {
+          const data = this.data
+          this.data.assignment[key].access.forEach(ac => {
+
+            console.log('picked' + ac)
+            console.log(accessLevelsArray[key])
+
+            if (accessLevelsArray[key][ac]) {
+              accessLevelsArray[key][ac].forEach(tx => {
+                if(!(data.generalPermission.includes(`${key}::${tx}`))){
+                  data.generalPermission.push(`${key}::${tx}`)
+                }
+                
+              })
+            }
+          })
+        }
       }
     }
   },
@@ -97,6 +133,15 @@ const selected_permission = reactive({
     if (this.data && this.data.assignment[key] && this.data.assignment[key].custom) {
       this.isPermissionChanged = true
       this.data.assignment[key].custom[custom_key] = !this.data.assignment[key].custom[custom_key]
+
+      if (this.data.assignment[key].custom[custom_key] === true) {
+        this.data.generalPermission.push(`${key}::${custom_key}`)
+      }else{
+        const general_index = this.data.generalPermission.indexOf(`${key}::${custom_key}`)
+        if(general_index !== -1){
+          this.data.generalPermission.splice(general_index, 1)
+        }
+      }
     }
   },
   async save_access_permission() {
@@ -216,49 +261,27 @@ onMounted(async () => {
   <div v-if="!selected_permission.isFetching">
     <div v-if="selected_permission.data" class="space-y-4">
       <div class="flex items-center space-x-2">
-        <Button variant="ghost" class="flex" @click="router.push({ name: 'permissions' })"
-          ><i class="material-icons text-md">arrow_back</i></Button
-        >
-        <Input
-          v-model="name_form.input.name"
-          type="text"
-          placeholder="Permission Name....."
-          @blur="name_form.revertName"
-          @keyup.enter="selected_permission.changeName()"
+        <Button variant="ghost" class="flex" @click="router.push({ name: 'permissions' })"><i
+            class="material-icons text-md">arrow_back</i></Button>
+        <Input v-model="name_form.input.name" type="text" placeholder="Permission Name....."
+          @blur="name_form.revertName" @keyup.enter="selected_permission.changeName()"
           class="max-w-[50%] rounded-none border-x-0 border-y-0 text-lg font-bold focus:rounded-lg focus:border focus-visible:border-blue-600 focus-visible:ring-0 focus-visible:ring-offset-0"
           :class="{
             '!rounded-lg !border !border-blue-600':
               name_form.input.name !== selected_permission.data.name ||
               selected_permission.changeNameLoad,
-          }"
-        />
-        <Button
-          v-if="name_form.input.name && name_form.input.name !== selected_permission.data.name"
-          variant="secondary"
-          size="xs"
-          class="text-blue-500"
-          @click="selected_permission.changeName()"
-          >Save</Button
-        >
-        <Button
-          v-else-if="selected_permission.changeNameLoad"
-          variant="outline"
-          size="xs"
-          disabled
-          class="flex items-center gap-2"
-        >
+          }" />
+        <Button v-if="name_form.input.name && name_form.input.name !== selected_permission.data.name"
+          variant="secondary" size="xs" class="text-blue-500" @click="selected_permission.changeName()">Save</Button>
+        <Button v-else-if="selected_permission.changeNameLoad" variant="outline" size="xs" disabled
+          class="flex items-center gap-2">
           <i class="material-icons animate-spin text-sm">donut_large</i>Changing Permission Name...
         </Button>
       </div>
       <div class="flex items-center space-x-4">
         <Input type="search" placeholder="Search Permissions..." class="" />
-        <Button
-          v-if="!selected_permission.saveLoad"
-          variant="outline"
-          size="sm"
-          class="flex items-center gap-2"
-          @click="selected_permission.save_access_permission()"
-        >
+        <Button v-if="!selected_permission.saveLoad" variant="outline" size="sm" class="flex items-center gap-2"
+          @click="selected_permission.save_access_permission()">
           <i class="material-icons text-sm">save</i>Save All
         </Button>
         <Button v-else variant="outline" size="sm" class="flex items-center gap-2" disabled>
@@ -268,38 +291,28 @@ onMounted(async () => {
       <div class="rounded-lg border-gray-200 bg-gray-100 py-4">
         <div v-if="!selected_permission.saveLoad">
           <div v-for="(custom, key) in custom_access" :key="key">
-            <div
-              v-if="
-                key in selected_permission.data.assignment &&
-                selected_permission.data.assignment[key]
-              "
-            >
+            <div v-if="
+              key in selected_permission.data.assignment &&
+              selected_permission.data.assignment[key]
+            ">
               <div class="space-y-4 px-5 py-5">
-                <div class="text-lg font-bold">{{ key }} Permissons</div>
+                <div class="text-lg font-bold">{{ permissionNames[key] }}</div>
                 <div class="space-y-2">
                   <div class="grid grid-cols-6">
                     <span class="col-span-2 text-sm font-semibold">Default Access Level:</span>
                     <div class="items-cente col-span-4 flex justify-between space-x-4">
                       <div class="flex space-x-2">
-                        <div
-                          v-for="(access_value, access_level, access_key) in accessLevelsArray[key]"
-                          :key="access_key"
-                        >
+                        <div v-for="(access_value, access_level, access_key) in accessLevelsArray[key]"
+                          :key="access_key">
                           <div v-if="access_level" class="flex items-center space-x-2">
-                            <Checkbox
-                              @update:checked="
-                                selected_permission.add_remove_access(key, access_level)
-                              "
-                              :checked="
-                                selected_permission.data.assignment[key].access.includes(
-                                  access_level,
-                                )
-                              "
-                            />
-                            <label
-                              for="terms"
-                              class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
+                            <Checkbox @update:checked="
+                              selected_permission.add_remove_access(key, access_level)
+                              " :checked="selected_permission.data.assignment[key].access.includes(
+                                access_level,
+                              )
+                                " />
+                            <label for="terms"
+                              class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                               {{ access_level }}
                             </label>
                           </div>
@@ -307,37 +320,25 @@ onMounted(async () => {
                       </div>
                     </div>
                   </div>
-                  <div
-                    v-if="
-                      selected_permission.data.assignment[key].custom &&
-                      selected_permission.data.assignment[key].access.includes(Access_levels.CUSTOM)
-                    "
-                  >
+                  <div v-if="
+                    selected_permission.data.assignment[key].custom &&
+                    selected_permission.data.assignment[key].access.includes(Access_levels.CUSTOM)
+                  ">
                     <div class="pb-2 pt-4">
                       <span class="text-lg">Custom:</span>
                     </div>
                     <div class="space-y-2">
-                      <div
-                        v-for="(custom_val, custom_key) in selected_permission.sortCustomPermission(
-                          selected_permission.data.assignment[key].custom,
-                        )"
-                        :key="custom_key"
-                        class="grid grid-cols-6"
-                      >
+                      <div v-for="(custom_val, custom_key) in selected_permission.sortCustomPermission(
+                        selected_permission.data.assignment[key].custom,
+                      )" :key="custom_key" class="grid grid-cols-6">
                         <span class="col-span-2 text-sm font-semibold">{{ custom_key }}:</span>
                         <div class="col-span-4">
-                          <RadioGroup
-                            :default-value="
-                              selected_permission.data.assignment[key].custom[custom_key]
-                                ? 'Yes'
-                                : 'No'
-                            "
-                            orientation="horizontal"
-                            @update:model-value="
+                          <RadioGroup :default-value="selected_permission.data.assignment[key].custom[custom_key]
+                            ? 'Yes'
+                            : 'No'
+                            " orientation="horizontal" @update:model-value="
                               selected_permission.change_custom_permission(key, custom_key)
-                            "
-                            class="flex space-x-2"
-                          >
+                              " class="flex space-x-2">
                             <div class="flex items-center space-x-2">
                               <RadioGroupItem id="r1" value="Yes" />
                               <Label for="r1">Yes</Label>
@@ -359,12 +360,8 @@ onMounted(async () => {
               <div class="space-y-4 px-5 py-5">
                 <div class="flex justify-between">
                   <span class="text-lg font-bold">{{ key }} Permissons</span>
-                  <Button
-                    class="text-red-500"
-                    variant="outline"
-                    size="xs"
-                    @click="selected_permission.add_permission(key)"
-                  >
+                  <Button class="text-red-500" variant="outline" size="xs"
+                    @click="selected_permission.add_permission(key)">
                     Add this permission
                   </Button>
                 </div>
