@@ -1,110 +1,169 @@
 <template>
-    <div>
-      <!-- Rete.js Canvas -->
-      <div ref="reteContainer" class="rete-container"></div>
-  
-      <!-- Save Button -->
-      <button @click="saveEditorState">Save</button>
+  <div class="container mx-auto">
+    <!-- Rete.js Canvas -->
+    <div id="no-right-click" ref="reteContainer" class="rete-container"></div>
+
+    <!-- Buttons -->
+    <button @click="saveEditorState">Save</button>
+    <button @click="createNewNode">New Node</button>
+
+    <!-- Floating Menu -->
+    <div v-if="menuVisible" class="floating-menu" :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }">
+      <div @click="createNewNode()">➕ Create Node</div>
+      <div>{{ menuPosition }}</div>
+      <div @click="closeMenu">❌ Close</div>
     </div>
-  </template>
-  
-  <script lang="ts" setup>
-  import { ref, onMounted } from 'vue';
-  import { NodeEditor, type GetSchemes, ClassicPreset } from 'rete';
-  import { AreaPlugin, AreaExtensions } from 'rete-area-plugin';
-  import { VuePlugin, Presets, type VueArea2D } from 'rete-vue-plugin';
-  
-  // Define Schemes
-  type Schemes = GetSchemes<
-    ClassicPreset.Node, // Node type
-    ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node> // Connection type
-  >;
-  
-  type AreaExtra = VueArea2D<Schemes>;
-  
-  // Refs
-  const reteContainer = ref<HTMLDivElement | null>(null);
-  let editor: NodeEditor<Schemes>;
-  
-  onMounted(async () => {
-    if (!reteContainer.value) return;
-  
-    // Initialize Node Editor
-    editor = new NodeEditor<Schemes>();
-  
-    // Initialize AreaPlugin for rendering
-    const area = new AreaPlugin<Schemes, AreaExtra>(reteContainer.value);
-    const render = new VuePlugin<Schemes, AreaExtra>();
-  
-    render.addPreset(Presets.classic.setup());
-    area.use(render);
-    editor.use(area);
-  
-    // Define sockets
-    const numberSocket = new ClassicPreset.Socket('number');
-  
-    // Create Start Node
-    const start = new ClassicPreset.Node('Start Node');
-    start.addOutput('start', new ClassicPreset.Output(numberSocket));
-    await editor.addNode(start);
-    await area.translate(start.id, { x: 100, y: 200 }); // Position start node
-  
-    // Create End Nodes (more than one)
-    const end1 = new ClassicPreset.Node('End 1 Node');
-    end1.addInput('end1', new ClassicPreset.Input(numberSocket));
-    await editor.addNode(end1);
-    await area.translate(end1.id, { x: 400, y: 100 }); // Position end1 node
-  
-    const end2 = new ClassicPreset.Node('End 2 Node');
-    end2.addInput('end2', new ClassicPreset.Input(numberSocket));
-    await editor.addNode(end2);
-    await area.translate(end2.id, { x: 400, y: 300 }); // Position end2 node
-  
-    const end3 = new ClassicPreset.Node('End 3 Node');
-    end3.addInput('end3', new ClassicPreset.Input(numberSocket));
-    await editor.addNode(end3);
-    await area.translate(end3.id, { x: 400, y: 500 }); // Position end3 node
-  
-    // Create connections from "Start" node to multiple "End" nodes
-    const connection1 = new ClassicPreset.Connection(start, 'start', end1, 'end1');
-    const connection2 = new ClassicPreset.Connection(start, 'start', end2, 'end2');
-    const connection3 = new ClassicPreset.Connection(start, 'start', end3, 'end3');
-    await editor.addConnection(connection1);
-    await editor.addConnection(connection2);
-    await editor.addConnection(connection3);
-  
-    // Zoom to fit all nodes
-    await AreaExtensions.zoomAt(area, editor.getNodes());
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { ref, onMounted } from 'vue';
+import { NodeEditor, type GetSchemes, ClassicPreset } from 'rete';
+import { AreaPlugin, AreaExtensions } from 'rete-area-plugin';
+import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin';
+import { VuePlugin, Presets, type VueArea2D } from 'rete-vue-plugin';
+
+// Refs
+const reteContainer = ref<HTMLDivElement>();
+
+// Define Schemes
+type Schemes = GetSchemes<
+  ClassicPreset.Node,
+  ClassicPreset.Connection<ClassicPreset.Node, ClassicPreset.Node>
+>;
+type AreaExtra = VueArea2D<Schemes>;
+
+let editor: NodeEditor<Schemes>;
+let area: AreaPlugin<Schemes, AreaExtra> | null = null;
+let render = new VuePlugin<Schemes, AreaExtra>();
+
+// Menu state
+const menuVisible = ref(false);
+const menuPosition = ref({ x: 0, y: 0 });
+
+// Initialize the canvas
+async function initializeCanvas() {
+  if (!reteContainer.value) return;
+
+  editor = new NodeEditor<Schemes>();
+  area = new AreaPlugin<Schemes, AreaExtra>(reteContainer.value);
+  const connection = new ConnectionPlugin<Schemes, AreaExtra>();
+
+  render.addPreset(Presets.classic.setup());
+  connection.addPreset(ConnectionPresets.classic.setup());
+
+  editor.use(area);
+  area.use(connection);
+  area.use(render);
+
+  AreaExtensions.selectableNodes(area, AreaExtensions.selector(), {
+    accumulating: AreaExtensions.accumulateOnCtrl(),
   });
-  
-  // Method to save the editor state as a JSON file
-  const saveEditorState = async () => {
-    const json = JSON.parse(JSON.stringify(editor)); // Get the JSON representation of the editor state
-    console.log(json)
-    const jsonString = JSON.stringify(json); // Convert to string
-  
-    // Create a Blob with the JSON data
-    const blob = new Blob([jsonString], { type: 'application/json' });
-  
-    // Create a download link
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'editor_state.json'; // File name
-  
-    // Trigger the "Save As" dialog (letting the user choose the location)
-    link.click();
-  
-    alert('Editor state saved as JSON file!');
-  };
-  </script>
-  
-  <style scoped>
-  .rete-container {
-    width: 100%;
-    height: 600px;
-    border: 1px solid #ccc;
-    background-color: #fafafa;
-    position: relative;
+
+  // Add a Start Node
+  const numberSocket = new ClassicPreset.Socket('number');
+  const start = new ClassicPreset.Node('Start Node');
+  start.addOutput('start', new ClassicPreset.Output(numberSocket));
+  await editor.addNode(start);
+  await area.translate(start.id, { x: 100, y: 200 });
+
+  await AreaExtensions.zoomAt(area, editor.getNodes());
+
+  // Track mouse events and right-click
+  trackMouseEvents(area);
+}
+
+// Track mouse events and handle right-click
+function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
+  area.addPipe((context) => {
+    if (context.type === 'pointerdown' && context.data.event.button === 2) {
+      context.data.event.preventDefault(); // Prevent default context menu
+      menuPosition.value = {
+        x: context.data.event.clientX,
+        y: context.data.event.clientY,
+      };
+      menuVisible.value = true;
+    }
+    return context;
+  });
+
+  // Hide the menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (menuVisible.value) {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.floating-menu')) {
+        closeMenu();
+      }
+    }
+  });
+}
+
+// Create a new node dynamically
+async function createNewNode() {
+  if (!area) return;
+
+  const numberSocket = new ClassicPreset.Socket('number');
+  const node = new ClassicPreset.Node('New Node');
+  node.addInput('input', new ClassicPreset.Input(numberSocket));
+  node.addOutput('output', new ClassicPreset.Output(numberSocket));
+  await editor.addNode(node);
+  await area.translate(node.id, { x: menuPosition.value.x, y: menuPosition.value.y });
+  await AreaExtensions.zoomAt(area, editor.getNodes());
+  closeMenu();
+}
+
+// Close the floating menu
+function closeMenu() {
+  menuVisible.value = false;
+}
+
+// Save editor state as JSON
+const saveEditorState = async () => {
+  const json = JSON.parse(JSON.stringify(editor));
+  console.log(json);
+  alert('Editor state saved as JSON file!');
+};
+
+// Lifecycle hook
+onMounted(async () => {
+  await initializeCanvas();
+  const noRightClickDiv = document.getElementById('no-right-click');
+  if (noRightClickDiv) {
+    noRightClickDiv.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
   }
-  </style>
-  
+});
+
+</script>
+
+<style scoped>
+.rete-container {
+  width: 100%;
+  height: 600px;
+  border: 1px solid #ccc;
+  background-color: #fafafa;
+  position: relative;
+}
+
+.floating-menu {
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  z-index: 1000;
+  padding: 8px;
+  min-width: 150px;
+}
+
+.floating-menu div {
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: background 0.2s;
+}
+
+.floating-menu div:hover {
+  background: #f0f0f0;
+}
+</style>
