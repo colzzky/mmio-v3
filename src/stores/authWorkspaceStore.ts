@@ -34,14 +34,14 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     data: null,
     isInitialized: false,
     isLoading: false,
-    reset() {},
+    reset() { },
   })
   const active_team = reactive<ActiveTeam>({
     data: null,
     members: {},
     isInitialized: false,
     isLoading: false,
-    reset() {},
+    reset() { },
   })
   const current_member = reactive<CurrentMember>({
     data: null,
@@ -49,7 +49,7 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     isInitialized: false,
     isLoading: false,
     listener: null,
-    reset() {},
+    reset() { },
     async listen(tm_id: string, member_id: string) {
       current_member.listener = await listenToCollection(
         'team_members',
@@ -386,6 +386,9 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
       },
     }),
   }
+  const active_flow = reactive({
+    json: '' as string
+  })
 
   function returnHome() {
     if (current_member.listener) {
@@ -403,5 +406,12 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     workspace_service,
     service_models,
     returnHome,
+    active_flow,
   }
-})
+},
+
+  {
+    persist: {
+      pick: ['active_flow']
+    }
+  })
