@@ -208,6 +208,11 @@ const allRoutes = [...routes,
   path: 'chatbot-flow-builder/flow-upload',
   component: () => import('./services/chatbot-flow-builder/chatbot-flow-view.vue'),
 },
+{
+  name: 'chatbot-flow-final',
+  path: 'chatbot-flow-builder/flow-final',
+  component: () => import('./services/chatbot-flow-builder/chatbot-flow-view.vue'),
+},
 
 ]
 
