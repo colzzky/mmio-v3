@@ -18,6 +18,6 @@ const props = defineProps<{
 }>()
 
 onMounted(() => {
-  console.log(props.data)
+  //console.log(props.data)
 })
 </script>

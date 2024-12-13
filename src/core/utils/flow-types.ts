@@ -64,5 +64,12 @@ export const rete_node_templates = {
         node.id = crypto.randomUUID()
         node.addOutput("socket", new ClassicPreset.Output(socket));
         return node
+    },
+    text_node(socket: ClassicPreset.Socket){
+        const node = new Node("text_node")
+        node.id = crypto.randomUUID()
+        node.addOutput("socket", new ClassicPreset.Output(socket));
+        node.addOutput("socket1", new ClassicPreset.Output(socket));
+        return node
     }
 }

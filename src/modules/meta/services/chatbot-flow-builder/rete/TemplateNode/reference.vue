@@ -42,8 +42,7 @@ const outputs = computed(() => sortByIndex(Object.entries(props.data.outputs)))
         <!-- node label -->
         <div
             class="absolute inset-x-0 top-[calc(100%+1rem)] flex items-center justify-center gap-x-2 font-semibold capitalize [[data-selected=true]_&]:text-slate-950">
-            <Icon icon="formkit:start" />
-            {{ data.label }}
+            <Icon icon="formkit:start" /> Reference
         </div>
     </article>
 </template>

@@ -387,7 +387,7 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     }),
   }
   const active_flow = reactive({
-    json: '' as string
+    json: '' as string,
   })
 
   function returnHome() {

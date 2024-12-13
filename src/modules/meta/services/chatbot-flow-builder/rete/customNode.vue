@@ -2,7 +2,7 @@
     <div class="text-black bg-white border-2 border-gray-500 rounded-lg cursor-pointer box-border relative user-select-none"
         :class="{ 'border-red-500': data.selected }" z data-testid="node">
         <!-- Title -->
-        <div class="text-white font-sans text-lg p-2" data-testid="title">
+        <div class=" font-sans text-lg p-2" data-testid="title">
             {{ data.label }}
         </div>
 
