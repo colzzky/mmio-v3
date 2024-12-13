@@ -13,6 +13,8 @@ import Text from "../rete/TemplateNode/text.vue";
 import CustomNode from "../rete/customNode.vue";
 import { toast } from "@/core/components/ui/toast";
 
+//** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
+
 interface MousePosition {
     x: number
     y: number
@@ -133,8 +135,20 @@ const reloadEditorState = async () => {
 
             });
 
-        node.addOutput("socket", new ClassicPreset.Output(socket));
-        node.addInput("socket", new ClassicPreset.Input(socket));
+        //Should be forloop depending on the saved socket
+        console.log(nodeData.inputs)
+        if (Object.keys(nodeData.inputs).length > 0) {
+            Object.keys(nodeData.inputs).forEach((key) => {
+                node.addInput(key, new ClassicPreset.Input(socket));
+            })
+        }
+
+        if (Object.keys(nodeData.outputs).length > 0) {
+            Object.keys(nodeData.outputs).forEach((key) => {
+                node.addOutput(key, new ClassicPreset.Input(socket));
+            })
+        }
+
 
         // Add the node back to the editor
         await rete_init.editor.addNode(node);
@@ -385,6 +399,7 @@ const saveEditorState = async () => {
     };
 
     const parse_serial = JSON.stringify(serializedState)
+    console.log(rete_init.editor)
     active_flow.json = parse_serial
     toast({
         title: 'Flow saved',
@@ -446,10 +461,6 @@ function removeNode(): void {
 
             <div id="no-right-click" ref="reteContainer" class="bg-dotted h-screen bg-gray-50"></div>
         </div>
-
-
-
-
 
         <div class="fixed top-0 left-0 right-0 flex justify-between p-4">
             <div class="font-bold">

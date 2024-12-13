@@ -56,6 +56,7 @@ export const rete_node_templates = {
 
         node.addOutput("socket", new ClassicPreset.Output(socket));
         node.addInput("socket", new ClassicPreset.Input(socket));
+        node.addInput("socket2", new ClassicPreset.Input(socket));
         
         return node
     },
