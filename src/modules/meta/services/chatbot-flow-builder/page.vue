@@ -18,7 +18,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/core/components/ui/table'
-import { PermissionServices } from '@/core/types/PermissionTypes'
 import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import router from '@/router'

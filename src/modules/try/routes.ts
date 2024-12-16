@@ -1,4 +1,4 @@
-import Other from './views/Try.vue'
+import Other from './views/MessengerSendAPI.vue'
 import type { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
