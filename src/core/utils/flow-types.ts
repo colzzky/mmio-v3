@@ -177,10 +177,7 @@ type FlowNodeData = {
         quick_replies?: {
             content_type: string,
             title: string,
-            payload: {
-                postback_id: string,
-                node_id: FlowData['flow_id']
-            } // This is the postback payload that will call another node ID 
+            payload: string// This is the postback payload that will call another node ID 
         }[]
     }
 }
