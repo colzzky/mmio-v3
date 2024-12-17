@@ -1,48 +1,39 @@
 <script setup lang="ts">
-import type { Schemes } from '@/core/utils/flow-types';
+import NodeCard from '../node-card.vue'
+import { sortByIndex } from '../utils'
+import type { Schemes } from '@/core/utils/flow-types'
+import NodeSocket from '@/modules/meta/services/chatbot-flow-builder/rete/node-socket.vue'
 import { Icon } from '@iconify/vue'
-import { Ref } from 'rete-vue-plugin'
 import { computed } from 'vue'
 
-function sortByIndex(entries: [string, any][]) {
-    return entries.sort((a, b) => {
-        const ai = (a[1]?.index) || 0
-        const bi = (b[1]?.index) || 0
-        return ai - bi
-    })
-}
-
-// emit:any cos idk emit type, can't find in rete.js
 const props = defineProps<{ data: Schemes['Node']; emit: any; seed: number }>()
 
 const outputs = computed(() => sortByIndex(Object.entries(props.data.outputs)))
 </script>
 
 <template>
-    <article
-        class="relative flex aspect-video w-64 flex-col justify-between rounded-lg border bg-slate-50 text-sm hover:bg-slate-300 data-[selected=true]:bg-slate-600 data-[selected=true]:text-slate-50"
-        :data-selected="data.selected" data-testid="node">
-        <div class="grid place-content-center py-8">
-            <Icon icon="formkit:start" class="size-20" />
-        </div>
+  <NodeCard :data-selected="data.selected">
+    <main class="absolute left-1/2 top-1/2 grid -translate-x-1/2 -translate-y-1/2 gap-y-2">
+      <Icon icon="bx:bolt-circle" class="size-20" />
+      <h1 class="text-center font-semibold">Reference</h1>
+    </main>
 
-        <!-- outputs -->
-        <section class="border-t py-2 text-xs font-medium">
-            <template v-for="[key, output] in outputs" :key="key + seed">
-                <div v-if="output" :data-testid="`output-${key}`" class="flex items-center justify-end gap-x-4">
-                    <div v-if="output.label">
-                        {{ output.label }}
-                    </div>
-                    <Ref :emit :data="{ type: 'socket', side: 'output', key, nodeId: data.id, payload: output.socket }"
-                        data-testid="output-socket" class="-mx-4 [&>div[title=socket]]:bg-slate-700" />
-                </div>
-            </template>
-        </section>
-
-        <!-- node label -->
-        <div
-            class="absolute inset-x-0 top-[calc(100%+1rem)] flex items-center justify-center gap-x-2 font-semibold capitalize [[data-selected=true]_&]:text-slate-950">
-            <Icon icon="formkit:start" /> Reference
+    <!-- outputs -->
+    <section class="-mx-[calc(var(--socket-size)/2)] grid justify-end">
+      <template v-for="[key, output] in outputs" :key="key + seed">
+        <div v-if="output" :data-testid="`output-${key}`" class="flex items-center gap-x-4">
+          <NodeSocket
+            :emit
+            :data="{
+              type: 'socket',
+              side: 'output',
+              key,
+              nodeId: data.id,
+              payload: output.socket,
+            }"
+          />
         </div>
-    </article>
+      </template>
+    </section>
+  </NodeCard>
 </template>
