@@ -1,17 +1,18 @@
 <script lang="ts" setup>
 import { ref, onMounted, type Ref, reactive, watch } from "vue";
-import { NodeEditor, type GetSchemes, ClassicPreset, type NodeId } from "rete";
+import { NodeEditor, type GetSchemes, ClassicPreset, type NodeId, Signal } from "rete";
 import { AreaPlugin, AreaExtensions, NodeView } from "rete-area-plugin";
 import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-plugin";
 import { VuePlugin, Presets, type VueArea2D } from "rete-vue-plugin";
 
 import { useAuthWorkspaceStore } from "@/stores/authWorkspaceStore";
-import { TestControl, type AreaExtra, type Schemes, Node, Connection, rete_node_templates } from "@/core/utils/flow-types";
+import { TestControl, type AreaExtra, type Schemes, Node, Connection, type ControlInterface, type SerializedFlow, ReteTemplates } from "@/core/utils/flow-types";
 import CustomControl from "../rete/customControl.vue";
 import Reference from "../rete/TemplateNode/reference.vue";
 import Text from "../rete/TemplateNode/text.vue";
 import CustomNode from "../rete/customNode.vue";
 import { toast } from "@/core/components/ui/toast";
+import type { Input, Output, Socket } from "rete/_types/presets/classic";
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -112,7 +113,7 @@ async function initializeFlow() {
 const reloadEditorState = async () => {
     if (!active_flow.json || !area || !rete_init.editor) return;
 
-    const parsedState = JSON.parse(active_flow.json);
+    const parsedState:SerializedFlow.State = JSON.parse(active_flow.json);
 
     for (const nodeData of parsedState.nodes) {
         const node = new Node(nodeData.label); // Recreate node
@@ -120,35 +121,28 @@ const reloadEditorState = async () => {
         nodeData.controls &&
             Object.keys(nodeData.controls).forEach((key) => {
                 const control = nodeData.controls[key];
-                if (control.type === 'TestControl') {
-                    node.addControl('test', new TestControl(control.details))
-                    return
+                if (control.type === 'text' || control.type === 'number') {
+                    node.addControl(key, ReteTemplates.control_template[control.type])
                 }
                 else {
-                    node.addControl(key, new ClassicPreset.InputControl(control.type, {
-                        initial: control.value || 0,
-                        change(value) {
-                            console.log(value)
-                        },
-                    }));
+                    if(control.type === 'testControl') node.addControl(key, ReteTemplates.control_template.testControl)
+                    //Add more here
                 }
 
             });
 
         //Should be forloop depending on the saved socket
         console.log(nodeData.inputs)
-        if (Object.keys(nodeData.inputs).length > 0) {
+        if (nodeData.inputs && Object.keys(nodeData.inputs).length > 0) {
             Object.keys(nodeData.inputs).forEach((key) => {
                 node.addInput(key, new ClassicPreset.Input(socket));
             })
         }
-
-        if (Object.keys(nodeData.outputs).length > 0) {
+        if (nodeData.outputs && Object.keys(nodeData.outputs).length > 0) {
             Object.keys(nodeData.outputs).forEach((key) => {
                 node.addOutput(key, new ClassicPreset.Input(socket));
             })
         }
-
 
         // Add the node back to the editor
         await rete_init.editor.addNode(node);
@@ -359,7 +353,7 @@ async function createNewNode(node_type: 'custom_node' | 'reference_node' | 'text
     if (!area || !rete_init.editor || !reteContainer.value) return;
     let node = null as Node | null
 
-    node = rete_node_templates[node_type](socket)
+    node = ReteTemplates.node_templates[node_type](socket)
 
     if (node) {
         await rete_init.editor.addNode(node);
@@ -371,36 +365,42 @@ async function createNewNode(node_type: 'custom_node' | 'reference_node' | 'text
 
 // Save editor state as JSON
 const saveEditorState = async () => {
+
     if (!rete_init.editor) return;
-    const serializedNodes = rete_init.editor.getNodes().map((node) => {
+    const serializedNodes: SerializedFlow.Node[] = rete_init.editor.getNodes().map((node) => {
         const position = area?.nodeViews.get(node.id)?.position; // Get node position
         return {
             id: node.id,
             label: node.label,
-            controls: node.controls,
-            outputs: node.outputs,
-            inputs: node.inputs,
-            position: position || { x: 0, y: 0 }, // Default position if missing
+            controls: node.controls as { [key: string]: ControlInterface},
+            outputs: node.outputs as { [key: string]: Output<ClassicPreset.Socket> } | undefined,
+            inputs: node.inputs as { [key: string]: Input<ClassicPreset.Socket> } | undefined,
+            position: position || { x: 0, y: 0 },
             data: node.data, // Any extra props you attached
         };
     });
 
-    const serializedState = {
+    const serializedState:SerializedFlow.State = {
         nodes: serializedNodes,
         connections: rete_init.editor.getConnections().map((conn) => ({
-            id: conn.id,
-            source: conn.source,
-            sourceOutput: conn.sourceOutput,
-            target: conn.target,
-            targetInput: conn.targetInput,
+            id: conn.id as string,
+            source: conn.source as string,
+            sourceOutput: conn.sourceOutput as string,
+            target: conn.target as string,
+            targetInput: conn.targetInput as string,
         })),
-        signal: rete_init.editor.signal,
-        name: rete_init.editor.name
+        signal: rete_init.editor.signal as any,
+        name: rete_init.editor.name as string
     };
 
     const parse_serial = JSON.stringify(serializedState)
+    //Print the serialized node and save to firestore
     console.log(rete_init.editor)
+
+    //Save The Flow to json
     active_flow.json = parse_serial
+
+    //Create a new Output data of the node
     toast({
         title: 'Flow saved',
         variant: 'success',

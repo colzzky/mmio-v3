@@ -97,7 +97,7 @@ async function testRemove(mp_id: string) {
 
 onMounted(async () => {
   try {
-    await servicePermission.check(PermissionServices.WorskspaceSettings, ['view'])
+    await servicePermission.check(PermissionServices.WorkspaceSettings, ['view'])
     page_initialize()
   } catch (error: any) {
     if (error instanceof PermissionAccessError) router.back()
@@ -209,6 +209,7 @@ const importIntegrationModalRef = useTemplateRef('importIntegrationModal')
                     uiHelpers.formatDateTimeAgo(integration.importedAt)
                   }}</span>
                 </div>
+                <p class="text-md block font-bold">{{ imported_meta_pages.data[index].access_token }}</p>
               </div>
             </div>
           </div>
