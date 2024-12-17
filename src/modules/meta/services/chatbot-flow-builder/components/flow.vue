@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import Carousel from '../rete/TemplateNode/carousel.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
 import Text from '../rete/TemplateNode/text.vue'
@@ -17,12 +18,12 @@ import {
   ReteTemplates,
 } from '@/core/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
-import { NodeEditor, type GetSchemes, ClassicPreset, type NodeId, Signal } from 'rete'
-import { AreaPlugin, AreaExtensions, NodeView } from 'rete-area-plugin'
+import { NodeEditor, ClassicPreset, type NodeId } from 'rete'
+import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
-import { VuePlugin, Presets, type VueArea2D } from 'rete-vue-plugin'
-import type { Input, Output, Socket } from 'rete/_types/presets/classic'
-import { ref, onMounted, type Ref, reactive, watch } from 'vue'
+import { VuePlugin, Presets } from 'rete-vue-plugin'
+import type { Input, Output } from 'rete/_types/presets/classic'
+import { ref, onMounted, reactive, watch } from 'vue'
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -38,7 +39,6 @@ const { active_flow } = authWorkspace
 const menuVisible = ref(false)
 const nodeOptionVisible = ref(false)
 const menuPosition = ref<MousePosition>({ x: 0, y: 0 })
-const mousePosition = ref<MousePosition>({ x: 0, y: 0 })
 const reteContainer = ref<HTMLDivElement>()
 const socket = new ClassicPreset.Socket('socket')
 
@@ -86,9 +86,10 @@ async function initializeFlow() {
           }
           if (context.payload.label === 'text_node') {
             return Text
-          }
-          if (context.payload.label === 'message_node') {
+          } else if (context.payload.label === 'message_node') {
             return Message
+          } else if (context.payload.label === 'carousel_node') {
+            return Carousel
           }
           return Presets.classic.Node
         },
@@ -364,7 +365,7 @@ function getTranslatedMousePosition(event: MousePosition) {
 
 // Create a new node dynamically
 async function createNewNode(
-  node_type: 'custom_node' | 'reference_node' | 'text_node' | 'message_node',
+  node_type: 'custom_node' | 'reference_node' | 'text_node' | 'message_node' | 'carousel_node',
 ) {
   if (!area || !rete_init.editor || !reteContainer.value) return
   let node = null as Node | null
@@ -429,7 +430,7 @@ onMounted(async () => {
 
 watch(
   () => rete_init.editor,
-  async (init_new, init_old) => {
+  async (init_new) => {
     if (init_new && init_new.getNodes().length > 0) {
       //Uncomment if you want a consisten save
       //await saveEditorState()
@@ -470,6 +471,7 @@ function handleClearEditor() {
       >
         <div @click="createNewNode('reference_node')">➕ New Reference Node</div>
         <div @click="createNewNode('message_node')">➕ New Message Node</div>
+        <div @click="createNewNode('carousel_node')">➕ New Carousel Node</div>
         <div @click="createNewNode('custom_node')">➕ Create Node</div>
         <div @click="createNewNode('text_node')">➕ Create Text Node</div>
         <div>{{ menuPosition }}</div>

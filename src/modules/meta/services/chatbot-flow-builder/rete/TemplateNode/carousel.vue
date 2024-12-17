@@ -16,9 +16,9 @@ const quickReplies = computed(() =>
   ),
 )
 
-const replies = computed(() =>
+const cards = computed(() =>
   sortByIndex(
-    Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('reply')) as [
+    Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('card')) as [
       string,
       CustomOutput,
     ][],
@@ -44,8 +44,8 @@ const replies = computed(() =>
             data-testid="input-socket"
           />
           <span class="flex items-center gap-x-2 font-semibold">
-            <Icon icon="bx:message" class="size-6" />
-            Message
+            <Icon icon="bx:carousel" class="size-6" />
+            Carousel
           </span>
           <NodeSocket
             v-show="input.control && input.showControl"
@@ -62,7 +62,7 @@ const replies = computed(() =>
       <h2 class="ms-[calc(var(--socket-size)+theme(spacing.4))] self-start font-semibold">
         Replies:
       </h2>
-      <template v-for="[key, reply] in replies" :key="key + seed">
+      <template v-for="[key, reply] in cards" :key="key + seed">
         <div v-if="reply" :data-testid="`output-${key}`" class="flex items-center gap-x-3 text-xs">
           <span class="flex flex-col text-end">
             <p>{{ reply.data.question }}</p>

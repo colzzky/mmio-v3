@@ -53,7 +53,6 @@ export namespace ReteTemplates {
     }),
     number: new ClassicPreset.InputControl('number', {
       initial: 0,
-      change(value) {},
     }),
     testControl: new CustomControls.Test({
       label: 'Hello World',
@@ -103,31 +102,80 @@ export namespace ReteTemplates {
       // replies
       node.addOutput(
         `output_reply_${crypto.randomUUID()}`,
-        new CustomOutput({ socket, type: 'reply', question: 'Button Name', answer: 'URL Link' }),
+        new CustomOutput({
+          socket,
+          type: 'reply',
+          question: 'Message Question #1',
+          answer: 'Message Answer #1',
+        }),
       )
       node.addOutput(
         `output_reply_${crypto.randomUUID()}`,
         new CustomOutput({
           socket,
           type: 'reply',
-          question: 'Do you want to start over?',
-          answer: 'Flow Step',
+          question: 'Message Question #2',
+          answer: 'Message Answer #2',
         }),
       )
 
       // quick replies
       node.addOutput(
         `output_quickReply_${crypto.randomUUID()}`,
-        new CustomOutput({ socket, type: 'classic', label: 'Free Consultation' }),
+        new CustomOutput({ socket, type: 'classic', label: 'Message Quick Reply #1' }),
       )
       node.addOutput(
         `output_quickReply_${crypto.randomUUID()}`,
-        new CustomOutput({ socket, type: 'classic', label: 'Talk to an agent' }),
+        new CustomOutput({ socket, type: 'classic', label: 'Message Quick Reply #2' }),
       )
       node.addOutput(
         `output_quickReply_${crypto.randomUUID()}`,
-        new CustomOutput({ socket, type: 'classic', label: 'Site Visit' }),
+        new CustomOutput({ socket, type: 'classic', label: 'Message Quick Reply #3' }),
       )
+
+      return node
+    },
+    carousel_node(socket: ClassicPreset.Socket) {
+      const node = new Node('carousel_node')
+      node.id = crypto.randomUUID()
+      node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(socket, 'hello', true))
+
+      // cards
+      node.addOutput(
+        `output_card_${crypto.randomUUID()}`,
+        new CustomOutput({
+          socket,
+          type: 'card',
+          question: 'Carousel Question #1',
+          answer: 'Carousel Answer #1',
+          image: '',
+        }),
+      )
+      node.addOutput(
+        `output_card_${crypto.randomUUID()}`,
+        new CustomOutput({
+          socket,
+          type: 'card',
+          question: 'Carousel Question #2',
+          answer: 'Carousel Answer #2',
+          image: '',
+        }),
+      )
+
+      // quick replies
+      node.addOutput(
+        `output_quickReply_${crypto.randomUUID()}`,
+        new CustomOutput({ socket, type: 'classic', label: 'Carousel Quick Reply #1' }),
+      )
+      node.addOutput(
+        `output_quickReply_${crypto.randomUUID()}`,
+        new CustomOutput({ socket, type: 'classic', label: 'Carousel Quick Reply #2' }),
+      )
+      node.addOutput(
+        `output_quickReply_${crypto.randomUUID()}`,
+        new CustomOutput({ socket, type: 'classic', label: 'Carousel Quick Reply #3' }),
+      )
+
       return node
     },
   }
@@ -228,11 +276,17 @@ type CustomOutputTypeOpts = {
     question: string
     answer: string
   }
+  card: {
+    question: string
+    answer: string
+    image: string
+  }
 }
 
 type OutputConstructorArgs = { socket: ClassicPreset.Socket } & (
   | ({ type: 'classic' } & CustomOutputTypeOpts['classic'])
   | ({ type: 'reply' } & CustomOutputTypeOpts['reply'])
+  | ({ type: 'card' } & CustomOutputTypeOpts['card'])
 )
 export class CustomOutput extends ClassicPreset.Output<ClassicPreset.Socket> {
   data: any
@@ -243,6 +297,9 @@ export class CustomOutput extends ClassicPreset.Output<ClassicPreset.Socket> {
     if (args.type === 'reply') {
       const { question, answer } = args
       this.setData({ question, answer })
+    } else if (args.type === 'card') {
+      const { question, answer, image } = args
+      this.setData({ question, answer, image })
     } else {
       this.label = args.label
     }
