@@ -6,7 +6,7 @@ import { ConnectionPlugin, Presets as ConnectionPresets } from "rete-connection-
 import { VuePlugin, Presets, type VueArea2D } from "rete-vue-plugin";
 
 import { useAuthWorkspaceStore } from "@/stores/authWorkspaceStore";
-import { TestControl, type AreaExtra, type Schemes, Node, Connection, type ControlInterface, type SerializedFlow, ReteTemplates } from "@/core/utils/flow-types";
+import { CustomControls, type AreaExtra, type Schemes, Node, Connection, type ControlInterface, type SerializedFlow, ReteTemplates } from "@/core/utils/flow-types";
 import CustomControl from "../rete/customControl.vue";
 import Reference from "../rete/TemplateNode/reference.vue";
 import Text from "../rete/TemplateNode/text.vue";
@@ -80,7 +80,7 @@ async function initializeFlow() {
                     return Presets.classic.Node;
                 },
                 control(context) {
-                    if (context.payload instanceof TestControl) {
+                    if (context.payload instanceof CustomControls.Test) {
                         return CustomControl;
                     }
                     if (context.payload instanceof ClassicPreset.InputControl) {

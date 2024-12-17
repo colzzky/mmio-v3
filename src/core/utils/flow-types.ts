@@ -2,22 +2,7 @@ import { ClassicPreset, type GetSchemes } from "rete";
 import type { VueArea2D } from "rete-vue-plugin";
 import type { Input, Output } from "rete/_types/presets/classic";
 
-interface SampleInput {
-    label: string,
-    placeholder: string
-}
 
-export type ControlInterface = TestControl | ClassicPreset.InputControl<"number"> | ClassicPreset.InputControl<"text">
-
-export class TestControl extends ClassicPreset.Control {
-    public type = 'testControl'
-    public details: SampleInput;
-
-    constructor(_details: SampleInput) {
-        super();
-        this.details = _details;
-    }
-}
 
 export class Node extends ClassicPreset.Node<
     Record<string, ClassicPreset.Socket>,
@@ -27,10 +12,31 @@ export class Node extends ClassicPreset.Node<
     data?: any; // Add the 'data' property directly as part of the class
 }
 
+export type ControlInterface = CustomControls.Test | ClassicPreset.InputControl<"number"> | ClassicPreset.InputControl<"text">
+export namespace CustomControls {
+    interface SampleInput {
+        label: string,
+        placeholder: string
+    }
+    export class Test extends ClassicPreset.Control {
+        public type = 'testControl'
+        public details: SampleInput;
+
+        constructor(_details: SampleInput) {
+            super();
+            this.details = _details;
+        }
+    }
+
+    //Add more custom control here
+}
+
 export class Connection<A extends Node> extends ClassicPreset.Connection<A, A> { }
 
 export type Schemes = GetSchemes<Node, Connection<Node>>;
 export type AreaExtra = VueArea2D<Schemes>;
+
+
 
 /////////////////////
 // RETE Templates //
@@ -51,7 +57,7 @@ export namespace ReteTemplates {
             change(value) {
             },
         }),
-        testControl: new TestControl({
+        testControl: new CustomControls.Test({
             label: "Hello World",
             placeholder: "Enter a valuess"
         })
@@ -133,14 +139,14 @@ export namespace FBAttachmentTemplate {
             };
         };
     }
-    
+
     export interface Element {
         title: string;
         subtitle: string;
         image_url: string;
         buttons: Button[];
     }
-    
+
     export interface Button {
         type: "web_url" | "postback";
         title: string;
