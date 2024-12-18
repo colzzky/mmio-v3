@@ -268,6 +268,7 @@ type FlowNodeData = {
 // CUSTOM OUTPUT //
 //////////////////
 
+type CustomOutputType = 'classic' | 'reply' | 'card'
 type CustomOutputTypeOpts = {
   classic: {
     label?: string
@@ -282,16 +283,14 @@ type CustomOutputTypeOpts = {
     image: string
   }
 }
+type CustomOutputConstructorArgs = { socket: ClassicPreset.Socket } & {
+  [K in CustomOutputType]: { type: K } & CustomOutputTypeOpts[K]
+}[CustomOutputType]
 
-type OutputConstructorArgs = { socket: ClassicPreset.Socket } & (
-  | ({ type: 'classic' } & CustomOutputTypeOpts['classic'])
-  | ({ type: 'reply' } & CustomOutputTypeOpts['reply'])
-  | ({ type: 'card' } & CustomOutputTypeOpts['card'])
-)
 export class CustomOutput extends ClassicPreset.Output<ClassicPreset.Socket> {
   data: any
 
-  constructor(args: OutputConstructorArgs) {
+  constructor(args: CustomOutputConstructorArgs) {
     super(args.socket)
 
     if (args.type === 'reply') {
