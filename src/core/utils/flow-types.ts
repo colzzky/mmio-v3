@@ -1,6 +1,7 @@
 import { ClassicPreset, type GetSchemes } from 'rete'
 import type { VueArea2D } from 'rete-vue-plugin'
 import type { Input, Output } from 'rete/_types/presets/classic'
+import type { SubCollections } from '../types/UniTypes'
 
 export class Node extends ClassicPreset.Node<
   Record<string, ClassicPreset.Socket>,
@@ -32,7 +33,7 @@ export namespace CustomControls {
   //Add more custom control here
 }
 
-export class Connection<A extends Node> extends ClassicPreset.Connection<A, A> {}
+export class Connection<A extends Node> extends ClassicPreset.Connection<A, A> { }
 
 export type Schemes = GetSchemes<Node, Connection<Node>>
 export type AreaExtra = VueArea2D<Schemes>
@@ -109,8 +110,8 @@ export namespace ReteTemplates {
           answer: 'Message Answer #1',
         }),
       )
-      node.addOutput(
-        `output_reply_${crypto.randomUUID()}`,
+
+      node.addOutput(`output_reply_${crypto.randomUUID()}`,
         new CustomOutput({
           socket,
           type: 'reply',
@@ -135,6 +136,8 @@ export namespace ReteTemplates {
 
       return node
     },
+
+
     carousel_node(socket: ClassicPreset.Socket) {
       const node = new Node('carousel_node')
       node.id = crypto.randomUUID()
@@ -179,6 +182,8 @@ export namespace ReteTemplates {
       return node
     },
   }
+
+
 }
 
 //Serialized State. This is the typ used when saving and populating rete editor
@@ -244,24 +249,34 @@ export namespace FBAttachmentTemplate {
 // Flow Data Templates //
 ////////////////////////
 
-interface FlowData {
+export interface FlowData extends SubCollections {
   flow_id: string
-  flow_node_data: FlowNodeData[]
+  editor_data: string // This is where we save the rete editor Data
+  flow_node_data: FlowNodeData[] // This is where we save the extracted nodes that will be use by FB Must be a subcollection
+  subCollections: 'node_refs'[]
+  createdAt: string
+  updatedAt: string
+
 }
 
-type FlowNodeData = {
+export interface FlowNodeData {
   node_id: string
-  postback_id: string
   message_type: string
   message_data: {
+    message_id: string
     text?: string
     attachment?: FBAttachmentTemplate.Attachment
     quick_replies?: {
       content_type: string
-      title: string
-      payload: string // This is the postback payload that will call another node ID
+      title?: string
+      payload?: string // This is the postback payload that will call another node ID
+      //{flow_id:'sample-id',node_id:'sample-node-id',quick_reply_id:'sample-qr-id'}
     }[]
-  }
+  },
+  // Can be quick replies or buttons
+  postback_data: { origin: string, postback: string }[]
+  createdAt: string
+  updatedAt: string
 }
 
 ////////////////////
@@ -289,7 +304,6 @@ type CustomOutputConstructorArgs = { socket: ClassicPreset.Socket } & {
 
 export class CustomOutput extends ClassicPreset.Output<ClassicPreset.Socket> {
   data: any
-
   constructor(args: CustomOutputConstructorArgs) {
     super(args.socket)
 
@@ -302,9 +316,14 @@ export class CustomOutput extends ClassicPreset.Output<ClassicPreset.Socket> {
     } else {
       this.label = args.label
     }
-  }
 
+  }
   setData(data: any) {
     this.data = data
   }
 }
+
+
+
+
+
