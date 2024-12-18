@@ -3,6 +3,7 @@ import Carousel from '../rete/TemplateNode/carousel.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
 import Text from '../rete/TemplateNode/text.vue'
+import ContextMenu from '../rete/context-menu.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
 import CustomNode from '../rete/customNode.vue'
@@ -463,21 +464,13 @@ function handleClearEditor() {
 <template>
   <div class="">
     <!-- Rete.js Canvas -->
-    <div class="h-screen bg-pink-50">
-      <div
-        v-if="menuVisible"
-        class="floating-menu"
+    <div>
+      <ContextMenu
+        v-show="menuVisible"
         :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }"
-      >
-        <div @click="createNewNode('reference_node')">➕ New Reference Node</div>
-        <div @click="createNewNode('message_node')">➕ New Message Node</div>
-        <div @click="createNewNode('carousel_node')">➕ New Carousel Node</div>
-        <div @click="createNewNode('custom_node')">➕ Create Node</div>
-        <div @click="createNewNode('text_node')">➕ Create Text Node</div>
-        <div>{{ menuPosition }}</div>
-        <div @click="handleClearEditor">Clear</div>
-        <div @click="closeMenu">❌ Close</div>
-      </div>
+        @add-click="createNewNode"
+        @clear-click="handleClearEditor"
+      />
       <div
         v-if="nodeOptionVisible"
         class="floating-menu"
