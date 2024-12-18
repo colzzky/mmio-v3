@@ -82,7 +82,29 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+
+  .fill-area {
+    display: table;
+    z-index: -11;
+    position: absolute;
+    top: -320000px;
+    left: -320000px;
+    width: 640000px;
+    height: 640000px;
+  }
+
+  .background {
+    background-color: #f7f6ff;
+    opacity: 1;
+    background-image: radial-gradient(theme(colors.primary.DEFAULT) 1.55px, transparent 1.55px),
+      radial-gradient(theme(colors.primary.DEFAULT) 1.55px, theme(colors.primary.foreground) 1.55px);
+    background-size: 62px 62px;
+    background-position:
+      0 0,
+      31px 31px;
   }
 }

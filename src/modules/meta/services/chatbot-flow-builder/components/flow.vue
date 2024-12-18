@@ -19,7 +19,7 @@ import {
   ReteTemplates,
 } from '@/core/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
-import { NodeEditor, ClassicPreset, type NodeId } from 'rete'
+import { NodeEditor, ClassicPreset, type NodeId, type BaseSchemes } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
 import { VuePlugin, Presets } from 'rete-vue-plugin'
@@ -120,6 +120,8 @@ async function initializeFlow() {
 
   AreaExtensions.selectableNodes(area, selector, { accumulating })
   trackMouseEvents(area)
+
+  addCustomBackground(area)
 }
 
 const reloadEditorState = async () => {
@@ -459,6 +461,15 @@ function handleClearEditor() {
   rete_init.editor?.clear()
   closeMenu()
 }
+
+function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
+  const background = document.createElement('div')
+
+  background.classList.add('background')
+  background.classList.add('fill-area')
+
+  area.area.content.add(background)
+}
 </script>
 
 <template>
@@ -482,7 +493,7 @@ function handleClearEditor() {
         <div @click="closeNodeOption()">❌ Close</div>
       </div>
 
-      <div id="no-right-click" ref="reteContainer" class="bg-dotted h-screen bg-gray-50"></div>
+      <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
     </div>
 
     <div class="fixed left-0 right-0 top-0 flex justify-between p-4">
@@ -507,14 +518,6 @@ function handleClearEditor() {
 </template>
 
 <style scoped>
-.bg-dotted {
-  background-image: radial-gradient(currentColor 0.5px, transparent 0.5px);
-  background-size: 10px 10px;
-  /* Adjust size of dots */
-  color: #c5c5c5;
-  /* Change dot color */
-}
-
 .floating-menu {
   position: absolute;
   user-select: none;
