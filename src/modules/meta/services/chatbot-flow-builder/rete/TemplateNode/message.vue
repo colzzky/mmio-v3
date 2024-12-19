@@ -3,31 +3,40 @@ import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
 import { sortByIndex } from '../utils'
 import MessageSheet from './message-sheet.vue'
-import type { MeteTemplateOutput, Schemes } from '@/core/utils/flow-types'
+import type { MetaTemplateOutput, Schemes } from '@/core/utils/flow-types'
 import { Icon } from '@iconify/vue'
-import { computed } from 'vue'
+import { computed, onUpdated, ref, watch } from 'vue'
 
 const props = defineProps<{ data: Schemes['Node']; emit: any; seed: number }>()
 
 const inputs = computed(() => sortByIndex(Object.entries(props.data.inputs)))
 
-const quickReplies = computed(() =>
-  sortByIndex(
-    Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('quickReply')) as [
-      string,
-      MeteTemplateOutput,
-    ][],
-  ),
+
+
+const quickReplies = ref(sortByIndex(
+  Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('quickReply')) as [
+    string,
+    MetaTemplateOutput<'quickReply'>,
+  ][],
+),
 )
 
-const replies = computed(() =>
-  sortByIndex(
-    Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('reply')) as [
+const replies = ref(sortByIndex(
+  Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('reply')) as [
+    string,
+    MetaTemplateOutput<'reply'>,
+  ][],
+))
+
+onUpdated(() => {
+  console.log(props.data.outputs)
+  quickReplies.value = sortByIndex(
+    Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('quickReply')) as [
       string,
-      MeteTemplateOutput,
+      MetaTemplateOutput<'quickReply'>,
     ][],
-  ),
-)
+  )
+})
 </script>
 
 <template>
@@ -97,7 +106,7 @@ const replies = computed(() =>
           :data-testid="`output-${key}`"
           class="flex items-center gap-x-3 text-xs"
         >
-          <span>{{ quickReply.data.label }}</span>
+          <span>{{ quickReply.data.title }}</span>
           <NodeSocket
             :emit
             :data="{
@@ -111,7 +120,5 @@ const replies = computed(() =>
         </div>
       </template>
     </section>
-
-    <MessageSheet :replies :quickReplies />
   </NodeCard>
 </template>

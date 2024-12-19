@@ -62,4 +62,10 @@ export namespace FBAttachmentTemplate {
         messenger_extensions?: "TRUE" | "FALSE" // Optional for web_url type
         payload?: string // Optional because 'web_url' doesn't need payload
     }
+
+    export interface QuickReply{
+        content_type: "text"|"user_email"|"user_phone_number",
+        title?: string,
+        payload?: string
+    }
 }

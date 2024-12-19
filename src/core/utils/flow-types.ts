@@ -2,13 +2,37 @@ import type { SubCollections } from '../types/UniTypes'
 import { ClassicPreset, type GetSchemes } from 'rete'
 import type { VueArea2D } from 'rete-vue-plugin'
 import type { Input, Output } from 'rete/_types/presets/classic'
+import type { FBAttachmentTemplate } from './flow-meta-types'
 
-export class Node extends ClassicPreset.Node<
-  Record<string, ClassicPreset.Socket>,
-  Record<string, ClassicPreset.Socket>,
-  Record<string, ControlInterface>
+export interface NodeType {
+  message_node: MessageNode
+  text_node: MessageNode
+  carousel_node: MessageNode
+  reference_node: MessageNode
+  button_node: ButtonNode
+}
+
+interface MessageNode {
+  name: string
+  message: string
+}
+
+interface ButtonNode {
+  name: string
+  message: string
+  isClick: boolean
+}
+
+export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
+  Record<string, ClassicPreset.Socket>, // Inputs
+  Record<string, ClassicPreset.Socket>, // Outputs
+  Record<string, ControlInterface>      // Controls
 > {
-  data?: any // Add the 'data' property directly as part of the class
+  data?: NodeType[T];          // Dynamically infer the type of 'data' based on 'T'
+
+  constructor(label: T) {
+    super(label); // Call the constructor of the base class (ClassicPreset.Node)
+  }
 }
 
 export type ControlInterface =
@@ -33,9 +57,9 @@ export namespace CustomControls {
   //Add more custom control here
 }
 
-export class Connection<A extends Node> extends ClassicPreset.Connection<A, A> {}
+export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> { }
 
-export type Schemes = GetSchemes<Node, Connection<Node>>
+export type Schemes = GetSchemes<Node<keyof NodeType>, Connection<Node<keyof NodeType>>>;
 export type AreaExtra = VueArea2D<Schemes>
 
 /////////////////////
@@ -63,16 +87,12 @@ export namespace ReteTemplates {
   //These are the templates needed to create a Facebook Node
   export const node_templates = {
     custom_node(socket: ClassicPreset.Socket) {
-      const node = new Node('Custom')
+      const node = new Node('message_node')
       node.id = crypto.randomUUID()
       node.addControl('input', control_template.text)
       node.addControl('input2', control_template.number)
       node.addControl('test', control_template.testControl)
 
-      node.data = {
-        details: 'Hello World',
-        content: 'Enter a This is a content',
-      }
       node.addOutput('socket', new ClassicPreset.Output(socket))
       node.addInput('socket', new ClassicPreset.Input(socket))
       node.addInput('socket2', new ClassicPreset.Input(socket))
@@ -85,7 +105,14 @@ export namespace ReteTemplates {
 
       createMetaTemplateOutput({
         node,
-        outputOpts: { socket, type: 'classic', label: 'sample label' },
+        type: 'classic',
+        outputOpts: {
+          socket,
+          data: {
+            label: ''
+
+          }
+        },
       })
       return node
     },
@@ -98,52 +125,72 @@ export namespace ReteTemplates {
     },
     message_node(socket: ClassicPreset.Socket) {
       const node = new Node('message_node')
+      node.data={
+        message:'',
+        name:''
+      }
       node.id = crypto.randomUUID()
       node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(socket, 'hello', true))
 
       // replies
       createMetaTemplateOutput({
         node,
+        type: 'reply',
         outputOpts: {
           socket,
-          type: 'reply',
-          question: 'Message Question #1',
-          answer: 'Message Answer #1',
+          data: {
+            question: 'Message Question #1',
+            answer: 'Message Answer #1',
+          }
         },
       })
       createMetaTemplateOutput({
         node,
+        type: 'reply',
         outputOpts: {
           socket,
-          type: 'reply',
-          question: 'Message Question #2',
-          answer: 'Message Answer #2',
+          data: {
+            question: 'Message Question #2',
+            answer: 'Message Answer #2',
+          }
         },
       })
 
       // quick replies
       createMetaTemplateOutput({
         node,
+        type: 'quickReply',
         outputOpts: {
           socket,
-          type: 'quickReply',
-          label: 'Message Quick Reply #1',
+          data: {
+            title: 'Message Quick Reply #1',
+            content_type: "text"
+          }
+
         },
       })
       createMetaTemplateOutput({
         node,
+        type: 'quickReply',
         outputOpts: {
           socket,
-          type: 'quickReply',
-          label: 'Message Quick Reply #2',
+          data: {
+            title: 'Message Quick Reply #2',
+            content_type: "text"
+
+          }
         },
       })
       createMetaTemplateOutput({
         node,
+        type: 'quickReply',
         outputOpts: {
           socket,
-          type: 'quickReply',
-          label: 'Message Quick Reply #3',
+          data: {
+            title: 'Message Quick Reply #3',
+            content_type: "text"
+
+          }
         },
       })
 
@@ -159,48 +206,63 @@ export namespace ReteTemplates {
 
       createMetaTemplateOutput({
         node,
+        type: 'carouselCard',
         outputOpts: {
           socket,
-          type: 'carouselCard',
-          question: 'Carousel Question #1',
-          answer: 'Carousel Answer #1',
-          image: '',
+          data: {
+            question: 'Carousel Question #1',
+            answer: 'Carousel Answer #1',
+            image: '',
+          }
         },
       })
       createMetaTemplateOutput({
         node,
+        type: 'carouselCard',
         outputOpts: {
           socket,
-          type: 'carouselCard',
-          question: 'Carousel Question #2',
-          answer: 'Carousel Answer #2',
-          image: '',
+          data: {
+            question: 'Carousel Question #2',
+            answer: 'Carousel Answer #2',
+            image: '',
+          }
         },
       })
 
       // quick replies
       createMetaTemplateOutput({
         node,
+        type: 'quickReply',
         outputOpts: {
           socket,
-          type: 'quickReply',
-          label: 'Carousel Quick Reply #1',
+          data: {
+            title: 'Carousel Quick Reply #1',
+            content_type: 'text'
+          }
         },
       })
       createMetaTemplateOutput({
         node,
+        type: 'quickReply',
         outputOpts: {
           socket,
-          type: 'quickReply',
-          label: 'Carousel Quick Reply #2',
+          data: {
+            title: 'Carousel Quick Reply #2',
+            content_type: 'text'
+
+          }
         },
       })
       createMetaTemplateOutput({
         node,
+        type: 'quickReply',
         outputOpts: {
           socket,
-          type: 'quickReply',
-          label: 'Carousel Quick Reply #3',
+          data: {
+            title: 'Carousel Quick Reply #3',
+            content_type: 'text'
+
+          }
         },
       })
 
@@ -215,7 +277,7 @@ export namespace SerializedFlow {
     id: string
     label: string
     controls: { [key: string]: ControlInterface }
-    outputs: { [key: string]: Output<ClassicPreset.Socket> } | undefined
+    outputs: { [key: string]: MetaTemplateOutput<keyof MetaTemplateOutputType> } | undefined
     inputs: { [key: string]: Input<ClassicPreset.Socket> } | undefined
     position: { x: number; y: number }
     data: any
@@ -234,37 +296,6 @@ export namespace SerializedFlow {
     connections: Connection[]
     signal: any
     name: string
-  }
-}
-
-/////////////////////////
-// Facebook Templates //
-///////////////////////
-
-export namespace FBAttachmentTemplate {
-  export interface Attachment {
-    attachment: {
-      type: 'template'
-      payload: {
-        template_type: 'generic'
-        elements: Element[]
-      }
-    }
-  }
-
-  export interface Element {
-    title: string
-    subtitle: string
-    image_url: string
-    buttons: Button[]
-  }
-
-  export interface Button {
-    type: 'web_url' | 'postback'
-    title: string
-    url?: string // Optional because 'postback' type doesn't require it
-    messenger_extensions?: boolean // Optional for web_url type
-    payload?: string // Optional because 'web_url' doesn't need payload
   }
 }
 
@@ -304,66 +335,78 @@ export interface FlowNodeData {
 ////////////////////
 // CUSTOM OUTPUT //
 //////////////////
+/**
+type MetaTemplateOutputType = {
+  classic: ClassicOutput
+  reply: ReplyOutput
+  quickReply: CarouselCardOutput
+  carouselCard: QuickReplyOutput
+};
 
-type MetaTemplateOutputType = 'classic' | 'reply' | 'quickReply' | 'carouselCard'
-type MetaTemplateOutputTypeOpts = {
+type ClassicOutput = {
+  label?: string;
+};
+type ReplyOutput = {
+  question: string;
+  answer: string;
+};
+type CarouselCardOutput = {
+  question: string;
+  answer: string;
+  image: string;
+};
+ */
+//type QuickReplyOutput = FBAttachmentTemplate.QuickReply;
+export type MetaTemplateOutputType = {
   classic: {
-    label?: string
-  }
+    label?: string;
+  };
   reply: {
-    question: string
-    answer: string
-  }
-  quickReply: {
-    label: string
-  }
+    question: string;
+    answer: string;
+  };
   carouselCard: {
-    question: string
-    answer: string
-    image: string
+    question: string;
+    answer: string;
+    image: string;
+  };
+  quickReply: FBAttachmentTemplate.QuickReply;
+};
+
+// Arguments passed into MetaTemplateOutput's constructor based on the type
+type MetaTemplateOutputConstructorArgs<T extends keyof MetaTemplateOutputType> = {
+  socket: ClassicPreset.Socket;
+  key: string;
+} & { data: MetaTemplateOutputType[T] };  // Dynamically adds fields based on the 'type' passed
+
+type CreateMetaTemplateOutputArgs<T extends keyof MetaTemplateOutputType> = {
+  node: Node<keyof NodeType>;
+  type: T
+  outputOpts: {
+    socket: ClassicPreset.Socket
+    data: MetaTemplateOutputType[T];
+  }
+};
+
+// Factory function to create a MetaTemplateOutput dynamically based on type
+export function createMetaTemplateOutput<T extends keyof MetaTemplateOutputType>(args: CreateMetaTemplateOutputArgs<T>, outKey:string='') {
+  const outputKey = !outKey ? `output_${args.type}_${crypto.randomUUID()}` : outKey; // Create a unique key for the output
+  args.node.addOutput(outputKey, new MetaTemplateOutput(args.type, { socket: args.outputOpts.socket, data: args.outputOpts.data, key: outputKey })); // Add the output to the node
+  return args.node;
+}
+
+export class MetaTemplateOutput<T extends keyof MetaTemplateOutputType> extends ClassicPreset.Output<ClassicPreset.Socket> {
+  data: MetaTemplateOutputType[T]; // Data will be of the correct type based on 'T'
+  type: keyof MetaTemplateOutputType;
+  id: string;
+
+  constructor(typeT: T, args: MetaTemplateOutputConstructorArgs<T>) {
+    super(args.socket); // Initialize with socket
+    this.type = typeT;   // Set the type (e.g., 'reply', 'quickReply', etc.)
+    this.id = args.key;  // Set the ID (provided as part of args)
+
+    // Dynamically set the data based on the type
+    this.data = { ...args.data };  // Assign the provided arguments to 'data'
   }
 }
 
-type CreateMetaTemplateOutputArgs = {
-  node: Node
-  outputOpts: { socket: ClassicPreset.Socket } & {
-    [K in MetaTemplateOutputType]: { type: K } & MetaTemplateOutputTypeOpts[K]
-  }[MetaTemplateOutputType]
-}
-
-function createMetaTemplateOutput({ node, outputOpts }: CreateMetaTemplateOutputArgs) {
-  const outputKey = `output_${outputOpts.type}_${crypto.randomUUID()}`
-  node.addOutput(outputKey, new MeteTemplateOutput({ ...outputOpts, key: outputKey }))
-  return node
-}
-
-type MetaTemplateOutputConstructorArgs = { socket: ClassicPreset.Socket; key: string } & {
-  [K in MetaTemplateOutputType]: { type: K } & MetaTemplateOutputTypeOpts[K]
-}[MetaTemplateOutputType]
-
-export class MeteTemplateOutput extends ClassicPreset.Output<ClassicPreset.Socket> {
-  data: any
-  type: MetaTemplateOutputType
-
-  constructor(args: MetaTemplateOutputConstructorArgs) {
-    super(args.socket)
-    this.type = args.type
-    this.id = args.key
-
-    if (args.type === 'reply') {
-      const { question, answer } = args
-      this.setData({ question, answer })
-    } else if (args.type === 'quickReply') {
-      const { label } = args
-      this.setData({ label })
-    } else if (args.type === 'carouselCard') {
-      const { question, answer, image } = args
-      this.setData({ question, answer, image })
-    } else {
-      this.label = args.label
-    }
-  }
-  setData(data: any) {
-    this.data = data
-  }
-}
