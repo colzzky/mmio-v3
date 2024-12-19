@@ -2,7 +2,7 @@
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
 import { sortByIndex } from '../utils'
-import type { CustomOutput, Schemes } from '@/core/utils/flow-types'
+import type { MeteTemplateOutput, Schemes } from '@/core/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
 
@@ -20,7 +20,7 @@ const cards = computed(() =>
   sortByIndex(
     Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('card')) as [
       string,
-      CustomOutput,
+      MeteTemplateOutput,
     ][],
   ),
 )

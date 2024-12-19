@@ -2,7 +2,8 @@
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
 import { sortByIndex } from '../utils'
-import type { CustomOutput, Schemes } from '@/core/utils/flow-types'
+import MessageSheet from './message-sheet.vue'
+import type { MeteTemplateOutput, Schemes } from '@/core/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
 
@@ -12,7 +13,10 @@ const inputs = computed(() => sortByIndex(Object.entries(props.data.inputs)))
 
 const quickReplies = computed(() =>
   sortByIndex(
-    Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('quickReply')),
+    Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('quickReply')) as [
+      string,
+      MeteTemplateOutput,
+    ][],
   ),
 )
 
@@ -20,7 +24,7 @@ const replies = computed(() =>
   sortByIndex(
     Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('reply')) as [
       string,
-      CustomOutput,
+      MeteTemplateOutput,
     ][],
   ),
 )
@@ -93,7 +97,7 @@ const replies = computed(() =>
           :data-testid="`output-${key}`"
           class="flex items-center gap-x-3 text-xs"
         >
-          <span>{{ quickReply.label }}</span>
+          <span>{{ quickReply.data.label }}</span>
           <NodeSocket
             :emit
             :data="{
@@ -107,5 +111,7 @@ const replies = computed(() =>
         </div>
       </template>
     </section>
+
+    <MessageSheet :replies :quickReplies />
   </NodeCard>
 </template>

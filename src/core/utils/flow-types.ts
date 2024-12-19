@@ -1,7 +1,7 @@
+import type { SubCollections } from '../types/UniTypes'
 import { ClassicPreset, type GetSchemes } from 'rete'
 import type { VueArea2D } from 'rete-vue-plugin'
 import type { Input, Output } from 'rete/_types/presets/classic'
-import type { SubCollections } from '../types/UniTypes'
 
 export class Node extends ClassicPreset.Node<
   Record<string, ClassicPreset.Socket>,
@@ -33,7 +33,7 @@ export namespace CustomControls {
   //Add more custom control here
 }
 
-export class Connection<A extends Node> extends ClassicPreset.Connection<A, A> { }
+export class Connection<A extends Node> extends ClassicPreset.Connection<A, A> {}
 
 export type Schemes = GetSchemes<Node, Connection<Node>>
 export type AreaExtra = VueArea2D<Schemes>
@@ -82,10 +82,11 @@ export namespace ReteTemplates {
     reference_node(socket: ClassicPreset.Socket) {
       const node = new Node('reference_node')
       node.id = crypto.randomUUID()
-      node.addOutput(
-        `output_${crypto.randomUUID()}`,
-        new CustomOutput({ socket, type: 'classic', label: 'sample label' }),
-      )
+
+      createMetaTemplateOutput({
+        node,
+        outputOpts: { socket, type: 'classic', label: 'sample label' },
+      })
       return node
     },
     text_node(socket: ClassicPreset.Socket) {
@@ -101,42 +102,53 @@ export namespace ReteTemplates {
       node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(socket, 'hello', true))
 
       // replies
-      node.addOutput(
-        `output_reply_${crypto.randomUUID()}`,
-        new CustomOutput({
+      createMetaTemplateOutput({
+        node,
+        outputOpts: {
           socket,
           type: 'reply',
           question: 'Message Question #1',
           answer: 'Message Answer #1',
-        }),
-      )
-
-      node.addOutput(`output_reply_${crypto.randomUUID()}`,
-        new CustomOutput({
+        },
+      })
+      createMetaTemplateOutput({
+        node,
+        outputOpts: {
           socket,
           type: 'reply',
           question: 'Message Question #2',
           answer: 'Message Answer #2',
-        }),
-      )
+        },
+      })
 
       // quick replies
-      node.addOutput(
-        `output_quickReply_${crypto.randomUUID()}`,
-        new CustomOutput({ socket, type: 'classic', label: 'Message Quick Reply #1' }),
-      )
-      node.addOutput(
-        `output_quickReply_${crypto.randomUUID()}`,
-        new CustomOutput({ socket, type: 'classic', label: 'Message Quick Reply #2' }),
-      )
-      node.addOutput(
-        `output_quickReply_${crypto.randomUUID()}`,
-        new CustomOutput({ socket, type: 'classic', label: 'Message Quick Reply #3' }),
-      )
+      createMetaTemplateOutput({
+        node,
+        outputOpts: {
+          socket,
+          type: 'quickReply',
+          label: 'Message Quick Reply #1',
+        },
+      })
+      createMetaTemplateOutput({
+        node,
+        outputOpts: {
+          socket,
+          type: 'quickReply',
+          label: 'Message Quick Reply #2',
+        },
+      })
+      createMetaTemplateOutput({
+        node,
+        outputOpts: {
+          socket,
+          type: 'quickReply',
+          label: 'Message Quick Reply #3',
+        },
+      })
 
       return node
     },
-
 
     carousel_node(socket: ClassicPreset.Socket) {
       const node = new Node('carousel_node')
@@ -144,46 +156,57 @@ export namespace ReteTemplates {
       node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(socket, 'hello', true))
 
       // cards
-      node.addOutput(
-        `output_card_${crypto.randomUUID()}`,
-        new CustomOutput({
+
+      createMetaTemplateOutput({
+        node,
+        outputOpts: {
           socket,
-          type: 'card',
+          type: 'carouselCard',
           question: 'Carousel Question #1',
           answer: 'Carousel Answer #1',
           image: '',
-        }),
-      )
-      node.addOutput(
-        `output_card_${crypto.randomUUID()}`,
-        new CustomOutput({
+        },
+      })
+      createMetaTemplateOutput({
+        node,
+        outputOpts: {
           socket,
-          type: 'card',
+          type: 'carouselCard',
           question: 'Carousel Question #2',
           answer: 'Carousel Answer #2',
           image: '',
-        }),
-      )
+        },
+      })
 
       // quick replies
-      node.addOutput(
-        `output_quickReply_${crypto.randomUUID()}`,
-        new CustomOutput({ socket, type: 'classic', label: 'Carousel Quick Reply #1' }),
-      )
-      node.addOutput(
-        `output_quickReply_${crypto.randomUUID()}`,
-        new CustomOutput({ socket, type: 'classic', label: 'Carousel Quick Reply #2' }),
-      )
-      node.addOutput(
-        `output_quickReply_${crypto.randomUUID()}`,
-        new CustomOutput({ socket, type: 'classic', label: 'Carousel Quick Reply #3' }),
-      )
+      createMetaTemplateOutput({
+        node,
+        outputOpts: {
+          socket,
+          type: 'quickReply',
+          label: 'Carousel Quick Reply #1',
+        },
+      })
+      createMetaTemplateOutput({
+        node,
+        outputOpts: {
+          socket,
+          type: 'quickReply',
+          label: 'Carousel Quick Reply #2',
+        },
+      })
+      createMetaTemplateOutput({
+        node,
+        outputOpts: {
+          socket,
+          type: 'quickReply',
+          label: 'Carousel Quick Reply #3',
+        },
+      })
 
       return node
     },
   }
-
-
 }
 
 //Serialized State. This is the typ used when saving and populating rete editor
@@ -256,7 +279,6 @@ export interface FlowData extends SubCollections {
   subCollections: 'node_refs'[]
   createdAt: string
   updatedAt: string
-
 }
 
 export interface FlowNodeData {
@@ -272,9 +294,9 @@ export interface FlowNodeData {
       payload?: string // This is the postback payload that will call another node ID
       //{flow_id:'sample-id',node_id:'sample-node-id',quick_reply_id:'sample-qr-id'}
     }[]
-  },
+  }
   // Can be quick replies or buttons
-  postback_data: { origin: string, postback: string }[]
+  postback_data: { origin: string; postback: string }[]
   createdAt: string
   updatedAt: string
 }
@@ -283,8 +305,8 @@ export interface FlowNodeData {
 // CUSTOM OUTPUT //
 //////////////////
 
-type CustomOutputType = 'classic' | 'reply' | 'card'
-type CustomOutputTypeOpts = {
+type MetaTemplateOutputType = 'classic' | 'reply' | 'quickReply' | 'carouselCard'
+type MetaTemplateOutputTypeOpts = {
   classic: {
     label?: string
   }
@@ -292,38 +314,56 @@ type CustomOutputTypeOpts = {
     question: string
     answer: string
   }
-  card: {
+  quickReply: {
+    label: string
+  }
+  carouselCard: {
     question: string
     answer: string
     image: string
   }
 }
-type CustomOutputConstructorArgs = { socket: ClassicPreset.Socket } & {
-  [K in CustomOutputType]: { type: K } & CustomOutputTypeOpts[K]
-}[CustomOutputType]
 
-export class CustomOutput extends ClassicPreset.Output<ClassicPreset.Socket> {
+type CreateMetaTemplateOutputArgs = {
+  node: Node
+  outputOpts: { socket: ClassicPreset.Socket } & {
+    [K in MetaTemplateOutputType]: { type: K } & MetaTemplateOutputTypeOpts[K]
+  }[MetaTemplateOutputType]
+}
+
+function createMetaTemplateOutput({ node, outputOpts }: CreateMetaTemplateOutputArgs) {
+  const outputKey = `output_${outputOpts.type}_${crypto.randomUUID()}`
+  node.addOutput(outputKey, new MeteTemplateOutput({ ...outputOpts, key: outputKey }))
+  return node
+}
+
+type MetaTemplateOutputConstructorArgs = { socket: ClassicPreset.Socket; key: string } & {
+  [K in MetaTemplateOutputType]: { type: K } & MetaTemplateOutputTypeOpts[K]
+}[MetaTemplateOutputType]
+
+export class MeteTemplateOutput extends ClassicPreset.Output<ClassicPreset.Socket> {
   data: any
-  constructor(args: CustomOutputConstructorArgs) {
+  type: MetaTemplateOutputType
+
+  constructor(args: MetaTemplateOutputConstructorArgs) {
     super(args.socket)
+    this.type = args.type
+    this.id = args.key
 
     if (args.type === 'reply') {
       const { question, answer } = args
       this.setData({ question, answer })
-    } else if (args.type === 'card') {
+    } else if (args.type === 'quickReply') {
+      const { label } = args
+      this.setData({ label })
+    } else if (args.type === 'carouselCard') {
       const { question, answer, image } = args
       this.setData({ question, answer, image })
     } else {
       this.label = args.label
     }
-
   }
   setData(data: any) {
     this.data = data
   }
 }
-
-
-
-
-
