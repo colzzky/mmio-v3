@@ -3,7 +3,7 @@ import NodeCard from './node-card.vue'
 import { Icon } from '@iconify/vue'
 
 defineEmits<{
-  (e: 'addClick', node: 'reference_node' | 'message_node' | 'carousel_node'): void
+  (e: 'addClick', node: 'reference_node' | 'text_node' | 'message_node' | 'carousel_node'): void
   (e: 'clearClick'): void
 }>()
 </script>

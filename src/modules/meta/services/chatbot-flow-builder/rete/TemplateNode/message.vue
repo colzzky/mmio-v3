@@ -15,9 +15,9 @@ onMounted(() => {
 })
 
 const inputs = computed(() => {
-  const entries = Object.entries(node.value?.inputs || {});
-  return sortByIndex(entries);
-});
+  const entries = Object.entries(node.value?.inputs || {})
+  return sortByIndex(entries)
+})
 
 // const quickReplies = ref(sortByIndex(
 //   Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('quickReply')) as [
@@ -57,26 +57,34 @@ const inputs = computed(() => {
     <section class="-mx-[calc(var(--socket-size)/2)] grid justify-start">
       <template v-for="[key, input] in inputs" :key="key + seed">
         <div v-if="input" :data-testid="`input-${key}`" class="flex items-center gap-x-4">
-          <NodeSocket :emit :data="{
-            type: 'socket',
-            side: 'input',
-            key,
-            nodeId: data.id,
-            payload: input.socket,
-          }" data-testid="input-socket" />
+          <NodeSocket
+            :emit
+            :data="{
+              type: 'socket',
+              side: 'input',
+              key,
+              nodeId: data.id,
+              payload: input.socket,
+            }"
+            data-testid="input-socket"
+          />
           <span class="flex items-center gap-x-2 font-semibold">
             <Icon icon="bx:message" class="size-6" />
             Message
           </span>
-          <NodeSocket v-show="input.control && input.showControl" :emit
-            :data="{ type: 'control', payload: input.control }" data-testid="input-control" />
+          <NodeSocket
+            v-show="input.control && input.showControl"
+            :emit
+            :data="{ type: 'control', payload: input.control }"
+            data-testid="input-control"
+          />
         </div>
       </template>
     </section>
 
     <!-- replies -->
     <section class="-mx-[calc(var(--socket-size)/2)] flex flex-col items-end gap-y-3">
-      <h2 class="ms-[calc(var(--socket-size)+theme(spacing.4))] self-start font-semibold">
+      <h2 class="ms-[calc(var(--socket-size)+theme(spacing.4))] self-start text-base font-bold">
         Replies:
       </h2>
       <div v-if="node && node.data">
@@ -86,22 +94,24 @@ const inputs = computed(() => {
               <p>{{ reply.title }}</p>
               <strong>{{ reply.type }}</strong>
             </span>
-            <NodeSocket :emit :data="{
-              type: 'socket',
-              side: 'output',
-              key,
-              nodeId: data.id,
-              payload: node.outputs[key]?.socket,
-            }" />
+            <NodeSocket
+              :emit
+              :data="{
+                type: 'socket',
+                side: 'output',
+                key,
+                nodeId: data.id,
+                payload: node.outputs[key]?.socket,
+              }"
+            />
           </div>
         </template>
       </div>
-      
     </section>
 
     <!-- quick replies -->
     <section class="-mx-[calc(var(--socket-size)/2)] flex flex-col items-end gap-y-3">
-      <h2 class="ms-[calc(var(--socket-size)+theme(spacing.4))] self-start font-semibold">
+      <h2 class="ms-[calc(var(--socket-size)+theme(spacing.4))] self-start text-base font-bold">
         Quick Replies:
       </h2>
       <div v-if="node && node.data">
@@ -110,13 +120,16 @@ const inputs = computed(() => {
             <span class="flex flex-col text-end">
               <p>{{ quickReply.title }}</p>
             </span>
-            <NodeSocket :emit :data="{
-              type: 'socket',
-              side: 'output',
-              key,
-              nodeId: data.id,
-              payload: node.outputs[key]?.socket,
-            }" />
+            <NodeSocket
+              :emit
+              :data="{
+                type: 'socket',
+                side: 'output',
+                key,
+                nodeId: data.id,
+                payload: node.outputs[key]?.socket,
+              }"
+            />
           </div>
         </template>
       </div>
