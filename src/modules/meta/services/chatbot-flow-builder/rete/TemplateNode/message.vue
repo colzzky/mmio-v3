@@ -36,6 +36,13 @@ onUpdated(() => {
       MetaTemplateOutput<'quickReply'>,
     ][],
   )
+
+  replies.value = sortByIndex(
+  Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('reply')) as [
+    string,
+    MetaTemplateOutput<'reply'>,
+  ][],
+)
 })
 </script>
 

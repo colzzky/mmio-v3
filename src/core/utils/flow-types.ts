@@ -15,12 +15,20 @@ export interface NodeType {
 interface MessageNode {
   name: string
   message: string
+  origin_return:{origin:string,postback:{
+    target_node:string,
+    target_output:string
+  }}[]
 }
 
 interface ButtonNode {
   name: string
   message: string
   isClick: boolean
+  origin_return:{origin:string,postback:{
+    target_node:string,
+    target_output:string
+  }}[]
 }
 
 export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
@@ -29,10 +37,19 @@ export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
   Record<string, ControlInterface>      // Controls
 > {
   data?: NodeType[T];          // Dynamically infer the type of 'data' based on 'T'
+  label: T;
 
   constructor(label: T) {
     super(label); // Call the constructor of the base class (ClassicPreset.Node)
+    this.label = label;
   }
+}
+
+export function isNodeOfType<T extends keyof NodeType>(
+  node: Node<keyof NodeType>,
+  label: T
+): node is Node<T> {
+  return node.label === label;
 }
 
 export type ControlInterface =
@@ -102,6 +119,12 @@ export namespace ReteTemplates {
     reference_node(socket: ClassicPreset.Socket) {
       const node = new Node('reference_node')
       node.id = crypto.randomUUID()
+      node.data={
+        message:'',
+        name:'',
+        origin_return:[]
+      }
+      
 
       createMetaTemplateOutput({
         node,
@@ -127,7 +150,8 @@ export namespace ReteTemplates {
       const node = new Node('message_node')
       node.data={
         message:'',
-        name:''
+        name:'',
+        origin_return:[]
       }
       node.id = crypto.randomUUID()
       node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(socket, 'hello', true))
@@ -392,7 +416,7 @@ type CreateMetaTemplateOutputArgs<T extends keyof MetaTemplateOutputType> = {
 export function createMetaTemplateOutput<T extends keyof MetaTemplateOutputType>(args: CreateMetaTemplateOutputArgs<T>, outKey:string='') {
   const outputKey = !outKey ? `output_${args.type}_${crypto.randomUUID()}` : outKey; // Create a unique key for the output
   args.node.addOutput(outputKey, new MetaTemplateOutput(args.type, { socket: args.outputOpts.socket, data: args.outputOpts.data, key: outputKey })); // Add the output to the node
-  return args.node;
+  return {args, outputKey}; // Return the arguments and the output key
 }
 
 export class MetaTemplateOutput<T extends keyof MetaTemplateOutputType> extends ClassicPreset.Output<ClassicPreset.Socket> {

@@ -21,7 +21,7 @@ import { ClassicPreset } from 'rete'
 import type { AreaPlugin } from 'rete-area-plugin'
 import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 const authWorkspace = useAuthWorkspaceStore()
-const {active_workspace} = authWorkspace
+const { active_workspace } = authWorkspace
 
 const props = defineProps<{
     node: Node<keyof NodeType>
@@ -49,11 +49,14 @@ function initialize() {
     resetState()
     console.log('test')
     console.log(props.node)
-    node_obj.value = props.node
+    node_obj.value = props.node as Node<'message_node'>
     if (node_obj.value.data) {
         node_obj.value.data.name = node_obj.value.data.name || 'Untitled Node'
         node_obj.value.data.message = node_obj.value.data.message || ''
+        node_obj.value.data.origin_return = node_obj.value.data.origin_return || []
     }
+
+
     Object.keys(props.node.outputs).forEach((key) => {
         if (props.node.outputs[key] instanceof MetaTemplateOutput) {
             if (props.node.outputs[key].type === 'reply') {
@@ -72,12 +75,10 @@ const reply_button = reactive({
         title: '',
         payload: '',
     } as FBAttachmentTemplate.Button,
-    add_new_button() {
+    add_new_reply() {
         const socket = new ClassicPreset.Socket('socket')
 
-        const ws_id = active_workspace.data?.ws_id
-        const cb_id = '' // chat bot flow id
-        const org_id = '' // Origin Id where it will be referenced
+
 
         //{ws:id/auto_reply_id/origin_data_id}
 
@@ -86,23 +87,28 @@ const reply_button = reactive({
         //Then Get the node data json
         //When node data is fetched we find 
 
-        
-        const auto_reply_id = active_workspace.data?.ws_id
-        const flow_id = active_workspace.data?.ws_id
-        const node_id = active_workspace.data?.ws_id
-        const payload_id = active_workspace.data?.ws_id
-
         //:ws_id,:node_id,:payload_id,:target_id
 
         if (node_obj.value) {
+
+            const ws_id = active_workspace.data?.ws_id
+            const cb_id = '' // chat bot flow id
+            const org_id = `output_reply_${crypto.randomUUID()}` // Origin Id where it will be referenced
+
+            const payload = {
+                ws_id, cb_id, org_id
+            }
+            const payload_string = JSON.stringify(payload)
             createMetaTemplateOutput({
                 node: node_obj.value,
                 type: 'reply',
                 outputOpts: {
                     socket,
-                    data:this.data
-                },
-            })
+                    data: { ...this.data, payload: payload_string }
+                }
+            }, org_id)
+
+
             initialize()
             console.log(props.node_id)
             props.area.update('node', props.node.id)
@@ -242,24 +248,24 @@ onUnmounted(() => {
         <main v-else-if="sheetState === 'create-reply-button'" class="grid gap-y-6 text-sm">
             <section class="grid gap-y-1.5">
                 <Label for="buttonName">Button Name</Label>
-                <Input id="buttonName" type="text" name="buttonName" placeholder="What do you call this button" />
+                <Input v-model="reply_button.data.title" type="text" name="buttonName"
+                    placeholder="What do you call this button" />
             </section>
             <section class="grid gap-y-1.5">
                 <Label for="buttonName">Button Type</Label>
-                <Select>
+                <Select v-model="reply_button.data.payload">
                     <SelectTrigger>
                         <SelectValue placeholder="Select a button type" />
                     </SelectTrigger>
                     <SelectContent>
                         <SelectGroup>
-                            <SelectItem value="buttonTypeOne">Button Type #1</SelectItem>
-                            <SelectItem value="buttonTypeTwo">Button Type #2</SelectItem>
-                            <SelectItem value="buttonTypeThree">Button Type #3</SelectItem>
+                            <SelectItem value="web_url">Web Url</SelectItem>
+                            <SelectItem value="postback">Postback</SelectItem>
                         </SelectGroup>
                     </SelectContent>
                 </Select>
             </section>
-            <Button>Create Message Reply Button</Button>
+            <Button @click="reply_button.add_new_reply()">Create Message Reply Button</Button>
         </main>
         <main v-else-if="sheetState === 'create-quick-reply-button'" class="grid gap-y-6 text-sm">
             <section class="grid gap-y-1.5">
