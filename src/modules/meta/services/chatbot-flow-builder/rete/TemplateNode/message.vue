@@ -78,8 +78,8 @@ onUpdated(() => {
       <template v-for="[key, reply] in replies" :key="key + seed">
         <div v-if="reply" :data-testid="`output-${key}`" class="flex items-center gap-x-3 text-xs">
           <span class="flex flex-col text-end">
-            <p>{{ reply.data.question }}</p>
-            <strong>{{ reply.data.answer }}</strong>
+            <p>{{ reply.data.title }}</p>
+            <strong>{{ reply.data.type }}</strong>
           </span>
           <NodeSocket
             :emit

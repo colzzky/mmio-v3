@@ -139,8 +139,9 @@ export namespace ReteTemplates {
         outputOpts: {
           socket,
           data: {
-            question: 'Message Question #1',
-            answer: 'Message Answer #1',
+            title: 'Message Question #1',
+            type: 'postback',
+            payload:''
           }
         },
       })
@@ -150,8 +151,9 @@ export namespace ReteTemplates {
         outputOpts: {
           socket,
           data: {
-            question: 'Message Question #2',
-            answer: 'Message Answer #2',
+            title: 'Message Question #2',
+            type: 'postback',
+            payload:''
           }
         },
       })
@@ -361,16 +363,14 @@ export type MetaTemplateOutputType = {
   classic: {
     label?: string;
   };
-  reply: {
-    question: string;
-    answer: string;
-  };
+  reply: FBAttachmentTemplate.Button
+
   carouselCard: {
     question: string;
     answer: string;
     image: string;
   };
-  quickReply: FBAttachmentTemplate.QuickReply;
+  quickReply: FBAttachmentTemplate.QuickReply
 };
 
 // Arguments passed into MetaTemplateOutput's constructor based on the type

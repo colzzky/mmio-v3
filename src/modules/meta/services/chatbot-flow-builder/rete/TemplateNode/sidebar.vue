@@ -14,11 +14,14 @@ import { Textarea } from '@/core/components/ui/textarea'
 import { toast } from '@/core/components/ui/toast'
 import type { FBAttachmentTemplate } from '@/core/utils/flow-meta-types'
 import { createMetaTemplateOutput, MetaTemplateOutput, type AreaExtra, type Node, type NodeType, type Schemes } from '@/core/utils/flow-types'
+import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
 import { node } from '@unovis/ts/components/sankey/style'
 import { ClassicPreset } from 'rete'
 import type { AreaPlugin } from 'rete-area-plugin'
 import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+const authWorkspace = useAuthWorkspaceStore()
+const {active_workspace} = authWorkspace
 
 const props = defineProps<{
     node: Node<keyof NodeType>
@@ -63,6 +66,56 @@ function initialize() {
     })
 }
 
+const reply_button = reactive({
+    data: {
+        type: 'postback',
+        title: '',
+        payload: '',
+    } as FBAttachmentTemplate.Button,
+    add_new_button() {
+        const socket = new ClassicPreset.Socket('socket')
+
+        const ws_id = active_workspace.data?.ws_id
+        const cb_id = '' // chat bot flow id
+        const org_id = '' // Origin Id where it will be referenced
+
+        //{ws:id/auto_reply_id/origin_data_id}
+
+        //Create a reference/payload_id
+        //In that Reference find ws:id/auto_reply_id/
+        //Then Get the node data json
+        //When node data is fetched we find 
+
+        
+        const auto_reply_id = active_workspace.data?.ws_id
+        const flow_id = active_workspace.data?.ws_id
+        const node_id = active_workspace.data?.ws_id
+        const payload_id = active_workspace.data?.ws_id
+
+        //:ws_id,:node_id,:payload_id,:target_id
+
+        if (node_obj.value) {
+            createMetaTemplateOutput({
+                node: node_obj.value,
+                type: 'reply',
+                outputOpts: {
+                    socket,
+                    data:this.data
+                },
+            })
+            initialize()
+            console.log(props.node_id)
+            props.area.update('node', props.node.id)
+            // console.log(props.area)
+            toast({
+                title: 'New Reply Button Added',
+                variant: 'success',
+                duration: 1000,
+            })
+        }
+    }
+})
+
 const quick_reply_button = reactive({
     title: 'Untitled Reply',
     content_type: 'text' as FBAttachmentTemplate.QuickReply['content_type'],
@@ -83,7 +136,7 @@ const quick_reply_button = reactive({
             })
             initialize()
             console.log(props.node_id)
-            props.area.update('node',props.node.id)
+            props.area.update('node', props.node.id)
             // console.log(props.area)
             toast({
                 title: 'New Node Added',
@@ -156,8 +209,8 @@ onUnmounted(() => {
                     <template v-for="(reply, key) in replies" :key>
                         <li v-if="reply"
                             class="grid grid-cols-[1fr_var(--icon-size)] grid-rows-2 items-center [--icon-size:theme(spacing.9)] *:leading-none">
-                            <p class="text-xs">{{ reply.data.question }}</p>
-                            <strong>{{ reply.data.answer }}</strong>
+                            <p class="text-xs">{{ reply.data.title }}</p>
+                            <strong>{{ reply.data.type }}</strong>
                             <button type="button"
                                 class="col-start-2 row-span-full grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5">
                                 <Icon icon="bx:dots-vertical-rounded" class="size-5" />
