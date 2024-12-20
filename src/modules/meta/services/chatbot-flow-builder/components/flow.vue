@@ -40,7 +40,7 @@ interface MousePosition {
 const authWorkspace = useAuthWorkspaceStore()
 const { active_flow } = authWorkspace
 
-// Menu state
+// Menu states
 const menuVisible = ref(false)
 const nodeOptionVisible = ref(false)
 const menuPosition = ref<MousePosition>({ x: 0, y: 0 })
