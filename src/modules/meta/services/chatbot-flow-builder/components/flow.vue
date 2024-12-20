@@ -1,7 +1,11 @@
 <script lang="ts" setup>
+import CarouselSidebar from '../rete/TemplateNode/carousel-sidebar.vue'
+import Carousel from '../rete/TemplateNode/carousel.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
+import Sidebar from '../rete/TemplateNode/sidebar.vue'
 import Text from '../rete/TemplateNode/text.vue'
+import ContextMenu from '../rete/context-menu.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
 import CustomNode from '../rete/customNode.vue'
@@ -21,14 +25,19 @@ import {
   type MetaTemplateOutputType,
 } from '@/core/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
-import { NodeEditor, type GetSchemes, ClassicPreset, type NodeId, Signal } from 'rete'
+import {
+  NodeEditor,
+  type GetSchemes,
+  ClassicPreset,
+  type NodeId,
+  Signal,
+  type BaseSchemes,
+} from 'rete'
 import { AreaPlugin, AreaExtensions, NodeView } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
 import { VuePlugin, Presets, type VueArea2D } from 'rete-vue-plugin'
 import type { Input, Output, Socket } from 'rete/_types/presets/classic'
 import { ref, onMounted, type Ref, reactive, watch, useTemplateRef } from 'vue'
-import MessageSheet from '../rete/TemplateNode/message-sheet.vue'
-import Sidebar from '../rete/TemplateNode/sidebar.vue'
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -67,10 +76,9 @@ function closeMenu() {
 }
 function closeNodeOption(reset_selected: boolean = true) {
   nodeOptionVisible.value = false
-  if (reset_selected)
-  {
+  if (reset_selected) {
     const multi_index = multi_selected_node.value.indexOf(selected_node.value)
-    if(multi_index > -1){
+    if (multi_index > -1) {
       multi_selected_node.value.splice(multi_index, 1)
     }
     selected_node.value = ''
@@ -104,6 +112,9 @@ async function initializeFlow() {
           if (context.payload.label === 'message_node') {
             return Message
           }
+          if (context.payload.label === 'carousel_node') {
+            return Carousel
+          }
           return Presets.classic.Node
         },
         control(context) {
@@ -132,6 +143,8 @@ async function initializeFlow() {
 
   AreaExtensions.selectableNodes(area, selector, { accumulating })
   trackMouseEvents(area)
+
+  addCustomBackground(area)
 }
 
 const reloadEditorState = async () => {
@@ -143,17 +156,17 @@ const reloadEditorState = async () => {
   for (const nodeData of parsedState.nodes) {
     const node = new Node(nodeData.label as keyof NodeType) // Recreate node
     node.id = nodeData.id
-    node.data= nodeData.data
-      Object.keys(nodeData.controls).forEach((key) => {
-        const control = nodeData.controls[key]
-        if (control.type === 'text' || control.type === 'number') {
-          node.addControl(key, ReteTemplates.control_template[control.type])
-        } else {
-          if (control.type === 'testControl')
-            node.addControl(key, ReteTemplates.control_template.testControl)
-          //Add more here
-        }
-      })
+    node.data = nodeData.data
+    Object.keys(nodeData.controls).forEach((key) => {
+      const control = nodeData.controls[key]
+      if (control.type === 'text' || control.type === 'number') {
+        node.addControl(key, ReteTemplates.control_template[control.type])
+      } else {
+        if (control.type === 'testControl')
+          node.addControl(key, ReteTemplates.control_template.testControl)
+        //Add more here
+      }
+    })
 
     //Should be forloop depending on the saved socket
     if (nodeData.inputs && Object.keys(nodeData.inputs).length > 0) {
@@ -164,14 +177,17 @@ const reloadEditorState = async () => {
     if (nodeData.outputs && Object.keys(nodeData.outputs).length > 0) {
       const output = nodeData.outputs
       Object.keys(nodeData.outputs).forEach((key) => {
-        createMetaTemplateOutput({
-                node,
-                type:output[key].type,
-                outputOpts: {
-                    socket,
-                    data: output[key].data
-                },
-            },key)
+        createMetaTemplateOutput(
+          {
+            node,
+            type: output[key].type,
+            outputOpts: {
+              socket,
+              data: output[key].data,
+            },
+          },
+          key,
+        )
       })
     }
 
@@ -274,7 +290,6 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
       nodeOptionVisible.value = false
       selected_node.value = context.data.id
       multi_selected_node.value = [context.data.id]
-      console.log('select')
     }
 
     if (context.type === 'pointerup' && selected_node.value) {
@@ -287,15 +302,12 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
             mousePosition: context.data.position,
           })
           if (mouse_outside) {
-            console.log('after  select')
             const node = rete_init.editor?.getNode(selected_node.value)
-            if(node?.selected){
-              
+            if (node?.selected) {
               closeNodeOption(false)
-            }else{
+            } else {
               closeNodeOption()
             }
-            
           }
         }
       })
@@ -396,7 +408,7 @@ function getTranslatedMousePosition(event: MousePosition) {
 
 // Create a new node dynamically
 async function createNewNode(
-  node_type: 'custom_node' | 'reference_node' | 'text_node' | 'message_node',
+  node_type: 'custom_node' | 'reference_node' | 'text_node' | 'message_node' | 'carousel_node',
 ) {
   if (!area || !rete_init.editor || !reteContainer.value) return
 
@@ -419,7 +431,9 @@ const saveEditorState = async () => {
       id: node.id,
       label: node.label,
       controls: node.controls as { [key: string]: ControlInterface },
-      outputs: node.outputs as { [key: string]: MetaTemplateOutput<keyof MetaTemplateOutputType> } | undefined,
+      outputs: node.outputs as
+        | { [key: string]: MetaTemplateOutput<keyof MetaTemplateOutputType> }
+        | undefined,
       inputs: node.inputs as { [key: string]: Input<ClassicPreset.Socket> } | undefined,
       position: position || { x: 0, y: 0 },
       data: node.data, // Any extra props you attached
@@ -472,15 +486,13 @@ watch(
 watch(
   () => selected_node.value,
   async (new_node, old_node) => {
-    
     if (new_node && rete_init.editor) {
       const node = rete_init.editor.getNode(new_node)
-      console.log(node)
       if (node) {
         selected_node_obj.value = node
       }
     }
-  }
+  },
 )
 
 function removeNode(): void {
@@ -502,14 +514,39 @@ function handleClearEditor() {
   rete_init.editor?.clear()
   closeMenu()
 }
+
+function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
+  const background = document.createElement('div')
+
+  background.classList.add('background')
+  background.classList.add('fill-area')
+
+  area.area.content.add(background)
+}
+
+watch(
+  () => selected_node_obj.value,
+  (value) => {
+    console.log(value)
+  },
+)
 </script>
 
 <template>
   <div class="">
     <!-- Rete.js Canvas -->
-    <div class="h-screen bg-pink-50">
-      <div v-if="menuVisible" class="floating-menu"
-        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }">
+    <div>
+      <ContextMenu
+        v-show="menuVisible"
+        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }"
+        @add-click="createNewNode"
+        @clear-click="handleClearEditor"
+      />
+      <!-- <div
+        v-if="menuVisible"
+        class="floating-menu"
+        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }"
+      >
         <div @click="createNewNode('reference_node')">➕ New Reference Node</div>
         <div @click="createNewNode('message_node')">➕ New Message Node</div>
         <div @click="createNewNode('custom_node')">➕ Create Node</div>
@@ -517,15 +554,18 @@ function handleClearEditor() {
         <div>{{ menuPosition }}</div>
         <div @click="handleClearEditor">Clear</div>
         <div @click="closeMenu">❌ Close</div>
-      </div>
-      <div v-if="nodeOptionVisible" class="floating-menu"
-        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }">
+      </div> -->
+      <div
+        v-if="nodeOptionVisible"
+        class="floating-menu"
+        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }"
+      >
         <div>Node Option</div>
         <div>{{ menuPosition }}</div>
         <div @click="removeNode()">❌ Remove</div>
         <div @click="closeNodeOption()">❌ Close</div>
       </div>
-      <div id="no-right-click" ref="reteContainer" class="bg-dotted h-screen bg-gray-50"></div>
+      <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
     </div>
 
     <div class="absolute top-0 p-4">
@@ -534,7 +574,7 @@ function handleClearEditor() {
           <button class="font-bold" @click="saveEditorState">Save</button>
           <span>{{
             multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : ''
-            }}</span>
+          }}</span>
         </div>
         <div>
           <div class="flex flex-col gap-4">
@@ -544,18 +584,26 @@ function handleClearEditor() {
           </div>
         </div>
       </div>
-
     </div>
     <div
-      class="fixed top-1/3 right-4 -translate-y-1/2 flex flex-col bg-gray-100 border border-gray-300 p-3 rounded-lg min-w-2 max-w-[20%] max-h-[80vh] overflow-auto">
+      class="fixed right-4 top-1/3 flex max-h-[80vh] min-w-2 max-w-[20%] -translate-y-1/2 flex-col overflow-auto rounded-lg border border-gray-300 bg-gray-100 p-3"
+    >
       <div v-if="selected_node && selected_node_obj && area">
-        <Sidebar :node="selected_node_obj" :node_id="selected_node_obj.id" :area  />
+        <Sidebar
+          v-if="selected_node_obj.label === 'message_node'"
+          :node="selected_node_obj"
+          :node_id="selected_node_obj.id"
+          :area
+        />
+        <CarouselSidebar
+          v-else-if="selected_node_obj.label === 'carousel_node'"
+          :node="selected_node_obj"
+          :node_id="selected_node_obj.id"
+          :area
+        />
       </div>
-      <div v-else>
-        Selection bar
-      </div>
+      <div v-else>Selection bar</div>
     </div>
-
 
     <!-- Floating Menu -->
   </div>

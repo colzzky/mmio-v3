@@ -1,13 +1,13 @@
 import type { SubCollections } from '../types/UniTypes'
+import type { FBAttachmentTemplate } from './flow-meta-types'
 import { ClassicPreset, type GetSchemes } from 'rete'
 import type { VueArea2D } from 'rete-vue-plugin'
-import type { Input, Output } from 'rete/_types/presets/classic'
-import type { FBAttachmentTemplate } from './flow-meta-types'
+import type { Input } from 'rete/_types/presets/classic'
 
 export interface NodeType {
   message_node: MessageNode
   text_node: MessageNode
-  carousel_node: MessageNode
+  carousel_node: CarouselNode
   reference_node: MessageNode
   button_node: ButtonNode
 }
@@ -15,6 +15,11 @@ export interface NodeType {
 interface MessageNode {
   name: string
   message: string
+}
+
+interface CarouselNode {
+  name: string
+  cards: { title: string; description: string; image: string }[]
 }
 
 interface ButtonNode {
@@ -26,12 +31,12 @@ interface ButtonNode {
 export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
   Record<string, ClassicPreset.Socket>, // Inputs
   Record<string, ClassicPreset.Socket>, // Outputs
-  Record<string, ControlInterface>      // Controls
+  Record<string, ControlInterface> // Controls
 > {
-  data?: NodeType[T];          // Dynamically infer the type of 'data' based on 'T'
+  data?: NodeType[T] // Dynamically infer the type of 'data' based on 'T'
 
   constructor(label: T) {
-    super(label); // Call the constructor of the base class (ClassicPreset.Node)
+    super(label) // Call the constructor of the base class (ClassicPreset.Node)
   }
 }
 
@@ -57,9 +62,9 @@ export namespace CustomControls {
   //Add more custom control here
 }
 
-export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> { }
+export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> {}
 
-export type Schemes = GetSchemes<Node<keyof NodeType>, Connection<Node<keyof NodeType>>>;
+export type Schemes = GetSchemes<Node<keyof NodeType>, Connection<Node<keyof NodeType>>>
 export type AreaExtra = VueArea2D<Schemes>
 
 /////////////////////
@@ -109,9 +114,8 @@ export namespace ReteTemplates {
         outputOpts: {
           socket,
           data: {
-            label: ''
-
-          }
+            label: '',
+          },
         },
       })
       return node
@@ -125,12 +129,12 @@ export namespace ReteTemplates {
     },
     message_node(socket: ClassicPreset.Socket) {
       const node = new Node('message_node')
-      node.data={
-        message:'',
-        name:''
+      node.data = {
+        message: '',
+        name: '',
       }
       node.id = crypto.randomUUID()
-      node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(socket, 'hello', true))
+      node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(socket, '', true))
 
       // replies
       createMetaTemplateOutput({
@@ -141,7 +145,7 @@ export namespace ReteTemplates {
           data: {
             question: 'Message Question #1',
             answer: 'Message Answer #1',
-          }
+          },
         },
       })
       createMetaTemplateOutput({
@@ -152,7 +156,7 @@ export namespace ReteTemplates {
           data: {
             question: 'Message Question #2',
             answer: 'Message Answer #2',
-          }
+          },
         },
       })
 
@@ -164,9 +168,8 @@ export namespace ReteTemplates {
           socket,
           data: {
             title: 'Message Quick Reply #1',
-            content_type: "text"
-          }
-
+            content_type: 'text',
+          },
         },
       })
       createMetaTemplateOutput({
@@ -176,9 +179,8 @@ export namespace ReteTemplates {
           socket,
           data: {
             title: 'Message Quick Reply #2',
-            content_type: "text"
-
-          }
+            content_type: 'text',
+          },
         },
       })
       createMetaTemplateOutput({
@@ -188,9 +190,8 @@ export namespace ReteTemplates {
           socket,
           data: {
             title: 'Message Quick Reply #3',
-            content_type: "text"
-
-          }
+            content_type: 'text',
+          },
         },
       })
 
@@ -200,20 +201,39 @@ export namespace ReteTemplates {
     carousel_node(socket: ClassicPreset.Socket) {
       const node = new Node('carousel_node')
       node.id = crypto.randomUUID()
-      node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(socket, 'hello', true))
+      node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(socket, '', true))
+      node.data = {
+        name: '',
+        cards: [
+          {
+            title: 'Pickaxe Product',
+            description: 'Pickaxe Product Description',
+            image: 'https://placehold.co/40',
+          },
+          {
+            title: 'Fire Extinguisher',
+            description: 'Fire Extinguisher Description',
+            image: 'https://placehold.co/40',
+          },
+          {
+            title: 'Flamethrower',
+            description: 'Flamethrower Description',
+            image: 'https://placehold.co/40',
+          },
+        ],
+      }
 
       // cards
-
       createMetaTemplateOutput({
         node,
         type: 'carouselCard',
         outputOpts: {
           socket,
           data: {
-            question: 'Carousel Question #1',
-            answer: 'Carousel Answer #1',
-            image: '',
-          }
+            cardTitle: 'Pickaxe Product',
+            label: 'Pickaxe Product Label #1',
+            type: 'Flow Step',
+          },
         },
       })
       createMetaTemplateOutput({
@@ -222,10 +242,58 @@ export namespace ReteTemplates {
         outputOpts: {
           socket,
           data: {
-            question: 'Carousel Question #2',
-            answer: 'Carousel Answer #2',
-            image: '',
-          }
+            cardTitle: 'Pickaxe Product',
+            label: 'Pickaxe Product Label #2',
+            type: 'Flow Step',
+          },
+        },
+      })
+      createMetaTemplateOutput({
+        node,
+        type: 'carouselCard',
+        outputOpts: {
+          socket,
+          data: {
+            cardTitle: 'Fire Extinguisher',
+            label: 'Fire Extinguisher Label #1',
+            type: 'Flow Step',
+          },
+        },
+      })
+      createMetaTemplateOutput({
+        node,
+        type: 'carouselCard',
+        outputOpts: {
+          socket,
+          data: {
+            cardTitle: 'Fire Extinguisher',
+            label: 'Fire Extinguisher Label #2',
+            type: 'Flow Step',
+          },
+        },
+      })
+      createMetaTemplateOutput({
+        node,
+        type: 'carouselCard',
+        outputOpts: {
+          socket,
+          data: {
+            cardTitle: 'Flamethrower',
+            label: 'Flamethrower Label #1',
+            type: 'Flow Step',
+          },
+        },
+      })
+      createMetaTemplateOutput({
+        node,
+        type: 'carouselCard',
+        outputOpts: {
+          socket,
+          data: {
+            cardTitle: 'Flamethrower',
+            label: 'Flamethrower Label #2',
+            type: 'Flow Step',
+          },
         },
       })
 
@@ -237,8 +305,8 @@ export namespace ReteTemplates {
           socket,
           data: {
             title: 'Carousel Quick Reply #1',
-            content_type: 'text'
-          }
+            content_type: 'text',
+          },
         },
       })
       createMetaTemplateOutput({
@@ -248,9 +316,8 @@ export namespace ReteTemplates {
           socket,
           data: {
             title: 'Carousel Quick Reply #2',
-            content_type: 'text'
-
-          }
+            content_type: 'text',
+          },
         },
       })
       createMetaTemplateOutput({
@@ -260,9 +327,8 @@ export namespace ReteTemplates {
           socket,
           data: {
             title: 'Carousel Quick Reply #3',
-            content_type: 'text'
-
-          }
+            content_type: 'text',
+          },
         },
       })
 
@@ -359,54 +425,65 @@ type CarouselCardOutput = {
 //type QuickReplyOutput = FBAttachmentTemplate.QuickReply;
 export type MetaTemplateOutputType = {
   classic: {
-    label?: string;
-  };
+    label?: string
+  }
   reply: {
-    question: string;
-    answer: string;
-  };
+    question: string
+    answer: string
+  }
   carouselCard: {
-    question: string;
-    answer: string;
-    image: string;
-  };
-  quickReply: FBAttachmentTemplate.QuickReply;
-};
+    cardTitle: string
+    label: string
+    type: string
+  }
+  quickReply: FBAttachmentTemplate.QuickReply
+}
 
 // Arguments passed into MetaTemplateOutput's constructor based on the type
 type MetaTemplateOutputConstructorArgs<T extends keyof MetaTemplateOutputType> = {
-  socket: ClassicPreset.Socket;
-  key: string;
-} & { data: MetaTemplateOutputType[T] };  // Dynamically adds fields based on the 'type' passed
+  socket: ClassicPreset.Socket
+  key: string
+} & { data: MetaTemplateOutputType[T] } // Dynamically adds fields based on the 'type' passed
 
 type CreateMetaTemplateOutputArgs<T extends keyof MetaTemplateOutputType> = {
-  node: Node<keyof NodeType>;
+  node: Node<keyof NodeType>
   type: T
   outputOpts: {
     socket: ClassicPreset.Socket
-    data: MetaTemplateOutputType[T];
+    data: MetaTemplateOutputType[T]
   }
-};
+}
 
 // Factory function to create a MetaTemplateOutput dynamically based on type
-export function createMetaTemplateOutput<T extends keyof MetaTemplateOutputType>(args: CreateMetaTemplateOutputArgs<T>, outKey:string='') {
-  const outputKey = !outKey ? `output_${args.type}_${crypto.randomUUID()}` : outKey; // Create a unique key for the output
-  args.node.addOutput(outputKey, new MetaTemplateOutput(args.type, { socket: args.outputOpts.socket, data: args.outputOpts.data, key: outputKey })); // Add the output to the node
-  return args.node;
+export function createMetaTemplateOutput<T extends keyof MetaTemplateOutputType>(
+  args: CreateMetaTemplateOutputArgs<T>,
+  outKey: string = '',
+) {
+  const outputKey = !outKey ? `output_${args.type}_${crypto.randomUUID()}` : outKey // Create a unique key for the output
+  args.node.addOutput(
+    outputKey,
+    new MetaTemplateOutput(args.type, {
+      socket: args.outputOpts.socket,
+      data: args.outputOpts.data,
+      key: outputKey,
+    }),
+  ) // Add the output to the node
+  return args.node
 }
 
-export class MetaTemplateOutput<T extends keyof MetaTemplateOutputType> extends ClassicPreset.Output<ClassicPreset.Socket> {
-  data: MetaTemplateOutputType[T]; // Data will be of the correct type based on 'T'
-  type: keyof MetaTemplateOutputType;
-  id: string;
+export class MetaTemplateOutput<
+  T extends keyof MetaTemplateOutputType,
+> extends ClassicPreset.Output<ClassicPreset.Socket> {
+  data: MetaTemplateOutputType[T] // Data will be of the correct type based on 'T'
+  type: keyof MetaTemplateOutputType
+  id: string
 
   constructor(typeT: T, args: MetaTemplateOutputConstructorArgs<T>) {
-    super(args.socket); // Initialize with socket
-    this.type = typeT;   // Set the type (e.g., 'reply', 'quickReply', etc.)
-    this.id = args.key;  // Set the ID (provided as part of args)
+    super(args.socket) // Initialize with socket
+    this.type = typeT // Set the type (e.g., 'reply', 'quickReply', etc.)
+    this.id = args.key // Set the ID (provided as part of args)
 
     // Dynamically set the data based on the type
-    this.data = { ...args.data };  // Assign the provided arguments to 'data'
+    this.data = { ...args.data } // Assign the provided arguments to 'data'
   }
 }
-

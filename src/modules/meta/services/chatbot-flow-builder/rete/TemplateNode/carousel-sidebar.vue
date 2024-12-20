@@ -1,15 +1,13 @@
-<script setup lang="ts" generic="T extends Node<keyof NodeType>">
+<script setup lang="ts" generic="T extends Node<'carousel_node'>">
 import { Button } from '@/core/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/core/components/ui/dropdown-menu'
+import DropdownMenuItem from '@/core/components/ui/dropdown-menu/DropdownMenuItem.vue'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-} from '@/core/components/ui/select'
 import { Textarea } from '@/core/components/ui/textarea'
 import { toast } from '@/core/components/ui/toast'
 import type { FBAttachmentTemplate } from '@/core/utils/flow-meta-types'
@@ -18,7 +16,6 @@ import {
   MetaTemplateOutput,
   type AreaExtra,
   type Node,
-  type NodeType,
   type Schemes,
 } from '@/core/utils/flow-types'
 import { Icon } from '@iconify/vue'
@@ -32,35 +29,32 @@ const props = defineProps<{
   area: AreaPlugin<Schemes, AreaExtra>
 }>()
 
-const replies = ref<MetaTemplateOutput<'reply'>[]>([])
+const cards = ref<MetaTemplateOutput<'carouselCard'>[]>([])
 const quickReplies = ref<MetaTemplateOutput<'quickReply'>[]>([])
 const node_obj = ref<T | null>(null)
 
-type State = 'main' | 'create-reply-button' | 'create-quick-reply-button'
+type State = 'main' | 'create-card-button' | 'create-quick-reply-button'
 const sheetState = ref<State>('main')
 function handleChangeSheetState(state: State) {
   sheetState.value = state
 }
 
 function resetState() {
-  replies.value = []
+  cards.value = []
   quickReplies.value = []
   node_obj.value = null
 }
 
 function initialize() {
   resetState()
-  console.log('test')
-  console.log(props.node)
   node_obj.value = props.node
   if (node_obj.value.data) {
     node_obj.value.data.name = node_obj.value.data.name || 'Untitled Node'
-    node_obj.value.data.message = node_obj.value.data.message || ''
   }
   Object.keys(props.node.outputs).forEach((key) => {
     if (props.node.outputs[key] instanceof MetaTemplateOutput) {
-      if (props.node.outputs[key].type === 'reply') {
-        replies.value.push(props.node.outputs[key])
+      if (props.node.outputs[key].type === 'carouselCard') {
+        cards.value.push(props.node.outputs[key])
       }
       if (props.node.outputs[key].type === 'quickReply') {
         quickReplies.value.push(props.node.outputs[key])
@@ -124,7 +118,7 @@ onUnmounted(() => {
       >
         <Icon
           v-if="sheetState === 'main'"
-          icon="bx:message"
+          icon="bx:carousel"
           class="row-span-full size-[var(--icon-size)]"
         />
         <button v-else type="button" @click="handleChangeSheetState('main')" class="row-span-full">
@@ -132,10 +126,8 @@ onUnmounted(() => {
         </button>
         <span class="leading-none">Flow Name 1</span>
         <small class="leading-none text-muted-foreground">
-          Message
-          <template v-if="sheetState === 'create-reply-button'">
-            > Create Message Reply Button
-          </template>
+          Carousel
+          <template v-if="sheetState === 'create-card-button'"> > Create Card Button </template>
           <template v-if="sheetState === 'create-quick-reply-button'">
             > Create Quick Reply Button
           </template>
@@ -153,39 +145,35 @@ onUnmounted(() => {
           placeholder="What do you call this node"
         />
       </section>
-      <section class="grid gap-y-1.5">
-        <Label for="message">Message</Label>
-        <Textarea
-          v-model="node_obj.data.message"
-          id="message"
-          name="message"
-          rows="5"
-          placeholder="Whats the message you want to sent to the user?"
-        />
-      </section>
       <section class="grid grid-cols-2 gap-y-3">
-        <h3 class="font-medium">Message Reply Buttons</h3>
+        <h3 class="font-medium">Card Buttons</h3>
         <button
           type="button"
           class="justify-self-end font-medium text-red-400 hover:text-red-500"
-          @click="handleChangeSheetState('create-reply-button')"
+          @click="handleChangeSheetState('create-card-button')"
         >
-          Create
+          New Card
         </button>
         <ul class="col-span-full grid gap-y-3">
-          <template v-for="(reply, key) in replies" :key>
+          <template v-for="(card, key) in node.data?.cards" :key>
             <li
-              v-if="reply"
-              class="grid grid-cols-[1fr_var(--icon-size)] grid-rows-2 items-center [--icon-size:theme(spacing.9)] *:leading-none"
+              v-if="card"
+              class="grid grid-cols-[var(--icon-size)_1fr_var(--icon-size)] items-center gap-x-2 [--icon-size:theme(spacing.9)] *:leading-none"
             >
-              <p class="text-xs">{{ reply.data.question }}</p>
-              <strong>{{ reply.data.answer }}</strong>
-              <button
-                type="button"
-                class="col-start-2 row-span-full grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5"
-              >
-                <Icon icon="bx:dots-vertical-rounded" class="size-5" />
-              </button>
+              <img :src="card.image" alt="" class="rounded-full" />
+              <strong>{{ card.title }}</strong>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  class="grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5"
+                >
+                  <Icon icon="bx:dots-vertical-rounded" class="size-5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>Card Dropdown Item #1</DropdownMenuItem>
+                  <DropdownMenuItem>Card Dropdown Item #2</DropdownMenuItem>
+                  <DropdownMenuItem>Card Dropdown Item #3</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </li>
           </template>
         </ul>
@@ -206,43 +194,45 @@ onUnmounted(() => {
               class="grid grid-cols-[1fr_var(--icon-size)] items-center [--icon-size:theme(spacing.9)] *:leading-none"
             >
               <p>{{ quickReply.data.title }}</p>
-              <button
-                type="button"
-                class="grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5"
-              >
-                <Icon icon="bx:dots-vertical-rounded" class="size-5" />
-              </button>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  class="grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5"
+                >
+                  <Icon icon="bx:dots-vertical-rounded" class="size-5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem>Quick Reply Dropdown Item #1</DropdownMenuItem>
+                  <DropdownMenuItem>Quick Reply Dropdown Item #2</DropdownMenuItem>
+                  <DropdownMenuItem>Quick Reply Dropdown Item #3</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </li>
           </template>
         </ul>
       </section>
     </main>
-    <main v-else-if="sheetState === 'create-reply-button'" class="grid gap-y-6 text-sm">
+    <main v-else-if="sheetState === 'create-card-button'" class="grid gap-y-6 text-sm">
       <section class="grid gap-y-1.5">
-        <Label for="buttonName">Button Name</Label>
-        <Input
-          id="buttonName"
-          type="text"
-          name="buttonName"
-          placeholder="What do you call this button"
+        <Label for="cardName">Card Name</Label>
+        <Input id="cardName" type="text" name="cardName" placeholder="What do you call this card" />
+      </section>
+      <section class="grid gap-y-1.5">
+        <Label for="cardDescription">Card Description</Label>
+        <Textarea
+          name="cardDescription"
+          id="cardDescription"
+          rows="5"
+          placeholder="What's the message you want to send to the user?"
         />
       </section>
-      <section class="grid gap-y-1.5">
-        <Label for="buttonName">Button Type</Label>
-        <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a button type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="buttonTypeOne">Button Type #1</SelectItem>
-              <SelectItem value="buttonTypeTwo">Button Type #2</SelectItem>
-              <SelectItem value="buttonTypeThree">Button Type #3</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+
+      <section
+        class="grid aspect-video place-content-center border-2 border-dashed p-4 font-medium"
+      >
+        Drag and Drop Image Here
       </section>
-      <Button>Create Message Reply Button</Button>
+      <section>/** section dedicated to adding output per cards */</section>
+      <Button>Create Card Button</Button>
     </main>
     <main v-else-if="sheetState === 'create-quick-reply-button'" class="grid gap-y-6 text-sm">
       <section class="grid gap-y-1.5">

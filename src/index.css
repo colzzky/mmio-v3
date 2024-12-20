@@ -100,8 +100,8 @@
   .background {
     background-color: #f7f6ff;
     opacity: 1;
-    background-image: radial-gradient(theme(colors.primary.DEFAULT) 1.55px, transparent 1.55px),
-      radial-gradient(theme(colors.primary.DEFAULT) 1.55px, theme(colors.primary.foreground) 1.55px);
+    background-image: radial-gradient(theme(colors.neutral.400) 1.55px, transparent 1.55px),
+      radial-gradient(theme(colors.neutral.400) 1.55px, theme(colors.primary.foreground) 1.55px);
     background-size: 62px 62px;
     background-position:
       0 0,

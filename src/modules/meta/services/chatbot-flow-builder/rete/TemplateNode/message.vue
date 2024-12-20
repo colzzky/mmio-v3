@@ -2,31 +2,31 @@
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
 import { sortByIndex } from '../utils'
-import MessageSheet from './message-sheet.vue'
 import type { MetaTemplateOutput, Schemes } from '@/core/utils/flow-types'
 import { Icon } from '@iconify/vue'
-import { computed, onUpdated, ref, watch } from 'vue'
+import { computed, onUpdated, ref } from 'vue'
 
 const props = defineProps<{ data: Schemes['Node']; emit: any; seed: number }>()
 
 const inputs = computed(() => sortByIndex(Object.entries(props.data.inputs)))
 
-
-
-const quickReplies = ref(sortByIndex(
-  Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('quickReply')) as [
-    string,
-    MetaTemplateOutput<'quickReply'>,
-  ][],
-),
+const quickReplies = ref(
+  sortByIndex(
+    Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('quickReply')) as [
+      string,
+      MetaTemplateOutput<'quickReply'>,
+    ][],
+  ),
 )
 
-const replies = ref(sortByIndex(
-  Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('reply')) as [
-    string,
-    MetaTemplateOutput<'reply'>,
-  ][],
-))
+const replies = ref(
+  sortByIndex(
+    Object.entries(props.data.outputs).filter(([key]) => key.split('_').includes('reply')) as [
+      string,
+      MetaTemplateOutput<'reply'>,
+    ][],
+  ),
+)
 
 onUpdated(() => {
   console.log(props.data.outputs)
@@ -72,7 +72,7 @@ onUpdated(() => {
 
     <!-- replies -->
     <section class="-mx-[calc(var(--socket-size)/2)] flex flex-col items-end gap-y-3">
-      <h2 class="ms-[calc(var(--socket-size)+theme(spacing.4))] self-start font-semibold">
+      <h2 class="ms-[calc(var(--socket-size)+theme(spacing.4))] self-start text-base font-bold">
         Replies:
       </h2>
       <template v-for="[key, reply] in replies" :key="key + seed">
@@ -97,7 +97,7 @@ onUpdated(() => {
 
     <!-- quick replies -->
     <section class="-mx-[calc(var(--socket-size)/2)] flex flex-col items-end gap-y-3">
-      <h2 class="ms-[calc(var(--socket-size)+theme(spacing.4))] self-start font-semibold">
+      <h2 class="ms-[calc(var(--socket-size)+theme(spacing.4))] self-start text-base font-bold">
         Quick Replies:
       </h2>
       <template v-for="[key, quickReply] in quickReplies" :key="key + seed">
