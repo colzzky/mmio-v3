@@ -99,7 +99,7 @@ const facebookLogin = async (): Promise<void> => {
   fb_api_load.value = true
   try {
     const FB = await loadFacebookSDK()
-    const scopes = 'email,public_profile,pages_show_list,pages_read_engagement' // Add page permissions here
+    const scopes = 'email,public_profile,pages_show_list,pages_read_engagement,pages_messaging,pages_manage_metadata';
     FB.login(
       (response: fb.StatusResponse) => {
         if (response.authResponse) {

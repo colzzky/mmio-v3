@@ -192,10 +192,28 @@ const routes: RouteRecordRaw[] = Object.entries(routeRecords).map(([key, values]
 })) as RouteRecordRaw[]
 
 //Children here
-routes.push({
+const allRoutes = [...routes,
+{
   name: 'post-randomizer-view',
   path: 'post-randomizer/:randomizer_id',
   component: () => import('./services/post-randomizer/view-post-randomizer.vue'),
-})
+},
+{
+  name: 'chatbot-flow',
+  path: 'chatbot-flow-builder/flow',
+  component: () => import('./services/chatbot-flow-builder/chatbot-flow-view.vue'),
+},
+{
+  name: 'chatbot-flow-upload',
+  path: 'chatbot-flow-builder/flow-upload',
+  component: () => import('./services/chatbot-flow-builder/chatbot-flow-view.vue'),
+},
+{
+  name: 'chatbot-flow-final',
+  path: 'chatbot-flow-builder/flow-final',
+  component: () => import('./services/chatbot-flow-builder/chatbot-flow-view.vue'),
+},
 
-export { routes }
+]
+
+export { allRoutes }

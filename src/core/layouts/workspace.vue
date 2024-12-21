@@ -144,15 +144,21 @@ watch(
       await validateMemberOwner()
       workspace_load.value = false;
     }
-  },{immediate:true}
+  }, { immediate: true }
 );
 </script>
 
 <template>
   <Toaster />
   <div v-if="!workspace_load">
-    <DesktopSidebar />
-    <div class="lg:pl-72">
+    <div v-if="!(route.name === 'chatbot-flow-final')" vv>
+      <DesktopSidebar />
+      <div class="lg:pl-72">
+        <RouterView />
+      </div>
+
+    </div>
+    <div v-else>
       <RouterView />
     </div>
   </div>
