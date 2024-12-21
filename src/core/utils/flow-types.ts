@@ -222,7 +222,6 @@ export namespace ReteTemplates {
 
       return node
     },
-
     carousel_node(socket: ClassicPreset.Socket) {
       const node = new Node('carousel_node')
       node.id = crypto.randomUUID()

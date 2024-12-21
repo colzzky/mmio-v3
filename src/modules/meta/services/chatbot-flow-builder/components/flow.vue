@@ -1,6 +1,8 @@
 <script lang="ts" setup>
+import MessageSheet from '../rete/TemplateNode/message-sheet.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
+import Sidebar from '../rete/TemplateNode/sidebar.vue'
 import Text from '../rete/TemplateNode/text.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
@@ -25,11 +27,12 @@ import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { NodeEditor, type GetSchemes, ClassicPreset, type NodeId, Signal } from 'rete'
 import { AreaPlugin, AreaExtensions, NodeView } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
+import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-menu-plugin'
 import { VuePlugin, Presets, type VueArea2D } from 'rete-vue-plugin'
 import type { Input, Output, Socket } from 'rete/_types/presets/classic'
 import { ref, onMounted, type Ref, reactive, watch, useTemplateRef } from 'vue'
-import MessageSheet from '../rete/TemplateNode/message-sheet.vue'
-import Sidebar from '../rete/TemplateNode/sidebar.vue'
+import Menu from './custom-contextmenu/index.vue'
+import type {ContextMenuRenderContext} from './custom-contextmenu/types'
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -87,6 +90,17 @@ async function initializeFlow() {
   rete_init.connection = new ConnectionPlugin<Schemes, AreaExtra>()
   rete_init.connection.addPreset(ConnectionPresets.classic.setup())
 
+  const socketTest = new ClassicPreset.Socket("socket")
+  const contextMenu = new ContextMenuPlugin<Schemes>({
+    items: ContextMenuPresets.classic.setup([
+      ["Text", () => ReteTemplates.node_templates.message_node(socketTest)],
+      ["Carousel", () => ReteTemplates.node_templates.carousel_node(socketTest)],
+    ]),
+  })
+
+  /* @ts-ignore */
+  area.use(contextMenu)
+
   // Use the customized preset
   rete_init.render.addPreset(
     Presets.classic.setup({
@@ -118,6 +132,36 @@ async function initializeFlow() {
     }),
   )
 
+  rete_init.render.addPreset({
+    update: function update(context: ContextMenuRenderContext) {
+      console.log({update: context})
+      const delay = typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) === 'undefined' ? 200 : context.data.delay;
+      if (context.data.type === 'contextmenu') {
+        return {
+          items: context.data.items,
+          delay: delay,
+          searchBar: context.data.searchBar,
+          onHide: context.data.onHide,
+        }
+      }
+    },
+    render: function render(context: ContextMenuRenderContext) {
+      const delay = typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) === 'undefined' ? 200 : context.data.delay;
+      console.log({render: context})
+      if (context.data.type === 'contextmenu') {
+        return {
+          component: Menu,
+          props: {
+            items: context.data.items,
+            delay: delay,
+            searchBar: context.data.searchBar,
+            onHide: context.data.onHide,
+          },
+        }
+      }
+    },
+  })
+
   rete_init.editor.use(area)
   area.use(rete_init.connection)
   area.use(rete_init.render)
@@ -129,6 +173,7 @@ async function initializeFlow() {
 
   AreaExtensions.selectableNodes(area, selector, { accumulating })
   trackMouseEvents(area)
+
 }
 
 const reloadEditorState = async () => {
@@ -161,14 +206,17 @@ const reloadEditorState = async () => {
     if (nodeData.outputs && Object.keys(nodeData.outputs).length > 0) {
       const output = nodeData.outputs
       Object.keys(nodeData.outputs).forEach((key) => {
-        createMetaTemplateOutput({
-          node,
-          type: output[key].type,
-          outputOpts: {
-            socket,
-            data: output[key].data
+        createMetaTemplateOutput(
+          {
+            node,
+            type: output[key].type,
+            outputOpts: {
+              socket,
+              data: output[key].data,
+            },
           },
-        }, key)
+          key,
+        )
       })
     }
 
@@ -238,9 +286,10 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
       if (rete_init.editor) {
         const soure_node = rete_init.editor.getNode(context.data.source)
         if (soure_node && soure_node.data) {
-
-          const check_index = soure_node.data.origin_return.findIndex(org=> org.origin === context.data.sourceOutput)
-          if(check_index !== -1 ){
+          const check_index = soure_node.data.origin_return.findIndex(
+            (org) => org.origin === context.data.sourceOutput,
+          )
+          if (check_index !== -1) {
             soure_node.data.origin_return.splice(check_index, 1)
           }
 
@@ -248,8 +297,8 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
             origin: context.data.sourceOutput,
             postback: {
               target_node: context.data.target,
-              target_output: context.data.targetInput
-            }
+              target_output: context.data.targetInput,
+            },
           })
           // if (isNodeOfType(soure_node, 'message_node')) {
           //   //do something here
@@ -311,12 +360,10 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
             console.log('after  select')
             const node = rete_init.editor?.getNode(selected_node.value)
             if (node?.selected) {
-
               closeNodeOption(false)
             } else {
               closeNodeOption()
             }
-
           }
         }
       })
@@ -359,11 +406,6 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
     }
 
     return context
-  })
-
-  // Hide the menu when clicking outside
-  document.addEventListener('contextmenu', (e) => {
-    e.preventDefault()
   })
 
   document.addEventListener('click', (e) => {
@@ -440,7 +482,9 @@ const saveEditorState = async () => {
       id: node.id,
       label: node.label,
       controls: node.controls as { [key: string]: ControlInterface },
-      outputs: node.outputs as { [key: string]: MetaTemplateOutput<keyof MetaTemplateOutputType> } | undefined,
+      outputs: node.outputs as
+        | { [key: string]: MetaTemplateOutput<keyof MetaTemplateOutputType> }
+        | undefined,
       inputs: node.inputs as { [key: string]: Input<ClassicPreset.Socket> } | undefined,
       position: position || { x: 0, y: 0 },
       data: node.data, // Any extra props you attached
@@ -493,7 +537,6 @@ watch(
 watch(
   () => selected_node.value,
   async (new_node, old_node) => {
-
     if (new_node && rete_init.editor) {
       const node = rete_init.editor.getNode(new_node)
       console.log(node)
@@ -501,7 +544,7 @@ watch(
         selected_node_obj.value = node
       }
     }
-  }
+  },
 )
 
 function removeNode(): void {
@@ -529,18 +572,11 @@ function handleClearEditor() {
   <div class="">
     <!-- Rete.js Canvas -->
     <div class="h-screen bg-pink-50">
-      <div v-if="menuVisible" class="floating-menu"
-        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }">
-        <div @click="createNewNode('reference_node')">➕ New Reference Node</div>
-        <div @click="createNewNode('message_node')">➕ New Message Node</div>
-        <div @click="createNewNode('custom_node')">➕ Create Node</div>
-        <div @click="createNewNode('text_node')">➕ Create Text Node</div>
-        <div>{{ menuPosition }}</div>
-        <div @click="handleClearEditor">Clear</div>
-        <div @click="closeMenu">❌ Close</div>
-      </div>
-      <div v-if="nodeOptionVisible" class="floating-menu"
-        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }">
+      <div
+        v-if="nodeOptionVisible"
+        class="floating-menu"
+        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }"
+      >
         <div>Node Option</div>
         <div>{{ menuPosition }}</div>
         <div @click="removeNode()">❌ Remove</div>
@@ -549,13 +585,13 @@ function handleClearEditor() {
       <div id="no-right-click" ref="reteContainer" class="bg-dotted h-screen bg-gray-50"></div>
     </div>
 
-    <div class="absolute flex justify-between top-0 p-4">
+    <div class="absolute top-0 flex justify-between p-4">
       <div class="space-y-2">
         <div class="flex gap-4">
           <button class="font-bold" @click="saveEditorState">Save</button>
           <span>{{
             multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : ''
-            }}</span>
+          }}</span>
         </div>
         <div>
           <div class="flex flex-col gap-4">
@@ -566,20 +602,16 @@ function handleClearEditor() {
         </div>
       </div>
       <div
-        class="fixed right-4 flex flex-col bg-gray-100 border border-gray-300 p-3 rounded-lg min-w-2 max-w-[20%] max-h-[80vh] overflow-auto">
+        class="fixed right-4 flex max-h-[80vh] min-w-2 max-w-[20%] flex-col overflow-auto rounded-lg border border-gray-300 bg-gray-100 p-3"
+      >
         <div v-if="selected_node && selected_node_obj && area">
           <div v-if="selected_node_obj.label === 'message_node'">
             <Sidebar :node="selected_node_obj" :node_id="selected_node_obj.id" :area />
           </div>
         </div>
-        <div v-else>
-          Selection bar
-        </div>
+        <div v-else>Selection bar</div>
       </div>
-
     </div>
-
-
 
     <!-- Floating Menu -->
   </div>
