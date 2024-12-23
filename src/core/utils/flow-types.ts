@@ -15,20 +15,24 @@ export interface NodeType {
 interface MessageNode {
   name: string
   message: string
-  origin_return:{origin:string,postback:{
-    target_node:string,
-    target_output:string
-  }}[]
+  origin_return: {
+    origin: string, postback: {
+      target_node: string,
+      target_output: string
+    }
+  }[]
 }
 
 interface ButtonNode {
   name: string
   message: string
   isClick: boolean
-  origin_return:{origin:string,postback:{
-    target_node:string,
-    target_output:string
-  }}[]
+  origin_return: {
+    origin: string, postback: {
+      target_node: string,
+      target_output: string
+    }
+  }[]
 }
 
 export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
@@ -103,34 +107,21 @@ export namespace ReteTemplates {
   }
   //These are the templates needed to create a Facebook Node
   export const node_templates = {
-    custom_node(socket: ClassicPreset.Socket) {
-      const node = new Node('message_node')
-      node.id = crypto.randomUUID()
-      node.addControl('input', control_template.text)
-      node.addControl('input2', control_template.number)
-      node.addControl('test', control_template.testControl)
-
-      node.addOutput('socket', new ClassicPreset.Output(ReteSockets['Accept All']))
-      node.addInput('socket', new ClassicPreset.Input(ReteSockets['Accept All']))
-      node.addInput('socket2', new ClassicPreset.Input(ReteSockets['Accept All']))
-
-      return node
-    },
     reference_node(socket: ClassicPreset.Socket) {
       const node = new Node('reference_node')
       node.id = crypto.randomUUID()
-      node.data={
-        message:'',
-        name:'',
-        origin_return:[]
+      node.data = {
+        message: '',
+        name: '',
+        origin_return: []
       }
-      
+
 
       createMetaTemplateOutput({
         node,
         type: 'classic',
         outputOpts: {
-          socket:ReteSockets['Accept All'],
+          socket: ReteSockets['Accept All'],
           data: {
             label: ''
 
@@ -142,30 +133,29 @@ export namespace ReteTemplates {
     text_node(socket: ClassicPreset.Socket) {
       const node = new Node('text_node')
       node.id = crypto.randomUUID()
-      node.addOutput('socket', new ClassicPreset.Output(ReteSockets['Accept All']))
-      node.addOutput('socket1', new ClassicPreset.Output(ReteSockets['Accept All']))
+      node.addOutput('socket', new ClassicPreset.Output(ReteSockets['Elements Output']))
       return node
     },
     message_node(socket: ClassicPreset.Socket) {
       const node = new Node('message_node')
-      node.data={
-        message:'',
-        name:'',
-        origin_return:[]
+      node.data = {
+        message: '',
+        name: '',
+        origin_return: []
       }
       node.id = crypto.randomUUID()
-      node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(ReteSockets['text'], 'hello', true))
+      node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(ReteSockets['Elements Input'], 'hello', true))
 
       // replies
       createMetaTemplateOutput({
         node,
         type: 'reply',
         outputOpts: {
-          socket:ReteSockets['button'],
+          socket: ReteSockets['button'],
           data: {
             title: 'Message Question #1',
             type: 'postback',
-            payload:''
+            payload: ''
           }
         },
       })
@@ -173,11 +163,11 @@ export namespace ReteTemplates {
         node,
         type: 'reply',
         outputOpts: {
-          socket:ReteSockets['button'],
+          socket: ReteSockets['button'],
           data: {
             title: 'Message Question #2',
             type: 'postback',
-            payload:''
+            payload: ''
           }
         },
       })
@@ -187,7 +177,7 @@ export namespace ReteTemplates {
         node,
         type: 'quickReply',
         outputOpts: {
-          socket:ReteSockets['quickreply'],
+          socket: ReteSockets['quickreply'],
           data: {
             title: 'Message Quick Reply #1',
             content_type: "text"
@@ -199,7 +189,7 @@ export namespace ReteTemplates {
         node,
         type: 'quickReply',
         outputOpts: {
-          socket:ReteSockets['quickreply'],
+          socket: ReteSockets['quickreply'],
           data: {
             title: 'Message Quick Reply #2',
             content_type: "text"
@@ -211,7 +201,7 @@ export namespace ReteTemplates {
         node,
         type: 'quickReply',
         outputOpts: {
-          socket:ReteSockets['Accept All'],
+          socket: ReteSockets['Accept All'],
           data: {
             title: 'Message Quick Reply #3',
             content_type: "text"
@@ -233,7 +223,7 @@ export namespace ReteTemplates {
         node,
         type: 'carouselCard',
         outputOpts: {
-          socket:ReteSockets['Accept All'],
+          socket: ReteSockets['Accept All'],
           data: {
             question: 'Carousel Question #1',
             answer: 'Carousel Answer #1',
@@ -245,7 +235,7 @@ export namespace ReteTemplates {
         node,
         type: 'carouselCard',
         outputOpts: {
-          socket:ReteSockets['Accept All'],
+          socket: ReteSockets['Accept All'],
           data: {
             question: 'Carousel Question #2',
             answer: 'Carousel Answer #2',
@@ -259,7 +249,7 @@ export namespace ReteTemplates {
         node,
         type: 'quickReply',
         outputOpts: {
-          socket:ReteSockets['Accept All'],
+          socket: ReteSockets['Accept All'],
           data: {
             title: 'Carousel Quick Reply #1',
             content_type: 'text'
@@ -270,7 +260,7 @@ export namespace ReteTemplates {
         node,
         type: 'quickReply',
         outputOpts: {
-          socket:ReteSockets['Accept All'],
+          socket: ReteSockets['Accept All'],
           data: {
             title: 'Carousel Quick Reply #2',
             content_type: 'text'
@@ -282,7 +272,7 @@ export namespace ReteTemplates {
         node,
         type: 'quickReply',
         outputOpts: {
-          socket:ReteSockets['Accept All'],
+          socket: ReteSockets['Accept All'],
           data: {
             title: 'Carousel Quick Reply #3',
             content_type: 'text'
@@ -398,7 +388,7 @@ export type MetaTemplateOutputType = {
 
 // Arguments passed into MetaTemplateOutput's constructor based on the type
 type MetaTemplateOutputConstructorArgs<T extends keyof MetaTemplateOutputType> = {
-  socket:CustomSocket;
+  socket: CustomSocket;
   key: string;
 } & { data: MetaTemplateOutputType[T] };  // Dynamically adds fields based on the 'type' passed
 
@@ -412,10 +402,10 @@ type CreateMetaTemplateOutputArgs<T extends keyof MetaTemplateOutputType> = {
 };
 
 // Factory function to create a MetaTemplateOutput dynamically based on type
-export function createMetaTemplateOutput<T extends keyof MetaTemplateOutputType>(args: CreateMetaTemplateOutputArgs<T>, outKey:string='') {
+export function createMetaTemplateOutput<T extends keyof MetaTemplateOutputType>(args: CreateMetaTemplateOutputArgs<T>, outKey: string = '') {
   const outputKey = !outKey ? `output_${args.type}_${crypto.randomUUID()}` : outKey; // Create a unique key for the output
   args.node.addOutput(outputKey, new MetaTemplateOutput(args.type, { socket: args.outputOpts.socket, data: args.outputOpts.data, key: outputKey })); // Add the output to the node
-  return {args, outputKey}; // Return the arguments and the output key
+  return { args, outputKey }; // Return the arguments and the output key
 }
 
 export class MetaTemplateOutput<T extends keyof MetaTemplateOutputType> extends ClassicPreset.Output<CustomSocket> {
@@ -433,247 +423,248 @@ export class MetaTemplateOutput<T extends keyof MetaTemplateOutputType> extends 
   }
 }
 
+const socketNames = [
+  'button', 'quickreply', 'quickreplyToSequence', 'carouselItem', 'carousel',
+  'text', 'image', 'video', 'file', 'facebookmedia', 'delay', 'delayO',
+  'Esequence', 'Ssequence', 'newMessageSet', 'newMessageSetO', 'buttonsOnly',
+  'newMessageSetO2', 'labels', 'triggers', 'CarouselQR', 'userinput', 'otn',
+  'SsequenceO', 'EsequenceO', 'Msequence', 'condition', 'timegap', 'actions',
+  'actionsO', 'Elements Input', 'Elements Output', 'Elements Only Output',
+  'Accept All', 'UserInput Only Input', 'UserInput Output',
+] as const;
 
-export const socketDefinitions = {
-  'Accept All': [], // Special "Accept All" socket that accepts everything
-  button: [
-      "carouselItem",
-      "carousel",
-      "file",
-      "image",
-      "video",
-      "facebookmedia",
-      "newMessageSet",
-      "condition",
-      "actions",
-      "Elements Input",
-      'Accept All'
-  ],
+
+export const socketDefinitions: Record<(typeof socketNames)[number], ((typeof socketNames)[number])[]> = {
+  'Elements Input': [],
+  'UserInput Only Input':[],
+  'Accept All': [],
+  button: [ "carouselItem", "carousel", "file", "image", "video", "facebookmedia", "newMessageSet", "condition", "actions", "Elements Input", "Accept All"],
   quickreply: [
-      "carouselItem",
-      "carousel",
-      "file",
-      "image",
-      "video",
-      "facebookmedia",
-      "newMessageSet",
-      "condition",
-      "actions",
-      "Elements Input",
-      "userinput",
-      "Accept All"
+    "carouselItem",
+    "carousel",
+    "file",
+    "image",
+    "video",
+    "facebookmedia",
+    "newMessageSet",
+    "condition",
+    "actions",
+    "Elements Input",
+    "userinput",
+    "Accept All"
   ],
   carouselItem: [
-      "text",
-      "carousel",
-      "quickreply",
-      "image",
-      "file",
-      "video",
-      "facebookmedia",
-      "delay",
-      "timegap",
-      "actions",
-      'Accept All',
+    "text",
+    "carousel",
+    "quickreply",
+    "image",
+    "file",
+    "video",
+    "facebookmedia",
+    "delay",
+    "timegap",
+    "actions",
+    'Accept All',
   ],
   carousel: [
-      "carouselItem",
-      "carousel",
-      "file",
-      "image",
-      "video",
-      "facebookmedia",
-      "delay",
-      "newMessageSet",
-      "userinput",
-      "otn",
-      "condition",
-      "timegap",
-      "actions",
-      'Accept All'
+    "carouselItem",
+    "carousel",
+    "file",
+    "image",
+    "video",
+    "facebookmedia",
+    "delay",
+    "newMessageSet",
+    "userinput",
+    "otn",
+    "condition",
+    "timegap",
+    "actions",
+    'Accept All'
   ],
   actions: [
-      "carouselItem",
-      "carousel",
-      "file",
-      "image",
-      "video",
-      "facebookmedia",
-      "delay",
-      "newMessageSet",
-      "userinput",
-      "otn",
-      "condition",
-      "Elements Input",
-      'Accept All'
-  ],    
+    "carouselItem",
+    "carousel",
+    "file",
+    "image",
+    "video",
+    "facebookmedia",
+    "delay",
+    "newMessageSet",
+    "userinput",
+    "otn",
+    "condition",
+    "Elements Input",
+    'Accept All'
+  ],
   text: [
-      "carouselItem",
-      "carousel",
-      "file",
-      "image",
-      "video",
-      "facebookmedia",
-      "delay",
-      "newMessageSet",
-      "userinput",
-      "otn",
-      "condition",
-      "timegap",
-      "actions",
-      "Elements Input",
-      'Accept All'
+    "carouselItem",
+    "carousel",
+    "file",
+    "image",
+    "video",
+    "facebookmedia",
+    "delay",
+    "newMessageSet",
+    "userinput",
+    "otn",
+    "condition",
+    "timegap",
+    "actions",
+    "Elements Input",
+    'Accept All'
   ],
   triggers: [
-      "Elements Input",
-      'Accept All'
+    "Elements Input",
+    'Accept All'
   ],
   image: [
-      "carouselItem",
-      "carousel",
-      "text",
-      "facebookmedia",
-      "delay",
-      "file",
-      "video",
-      "timegap",
-      "actions",
-      'Accept All'
+    "carouselItem",
+    "carousel",
+    "text",
+    "facebookmedia",
+    "delay",
+    "file",
+    "video",
+    "timegap",
+    "actions",
+    'Accept All'
   ],
   video: [
-      "carouselItem",
-      "carousel",
-      "text",
-      "image",
-      "file",
-      "video",
-      "facebookmedia",
-      "delay",
-      "timegap",
-      "actions",
-      'Accept All'
+    "carouselItem",
+    "carousel",
+    "text",
+    "image",
+    "file",
+    "video",
+    "facebookmedia",
+    "delay",
+    "timegap",
+    "actions",
+    'Accept All'
   ],
   file: [
-      "text",
-      "facebookmedia",
-      "delay",
-      "file",
-      "video",
-      "carouselItem",
-      "carousel",
-      "image",
-      "timegap",
-      "actions",
-      'Accept All'
+    "text",
+    "facebookmedia",
+    "delay",
+    "file",
+    "video",
+    "carouselItem",
+    "carousel",
+    "image",
+    "timegap",
+    "actions",
+    'Accept All'
   ],
   facebookmedia: [
-      "quickreply",
-      "carousel",
-      "text",
-      "image",
-      "file",
-      "video",
-      "delay",
-      "carouselItem",
-      "timegap",
-      "actions",
-      'Accept All'
+    "quickreply",
+    "carousel",
+    "text",
+    "image",
+    "file",
+    "video",
+    "delay",
+    "carouselItem",
+    "timegap",
+    "actions",
+    'Accept All'
   ],
   delay: [
-      "text",
-      "image",
-      "file",
-      "video",
-      "facebookmedia",
-      "carousel",
-      "carouselItem",
-      "actions",
-      'Accept All'
+    "text",
+    "image",
+    "file",
+    "video",
+    "facebookmedia",
+    "carousel",
+    "carouselItem",
+    "actions",
+    'Accept All'
   ],
   delayO: [
-      "text",
-      "image",
-      "file",
-      "video",
-      "facebookmedia",
-      "carousel",
-      "carouselItem",
-      "actions",
-      'Accept All'
-  ],    
+    "text",
+    "image",
+    "file",
+    "video",
+    "facebookmedia",
+    "carousel",
+    "carouselItem",
+    "actions",
+    'Accept All'
+  ],
   Msequence: [],
   Esequence: [],
   Ssequence: [],
   newMessageSet: [],
   newMessageSetO: [
-      "text",
-      "carousel",
-      "file",
-      "image",
-      "video",
-      "carouselItem",
-      "facebookmedia",
-      "delay",
-      "actions",
-      'Accept All'
+    "text",
+    "carousel",
+    "file",
+    "image",
+    "video",
+    "carouselItem",
+    "facebookmedia",
+    "delay",
+    "actions",
+    'Accept All'
   ],
   buttonsOnly: [
-      "quickreply",
-      "button",
-      "actions",
-      'Accept All'
+    "quickreply",
+    "button",
+    "actions",
+    'Accept All'
   ],
   newMessageSetO2: [
-      "Msequence"
+    "Msequence"
   ],
   labels: [],
   CarouselQR: [
-      "quickreply"
+    "quickreply"
   ],
   userinput: [],
   otn: [],
   SsequenceO: [
-      "Ssequence"
+    "Ssequence"
   ],
   EsequenceO: [
-      "Esequence"
+    "Esequence"
   ],
   quickreplyToSequence: [
-      "Esequence",
-      "Ssequence",
-      'Accept All'
+    "Esequence",
+    "Ssequence",
+    'Accept All'
   ],
   condition: [
-      "newMessageSet",
-      "actions",
-      'Accept All'
+    "newMessageSet",
+    "actions",
+    'Accept All'
   ],
   actionsO: [
-      "Elements Input",
-      "text",
-      'Accept All'
+    "Elements Input",
+    "text",
+    'Accept All'
   ],
   'Elements Only Output': [
-      'actions',
-      'Elements Input',
-      'Accept All'
+    'actions',
+    'Elements Input',
+    'Accept All'
   ],
   'Elements Output': [
-      'actions',
-      'timegap',
-      'userinput',
-      'Elements Input',
-      'Accept All'
+    'actions',
+    'timegap',
+    'userinput',
+    'Elements Input',
+    'Accept All'
   ],
-  'UserInput Output' : [
-      'actions',
-      'timegap',
-      'userinput',
-      'Elements Input',
-      'Accept All',
-      'UserInput Only Input'
-  ]
-} as const
+  'UserInput Output': [
+    'actions',
+    'timegap',
+    'userinput',
+    'Elements Input',
+    'Accept All',
+    'UserInput Only Input'
+  ],
+  'timegap':[]
+}
 
 class CustomSocket extends ClassicPreset.Socket {
   private compatibility: Array<string>;

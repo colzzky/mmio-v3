@@ -284,7 +284,21 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
     const mouse_inside_nodes: string[] = []
 
     if (context.type === 'connectioncreate') {
-      checkConnectionSocket(context.data)
+      const check = checkConnectionSocket(context.data)
+      if (check) {
+        toast({
+          title: 'Copatible',
+          variant: 'success',
+          duration: 2000,
+        })
+      } else {
+        toast({
+          title: 'Not Copatible',
+          variant: 'destructive',
+          duration: 2000,
+        })
+        return
+      }
 
       //Connection Socket Validation heres
 
@@ -445,25 +459,21 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
   })
 }
 
-function checkConnectionSocket(data: {source:string, sourceOutput:string, target:string, targetInput:string}) {
-  if(rete_init.editor){
+function checkConnectionSocket(data: { source: string, sourceOutput: string, target: string, targetInput: string }) {
+  if (rete_init.editor) {
     const source_node = rete_init.editor.getNode(data.source)
     const target_node = rete_init.editor.getNode(data.target)
-    
-    if(source_node && target_node){
+
+    if (source_node && target_node) {
       const output_socket = source_node.outputs[data.sourceOutput]
       const Input_socket = target_node.inputs[data.targetInput]
       console.log(output_socket, Input_socket)
-      if(output_socket && Input_socket){
-        if(output_socket.socket.isCompatibleWith(Input_socket.socket)){
-          console.log('compatible')
-        }else{
-          console.log('not compatible')
-        }
+      if (output_socket && Input_socket) {
+        return output_socket.socket.isCompatibleWith(Input_socket.socket)
       }
     }
-
   }
+  return false
 }
 
 
@@ -483,22 +493,6 @@ function getTranslatedMousePosition(event: MousePosition) {
   } else {
     return { x: 0, y: 0 }
   }
-}
-
-// Create a new node dynamically
-async function createNewNode(
-  node_type: 'custom_node' | 'reference_node' | 'text_node' | 'message_node',
-) {
-  if (!area || !rete_init.editor || !reteContainer.value) return
-
-  const node = ReteTemplates.node_templates[node_type](socket)
-
-  if (node) {
-    await rete_init.editor.addNode(node)
-    await area.translate(node.id, getTranslatedMousePosition(menuPosition.value))
-  }
-
-  closeMenu()
 }
 
 // Save editor state as JSON
