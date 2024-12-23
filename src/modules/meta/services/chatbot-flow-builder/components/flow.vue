@@ -32,7 +32,7 @@ import { VuePlugin, Presets, type VueArea2D } from 'rete-vue-plugin'
 import type { Input, Output, Socket } from 'rete/_types/presets/classic'
 import { ref, onMounted, type Ref, reactive, watch, useTemplateRef } from 'vue'
 import Menu from './custom-contextmenu/index.vue'
-import type {ContextMenuRenderContext} from './custom-contextmenu/types'
+import type { ContextMenuRenderContext } from './custom-contextmenu/types'
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -93,6 +93,7 @@ async function initializeFlow() {
   const socketTest = new ClassicPreset.Socket("socket")
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
+      ["Reference", () => ReteTemplates.node_templates.reference_node(socketTest)],
       ["Text", () => ReteTemplates.node_templates.message_node(socketTest)],
       ["Carousel", () => ReteTemplates.node_templates.carousel_node(socketTest)],
     ]),
@@ -134,7 +135,7 @@ async function initializeFlow() {
 
   rete_init.render.addPreset({
     update: function update(context: ContextMenuRenderContext) {
-      console.log({update: context})
+      console.log({ update: context })
       const delay = typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) === 'undefined' ? 200 : context.data.delay;
       if (context.data.type === 'contextmenu') {
         return {
@@ -147,7 +148,7 @@ async function initializeFlow() {
     },
     render: function render(context: ContextMenuRenderContext) {
       const delay = typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) === 'undefined' ? 200 : context.data.delay;
-      console.log({render: context})
+      console.log({ render: context })
       if (context.data.type === 'contextmenu') {
         return {
           component: Menu,
@@ -198,27 +199,27 @@ const reloadEditorState = async () => {
     })
 
     //Should be forloop depending on the saved socket
-    if (nodeData.inputs && Object.keys(nodeData.inputs).length > 0) {
-      Object.keys(nodeData.inputs).forEach((key) => {
-        node.addInput(key, new ClassicPreset.Input(socket))
-      })
-    }
-    if (nodeData.outputs && Object.keys(nodeData.outputs).length > 0) {
-      const output = nodeData.outputs
-      Object.keys(nodeData.outputs).forEach((key) => {
-        createMetaTemplateOutput(
-          {
-            node,
-            type: output[key].type,
-            outputOpts: {
-              socket,
-              data: output[key].data,
-            },
-          },
-          key,
-        )
-      })
-    }
+    // if (nodeData.inputs && Object.keys(nodeData.inputs).length > 0) {
+    //   Object.keys(nodeData.inputs).forEach((key) => {
+    //     node.addInput(key, new ClassicPreset.Input(socket))
+    //   })
+    // }
+    // if (nodeData.outputs && Object.keys(nodeData.outputs).length > 0) {
+    //   const output = nodeData.outputs
+    //   Object.keys(nodeData.outputs).forEach((key) => {
+    //     createMetaTemplateOutput(
+    //       {
+    //         node,
+    //         type: output[key].type,
+    //         outputOpts: {
+    //           socket,
+    //           data: output[key].data,
+    //         },
+    //       },
+    //       key,
+    //     )
+    //   })
+    // }
 
     // Add the node back to the editor
     await rete_init.editor.addNode(node)
@@ -283,6 +284,11 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
     const mouse_inside_nodes: string[] = []
 
     if (context.type === 'connectioncreate') {
+      checkConnectionSocket(context.data)
+
+      //Connection Socket Validation heres
+
+
       if (rete_init.editor) {
         const soure_node = rete_init.editor.getNode(context.data.source)
         if (soure_node && soure_node.data) {
@@ -439,6 +445,28 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
   })
 }
 
+function checkConnectionSocket(data: {source:string, sourceOutput:string, target:string, targetInput:string}) {
+  if(rete_init.editor){
+    const source_node = rete_init.editor.getNode(data.source)
+    const target_node = rete_init.editor.getNode(data.target)
+    
+    if(source_node && target_node){
+      const output_socket = source_node.outputs[data.sourceOutput]
+      const Input_socket = target_node.inputs[data.targetInput]
+      console.log(output_socket, Input_socket)
+      if(output_socket && Input_socket){
+        if(output_socket.socket.isCompatibleWith(Input_socket.socket)){
+          console.log('compatible')
+        }else{
+          console.log('not compatible')
+        }
+      }
+    }
+
+  }
+}
+
+
 function getTranslatedMousePosition(event: MousePosition) {
   if (area) {
     const { transform } = area.area // Rete.js area transform
@@ -572,11 +600,8 @@ function handleClearEditor() {
   <div class="">
     <!-- Rete.js Canvas -->
     <div class="h-screen bg-pink-50">
-      <div
-        v-if="nodeOptionVisible"
-        class="floating-menu"
-        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }"
-      >
+      <div v-if="nodeOptionVisible" class="floating-menu"
+        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }">
         <div>Node Option</div>
         <div>{{ menuPosition }}</div>
         <div @click="removeNode()">❌ Remove</div>
@@ -591,7 +616,7 @@ function handleClearEditor() {
           <button class="font-bold" @click="saveEditorState">Save</button>
           <span>{{
             multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : ''
-          }}</span>
+            }}</span>
         </div>
         <div>
           <div class="flex flex-col gap-4">
@@ -602,8 +627,7 @@ function handleClearEditor() {
         </div>
       </div>
       <div
-        class="fixed right-4 flex max-h-[80vh] min-w-2 max-w-[20%] flex-col overflow-auto rounded-lg border border-gray-300 bg-gray-100 p-3"
-      >
+        class="fixed right-4 flex max-h-[80vh] min-w-2 max-w-[20%] flex-col overflow-auto rounded-lg border border-gray-300 bg-gray-100 p-3">
         <div v-if="selected_node && selected_node_obj && area">
           <div v-if="selected_node_obj.label === 'message_node'">
             <Sidebar :node="selected_node_obj" :node_id="selected_node_obj.id" :area />
