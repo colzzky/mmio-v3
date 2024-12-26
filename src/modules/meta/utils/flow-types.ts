@@ -314,7 +314,8 @@ export namespace SerializedFlow {
 
 //////////////////////////
 // Flow Data Templates //
-////////////////////////
+// Not yet being used //
+///////////////////////
 
 export interface FlowData extends SubCollections {
   flow_id: string
@@ -345,33 +346,10 @@ export interface FlowNodeData {
   updatedAt: string
 }
 
-////////////////////
-// CUSTOM OUTPUT //
-//////////////////
-/**
-type MetaTemplateOutputType = {
-  classic: ClassicOutput
-  reply: ReplyOutput
-  quickReply: CarouselCardOutput
-  carouselCard: QuickReplyOutput
-};
+/////////////////////////////////////
+// CUSTOM INPUT OUTPUT AND SOCKET //
+///////////////////////////////////
 
-type ClassicOutput = {
-  label?: string;
-};
-type ReplyOutput = {
-  question: string;
-  answer: string;
-};
-type CarouselCardOutput = {
-  question: string;
-  answer: string;
-  image: string;
-};
- */
-//type QuickReplyOutput = FBAttachmentTemplate.QuickReply;x
-
-// Arguments passed into MetaTemplateOutput's constructor based on the type
 type MetaTemplateOutputConstructorArgs = {
   socket: CustomSocket;
   key: string;
