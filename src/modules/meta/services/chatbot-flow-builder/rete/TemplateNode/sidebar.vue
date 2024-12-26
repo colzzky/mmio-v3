@@ -12,8 +12,8 @@ import {
 } from '@/core/components/ui/select'
 import { Textarea } from '@/core/components/ui/textarea'
 import { toast } from '@/core/components/ui/toast'
-import type { FBAttachmentTemplate } from '@/core/utils/flow-meta-types'
-import { createMetaTemplateOutIn, MetaTemplateOutput, ReteSockets, type AreaExtra, type Node, type NodeType, type Schemes } from '@/core/utils/flow-types'
+import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
+import { createMetaTemplateOutIn, MetaTemplateOutput, ReteSockets, type AreaExtra, type Node, type NodeType, type Schemes } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
 import { node } from '@unovis/ts/components/sankey/style'
@@ -76,24 +76,15 @@ const reply_button = reactive({
         payload: '',
     } as FBAttachmentTemplate.Button,
     add_new_reply() {
-        if (node_obj.value) {
-
-            const ws_id = active_workspace.data?.ws_id
-            const cb_id = '' // chat bot flow id
-            const org_id = `${crypto.randomUUID()}` // Origin Id where it will be referenced
-
-            const payload = {
-                ws_id, cb_id, org_id
-            }
-            const payload_string = JSON.stringify(payload)
-            createMetaTemplateOutIn({
+        if (node_obj.value && node_obj.value.data) {
+            const reply_origin = createMetaTemplateOutIn({
                 node: node_obj.value,
                 socket:ReteSockets['button']
-            }, org_id)
-
-
+            })
+            const postback_id = `${crypto.randomUUID()}` // Origin Id where it will be referenced
+            node_obj.value.data.giver_data[reply_origin.key] = postback_id
+            node_obj.value.data.buttons[reply_origin.key] ={...this.data}
             initialize()
-            console.log(props.node_id)
             props.area.update('node', props.node.id)
             // console.log(props.area)
             toast({
@@ -109,17 +100,23 @@ const quick_reply_button = reactive({
     title: 'Untitled Reply',
     content_type: 'text' as FBAttachmentTemplate.QuickReply['content_type'],
     add_new_reply() {
-        if (node_obj.value) {
-            const org_id = `${crypto.randomUUID()}` // Origin Id where it will be referenced
-            createMetaTemplateOutIn({
+        if (node_obj.value && node_obj.value.data) {
+            const quickreply_origin = createMetaTemplateOutIn({
                 node: node_obj.value,
-                socket: ReteSockets['quickreply'],
-            },org_id)
+                socket:ReteSockets['quickreply']
+            })
+            const postback_id = `${crypto.randomUUID()}` // Origin Id where it will be referenced
+            node_obj.value.data.giver_data[quickreply_origin.key] = postback_id
+            node_obj.value.data.quick_replies[quickreply_origin.key] = {
+                title:this.title,
+                content_type: this.content_type,
+                payload: postback_id
+            }
             initialize()
             props.area.update('node', props.node.id)
             // console.log(props.area)
             toast({
-                title: 'New quick reply Added',
+                title: 'New Reply Button Added',
                 variant: 'success',
                 duration: 1000,
             })

@@ -1,4 +1,4 @@
-import type { SubCollections } from '../types/UniTypes'
+import type { SubCollections } from '../../../core/types/UniTypes'
 import { ClassicPreset, type GetSchemes } from 'rete'
 import type { VueArea2D } from 'rete-vue-plugin'
 import type { Input, Output } from 'rete/_types/presets/classic'
@@ -16,9 +16,25 @@ export interface CarouselCard {
   image_aspect_ratio: string
   title: string,
   text: string,
-  buttons: [],
+  buttons: Record<string, Button>,
   giver_data: Record<string, string>
 }
+
+
+export interface Button {
+  type: 'web_url' | 'postback'
+  title: string
+  url?: string // Optional because 'postback' type doesn't require it
+  messenger_extensions?: "TRUE" | "FALSE" // Optional for web_url type
+  payload?: string // Optional because 'web_url' doesn't need payload
+}
+
+export interface QuickReply{
+  content_type: "text"|"user_email"|"user_phone_number",
+  title?: string,
+  payload?: string
+}
+
 export interface ReferenceNode {
   name: string,
   postbackid?: string
@@ -27,22 +43,22 @@ export interface ReferenceNode {
 export interface GenericNode extends CarouselCard {
   name: string,
   postbackid?: string
-  quick_replies: [],
+  quick_replies: Record<string, QuickReply>,
   giver_data: Record<string, string>
 }
 export interface CarouselNode {
   name: string,
   postbackid?: string
   cards: CarouselCard[]
-  quick_replies: [],
+  quick_replies: Record<string, QuickReply>,
   giver_data: Record<string, string>
 }
 interface MessageNode {
   name: string,
   postbackid?: string
   text: string,
-  buttons: [],
-  quick_replies: [],
+  buttons: Record<string, Button>,
+  quick_replies: Record<string, QuickReply>,
   giver_data: Record<string, string>
 }
 
@@ -120,18 +136,18 @@ export namespace ReteTemplates {
   export const node_templates = {
     reference_node() {
       const node = new Node('reference_node')
-      const out_key = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
       node.id = crypto.randomUUID()
       node.data = {
         name: 'reference',
         giver_data:{
-          'num1':out_key
+          'num1':num1_postback
         },
       }
       createMetaTemplateOutIn({
         node,
         socket: ReteSockets['Accept All'],
-      },out_key)
+      },'num1')
 
       return node
     },
@@ -141,8 +157,8 @@ export namespace ReteTemplates {
       node.data = {
         name: '',
         text: '',
-        buttons: [],
-        quick_replies: [],
+        buttons: {},
+        quick_replies: {},
         giver_data:{}
       }
       node.id = crypto.randomUUID()
@@ -166,8 +182,8 @@ export namespace ReteTemplates {
         title:'horizontal',
         text: '',
         giver_data:{},
-        quick_replies:[],
-        buttons:[]
+        quick_replies:{},
+        buttons:{}
       }
       node.id = crypto.randomUUID()
       createMetaTemplateOutIn({
@@ -188,8 +204,8 @@ export namespace ReteTemplates {
       node.data = {
         name: '',
         text: '',
-        buttons: [],
-        quick_replies: [],
+        buttons: {},
+        quick_replies: {},
         giver_data:{}
       }
       createMetaTemplateOutIn({
@@ -368,7 +384,7 @@ type createMetaTemplateOutInArgs = {
 
 // Factory function to create a MetaTemplateOutput dynamically based on type
 export function createMetaTemplateOutIn(args: createMetaTemplateOutInArgs, outKey: string = '', type: 'output' | 'input' = 'output') {
-  const key = !outKey ? `${crypto.randomUUID()}` : outKey; // Create a unique key for the output
+  const key = !outKey ? `${args.socket.name}_${crypto.randomUUID()}` : outKey; // Create a unique key for the output
   if (type === 'input') args.node.addInput(key, new MetaTemplateInput({ socket: args.socket, key })); // Add the output to the node
   else args.node.addOutput(key, new MetaTemplateOutput({ socket: args.socket, key })); // Add the output to the node
   return { args, key }; // Return the arguments and the output key

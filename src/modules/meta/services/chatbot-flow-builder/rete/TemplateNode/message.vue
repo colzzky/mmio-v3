@@ -3,7 +3,7 @@ import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
 import { sortByIndex } from '../utils'
 import MessageSheet from './message-sheet.vue'
-import type { MetaTemplateOutput, Schemes } from '@/core/utils/flow-types'
+import type { MetaTemplateOutput, Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { computed, onUpdated, ref, watch } from 'vue'
 

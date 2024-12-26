@@ -18,7 +18,7 @@ import {
   SheetTitle,
 } from '@/core/components/ui/sheet'
 import { Textarea } from '@/core/components/ui/textarea'
-import type { MeteTemplateOutput } from '@/core/utils/flow-types'
+import type { MeteTemplateOutput } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { ref } from 'vue'
 

@@ -21,7 +21,7 @@ import {
   createMetaTemplateOutIn,
   MetaTemplateOutput,
   isNodeOfType,
-} from '@/core/utils/flow-types'
+} from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { NodeEditor, type GetSchemes, ClassicPreset, type NodeId, Signal } from 'rete'
 import { AreaPlugin, AreaExtensions, NodeView } from 'rete-area-plugin'
@@ -88,8 +88,7 @@ async function initializeFlow() {
   rete_init.render = new VuePlugin<Schemes, AreaExtra>()
   rete_init.connection = new ConnectionPlugin<Schemes, AreaExtra>()
   rete_init.connection.addPreset(ConnectionPresets.classic.setup())
-
-  const socketTest = new ClassicPreset.Socket("socket")
+  
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
       ["Reference", () => ReteTemplates.node_templates.reference_node()],
@@ -168,7 +167,7 @@ async function initializeFlow() {
 
   if (active_flow.json) {
     //Reload saved flow if there is an existing state
-    reloadEditorState()
+    //reloadEditorState()
   }
 
   AreaExtensions.selectableNodes(area, selector, { accumulating })
@@ -303,7 +302,8 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
         const soure_node = rete_init.editor.getNode(context.data.source)
         if (soure_node && soure_node.data) {
           const origin = soure_node.data.giver_data[context.data.sourceOutput]
-
+          console.log(context.data)
+          console.log(soure_node)
           if (!origin) {
             toast({
               title: 'Something went wrong',
@@ -317,7 +317,7 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
               target_node.data.postbackid = soure_node.data.giver_data[context.data.sourceOutput]
             } else {
               toast({
-                title: 'Something went wrong',
+                title: 'Something went wrong here',
                 variant: 'destructive',
                 duration: 2000,
               })

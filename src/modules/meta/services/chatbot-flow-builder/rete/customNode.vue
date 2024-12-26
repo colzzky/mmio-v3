@@ -63,7 +63,7 @@
 <script lang="ts" setup>
 import Button from '@/core/components/ui/button/Button.vue';
 import Input from '@/core/components/ui/input/Input.vue';
-import type { Schemes } from '@/core/utils/flow-types';
+import type { Schemes } from '@/modules/meta/utils/flow-types';
 import { Ref } from 'rete-vue-plugin'
 import type { InputControl } from 'rete/_types/presets/classic';
 import { computed } from 'vue';

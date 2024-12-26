@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Schemes } from '@/core/utils/flow-types';
+import type { Schemes } from '@/modules/meta/utils/flow-types';
 import { Icon } from '@iconify/vue'
 import { Ref } from 'rete-vue-plugin'
 import { computed } from 'vue'
