@@ -11,7 +11,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import type { TestControl } from '@/core/utils/flow-types';
+import type { TestControl } from '@/modules/meta/utils/flow-types';
 
 const props = defineProps<{
   data: TestControl

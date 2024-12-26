@@ -18,11 +18,10 @@ import {
   type SerializedFlow,
   ReteTemplates,
   type NodeType,
-  createMetaTemplateOutput,
+  createMetaTemplateOutIn,
   MetaTemplateOutput,
-  type MetaTemplateOutputType,
   isNodeOfType,
-} from '@/core/utils/flow-types'
+} from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { NodeEditor, type GetSchemes, ClassicPreset, type NodeId, Signal } from 'rete'
 import { AreaPlugin, AreaExtensions, NodeView } from 'rete-area-plugin'
@@ -89,13 +88,12 @@ async function initializeFlow() {
   rete_init.render = new VuePlugin<Schemes, AreaExtra>()
   rete_init.connection = new ConnectionPlugin<Schemes, AreaExtra>()
   rete_init.connection.addPreset(ConnectionPresets.classic.setup())
-
-  const socketTest = new ClassicPreset.Socket("socket")
+  
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
-      ["Reference", () => ReteTemplates.node_templates.reference_node(socketTest)],
-      ["Text", () => ReteTemplates.node_templates.message_node(socketTest)],
-      ["Carousel", () => ReteTemplates.node_templates.carousel_node(socketTest)],
+      ["Reference", () => ReteTemplates.node_templates.reference_node()],
+      ["Text", () => ReteTemplates.node_templates.message_node()],
+      ["Carousel", () => ReteTemplates.node_templates.carousel_node()],
     ]),
   })
 
@@ -110,9 +108,9 @@ async function initializeFlow() {
           if (context.payload.label === 'reference_node') {
             return Reference
           }
-          if (context.payload.label === 'text_node') {
-            return Text
-          }
+          // if (context.payload.label === 'text_node') {
+          //   return Text
+          // }
           if (context.payload.label === 'message_node') {
             return Message
           }
@@ -169,7 +167,7 @@ async function initializeFlow() {
 
   if (active_flow.json) {
     //Reload saved flow if there is an existing state
-    reloadEditorState()
+    //reloadEditorState()
   }
 
   AreaExtensions.selectableNodes(area, selector, { accumulating })
@@ -284,28 +282,48 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
     const mouse_inside_nodes: string[] = []
 
     if (context.type === 'connectioncreate') {
-      checkConnectionSocket(context.data)
-
-      //Connection Socket Validation heres
-
+      const check = checkConnectionSocket(context.data)
+      if (check) {
+        toast({
+          title: 'Copatible',
+          variant: 'success',
+          duration: 2000,
+        })
+      } else {
+        toast({
+          title: 'Not Copatible',
+          variant: 'destructive',
+          duration: 2000,
+        })
+        return
+      }
 
       if (rete_init.editor) {
         const soure_node = rete_init.editor.getNode(context.data.source)
         if (soure_node && soure_node.data) {
-          const check_index = soure_node.data.origin_return.findIndex(
-            (org) => org.origin === context.data.sourceOutput,
-          )
-          if (check_index !== -1) {
-            soure_node.data.origin_return.splice(check_index, 1)
+          const origin = soure_node.data.giver_data[context.data.sourceOutput]
+          console.log(context.data)
+          console.log(soure_node)
+          if (!origin) {
+            toast({
+              title: 'Something went wrong',
+              variant: 'destructive',
+              duration: 2000,
+            })
+            return
+          } else {
+            const target_node = rete_init.editor.getNode(context.data.target)
+            if (target_node && target_node.data) {
+              target_node.data.postbackid = soure_node.data.giver_data[context.data.sourceOutput]
+            } else {
+              toast({
+                title: 'Something went wrong here',
+                variant: 'destructive',
+                duration: 2000,
+              })
+              return
+            }
           }
-
-          soure_node.data.origin_return.push({
-            origin: context.data.sourceOutput,
-            postback: {
-              target_node: context.data.target,
-              target_output: context.data.targetInput,
-            },
-          })
           // if (isNodeOfType(soure_node, 'message_node')) {
           //   //do something here
           // }
@@ -445,25 +463,21 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
   })
 }
 
-function checkConnectionSocket(data: {source:string, sourceOutput:string, target:string, targetInput:string}) {
-  if(rete_init.editor){
+function checkConnectionSocket(data: { source: string, sourceOutput: string, target: string, targetInput: string }) {
+  if (rete_init.editor) {
     const source_node = rete_init.editor.getNode(data.source)
     const target_node = rete_init.editor.getNode(data.target)
-    
-    if(source_node && target_node){
+
+    if (source_node && target_node) {
       const output_socket = source_node.outputs[data.sourceOutput]
       const Input_socket = target_node.inputs[data.targetInput]
       console.log(output_socket, Input_socket)
-      if(output_socket && Input_socket){
-        if(output_socket.socket.isCompatibleWith(Input_socket.socket)){
-          console.log('compatible')
-        }else{
-          console.log('not compatible')
-        }
+      if (output_socket && Input_socket) {
+        return output_socket.socket.isCompatibleWith(Input_socket.socket)
       }
     }
-
   }
+  return false
 }
 
 
@@ -485,22 +499,6 @@ function getTranslatedMousePosition(event: MousePosition) {
   }
 }
 
-// Create a new node dynamically
-async function createNewNode(
-  node_type: 'custom_node' | 'reference_node' | 'text_node' | 'message_node',
-) {
-  if (!area || !rete_init.editor || !reteContainer.value) return
-
-  const node = ReteTemplates.node_templates[node_type](socket)
-
-  if (node) {
-    await rete_init.editor.addNode(node)
-    await area.translate(node.id, getTranslatedMousePosition(menuPosition.value))
-  }
-
-  closeMenu()
-}
-
 // Save editor state as JSON
 const saveEditorState = async () => {
   if (!rete_init.editor) return
@@ -511,7 +509,7 @@ const saveEditorState = async () => {
       label: node.label,
       controls: node.controls as { [key: string]: ControlInterface },
       outputs: node.outputs as
-        | { [key: string]: MetaTemplateOutput<keyof MetaTemplateOutputType> }
+        | { [key: string]: MetaTemplateOutput }
         | undefined,
       inputs: node.inputs as { [key: string]: Input<ClassicPreset.Socket> } | undefined,
       position: position || { x: 0, y: 0 },
@@ -616,7 +614,7 @@ function handleClearEditor() {
           <button class="font-bold" @click="saveEditorState">Save</button>
           <span>{{
             multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : ''
-            }}</span>
+          }}</span>
         </div>
         <div>
           <div class="flex flex-col gap-4">

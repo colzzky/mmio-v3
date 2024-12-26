@@ -2,7 +2,7 @@
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
 import { sortByIndex } from '../utils'
-import type { MeteTemplateOutput, Schemes } from '@/core/utils/flow-types'
+import type { MeteTemplateOutput, Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
 

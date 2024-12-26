@@ -12,14 +12,15 @@ import {
 } from '@/core/components/ui/select'
 import { Textarea } from '@/core/components/ui/textarea'
 import { toast } from '@/core/components/ui/toast'
-import type { FBAttachmentTemplate } from '@/core/utils/flow-meta-types'
-import { createMetaTemplateOutput, MetaTemplateOutput, type AreaExtra, type Node, type NodeType, type Schemes } from '@/core/utils/flow-types'
+import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
+import { createMetaTemplateOutIn, MetaTemplateOutput, ReteSockets, type AreaExtra, type Node, type NodeType, type Schemes } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
 import { node } from '@unovis/ts/components/sankey/style'
 import { ClassicPreset } from 'rete'
 import type { AreaPlugin } from 'rete-area-plugin'
 import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
+import CustomSocket from '../customSocket.vue'
 const authWorkspace = useAuthWorkspaceStore()
 const { active_workspace } = authWorkspace
 
@@ -29,8 +30,8 @@ const props = defineProps<{
     area: AreaPlugin<Schemes, AreaExtra>
 }>()
 
-const replies = ref<MetaTemplateOutput<'reply'>[]>([])
-const quickReplies = ref<MetaTemplateOutput<'quickReply'>[]>([])
+const replies = ref<MetaTemplateOutput[]>([])
+const quickReplies = ref<MetaTemplateOutput[]>([])
 const node_obj = ref<Node<'message_node'> | null>(null)
 
 type State = 'main' | 'create-reply-button' | 'create-quick-reply-button'
@@ -52,21 +53,20 @@ function initialize() {
     node_obj.value = props.node as Node<'message_node'>
     if (node_obj.value.data) {
         node_obj.value.data.name = node_obj.value.data.name || 'Untitled Node'
-        node_obj.value.data.message = node_obj.value.data.message || ''
-        node_obj.value.data.origin_return = node_obj.value.data.origin_return || []
+        node_obj.value.data.text = node_obj.value.data.text || ''
     }
 
 
-    Object.keys(props.node.outputs).forEach((key) => {
-        if (props.node.outputs[key] instanceof MetaTemplateOutput) {
-            if (props.node.outputs[key].type === 'reply') {
-                replies.value.push(props.node.outputs[key])
-            }
-            if (props.node.outputs[key].type === 'quickReply') {
-                quickReplies.value.push(props.node.outputs[key])
-            }
-        }
-    })
+    // Object.keys(props.node.outputs).forEach((key) => {
+    //     if (props.node.outputs[key] instanceof MetaTemplateOutput) {
+    //         if (props.node.outputs[key].type === 'reply') {
+    //             replies.value.push(props.node.outputs[key])
+    //         }
+    //         if (props.node.outputs[key].type === 'quickReply') {
+    //             quickReplies.value.push(props.node.outputs[key])
+    //         }
+    //     }
+    // })
 }
 
 const reply_button = reactive({
@@ -76,41 +76,15 @@ const reply_button = reactive({
         payload: '',
     } as FBAttachmentTemplate.Button,
     add_new_reply() {
-        const socket = new ClassicPreset.Socket('socket')
-
-
-
-        //{ws:id/auto_reply_id/origin_data_id}
-
-        //Create a reference/payload_id
-        //In that Reference find ws:id/auto_reply_id/
-        //Then Get the node data json
-        //When node data is fetched we find 
-
-        //:ws_id,:node_id,:payload_id,:target_id
-
-        if (node_obj.value) {
-
-            const ws_id = active_workspace.data?.ws_id
-            const cb_id = '' // chat bot flow id
-            const org_id = `output_reply_${crypto.randomUUID()}` // Origin Id where it will be referenced
-
-            const payload = {
-                ws_id, cb_id, org_id
-            }
-            const payload_string = JSON.stringify(payload)
-            createMetaTemplateOutput({
+        if (node_obj.value && node_obj.value.data) {
+            const reply_origin = createMetaTemplateOutIn({
                 node: node_obj.value,
-                type: 'reply',
-                outputOpts: {
-                    socket,
-                    data: { ...this.data, payload: payload_string }
-                }
-            }, org_id)
-
-
+                socket:ReteSockets['button']
+            })
+            const postback_id = `${crypto.randomUUID()}` // Origin Id where it will be referenced
+            node_obj.value.data.giver_data[reply_origin.key] = postback_id
+            node_obj.value.data.buttons[reply_origin.key] ={...this.data}
             initialize()
-            console.log(props.node_id)
             props.area.update('node', props.node.id)
             // console.log(props.area)
             toast({
@@ -126,26 +100,23 @@ const quick_reply_button = reactive({
     title: 'Untitled Reply',
     content_type: 'text' as FBAttachmentTemplate.QuickReply['content_type'],
     add_new_reply() {
-        const socket = new ClassicPreset.Socket('socket')
-        if (node_obj.value) {
-
-            createMetaTemplateOutput({
+        if (node_obj.value && node_obj.value.data) {
+            const quickreply_origin = createMetaTemplateOutIn({
                 node: node_obj.value,
-                type: 'quickReply',
-                outputOpts: {
-                    socket,
-                    data: {
-                        title: this.title,
-                        content_type: this.content_type
-                    }
-                },
+                socket:ReteSockets['quickreply']
             })
+            const postback_id = `${crypto.randomUUID()}` // Origin Id where it will be referenced
+            node_obj.value.data.giver_data[quickreply_origin.key] = postback_id
+            node_obj.value.data.quick_replies[quickreply_origin.key] = {
+                title:this.title,
+                content_type: this.content_type,
+                payload: postback_id
+            }
             initialize()
-            console.log(props.node_id)
             props.area.update('node', props.node.id)
             // console.log(props.area)
             toast({
-                title: 'New Node Added',
+                title: 'New Reply Button Added',
                 variant: 'success',
                 duration: 1000,
             })
@@ -202,7 +173,7 @@ onUnmounted(() => {
             </section>
             <section class="grid gap-y-1.5">
                 <Label for="message">Message</Label>
-                <Textarea v-model="node_obj.data.message" id="message" name="message" rows="5"
+                <Textarea v-model="node_obj.data.text" id="message" name="message" rows="5"
                     placeholder="Whats the message you want to sent to the user?" />
             </section>
             <section class="grid grid-cols-2 gap-y-3">
@@ -211,11 +182,11 @@ onUnmounted(() => {
                     @click="handleChangeSheetState('create-reply-button')">
                     Create
                 </button>
-                <ul class="col-span-full grid gap-y-3">
+                <!-- <ul class="col-span-full grid gap-y-3">
                     <template v-for="(reply, key) in replies" :key>
                         <li v-if="reply"
                             class="grid grid-cols-[1fr_var(--icon-size)] grid-rows-2 items-center [--icon-size:theme(spacing.9)] *:leading-none">
-                            <p class="text-xs">{{ reply.data.title }}</p>
+                            <p class="text-xs">{{ reply }}</p>
                             <strong>{{ reply.data.type }}</strong>
                             <button type="button"
                                 class="col-start-2 row-span-full grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5">
@@ -223,7 +194,7 @@ onUnmounted(() => {
                             </button>
                         </li>
                     </template>
-                </ul>
+                </ul> -->
             </section>
             <section class="grid grid-cols-2 gap-y-3">
                 <h3 class="font-medium">Quick Replies Buttons</h3>
@@ -231,7 +202,7 @@ onUnmounted(() => {
                     @click="handleChangeSheetState('create-quick-reply-button')">
                     Create
                 </button>
-                <ul class="col-span-full grid gap-y-3">
+                <!-- <ul class="col-span-full grid gap-y-3">
                     <template v-for="(quickReply, key) in quickReplies" :key>
                         <li v-if="quickReply && quickReply.type === 'quickReply'"
                             class="grid grid-cols-[1fr_var(--icon-size)] items-center [--icon-size:theme(spacing.9)] *:leading-none">
@@ -242,7 +213,7 @@ onUnmounted(() => {
                             </button>
                         </li>
                     </template>
-                </ul>
+                </ul> -->
             </section>
         </main>
         <main v-else-if="sheetState === 'create-reply-button'" class="grid gap-y-6 text-sm">
