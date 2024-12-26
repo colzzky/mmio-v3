@@ -18,9 +18,8 @@ import {
   type SerializedFlow,
   ReteTemplates,
   type NodeType,
-  createMetaTemplateOutput,
+  createMetaTemplateOutIn,
   MetaTemplateOutput,
-  type MetaTemplateOutputType,
   isNodeOfType,
 } from '@/core/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -93,9 +92,9 @@ async function initializeFlow() {
   const socketTest = new ClassicPreset.Socket("socket")
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
-      ["Reference", () => ReteTemplates.node_templates.reference_node(socketTest)],
-      ["Text", () => ReteTemplates.node_templates.message_node(socketTest)],
-      ["Carousel", () => ReteTemplates.node_templates.carousel_node(socketTest)],
+      ["Reference", () => ReteTemplates.node_templates.reference_node()],
+      ["Text", () => ReteTemplates.node_templates.message_node()],
+      ["Carousel", () => ReteTemplates.node_templates.carousel_node()],
     ]),
   })
 
@@ -110,9 +109,9 @@ async function initializeFlow() {
           if (context.payload.label === 'reference_node') {
             return Reference
           }
-          if (context.payload.label === 'text_node') {
-            return Text
-          }
+          // if (context.payload.label === 'text_node') {
+          //   return Text
+          // }
           if (context.payload.label === 'message_node') {
             return Message
           }
@@ -300,26 +299,31 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
         return
       }
 
-      //Connection Socket Validation heres
-
-
       if (rete_init.editor) {
         const soure_node = rete_init.editor.getNode(context.data.source)
         if (soure_node && soure_node.data) {
-          const check_index = soure_node.data.origin_return.findIndex(
-            (org) => org.origin === context.data.sourceOutput,
-          )
-          if (check_index !== -1) {
-            soure_node.data.origin_return.splice(check_index, 1)
-          }
+          const origin = soure_node.data.giver_data[context.data.sourceOutput]
 
-          soure_node.data.origin_return.push({
-            origin: context.data.sourceOutput,
-            postback: {
-              target_node: context.data.target,
-              target_output: context.data.targetInput,
-            },
-          })
+          if (!origin) {
+            toast({
+              title: 'Something went wrong',
+              variant: 'destructive',
+              duration: 2000,
+            })
+            return
+          } else {
+            const target_node = rete_init.editor.getNode(context.data.target)
+            if (target_node && target_node.data) {
+              target_node.data.postbackid = soure_node.data.giver_data[context.data.sourceOutput]
+            } else {
+              toast({
+                title: 'Something went wrong',
+                variant: 'destructive',
+                duration: 2000,
+              })
+              return
+            }
+          }
           // if (isNodeOfType(soure_node, 'message_node')) {
           //   //do something here
           // }
@@ -505,7 +509,7 @@ const saveEditorState = async () => {
       label: node.label,
       controls: node.controls as { [key: string]: ControlInterface },
       outputs: node.outputs as
-        | { [key: string]: MetaTemplateOutput<keyof MetaTemplateOutputType> }
+        | { [key: string]: MetaTemplateOutput }
         | undefined,
       inputs: node.inputs as { [key: string]: Input<ClassicPreset.Socket> } | undefined,
       position: position || { x: 0, y: 0 },
@@ -610,7 +614,7 @@ function handleClearEditor() {
           <button class="font-bold" @click="saveEditorState">Save</button>
           <span>{{
             multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : ''
-            }}</span>
+          }}</span>
         </div>
         <div>
           <div class="flex flex-col gap-4">

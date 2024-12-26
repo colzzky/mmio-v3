@@ -6,33 +6,44 @@ import type { FBAttachmentTemplate } from './flow-meta-types'
 
 export interface NodeType {
   message_node: MessageNode
-  text_node: MessageNode
-  carousel_node: MessageNode
-  reference_node: MessageNode
-  button_node: ButtonNode
+  generic_node: GenericNode
+  carousel_node: CarouselNode
+  reference_node: ReferenceNode
 }
 
+export interface CarouselCard {
+  image: string,
+  image_aspect_ratio: string
+  title: string,
+  text: string,
+  buttons: [],
+  giver_data: Record<string, string>
+}
+export interface ReferenceNode {
+  name: string,
+  postbackid?: string
+  giver_data: Record<string, string>
+}
+export interface GenericNode extends CarouselCard {
+  name: string,
+  postbackid?: string
+  quick_replies: [],
+  giver_data: Record<string, string>
+}
+export interface CarouselNode {
+  name: string,
+  postbackid?: string
+  cards: CarouselCard[]
+  quick_replies: [],
+  giver_data: Record<string, string>
+}
 interface MessageNode {
-  name: string
-  message: string
-  origin_return: {
-    origin: string, postback: {
-      target_node: string,
-      target_output: string
-    }
-  }[]
-}
-
-interface ButtonNode {
-  name: string
-  message: string
-  isClick: boolean
-  origin_return: {
-    origin: string, postback: {
-      target_node: string,
-      target_output: string
-    }
-  }[]
+  name: string,
+  postbackid?: string
+  text: string,
+  buttons: [],
+  quick_replies: [],
+  giver_data: Record<string, string>
 }
 
 export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
@@ -107,179 +118,150 @@ export namespace ReteTemplates {
   }
   //These are the templates needed to create a Facebook Node
   export const node_templates = {
-    reference_node(socket: ClassicPreset.Socket) {
+    reference_node() {
       const node = new Node('reference_node')
+      const out_key = crypto.randomUUID()
       node.id = crypto.randomUUID()
       node.data = {
-        message: '',
-        name: '',
-        origin_return: []
-      }
-
-
-      createMetaTemplateOutput({
-        node,
-        type: 'classic',
-        outputOpts: {
-          socket: ReteSockets['Accept All'],
-          data: {
-            label: ''
-
-          }
+        name: 'reference',
+        giver_data:{
+          'num1':out_key
         },
-      })
+      }
+      createMetaTemplateOutIn({
+        node,
+        socket: ReteSockets['Accept All'],
+      },out_key)
+
       return node
     },
-    text_node(socket: ClassicPreset.Socket) {
-      const node = new Node('text_node')
-      node.id = crypto.randomUUID()
-      node.addOutput('socket', new ClassicPreset.Output(ReteSockets['Elements Output']))
-      return node
-    },
-    message_node(socket: ClassicPreset.Socket) {
+    text_node() {
       const node = new Node('message_node')
+      node.id = crypto.randomUUID()
       node.data = {
-        message: '',
         name: '',
-        origin_return: []
+        text: '',
+        buttons: [],
+        quick_replies: [],
+        giver_data:{}
       }
       node.id = crypto.randomUUID()
-      node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(ReteSockets['Elements Input'], 'hello', true))
-
-      // replies
-      createMetaTemplateOutput({
+      createMetaTemplateOutIn({
         node,
-        type: 'reply',
-        outputOpts: {
-          socket: ReteSockets['button'],
-          data: {
-            title: 'Message Question #1',
-            type: 'postback',
-            payload: ''
-          }
-        },
-      })
-      createMetaTemplateOutput({
+        socket: ReteSockets['text']
+      }, 'num', 'input')
+      createMetaTemplateOutIn({
         node,
-        type: 'reply',
-        outputOpts: {
-          socket: ReteSockets['button'],
-          data: {
-            title: 'Message Question #2',
-            type: 'postback',
-            payload: ''
-          }
-        },
-      })
-
-      // quick replies
-      createMetaTemplateOutput({
-        node,
-        type: 'quickReply',
-        outputOpts: {
-          socket: ReteSockets['quickreply'],
-          data: {
-            title: 'Message Quick Reply #1',
-            content_type: "text"
-          }
-
-        },
-      })
-      createMetaTemplateOutput({
-        node,
-        type: 'quickReply',
-        outputOpts: {
-          socket: ReteSockets['quickreply'],
-          data: {
-            title: 'Message Quick Reply #2',
-            content_type: "text"
-
-          }
-        },
-      })
-      createMetaTemplateOutput({
-        node,
-        type: 'quickReply',
-        outputOpts: {
-          socket: ReteSockets['Accept All'],
-          data: {
-            title: 'Message Quick Reply #3',
-            content_type: "text"
-
-          }
-        },
-      })
-
+        socket: ReteSockets['text']
+      }, 'num1')
       return node
     },
-    carousel_node(socket: ClassicPreset.Socket) {
+    generic_node() {
+      const node = new Node('generic_node')
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: '',
+        image:'https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=925&format=pjpg&exif=1&iptc=1%201x,%20https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=750&format=pjpg&exif=1&iptc=1%202x',
+        image_aspect_ratio:'horizontal',
+        title:'horizontal',
+        text: '',
+        giver_data:{},
+        quick_replies:[],
+        buttons:[]
+      }
+      node.id = crypto.randomUUID()
+      createMetaTemplateOutIn({
+        node,
+        socket: ReteSockets['carousel']
+      }, 'num', 'input')
+      createMetaTemplateOutIn({
+        node,
+        socket: ReteSockets['carousel']
+      }, 'num1')
+      return node
+    },
+
+    //Should be generic node
+    message_node() {
+      const node = new Node('message_node')
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: '',
+        text: '',
+        buttons: [],
+        quick_replies: [],
+        giver_data:{}
+      }
+      createMetaTemplateOutIn({
+        node,
+        socket: ReteSockets['text']
+      }, 'num', 'input')
+      createMetaTemplateOutIn({
+        node,
+        socket: ReteSockets['text']
+      }, 'num1')
+      return node
+    },
+    carousel_node() {
       const node = new Node('carousel_node')
       node.id = crypto.randomUUID()
-      node.addInput(`input_${crypto.randomUUID()}`, new ClassicPreset.Input(ReteSockets['Accept All'], 'hello', true))
+      node.addInput(`num`, new ClassicPreset.Input(ReteSockets['carousel'], 'carousel', true))
 
       // cards
 
-      createMetaTemplateOutput({
+      createMetaTemplateOutIn({
         node,
-        type: 'carouselCard',
-        outputOpts: {
-          socket: ReteSockets['Accept All'],
-          data: {
-            question: 'Carousel Question #1',
-            answer: 'Carousel Answer #1',
-            image: '',
-          }
-        },
+        socket: ReteSockets['carousel'],
       })
-      createMetaTemplateOutput({
-        node,
-        type: 'carouselCard',
-        outputOpts: {
-          socket: ReteSockets['Accept All'],
-          data: {
-            question: 'Carousel Question #2',
-            answer: 'Carousel Answer #2',
-            image: '',
-          }
-        },
-      })
+      // createMetaTemplateOutIn({
+      //   node,
+      //   type: 'carouselCard',
+      //   outputOpts: {
+      //     socket: ReteSockets['Accept All'],
+      //     data: {
+      //       question: 'Carousel Question #2',
+      //       answer: 'Carousel Answer #2',
+      //       image: '',
+      //     }
+      //   },
+      // })
 
-      // quick replies
-      createMetaTemplateOutput({
-        node,
-        type: 'quickReply',
-        outputOpts: {
-          socket: ReteSockets['Accept All'],
-          data: {
-            title: 'Carousel Quick Reply #1',
-            content_type: 'text'
-          }
-        },
-      })
-      createMetaTemplateOutput({
-        node,
-        type: 'quickReply',
-        outputOpts: {
-          socket: ReteSockets['Accept All'],
-          data: {
-            title: 'Carousel Quick Reply #2',
-            content_type: 'text'
+      // // quick replies
+      // createMetaTemplateOutIn({
+      //   node,
+      //   type: 'quickReply',
+      //   outputOpts: {
+      //     socket: ReteSockets['Accept All'],
+      //     data: {
+      //       title: 'Carousel Quick Reply #1',
+      //       content_type: 'text'
+      //     }
+      //   },
+      // })
+      // createMetaTemplateOutIn({
+      //   node,
+      //   type: 'quickReply',
+      //   outputOpts: {
+      //     socket: ReteSockets['Accept All'],
+      //     data: {
+      //       title: 'Carousel Quick Reply #2',
+      //       content_type: 'text'
 
-          }
-        },
-      })
-      createMetaTemplateOutput({
-        node,
-        type: 'quickReply',
-        outputOpts: {
-          socket: ReteSockets['Accept All'],
-          data: {
-            title: 'Carousel Quick Reply #3',
-            content_type: 'text'
+      //     }
+      //   },
+      // })
+      // createMetaTemplateOutIn({
+      //   node,
+      //   type: 'quickReply',
+      //   outputOpts: {
+      //     socket: ReteSockets['Accept All'],
+      //     data: {
+      //       title: 'Carousel Quick Reply #3',
+      //       content_type: 'text'
 
-          }
-        },
-      })
+      //     }
+      //   },
+      // })
 
       return node
     },
@@ -292,7 +274,7 @@ export namespace SerializedFlow {
     id: string
     label: string
     controls: { [key: string]: ControlInterface }
-    outputs: { [key: string]: MetaTemplateOutput<keyof MetaTemplateOutputType> } | undefined
+    outputs: { [key: string]: MetaTemplateOutput } | undefined
     inputs: { [key: string]: Input<ClassicPreset.Socket> } | undefined
     position: { x: number; y: number }
     data: any
@@ -371,55 +353,45 @@ type CarouselCardOutput = {
   image: string;
 };
  */
-//type QuickReplyOutput = FBAttachmentTemplate.QuickReply;
-export type MetaTemplateOutputType = {
-  classic: {
-    label?: string;
-  };
-  reply: FBAttachmentTemplate.Button
-
-  carouselCard: {
-    question: string;
-    answer: string;
-    image: string;
-  };
-  quickReply: FBAttachmentTemplate.QuickReply
-};
+//type QuickReplyOutput = FBAttachmentTemplate.QuickReply;x
 
 // Arguments passed into MetaTemplateOutput's constructor based on the type
-type MetaTemplateOutputConstructorArgs<T extends keyof MetaTemplateOutputType> = {
+type MetaTemplateOutputConstructorArgs = {
   socket: CustomSocket;
   key: string;
-} & { data: MetaTemplateOutputType[T] };  // Dynamically adds fields based on the 'type' passed
+};  // Dynamically adds fields based on the 'type' passed
 
-type CreateMetaTemplateOutputArgs<T extends keyof MetaTemplateOutputType> = {
+type createMetaTemplateOutInArgs = {
   node: Node<keyof NodeType>;
-  type: T
-  outputOpts: {
-    socket: CustomSocket
-    data: MetaTemplateOutputType[T];
-  }
+  socket: CustomSocket
 };
 
 // Factory function to create a MetaTemplateOutput dynamically based on type
-export function createMetaTemplateOutput<T extends keyof MetaTemplateOutputType>(args: CreateMetaTemplateOutputArgs<T>, outKey: string = '') {
-  const outputKey = !outKey ? `output_${args.type}_${crypto.randomUUID()}` : outKey; // Create a unique key for the output
-  args.node.addOutput(outputKey, new MetaTemplateOutput(args.type, { socket: args.outputOpts.socket, data: args.outputOpts.data, key: outputKey })); // Add the output to the node
-  return { args, outputKey }; // Return the arguments and the output key
+export function createMetaTemplateOutIn(args: createMetaTemplateOutInArgs, outKey: string = '', type: 'output' | 'input' = 'output') {
+  const key = !outKey ? `${crypto.randomUUID()}` : outKey; // Create a unique key for the output
+  if (type === 'input') args.node.addInput(key, new MetaTemplateInput({ socket: args.socket, key })); // Add the output to the node
+  else args.node.addOutput(key, new MetaTemplateOutput({ socket: args.socket, key })); // Add the output to the node
+  return { args, key }; // Return the arguments and the output key
 }
 
-export class MetaTemplateOutput<T extends keyof MetaTemplateOutputType> extends ClassicPreset.Output<CustomSocket> {
-  data: MetaTemplateOutputType[T]; // Data will be of the correct type based on 'T'
-  type: keyof MetaTemplateOutputType;
+export class MetaTemplateOutput extends ClassicPreset.Output<CustomSocket> {
   id: string;
-
-  constructor(typeT: T, args: MetaTemplateOutputConstructorArgs<T>) {
+  label: string
+  constructor(args: MetaTemplateOutputConstructorArgs) {
     super(args.socket); // Initialize with socket
-    this.type = typeT;   // Set the type (e.g., 'reply', 'quickReply', etc.)
     this.id = args.key;  // Set the ID (provided as part of args)
+    this.label = args.socket.name;  // Set the ID (provided as part of args)
+  }
+}
 
-    // Dynamically set the data based on the type
-    this.data = { ...args.data };  // Assign the provided arguments to 'data'
+export class MetaTemplateInput extends ClassicPreset.Input<CustomSocket> {
+  id: string;
+  label: string
+  constructor(args: MetaTemplateOutputConstructorArgs) {
+    super(args.socket); // Initialize with socket
+    this.id = args.key;  // Set the ID (provided as part of args)
+    this.label = args.socket.name;  // Set the ID (provided as part of args)
+    this.multipleConnections = true
   }
 }
 
@@ -430,15 +402,16 @@ const socketNames = [
   'newMessageSetO2', 'labels', 'triggers', 'CarouselQR', 'userinput', 'otn',
   'SsequenceO', 'EsequenceO', 'Msequence', 'condition', 'timegap', 'actions',
   'actionsO', 'Elements Input', 'Elements Output', 'Elements Only Output',
-  'Accept All', 'UserInput Only Input', 'UserInput Output',
+  'Accept All', 'UserInput Only Input', 'UserInput Output', 'test',
 ] as const;
 
 
 export const socketDefinitions: Record<(typeof socketNames)[number], ((typeof socketNames)[number])[]> = {
+  'test': [],
   'Elements Input': [],
-  'UserInput Only Input':[],
+  'UserInput Only Input': [],
   'Accept All': [],
-  button: [ "carouselItem", "carousel", "file", "image", "video", "facebookmedia", "newMessageSet", "condition", "actions", "Elements Input", "Accept All"],
+  button: ["carouselItem", "carousel", "file", "image", "video", "facebookmedia", "newMessageSet", "condition", "actions", "Elements Input", "Accept All"],
   quickreply: [
     "carouselItem",
     "carousel",
@@ -663,32 +636,36 @@ export const socketDefinitions: Record<(typeof socketNames)[number], ((typeof so
     'Accept All',
     'UserInput Only Input'
   ],
-  'timegap':[]
+  'timegap': []
 }
 
 class CustomSocket extends ClassicPreset.Socket {
-  private compatibility: Array<string>;
+  private compatibility: Set<string>;
+  private reverseCompatibilityMap: Map<string, Set<string>>;
 
-  constructor(name: string, compatibility: Array<string>) {
+  constructor(name: string, compatibility: string[]) {
     super(name);
-    this.compatibility = compatibility;
+    this.compatibility = new Set(compatibility);
+    // Create the reverse compatibility map dynamically.
+    this.reverseCompatibilityMap = new Map();
+    compatibility.forEach(item => {
+      if (!this.reverseCompatibilityMap.has(item)) {
+        this.reverseCompatibilityMap.set(item, new Set());
+      }
+      this.reverseCompatibilityMap.get(item)?.add(name);
+    });
   }
 
   isCompatibleWith(socket: CustomSocket) {
-    // "Accept All" socket should be compatible with any socket
-    if (this.name === 'Accept All' || socket.name === 'Accept All') {
+    // First, check if the socket name exists in the reverse map for fast lookup.
+    if (this.reverseCompatibilityMap.has(socket.name)) {
       return true;
     }
-
-    // Check regular compatibility for other sockets
-    return (
-      socket instanceof CustomSocket &&
-      (socket.compatibility.includes(this.name) || this.compatibility.includes(socket.name))
-    );
+    // Fallback to the old method (checking compatibility array directly).
+    return socket instanceof CustomSocket &&
+      (this.compatibility.has(socket.name) || socket.compatibility.has(this.name));
   }
-
 }
-
 
 // Dynamically create and instantiate sockets
 export const ReteSockets = Object.fromEntries(
