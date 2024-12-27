@@ -79,7 +79,7 @@ function initialize() {
 const reply_button = reactive({
   data: {
     type: 'postback',
-    title: '',
+    title: 'Untitled Button',
     payload: '',
   } as FBAttachmentTemplate.Button,
   add_new_reply() {
@@ -188,7 +188,7 @@ onUnmounted(() => {
       <section class="grid gap-y-1.5">
         <Label for="message">Message</Label>
         <Textarea
-          v-model="node_obj.data.message"
+          v-model="node_obj.data.text"
           id="message"
           name="message"
           rows="5"
@@ -205,13 +205,12 @@ onUnmounted(() => {
           Create
         </button>
         <ul class="col-span-full grid gap-y-3">
-          <template v-for="(reply, key) in replies" :key>
+          <template v-for="(reply, key) in node_obj.data.buttons" :key>
             <li
-              v-if="reply"
               class="grid grid-cols-[1fr_var(--icon-size)] grid-rows-2 items-center [--icon-size:theme(spacing.9)] *:leading-none"
             >
-              <p class="text-xs">{{ reply.data.title }}</p>
-              <strong>{{ reply.data.type }}</strong>
+              <p class="text-xs">{{ reply.title }}</p>
+              <strong>{{ reply.type }}</strong>
               <button
                 type="button"
                 class="col-start-2 row-span-full grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5"
@@ -232,12 +231,11 @@ onUnmounted(() => {
           Create
         </button>
         <ul class="col-span-full grid gap-y-3">
-          <template v-for="(quickReply, key) in quickReplies" :key>
+          <template v-for="(quickReply, key) in node_obj.data.quick_replies" :key>
             <li
-              v-if="quickReply && quickReply.type === 'quickReply'"
               class="grid grid-cols-[1fr_var(--icon-size)] items-center [--icon-size:theme(spacing.9)] *:leading-none"
             >
-              <p>{{ quickReply.data.title }}</p>
+              <p>{{ quickReply.title }}</p>
               <button
                 type="button"
                 class="grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5"

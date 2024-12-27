@@ -153,12 +153,15 @@ export namespace ReteTemplates {
     text_node() {
       const node = new Node('message_node')
       node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
       node.data = {
         name: '',
         text: '',
         buttons: {},
         quick_replies: {},
-        giver_data: {}
+        giver_data: {
+          'num1': num1_postback
+        },
       }
       node.id = crypto.randomUUID()
       createMetaTemplateOutIn(
@@ -214,12 +217,15 @@ export namespace ReteTemplates {
     message_node() {
       const node = new Node('message_node')
       node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
       node.data = {
-        name: '',
+        name: 'Untitled Message Node',
         text: '',
         buttons: {},
         quick_replies: {},
-        giver_data: {}
+        giver_data: {
+          'num1': num1_postback
+        },
       }
       createMetaTemplateOutIn(
         {
@@ -522,6 +528,8 @@ export const socketDefinitions: Record<
     'Accept All',
   ],
   text: [
+    'text',
+    'quickreply',
     'carouselItem',
     'carousel',
     'file',
