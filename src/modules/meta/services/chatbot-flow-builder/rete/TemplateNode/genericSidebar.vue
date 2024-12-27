@@ -31,7 +31,7 @@ import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 
 const authWorkspace = useAuthWorkspaceStore()
 const { active_workspace } = authWorkspace
-const node_obj = ref<Node<'message_node'> | null>(null)
+
 const props = defineProps<{
   node: T
   node_id: string
@@ -40,7 +40,7 @@ const props = defineProps<{
 
 const replies = ref<MetaTemplateOutput[]>([])
 const quickReplies = ref<MetaTemplateOutput[]>([])
-
+const node_obj = ref<Node<'generic_node'> | null>(null)
 
 type State = 'main' | 'create-reply-button' | 'create-quick-reply-button'
 const sheetState = ref<State>('main')
@@ -58,22 +58,11 @@ function initialize() {
   resetState()
   console.log('test')
   console.log(props.node)
-  node_obj.value = props.node as Node<'message_node'>
+  node_obj.value = props.node as Node<'generic_node'>
   if (node_obj.value.data) {
     node_obj.value.data.name = node_obj.value.data.name || 'Untitled Node'
     node_obj.value.data.text = node_obj.value.data.text || ''
   }
-
-  // Object.keys(props.node.outputs).forEach((key) => {
-  //     if (props.node.outputs[key] instanceof MetaTemplateOutput) {
-  //         if (props.node.outputs[key].type === 'reply') {
-  //             replies.value.push(props.node.outputs[key])
-  //         }
-  //         if (props.node.outputs[key].type === 'quickReply') {
-  //             quickReplies.value.push(props.node.outputs[key])
-  //         }
-  //     }
-  // })
 }
 
 const reply_button = reactive({

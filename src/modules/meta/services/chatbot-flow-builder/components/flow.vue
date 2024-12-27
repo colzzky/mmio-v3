@@ -3,6 +3,7 @@ import Carousel from '../rete/TemplateNode/carousel.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
 import Sidebar from '../rete/TemplateNode/sidebar.vue'
+import GenericSidebar from '../rete/TemplateNode/genericSidebar.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
 import Menu from './custom-contextmenu/index.vue'
@@ -28,6 +29,7 @@ import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-m
 import { VuePlugin, Presets } from 'rete-vue-plugin'
 import type { Input } from 'rete/_types/presets/classic'
 import { ref, onMounted, reactive, watch } from 'vue'
+import Generic from '../rete/TemplateNode/generic.vue'
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -90,6 +92,7 @@ async function initializeFlow() {
       ['Reference', () => ReteTemplates.node_templates.reference_node()],
       ['Text', () => ReteTemplates.node_templates.message_node()],
       ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
+      ['Generic Node', () => ReteTemplates.node_templates.generic_node()],
     ]),
   })
 
@@ -113,6 +116,10 @@ async function initializeFlow() {
           if (context.payload.label === 'carousel_node') {
             return Carousel
           }
+          if (context.payload.label === 'generic_node') {
+            return Generic
+          }
+
           return Presets.classic.Node
         },
         control(context) {
@@ -642,6 +649,12 @@ watch(
       <div v-if="selected_node && selected_node_obj && area">
         <Sidebar
           v-if="selected_node_obj.label === 'message_node'"
+          :node="selected_node_obj"
+          :node_id="selected_node_obj.id"
+          :area
+        />
+        <GenericSidebar
+          v-if="selected_node_obj.label === 'generic_node'"
           :node="selected_node_obj"
           :node_id="selected_node_obj.id"
           :area

@@ -183,14 +183,17 @@ export namespace ReteTemplates {
     },
     generic_node() {
       const node = new Node('generic_node')
+      const num1_postback = crypto.randomUUID()
       node.id = crypto.randomUUID()
       node.data = {
-        name: '',
+        name: 'Untitled Generic Node',
         image: 'https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=925&format=pjpg&exif=1&iptc=1%201x,%20https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=750&format=pjpg&exif=1&iptc=1%202x',
         image_aspect_ratio: 'horizontal',
         title: 'horizontal',
         text: '',
-        giver_data: {},
+        giver_data: {
+          'num1':num1_postback
+        },
         quick_replies: {},
         buttons: {}
       }
