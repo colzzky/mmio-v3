@@ -1,6 +1,6 @@
-import { toast } from '@/core/components/ui/toast'
 import type { SubCollections } from '../../../core/types/UniTypes'
 import type { FBAttachmentTemplate } from './flow-meta-types'
+import { toast } from '@/core/components/ui/toast'
 import { ClassicPreset, type GetSchemes } from 'rete'
 import type { VueArea2D } from 'rete-vue-plugin'
 import type { Input, Output } from 'rete/_types/presets/classic'
@@ -30,8 +30,8 @@ export interface Button {
 }
 
 export interface QuickReply {
-  content_type: "text" | "user_email" | "user_phone_number",
-  title?: string,
+  content_type: 'text' | 'user_email' | 'user_phone_number'
+  title?: string
   payload?: string
 }
 
@@ -43,14 +43,14 @@ export interface ReferenceNode {
 export interface GenericNode extends CarouselCard {
   name: string
   postbackid?: string
-  delay?:string,
+  delay?: string
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
 export interface CarouselNode {
   name: string
   postbackid?: string
-  delay?:string,
+  delay?: string
   cards: CarouselCard[]
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
@@ -58,17 +58,17 @@ export interface CarouselNode {
 export interface MessageNode {
   name: string
   postbackid?: string
-  delay?:string,
+  delay?: string
   text: string
   buttons: Record<string, Button>
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
 export interface MediaNode {
-  name:string,
-  url:string,
-  type:string,
-  delay?:string,
+  name: string
+  url: string
+  type: string
+  delay?: string
   postbackid?: string
   buttons: Record<string, Button>
   quick_replies: Record<string, QuickReply>
@@ -118,7 +118,7 @@ export namespace CustomControls {
   //Add more custom control here
 }
 
-export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> { }
+export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> {}
 
 export type Schemes = GetSchemes<Node<keyof NodeType>, Connection<Node<keyof NodeType>>>
 export type AreaExtra = VueArea2D<Schemes>
@@ -154,13 +154,16 @@ export namespace ReteTemplates {
       node.data = {
         name: 'reference',
         giver_data: {
-          'num1': num1_postback
+          num1: num1_postback,
         },
       }
-      createMetaTemplateOutIn({
-        node,
-        socket: ReteSockets['Accept All'],
-      }, 'num1')
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['Accept All'],
+        },
+        'num1',
+      )
 
       return node
     },
@@ -199,13 +202,14 @@ export namespace ReteTemplates {
       node.id = crypto.randomUUID()
       node.data = {
         name: 'Untitled Generic Node',
-        image: 'https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=925&format=pjpg&exif=1&iptc=1%201x,%20https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=750&format=pjpg&exif=1&iptc=1%202x',
+        image:
+          'https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=925&format=pjpg&exif=1&iptc=1%201x,%20https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=750&format=pjpg&exif=1&iptc=1%202x',
         image_aspect_ratio: 'horizontal',
         title: 'Sample Title',
         text: 'Sample Description',
         giver_data: {},
         quick_replies: {},
-        buttons: {}
+        buttons: {},
       }
       node.id = crypto.randomUUID()
       createMetaTemplateOutIn(
@@ -231,18 +235,18 @@ export namespace ReteTemplates {
       node.id = crypto.randomUUID()
       node.data = {
         name: 'Untitled Carousel Node',
-        cards:[
+        cards: [
           {
-            image: 'https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=925&format=pjpg&exif=1&iptc=1%201x,%20https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=750&format=pjpg&exif=1&iptc=1%202x',
+            image:
+              'https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=925&format=pjpg&exif=1&iptc=1%201x,%20https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=750&format=pjpg&exif=1&iptc=1%202x',
             image_aspect_ratio: 'horizontal',
             title: 'Sample Title',
             text: 'Sample Description',
-            buttons: {}
-          }
+            buttons: {},
+          },
         ],
         giver_data: {},
         quick_replies: {},
-        
       }
       node.id = crypto.randomUUID()
       createMetaTemplateOutIn(
@@ -269,7 +273,7 @@ export namespace ReteTemplates {
       node.data = {
         name: 'Untitled Media Node',
         url: '',
-        type:'',
+        type: '',
         giver_data: {},
         quick_replies: {},
         buttons: {},
@@ -292,7 +296,6 @@ export namespace ReteTemplates {
       )
       return node
     },
-    
 
     //Should be generic node
     message_node() {
@@ -323,7 +326,6 @@ export namespace ReteTemplates {
       )
       return node
     },
-
   }
 }
 
@@ -486,7 +488,20 @@ export const socketDefinitions: Record<
   'Elements Input': [],
   'UserInput Only Input': [],
   'Accept All': [],
-  button: ["text", "carouselItem", "carousel", "file", "image", "video", "facebookmedia", "newMessageSet", "condition", "actions", "Elements Input", "Accept All"],
+  button: [
+    'text',
+    'carouselItem',
+    'carousel',
+    'file',
+    'image',
+    'video',
+    'facebookmedia',
+    'newMessageSet',
+    'condition',
+    'actions',
+    'Elements Input',
+    'Accept All',
+  ],
   quickreply: [
     'carouselItem',
     'carousel',
@@ -718,8 +733,7 @@ export const ReteSockets = Object.fromEntries(
 
 export async function copyPostback(item_copy: string) {
   try {
-    if (item_copy)
-      await navigator.clipboard.writeText(`${item_copy}`)
+    if (item_copy) await navigator.clipboard.writeText(`${item_copy}`)
     toast({
       title: 'Postback Id Copied',
       variant: 'default',

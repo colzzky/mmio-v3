@@ -5,6 +5,7 @@
     @mouseleave="hide"
     data-testid="context-menu"
     rete-context-menu
+    @dblclick.stop=""
   >
     <div v-if="searchBar" class="relative mb-2 rounded-md bg-white [--icon-size:theme(spacing.5)]">
       <Icon

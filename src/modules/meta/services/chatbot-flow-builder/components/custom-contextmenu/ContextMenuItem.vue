@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-md p-2 font-medium hover:bg-neutral-200">
+  <div class="select-none rounded-md p-2 font-medium hover:bg-neutral-200">
     <div
       class="flex items-center gap-x-1.5"
       @click.stop="(emits('select', $event), emits('hide'))"
