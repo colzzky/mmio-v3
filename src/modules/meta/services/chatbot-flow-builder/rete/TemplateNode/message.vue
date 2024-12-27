@@ -19,36 +19,36 @@ const inputs = computed(() => {
   return sortByIndex(entries);
 });
 
-const quickReplies = ref(sortByIndex(
-  Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('quickReply')) as [
-    string,
-    MetaTemplateOutput,
-  ][],
-),
-)
+// const quickReplies = ref(sortByIndex(
+//   Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('quickReply')) as [
+//     string,
+//     MetaTemplateOutput,
+//   ][],
+// ),
+// )
 
-const replies = ref(sortByIndex(
-  Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('reply')) as [
-    string,
-    MetaTemplateOutput,
-  ][],
-))
+// const replies = ref(sortByIndex(
+//   Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('reply')) as [
+//     string,
+//     MetaTemplateOutput,
+//   ][],
+// ))
 
-onUpdated(() => {
-  quickReplies.value = sortByIndex(
-    Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('quickReply')) as [
-      string,
-      MetaTemplateOutput,
-    ][],
-  )
+// onUpdated(() => {
+//   quickReplies.value = sortByIndex(
+//     Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('quickReply')) as [
+//       string,
+//       MetaTemplateOutput,
+//     ][],
+//   )
 
-  replies.value = sortByIndex(
-    Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('reply')) as [
-      string,
-      MetaTemplateOutput,
-    ][],
-  )
-})
+//   replies.value = sortByIndex(
+//     Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('reply')) as [
+//       string,
+//       MetaTemplateOutput,
+//     ][],
+//   )
+// })
 </script>
 
 <template>
