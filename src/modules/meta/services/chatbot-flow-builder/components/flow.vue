@@ -643,10 +643,8 @@ watch(
         </div>
       </div>
     </div>
-    <div
-      class="fixed right-4 top-1/3 flex max-h-[80vh] min-w-2 max-w-[20%] -translate-y-1/2 flex-col overflow-auto rounded-lg border border-gray-300 bg-gray-100 p-3"
-    >
-      <div v-if="selected_node && selected_node_obj && area">
+    <div v-if="selected_node && selected_node_obj && area && selected_node_obj.label != 'reference_node'">
+      <div class="fixed left-0 top-0 h-screen w-[20%] flex flex-col overflow-auto border border-gray-300 bg-gray-100 p-3 overflow-y-auto">
         <Sidebar
           v-if="selected_node_obj.label === 'message_node'"
           :node="selected_node_obj"
@@ -660,7 +658,6 @@ watch(
           :area
         />
       </div>
-      <div v-else>Selection bar</div>
     </div>
 
     <!-- Floating Menu -->

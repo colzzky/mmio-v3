@@ -1,3 +1,4 @@
+import { toast } from '@/core/components/ui/toast'
 import type { SubCollections } from '../../../core/types/UniTypes'
 import type { FBAttachmentTemplate } from './flow-meta-types'
 import { ClassicPreset, type GetSchemes } from 'rete'
@@ -17,7 +18,6 @@ export interface CarouselCard {
   title: string
   text: string
   buttons: Record<string, Button>
-  giver_data: Record<string, string>
 }
 
 export interface Button {
@@ -104,7 +104,7 @@ export namespace CustomControls {
   //Add more custom control here
 }
 
-export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> {}
+export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> { }
 
 export type Schemes = GetSchemes<Node<keyof NodeType>, Connection<Node<keyof NodeType>>>
 export type AreaExtra = VueArea2D<Schemes>
@@ -192,10 +192,49 @@ export namespace ReteTemplates {
         title: 'horizontal',
         text: '',
         giver_data: {
-          'num1':num1_postback
+          'num1': num1_postback
         },
         quick_replies: {},
         buttons: {}
+      }
+      node.id = crypto.randomUUID()
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['carousel'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['carousel'],
+        },
+        'num1',
+      )
+      return node
+    },
+    carousel_node() {
+      const node = new Node('carousel_node')
+      const num1_postback = crypto.randomUUID()
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Carousel Node',
+        cards:[
+          {
+            image: 'https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=925&format=pjpg&exif=1&iptc=1%201x,%20https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=750&format=pjpg&exif=1&iptc=1%202x',
+            image_aspect_ratio: 'horizontal',
+            title: 'horizontal',
+            text: '',
+            buttons: {}
+          }
+        ],
+        giver_data: {
+          'num1': num1_postback
+        },
+        quick_replies: {},
+        
       }
       node.id = crypto.randomUUID()
       createMetaTemplateOutIn(
@@ -247,69 +286,7 @@ export namespace ReteTemplates {
       )
       return node
     },
-    carousel_node() {
-      const node = new Node('carousel_node')
-      node.id = crypto.randomUUID()
-      node.addInput(`num`, new ClassicPreset.Input(ReteSockets['carousel'], 'carousel', true))
 
-      // cards
-
-      createMetaTemplateOutIn({
-        node,
-        socket: ReteSockets['carousel'],
-      })
-      // createMetaTemplateOutIn({
-      //   node,
-      //   type: 'carouselCard',
-      //   outputOpts: {
-      //     socket: ReteSockets['Accept All'],
-      //     data: {
-      //       question: 'Carousel Question #2',
-      //       answer: 'Carousel Answer #2',
-      //       image: '',
-      //     }
-      //   },
-      // })
-
-      // // quick replies
-      // createMetaTemplateOutIn({
-      //   node,
-      //   type: 'quickReply',
-      //   outputOpts: {
-      //     socket: ReteSockets['Accept All'],
-      //     data: {
-      //       title: 'Carousel Quick Reply #1',
-      //       content_type: 'text'
-      //     }
-      //   },
-      // })
-      // createMetaTemplateOutIn({
-      //   node,
-      //   type: 'quickReply',
-      //   outputOpts: {
-      //     socket: ReteSockets['Accept All'],
-      //     data: {
-      //       title: 'Carousel Quick Reply #2',
-      //       content_type: 'text'
-
-      //     }
-      //   },
-      // })
-      // createMetaTemplateOutIn({
-      //   node,
-      //   type: 'quickReply',
-      //   outputOpts: {
-      //     socket: ReteSockets['Accept All'],
-      //     data: {
-      //       title: 'Carousel Quick Reply #3',
-      //       content_type: 'text'
-
-      //     }
-      //   },
-      // })
-
-      return node
-    },
   }
 }
 
@@ -700,3 +677,17 @@ export const ReteSockets = Object.fromEntries(
     new CustomSocket(name, [...compatibleWith]),
   ]),
 ) as Record<keyof typeof socketDefinitions, CustomSocket>
+
+export async function copyPostback(item_copy: string) {
+  try {
+    if (item_copy)
+      await navigator.clipboard.writeText(`${item_copy}`)
+    toast({
+      title: 'Postback Id Copied',
+      variant: 'default',
+      duration: 2000,
+    })
+  } catch (err) {
+    console.error('Failed to copy text:', err)
+  }
+}

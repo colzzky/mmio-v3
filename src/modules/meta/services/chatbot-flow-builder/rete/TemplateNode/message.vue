@@ -21,6 +21,11 @@ const inputs = computed(() => {
   return sortByIndex(entries)
 })
 
+const outputs = computed(() => {
+  const entries = Object.entries(node.value?.outputs || {})
+  return sortByIndex(entries)
+})
+
 // const quickReplies = ref(sortByIndex(
 //   Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('quickReply')) as [
 //     string,
@@ -203,10 +208,10 @@ const inputs = computed(() => {
       </section>
 
       <section class="border-t py-2">
-        <div class="flex flex-col gap-4">
           <div v-if="node && node.data">
-            <template v-if="node.outputs['num1']" :data-testid="`num1`">
-              <div class="relative">
+            <div class="flex flex-col gap-4">
+              <template v-for="[key, output] in outputs" :key="key + seed" class="flex flex-col gap-4">
+                <div v-if="output && key === 'num1'" :data-testid="`input-${key}`" class="relative">
                 <div class="px-5 flex rounded-lg justify-end items-center">
                   <span class="flex items-center gap-x-2 font-semibold text-gray-400">
                     Continue to Next Step
@@ -218,9 +223,9 @@ const inputs = computed(() => {
                   <NodeSocket :emit :data="{
                     type: 'socket',
                     side: 'output',
-                    key: 'num1',
+                    key,
                     nodeId: data.id,
-                    payload: node.outputs['num1'].socket,
+                    payload: output.socket,
                   }" class="[--socket-size:16px]" />
                 </div>
               </div>
