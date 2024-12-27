@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import NodeCard from '../node-card.vue'
 import { sortByIndex } from '../utils'
-import type { Schemes } from '@/modules/meta/utils/flow-types'
 import NodeSocket from '@/modules/meta/services/chatbot-flow-builder/rete/node-socket.vue'
+import type { Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
 
