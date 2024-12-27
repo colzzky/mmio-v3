@@ -1,7 +1,7 @@
-import type { MeteTemplateOutput } from '@/modules/meta/utils/flow-types'
+import type { MetaTemplateOutput } from '@/modules/meta/utils/flow-types'
 import type { Input, Output, Socket } from 'rete/_types/presets/classic'
 
-export function sortByIndex<T extends Output<Socket> | Input<Socket> | MeteTemplateOutput>(
+export function sortByIndex<T extends Output<Socket> | Input<Socket> | MetaTemplateOutput>(
   entries: [string, T | undefined][],
 ) {
   return entries.sort((a, b) => {

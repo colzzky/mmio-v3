@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import NodeCard from '../node-card.vue'
+import NodeSheet from '../node-sheet.vue'
 import NodeSocket from '../node-socket.vue'
 import { sortByIndex } from '../utils'
 import type { MeteTemplateOutput, Schemes } from '@/modules/meta/utils/flow-types'
@@ -131,5 +132,7 @@ onUpdated(() => {
         </div>
       </template>
     </section>
+
+    <NodeSheet :data />
   </NodeCard>
 </template>

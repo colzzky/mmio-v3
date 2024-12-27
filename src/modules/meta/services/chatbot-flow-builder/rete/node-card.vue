@@ -13,6 +13,7 @@ const props = withDefaults(defineProps<{ class?: HTMLAttributes['class'] }>(), {
         props.class,
       )
     "
+    @dblclick.stop=""
   >
     <slot />
   </article>
