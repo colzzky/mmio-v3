@@ -1,11 +1,8 @@
 <script lang="ts" setup>
-import CarouselSidebar from '../rete/TemplateNode/carousel-sidebar.vue'
 import Carousel from '../rete/TemplateNode/carousel.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
 import Sidebar from '../rete/TemplateNode/sidebar.vue'
-import Text from '../rete/TemplateNode/text.vue'
-import ContextMenu from '../rete/context-menu.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
 import Menu from './custom-contextmenu/index.vue'
@@ -21,20 +18,16 @@ import {
   type SerializedFlow,
   ReteTemplates,
   type NodeType,
-  createMetaTemplateOutIn,
   MetaTemplateOutput,
-  isNodeOfType,
 } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { NodeEditor, ClassicPreset, type NodeId, type BaseSchemes } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
 import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-menu-plugin'
-import { VuePlugin, Presets, type VueArea2D } from 'rete-vue-plugin'
-import type { Input, Output, Socket } from 'rete/_types/presets/classic'
-import { ref, onMounted, type Ref, reactive, watch, useTemplateRef } from 'vue'
-import Menu from './custom-contextmenu/index.vue'
-import type { ContextMenuRenderContext } from './custom-contextmenu/types'
+import { VuePlugin, Presets } from 'rete-vue-plugin'
+import type { Input } from 'rete/_types/presets/classic'
+import { ref, onMounted, reactive, watch } from 'vue'
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -91,12 +84,12 @@ async function initializeFlow() {
   rete_init.render = new VuePlugin<Schemes, AreaExtra>()
   rete_init.connection = new ConnectionPlugin<Schemes, AreaExtra>()
   rete_init.connection.addPreset(ConnectionPresets.classic.setup())
-  
+
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
-      ["Reference", () => ReteTemplates.node_templates.reference_node()],
-      ["Text", () => ReteTemplates.node_templates.message_node()],
-      ["Carousel", () => ReteTemplates.node_templates.carousel_node()],
+      ['Reference', () => ReteTemplates.node_templates.reference_node()],
+      ['Text', () => ReteTemplates.node_templates.message_node()],
+      ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
     ]),
   })
 
@@ -140,7 +133,11 @@ async function initializeFlow() {
   rete_init.render.addPreset({
     update: function update(context: ContextMenuRenderContext) {
       console.log({ update: context })
-      const delay = typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) === 'undefined' ? 200 : context.data.delay;
+      const delay =
+        typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
+        'undefined'
+          ? 200
+          : context.data.delay
       if (context.data.type === 'contextmenu') {
         return {
           items: context.data.items,
@@ -151,7 +148,11 @@ async function initializeFlow() {
       }
     },
     render: function render(context: ContextMenuRenderContext) {
-      const delay = typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) === 'undefined' ? 200 : context.data.delay;
+      const delay =
+        typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
+        'undefined'
+          ? 200
+          : context.data.delay
       console.log({ render: context })
       if (context.data.type === 'contextmenu') {
         return {
@@ -468,7 +469,12 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
   })
 }
 
-function checkConnectionSocket(data: { source: string, sourceOutput: string, target: string, targetInput: string }) {
+function checkConnectionSocket(data: {
+  source: string
+  sourceOutput: string
+  target: string
+  targetInput: string
+}) {
   if (rete_init.editor) {
     const source_node = rete_init.editor.getNode(data.source)
     const target_node = rete_init.editor.getNode(data.target)
@@ -484,7 +490,6 @@ function checkConnectionSocket(data: { source: string, sourceOutput: string, tar
   }
   return false
 }
-
 
 function getTranslatedMousePosition(event: MousePosition) {
   if (area) {
@@ -513,9 +518,7 @@ const saveEditorState = async () => {
       id: node.id,
       label: node.label,
       controls: node.controls as { [key: string]: ControlInterface },
-      outputs: node.outputs as
-        | { [key: string]: MetaTemplateOutput }
-        | undefined,
+      outputs: node.outputs as { [key: string]: MetaTemplateOutput } | undefined,
       inputs: node.inputs as { [key: string]: Input<ClassicPreset.Socket> } | undefined,
       position: position || { x: 0, y: 0 },
       data: node.data, // Any extra props you attached
@@ -592,11 +595,6 @@ function removeNode(): void {
   }
 }
 
-function handleClearEditor() {
-  rete_init.editor?.clear()
-  closeMenu()
-}
-
 function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
   const background = document.createElement('div')
 
@@ -618,8 +616,11 @@ watch(
   <div class="">
     <!-- Rete.js Canvas -->
     <div class="h-screen bg-pink-50">
-      <div v-if="nodeOptionVisible" class="floating-menu"
-        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }">
+      <div
+        v-if="nodeOptionVisible"
+        class="floating-menu"
+        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }"
+      >
         <div>Node Option</div>
         <div>{{ menuPosition }}</div>
         <div @click="removeNode()">❌ Remove</div>
@@ -651,12 +652,6 @@ watch(
       <div v-if="selected_node && selected_node_obj && area">
         <Sidebar
           v-if="selected_node_obj.label === 'message_node'"
-          :node="selected_node_obj"
-          :node_id="selected_node_obj.id"
-          :area
-        />
-        <CarouselSidebar
-          v-else-if="selected_node_obj.label === 'carousel_node'"
           :node="selected_node_obj"
           :node_id="selected_node_obj.id"
           :area

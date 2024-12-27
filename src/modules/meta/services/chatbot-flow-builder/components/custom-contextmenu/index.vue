@@ -1,40 +1,50 @@
 <template>
   <div
-    class="menu min-h-[40px] bg-white rounded-md shadow-md"
-    @mouseover="hide.cancel()"
-    @mouseleave="hide()"
+    class="min-w-48 rounded-xl border-2 border-neutral-200 bg-neutral-100 p-2 text-sm shadow-sm"
+    @mouseover="hide.cancel"
+    @mouseleave="hide"
     data-testid="context-menu"
     rete-context-menu
   >
-    <div v-if="searchBar" class="flex w-full items-center justify-center bg-gray-300">
-      <input type="text" v-model="filter" placeholder="Search..." class="w-full p-2" />
+    <div v-if="searchBar" class="relative mb-2 rounded-md bg-white [--icon-size:theme(spacing.5)]">
+      <Icon
+        icon="bx:search"
+        class="absolute left-0 top-1/2 size-[var(--icon-size)] -translate-y-1/2 translate-x-2"
+      />
+      <input
+        v-model="filter"
+        type="search"
+        placeholder="Search Template..."
+        class="rounded-md border border-input bg-transparent py-2 ps-[calc(theme(spacing.2)+var(--icon-size)+theme(spacing.2))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        ref="search"
+      />
     </div>
     <ContextMenuItem
       v-for="item in getItems"
       :key="item.key"
-      @select="item.handler($event)"
-      :delay="delay"
+      :sub-items="item.subItems"
+      :label="item.label"
+      :delay
+      @select="item.handler"
       @hide="typeof onHide === 'function' ? onHide : () => {}"
-      :subitems="item.subitems"
-    >
-      {{ item.label }}
-    </ContextMenuItem>
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
 import ContextMenuItem from './ContextMenuItem.vue'
 import type { ContextMenuItemType } from './types'
+import { Icon } from '@iconify/vue'
 import { debounce } from 'lodash'
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted, onMounted, useTemplateRef } from 'vue'
 
-const props = defineProps({
-  items: Array<ContextMenuItemType>,
-  delay: Number,
-  searchBar: Boolean,
-  onHide: Function,
-  seed: String,
-})
+const props = defineProps<{
+  items: ContextMenuItemType[]
+  delay: number
+  searchBar: boolean
+  onHide: Function
+  seed: number
+}>()
 
 const filter = ref('')
 const hide = debounce(() => {
@@ -50,13 +60,11 @@ const getItems = computed(() => {
 onUnmounted(() => {
   hide.cancel()
 })
-</script>
 
-<style scoped>
-.menu {
-  padding: 10px;
-  width: 200px; /* Replace $width variable */
-  margin-top: -20px;
-  margin-left: calc(-200px / 2); /* Replace math.div($width, 2) */
-}
-</style>
+// input autofocus upon mounted
+const searchRef = useTemplateRef('search')
+onMounted(() => {
+  if (!searchRef.value) return
+  searchRef.value.focus()
+})
+</script>
