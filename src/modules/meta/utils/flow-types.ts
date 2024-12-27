@@ -633,7 +633,7 @@ export const socketDefinitions: Record<(typeof socketNames)[number], ((typeof so
   'timegap': []
 }
 
-class CustomSocket extends ClassicPreset.Socket {
+export class CustomSocket extends ClassicPreset.Socket {
   private compatibility: Set<string>;
   private reverseCompatibilityMap: Map<string, Set<string>>;
 
