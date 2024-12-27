@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Button from '@/core/components/ui/button/Button.vue'
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
 import { sortByIndex } from '../utils'
@@ -52,32 +53,50 @@ const inputs = computed(() => {
 </script>
 
 <template>
-  <NodeCard :data-selected="data.selected" class="flex flex-col gap-y-8">
+  <NodeCard :data-selected="data.selected" class="flex flex-col gap-y-3">
     <!-- inputs -->
-    <section class="-mx-[calc(var(--socket-size)/2)] grid justify-start">
+
+    <div class="relative">
+      <div class="px-5 flex justify-center items-center rounded-lg">
+        <div class="w-full h-9 rounded-md px-3 border flex items-center justify-center">test</div>
+      </div>
+      <!-- Circle overlapping the border of the main div -->
+      <div class="absolute top-1.5 -right-3 w-6 h-6 bg-blue-500 rounded-full border-2 border-gray-500"></div>
+    </div>
+
+    <div class="relative">
+      <div class="px-5 flex justify-center items-center rounded-lg">
+        <div class="w-full h-9 rounded-md px-3 border flex items-center justify-center">test</div>
+      </div>
+      <!-- Circle overlapping the border of the main div -->
+      <div class="absolute top-1.5 -left-3 w-6 h-6 bg-blue-500 rounded-full border-2 border-gray-500"></div>
+    </div>
+
+
+
+
+    <section class="">
       <template v-for="[key, input] in inputs" :key="key + seed">
-        <div v-if="input" :data-testid="`input-${key}`" class="flex items-center gap-x-4">
-          <NodeSocket
-            :emit
-            :data="{
+        <div v-if="input" :data-testid="`input-${key}`" class="relative">
+          <div class="px-5 flex justify-center items-center rounded-lg">
+            <div class="w-full h-9 rounded-md px-3 border flex items-center justify-center">test</div>
+          </div>
+          <!-- Circle overlapping the border of the main div -->
+          <div class="absolute -top-0 -left-5 rounded-full">
+            <NodeSocket :emit :data="{
               type: 'socket',
               side: 'input',
               key,
               nodeId: data.id,
               payload: input.socket,
-            }"
-            data-testid="input-socket"
-          />
+            }" data-testid="input-socket" />
+
+          </div>
           <span class="flex items-center gap-x-2 font-semibold">
             <Icon icon="bx:message" class="size-6" />
             Message
           </span>
-          <NodeSocket
-            v-show="input.control && input.showControl"
-            :emit
-            :data="{ type: 'control', payload: input.control }"
-            data-testid="input-control"
-          />
+          <!-- <NodeSocket v-show="input.control && input.showControl" :emit :data="{ type: 'control', payload: input.control }" data-testid="input-control" /> -->
         </div>
       </template>
     </section>
@@ -107,6 +126,7 @@ const inputs = computed(() => {
           </div>
         </template>
       </div>
+
     </section>
 
     <!-- quick replies -->

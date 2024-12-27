@@ -29,8 +29,8 @@ export interface Button {
 }
 
 export interface QuickReply {
-  content_type: 'text' | 'user_email' | 'user_phone_number'
-  title?: string
+  content_type: "text" | "user_email" | "user_phone_number",
+  title?: string,
   payload?: string
 }
 
@@ -140,16 +140,13 @@ export namespace ReteTemplates {
       node.data = {
         name: 'reference',
         giver_data: {
-          num1: num1_postback,
+          'num1': num1_postback
         },
       }
-      createMetaTemplateOutIn(
-        {
-          node,
-          socket: ReteSockets['Accept All'],
-        },
-        'num1',
-      )
+      createMetaTemplateOutIn({
+        node,
+        socket: ReteSockets['Accept All'],
+      }, 'num1')
 
       return node
     },
@@ -161,7 +158,7 @@ export namespace ReteTemplates {
         text: '',
         buttons: {},
         quick_replies: {},
-        giver_data: {},
+        giver_data: {}
       }
       node.id = crypto.randomUUID()
       createMetaTemplateOutIn(
@@ -186,14 +183,13 @@ export namespace ReteTemplates {
       node.id = crypto.randomUUID()
       node.data = {
         name: '',
-        image:
-          'https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=925&format=pjpg&exif=1&iptc=1%201x,%20https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=750&format=pjpg&exif=1&iptc=1%202x',
+        image: 'https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=925&format=pjpg&exif=1&iptc=1%201x,%20https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=750&format=pjpg&exif=1&iptc=1%202x',
         image_aspect_ratio: 'horizontal',
         title: 'horizontal',
         text: '',
         giver_data: {},
         quick_replies: {},
-        buttons: {},
+        buttons: {}
       }
       node.id = crypto.randomUUID()
       createMetaTemplateOutIn(
@@ -223,7 +219,7 @@ export namespace ReteTemplates {
         text: '',
         buttons: {},
         quick_replies: {},
-        giver_data: {},
+        giver_data: {}
       }
       createMetaTemplateOutIn(
         {
@@ -466,19 +462,7 @@ export const socketDefinitions: Record<
   'Elements Input': [],
   'UserInput Only Input': [],
   'Accept All': [],
-  button: [
-    'carouselItem',
-    'carousel',
-    'file',
-    'image',
-    'video',
-    'facebookmedia',
-    'newMessageSet',
-    'condition',
-    'actions',
-    'Elements Input',
-    'Accept All',
-  ],
+  button: ["text", "carouselItem", "carousel", "file", "image", "video", "facebookmedia", "newMessageSet", "condition", "actions", "Elements Input", "Accept All"],
   quickreply: [
     'carouselItem',
     'carousel',

@@ -124,7 +124,7 @@ async function initializeFlow() {
           }
         },
         connection() {
-          return CustomConnection
+          return Presets.classic.Connection
         },
       },
     }),
@@ -615,12 +615,9 @@ watch(
 <template>
   <div class="">
     <!-- Rete.js Canvas -->
-    <div class="h-screen bg-pink-50">
-      <div
-        v-if="nodeOptionVisible"
-        class="floating-menu"
-        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }"
-      >
+    <div class="h-screen">
+      <div v-if="nodeOptionVisible" class="floating-menu"
+        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }">
         <div>Node Option</div>
         <div>{{ menuPosition }}</div>
         <div @click="removeNode()">❌ Remove</div>
@@ -636,13 +633,6 @@ watch(
           <span>{{
             multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : ''
           }}</span>
-        </div>
-        <div>
-          <div class="flex flex-col gap-4">
-            <span>Left Click - Show Menu Options</span>
-            <span>Alt + Right Click inside Node - Show Node Option</span>
-            <span>Cmd + Right Click - Select Multiple Nodes</span>
-          </div>
         </div>
       </div>
     </div>
