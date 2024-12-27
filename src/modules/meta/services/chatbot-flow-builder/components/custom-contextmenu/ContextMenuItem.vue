@@ -52,7 +52,7 @@ const iconMapping: Record<string, string> = {
   delete: 'bx:bx-trash',
   clone: 'bx:bx-duplicate',
   reference: 'bx:bolt-circle',
-  text: 'bx:font',
+  message: 'bx:message',
   carousel: 'bx:carousel',
 }
 

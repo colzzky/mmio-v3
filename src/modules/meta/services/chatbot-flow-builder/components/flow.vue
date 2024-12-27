@@ -91,7 +91,7 @@ async function initializeFlow() {
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
       ['Reference', () => ReteTemplates.node_templates.reference_node()],
-      ['Text', () => ReteTemplates.node_templates.message_node()],
+      ['Message', () => ReteTemplates.node_templates.message_node()],
       ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
       ['Generic Node', () => ReteTemplates.node_templates.generic_node()],
     ]),
@@ -668,6 +668,9 @@ function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
     </div>
 
     <!-- Floating Menu -->
+
+    <!-- open for refactoring: instance should be declared here instead of every node -->
+    <!-- <NodeSheet /> -->
   </div>
 </template>
 
