@@ -32,7 +32,7 @@ import { reactive, ref } from 'vue'
 
 const props = defineProps<{ data: Node<'message_node'> }>()
 
-const localData = ref({ ...props.data })
+const localData = ref<Node<'message_node'>>(props.data)
 
 // CHANGE SHEET STATE
 type State =
@@ -43,9 +43,8 @@ type State =
   | 'edit-quick-reply'
 const sheetState = ref<State>('default')
 
-// MESSAGE REPLY BUTTON FORM
-type MessageReplyButtonForm = {
-  form: FBAttachmentTemplate.Button
+interface Form<T extends 'message-reply' | 'quick-reply'> {
+  form: T extends 'message-reply' ? FBAttachmentTemplate.Button : FBAttachmentTemplate.QuickReply
   initialState: () => void
 
   submitForm: (event: SubmitEvent) => void
@@ -53,15 +52,27 @@ type MessageReplyButtonForm = {
   updateButton: () => void
   deleteButton: (key: string) => void
 
-  intent: Extract<State, 'default' | 'create-message-reply' | 'edit-message-reply'>
-  changeIntent: (
-    args:
-      | { intent: Extract<State, 'default' | 'create-message-reply'> }
-      | { intent: Extract<State, 'edit-message-reply'>; key: string; reply: MetaButton },
-  ) => void
-  messageReplyKey: string | null
+  intent: T extends 'message-reply'
+    ? Extract<State, 'default' | 'create-message-reply' | 'edit-message-reply'>
+    : Extract<State, 'default' | 'create-quick-reply' | 'edit-quick-reply'>
+  buttonKey: string | null
+  changeIntent: T extends 'message-reply'
+    ? (
+        args:
+          | { intent: Extract<State, 'default' | 'create-message-reply'> }
+          | { intent: Extract<State, 'edit-message-reply'>; key: string; reply: MetaButton },
+      ) => void
+    : (
+        args:
+          | { intent: Extract<State, 'default' | 'create-quick-reply'> }
+          | { intent: Extract<State, 'edit-quick-reply'>; key: string; quickReply: QuickReply },
+      ) => void
+
+  deleteAllButtons?: () => void
 }
-const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
+
+// MESSAGE REPLY BUTTON FORM
+const messageReplyButtonForm = reactive<Form<'message-reply'>>({
   form: {
     title: 'Untitled Button',
     type: 'postback',
@@ -71,7 +82,7 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
     this.form.type = 'postback'
 
     this.intent = 'default'
-    this.messageReplyKey = null
+    this.buttonKey = null
   },
 
   submitForm(event: SubmitEvent) {
@@ -84,7 +95,7 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
         this.updateButton()
         break
       case 'delete':
-        this.deleteButton(this.messageReplyKey ?? '')
+        this.deleteButton(this.buttonKey ?? '')
         break
 
       default:
@@ -113,9 +124,9 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
   },
   updateButton() {
     if (!localData.value.data) throw new Error('no localData.data')
-    if (!this.messageReplyKey) throw new Error('no editMessageReplyKey')
+    if (!this.buttonKey) throw new Error('no buttonKey')
 
-    localData.value.data.buttons[this.messageReplyKey] = { ...this.form }
+    localData.value.data.buttons[this.buttonKey] = { ...this.form }
 
     toast({
       title: 'Message Reply Button Edited',
@@ -141,7 +152,7 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
   },
 
   intent: 'default',
-  messageReplyKey: null,
+  buttonKey: null,
   changeIntent(args) {
     this.intent = args.intent
     sheetState.value = args.intent
@@ -149,31 +160,13 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
     this.initialState()
 
     if (args.intent === 'edit-message-reply') {
-      this.messageReplyKey = args.key
       this.form = { ...args.reply }
     }
   },
 })
 
 // QUICK REPLY BUTTON FORM
-type QuickReplyButtonForm = {
-  form: FBAttachmentTemplate.QuickReply
-  initialState: () => void
-
-  submitForm: (event: SubmitEvent) => void
-  createButton: () => void
-  updateButton: () => void
-  deleteButton: (key: string) => void
-
-  intent: Extract<State, 'default' | 'create-quick-reply' | 'edit-quick-reply'>
-  changeIntent: (
-    args:
-      | { intent: Extract<State, 'default' | 'create-quick-reply'> }
-      | { intent: Extract<State, 'edit-quick-reply'>; key: string; quickReply: QuickReply },
-  ) => void
-  quickReplyKey: string | null
-}
-const quickReplyButtonForm = reactive<QuickReplyButtonForm>({
+const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
   form: {
     title: 'Untitled Button',
     content_type: 'text',
@@ -183,7 +176,7 @@ const quickReplyButtonForm = reactive<QuickReplyButtonForm>({
     this.form.content_type = 'text'
 
     this.intent = 'default'
-    this.quickReplyKey = null
+    this.buttonKey = null
   },
 
   submitForm(event: SubmitEvent) {
@@ -196,7 +189,7 @@ const quickReplyButtonForm = reactive<QuickReplyButtonForm>({
         this.updateButton()
         break
       case 'delete':
-        this.deleteButton(this.quickReplyKey ?? '')
+        this.deleteButton(this.buttonKey ?? '')
         break
 
       default:
@@ -225,9 +218,9 @@ const quickReplyButtonForm = reactive<QuickReplyButtonForm>({
   },
   updateButton() {
     if (!localData.value.data) throw new Error('no localData.data')
-    if (!this.quickReplyKey) throw new Error('no editMessageReplyKey')
+    if (!this.buttonKey) throw new Error('no buttonKey')
 
-    localData.value.data.quick_replies[this.quickReplyKey] = { ...this.form }
+    localData.value.data.quick_replies[this.buttonKey] = { ...this.form }
 
     toast({
       title: 'Quick Reply Button Edited',
@@ -253,7 +246,7 @@ const quickReplyButtonForm = reactive<QuickReplyButtonForm>({
   },
 
   intent: 'default',
-  quickReplyKey: null,
+  buttonKey: null,
   changeIntent(args) {
     this.intent = args.intent
     sheetState.value = args.intent
@@ -261,32 +254,57 @@ const quickReplyButtonForm = reactive<QuickReplyButtonForm>({
     this.initialState()
 
     if (args.intent === 'edit-quick-reply') {
-      this.quickReplyKey = args.key
+      this.buttonKey = args.key
       this.form = { ...args.quickReply }
     }
+  },
+
+  deleteAllButtons() {
+    if (!localData.value.data) throw new Error('no localData.data')
+
+    localData.value.data.quick_replies = {}
+
+    toast({
+      title: 'All Quick Reply Buttons Cleared',
+      variant: 'success',
+      duration: 2000,
+    })
   },
 })
 </script>
 
 <template>
-  <SheetContent side="left" class="p-0">
+  <SheetContent side="left" class="p-0" v-if="localData.data">
     <!-- default state -->
     <template v-if="sheetState === 'default'">
       <SheetHeader
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
         <Icon icon="bx:message" class="row-span-full size-[var(--icon-size)] self-center" />
-        <SheetTitle class="leading-none">{{ data.data?.name }}</SheetTitle>
+        <SheetTitle class="leading-none">{{ localData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none"> Message </SheetDescription>
       </SheetHeader>
       <main class="grid gap-y-4 px-6 py-3">
         <div>
           <Label for="name">Node Name</Label>
-          <Input id="name" type="text" name="name" placeholder="What do you call this node?" />
+          <Input
+            v-model:model-value="localData.data.name"
+            id="name"
+            type="text"
+            name="name"
+            placeholder="What do you call this node?"
+          />
         </div>
         <div>
           <Label for="text">Text Message</Label>
-          <Textarea id="text" name="text" rows="5" class="resize-none" placeholder="" />
+          <Textarea
+            v-model:model-value="localData.data.text"
+            id="text"
+            name="text"
+            rows="5"
+            class="resize-none"
+            placeholder=""
+          />
         </div>
         <div class="grid gap-y-3 text-sm">
           <h3 class="font-medium">Message Reply Buttons</h3>
@@ -339,7 +357,13 @@ const quickReplyButtonForm = reactive<QuickReplyButtonForm>({
         <div class="mt-2 grid gap-y-3 text-sm">
           <div class="flex items-center justify-between">
             <h3 class="font-medium">Quick Reply Buttons</h3>
-            <button type="button" class="font-medium text-destructive">Clear</button>
+            <button
+              type="button"
+              class="font-medium text-destructive"
+              @click="quickReplyButtonForm.deleteAllButtons"
+            >
+              Clear
+            </button>
           </div>
           <ul class="grid gap-y-1.5 text-xs">
             <li
@@ -401,7 +425,7 @@ const quickReplyButtonForm = reactive<QuickReplyButtonForm>({
         >
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
-        <SheetTitle class="leading-none">{{ data.data?.name }}</SheetTitle>
+        <SheetTitle class="leading-none">{{ localData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">
           <button
             type="button"
@@ -465,7 +489,7 @@ const quickReplyButtonForm = reactive<QuickReplyButtonForm>({
         >
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
-        <SheetTitle class="leading-none">{{ data.data?.name }}</SheetTitle>
+        <SheetTitle class="leading-none">{{ localData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">
           <button
             type="button"
