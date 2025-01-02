@@ -189,8 +189,8 @@ export namespace ReteTemplates {
         name: 'Untitled Generic Node',
         image: 'https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=925&format=pjpg&exif=1&iptc=1%201x,%20https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=750&format=pjpg&exif=1&iptc=1%202x',
         image_aspect_ratio: 'horizontal',
-        title: 'horizontal',
-        text: '',
+        title: 'Sample Title',
+        text: 'Sample Description',
         giver_data: {
           'num1': num1_postback
         },
@@ -225,8 +225,8 @@ export namespace ReteTemplates {
           {
             image: 'https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=925&format=pjpg&exif=1&iptc=1%201x,%20https://burst.shopifycdn.com/photos/young-boy-smiles-at-father-holding-baby-sister.jpg?width=750&format=pjpg&exif=1&iptc=1%202x',
             image_aspect_ratio: 'horizontal',
-            title: 'horizontal',
-            text: '',
+            title: 'Sample Title',
+            text: 'Sample Description',
             buttons: {}
           }
         ],

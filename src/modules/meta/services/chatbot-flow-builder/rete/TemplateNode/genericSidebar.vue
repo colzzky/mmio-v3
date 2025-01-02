@@ -146,7 +146,7 @@ onUnmounted(() => {
         <button v-else type="button" @click="handleChangeSheetState('main')" class="row-span-full">
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
-        <span class="leading-none">{{ node_obj?.data?.name? node_obj?.data?.name : 'Untitled Generic Node' }}</span>
+        <span class="leading-none">{{ node_obj?.data?.name ? node_obj?.data?.name : 'Untitled Generic Node' }}</span>
         <small class="leading-none text-muted-foreground">
           Generic Node
           <template v-if="sheetState === 'create-reply-button'">
@@ -170,14 +170,15 @@ onUnmounted(() => {
       </section>
 
       <div class="min-h-28 border-4 border-dotted rounded-lg p-2 border-gray-400 flex items-center justify-center">
-        <img v-if="node_obj.data.image" :src="node_obj.data.image" alt="Placeholder Image" class="max-w-full max-h-full object-contain rounded-lg" />
+        <img v-if="node_obj.data.image" :src="node_obj.data.image" alt="Placeholder Image"
+          class="max-w-full max-h-full object-contain rounded-lg" />
         <span v-else>Please put image URL</span>
       </div>
 
       <section class="grid gap-y-1.5">
         <Label for="title">Title:</Label>
         <Input v-model="node_obj.data.title" type="text" id="title" name="title" rows="5"
-          placeholder="Whats the heading for this message?"/>
+          placeholder="Whats the heading for this message?" />
       </section>
 
       <section class="grid gap-y-1.5">
@@ -187,10 +188,6 @@ onUnmounted(() => {
       </section>
       <section class="grid grid-cols-2 gap-y-3">
         <h3 class="font-medium">Message Reply Buttons</h3>
-        <button type="button" class="justify-self-end font-medium text-red-400 hover:text-red-500"
-          @click="handleChangeSheetState('create-reply-button')">
-          Create
-        </button>
         <ul class="col-span-full grid gap-y-3">
           <template v-for="(reply, key) in node_obj.data.buttons" :key>
             <li
@@ -203,14 +200,14 @@ onUnmounted(() => {
               </button>
             </li>
           </template>
+          <Button size="sm" variant="outline" class="!bg-none border-2 border-dashed"
+            @click="handleChangeSheetState('create-reply-button')">
+            <p>Create Reply Button</p>
+          </Button>
         </ul>
       </section>
       <section class="grid grid-cols-2 gap-y-3">
         <h3 class="font-medium">Quick Replies Buttons</h3>
-        <button type="button" class="justify-self-end font-medium text-blue-400 hover:text-blue-500"
-          @click="handleChangeSheetState('create-quick-reply-button')">
-          Create
-        </button>
         <ul class="col-span-full grid gap-y-3">
           <template v-for="(quickReply, key) in node_obj.data.quick_replies" :key>
             <li
@@ -222,6 +219,10 @@ onUnmounted(() => {
               </button>
             </li>
           </template>
+          <Button size="sm" variant="outline" class="!bg-none border-2 border-dashed"
+            @click="handleChangeSheetState('create-quick-reply-button')">
+            <p>Create Quick Reply Button</p>
+          </Button>
         </ul>
       </section>
     </main>

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import Carousel from '../rete/TemplateNode/carousel.vue'
+import CarouselSidebar from '../rete/TemplateNode/carouselSidebar.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
 import Sidebar from '../rete/TemplateNode/sidebar.vue'
@@ -653,6 +654,12 @@ watch(
         />
         <GenericSidebar
           v-if="selected_node_obj.label === 'generic_node'"
+          :node="selected_node_obj"
+          :node_id="selected_node_obj.id"
+          :area
+        />
+        <CarouselSidebar
+          v-if="selected_node_obj.label === 'carousel_node'"
           :node="selected_node_obj"
           :node_id="selected_node_obj.id"
           :area
