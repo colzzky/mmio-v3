@@ -25,11 +25,14 @@ import {
   ReteSockets,
   type Button as MetaButton,
   type Node,
+  type QuickReply,
 } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { reactive, ref } from 'vue'
 
 const props = defineProps<{ data: Node<'message_node'> }>()
+
+const localData = ref({ ...props.data })
 
 // CHANGE SHEET STATE
 type State =
@@ -40,8 +43,7 @@ type State =
   | 'edit-quick-reply'
 const sheetState = ref<State>('default')
 
-const localData = ref({ ...props.data })
-
+// MESSAGE REPLY BUTTON FORM
 type MessageReplyButtonForm = {
   form: FBAttachmentTemplate.Button
   initialState: () => void
@@ -51,11 +53,11 @@ type MessageReplyButtonForm = {
   updateButton: () => void
   deleteButton: (key: string) => void
 
-  intent: 'default' | 'create-message-reply' | 'edit-message-reply'
+  intent: Extract<State, 'default' | 'create-message-reply' | 'edit-message-reply'>
   changeIntent: (
     args:
-      | { intent: 'default' | 'create-message-reply' }
-      | { intent: 'edit-message-reply'; key: string; reply: MetaButton },
+      | { intent: Extract<State, 'default' | 'create-message-reply'> }
+      | { intent: Extract<State, 'edit-message-reply'>; key: string; reply: MetaButton },
   ) => void
   messageReplyKey: string | null
 }
@@ -139,6 +141,7 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
   },
 
   intent: 'default',
+  messageReplyKey: null,
   changeIntent(args) {
     this.intent = args.intent
     sheetState.value = args.intent
@@ -150,12 +153,124 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
       this.form = { ...args.reply }
     }
   },
-  messageReplyKey: null,
+})
+
+// QUICK REPLY BUTTON FORM
+type QuickReplyButtonForm = {
+  form: FBAttachmentTemplate.QuickReply
+  initialState: () => void
+
+  submitForm: (event: SubmitEvent) => void
+  createButton: () => void
+  updateButton: () => void
+  deleteButton: (key: string) => void
+
+  intent: Extract<State, 'default' | 'create-quick-reply' | 'edit-quick-reply'>
+  changeIntent: (
+    args:
+      | { intent: Extract<State, 'default' | 'create-quick-reply'> }
+      | { intent: Extract<State, 'edit-quick-reply'>; key: string; quickReply: QuickReply },
+  ) => void
+  quickReplyKey: string | null
+}
+const quickReplyButtonForm = reactive<QuickReplyButtonForm>({
+  form: {
+    title: 'Untitled Button',
+    content_type: 'text',
+  },
+  initialState() {
+    this.form.title = 'Untitled Button'
+    this.form.content_type = 'text'
+
+    this.intent = 'default'
+    this.quickReplyKey = null
+  },
+
+  submitForm(event: SubmitEvent) {
+    const action = event.submitter?.dataset.action
+    switch (action) {
+      case 'create':
+        this.createButton()
+        break
+      case 'update':
+        this.updateButton()
+        break
+      case 'delete':
+        this.deleteButton(this.quickReplyKey ?? '')
+        break
+
+      default:
+        throw new Error('UNHANDLED ACTION')
+    }
+  },
+  createButton() {
+    if (!localData.value.data) throw new Error('no localData.data')
+
+    const newButton = createMetaTemplateOutIn({
+      node: props.data,
+      socket: ReteSockets['quickreply'],
+    })
+
+    const postbackId = crypto.randomUUID()
+    localData.value.data.giver_data[newButton.key] = postbackId
+    localData.value.data.quick_replies[newButton.key] = { ...this.form }
+
+    toast({
+      title: 'Quick Reply Button Added',
+      variant: 'success',
+      duration: 2000,
+    })
+
+    this.changeIntent({ intent: 'default' })
+  },
+  updateButton() {
+    if (!localData.value.data) throw new Error('no localData.data')
+    if (!this.quickReplyKey) throw new Error('no editMessageReplyKey')
+
+    localData.value.data.quick_replies[this.quickReplyKey] = { ...this.form }
+
+    toast({
+      title: 'Quick Reply Button Edited',
+      variant: 'success',
+      duration: 2000,
+    })
+
+    this.changeIntent({ intent: 'default' })
+  },
+  deleteButton(key: string) {
+    if (!localData.value.data) throw new Error('no localData.data')
+    if (!key) throw new Error('no key')
+
+    delete localData.value.data.quick_replies[key]
+
+    toast({
+      title: 'Quick Reply Button Deleted',
+      variant: 'success',
+      duration: 2000,
+    })
+
+    this.changeIntent({ intent: 'default' })
+  },
+
+  intent: 'default',
+  quickReplyKey: null,
+  changeIntent(args) {
+    this.intent = args.intent
+    sheetState.value = args.intent
+
+    this.initialState()
+
+    if (args.intent === 'edit-quick-reply') {
+      this.quickReplyKey = args.key
+      this.form = { ...args.quickReply }
+    }
+  },
 })
 </script>
 
 <template>
   <SheetContent side="left" class="p-0">
+    <!-- default state -->
     <template v-if="sheetState === 'default'">
       <SheetHeader
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
@@ -226,18 +341,35 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
             <h3 class="font-medium">Quick Reply Buttons</h3>
             <button type="button" class="font-medium text-destructive">Clear</button>
           </div>
-          <ul class="text-xs">
-            <li class="flex items-center justify-between">
-              Free Consultation
+          <ul class="grid gap-y-1.5 text-xs">
+            <li
+              v-for="(quickReply, key) in localData.data?.quick_replies"
+              :key
+              class="flex items-center justify-between"
+            >
+              {{ quickReply.title }}
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <span class="sr-only">open dropdown menu</span>
                   <Icon icon="bx:dots-vertical-rounded" class="size-5" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem class="gap-x-2">
+                  <DropdownMenuItem
+                    class="gap-x-2"
+                    @click="
+                      quickReplyButtonForm.changeIntent({
+                        intent: 'edit-quick-reply',
+                        key,
+                        quickReply,
+                      })
+                    "
+                  >
                     <Icon icon="bx:pencil" class="size-4" />
                     Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem class="gap-x-2" @click="quickReplyButtonForm.deleteButton(key)">
+                    <Icon icon="bx:trash" class="size-4" />
+                    Delete
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -247,12 +379,15 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
             type="button"
             variant="ghost"
             class="w-full border-2 border-dashed text-muted-foreground"
+            @click="quickReplyButtonForm.changeIntent({ intent: 'create-quick-reply' })"
           >
             Add Quick Reply
           </Button>
         </div>
       </main>
     </template>
+
+    <!-- message reply button state -->
     <template
       v-else-if="sheetState === 'create-message-reply' || sheetState === 'edit-message-reply'"
     >
@@ -317,23 +452,41 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
         </template>
       </form>
     </template>
+
+    <!-- quick reply button state -->
     <template v-else-if="sheetState === 'create-quick-reply' || sheetState === 'edit-quick-reply'">
       <SheetHeader
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
-        <button type="button" class="row-span-full self-center">
+        <button
+          type="button"
+          class="row-span-full self-center"
+          @click="quickReplyButtonForm.changeIntent({ intent: 'default' })"
+        >
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
         <SheetTitle class="leading-none">{{ data.data?.name }}</SheetTitle>
         <SheetDescription class="leading-none">
-          <button type="button" class="font-medium text-blue-600">Message</button>
+          <button
+            type="button"
+            class="font-medium text-blue-600"
+            @click="messageReplyButtonForm.changeIntent({ intent: 'default' })"
+          >
+            Message
+          </button>
           > Quick Reply
         </SheetDescription>
       </SheetHeader>
-      <main class="grid gap-y-4 px-6 py-3">
+      <!-- @note: have to **manually assert** since vue's typing for form submits are `Event` -->
+      <!-- while the browser instance is typed as `SubmitEvent` -->
+      <form
+        class="grid gap-y-4 px-6 py-3"
+        @submit.prevent="quickReplyButtonForm.submitForm($event as SubmitEvent)"
+      >
         <div>
-          <Label for="title">Quick Reply Label</Label>
+          <Label for="title">Quick Reply Title</Label>
           <Input
+            v-model:model-value="quickReplyButtonForm.form.title"
             id="title"
             type="text"
             name="title"
@@ -342,7 +495,11 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
         </div>
         <div>
           <Label for="type">Quick Reply Type</Label>
-          <Select id="type" name="type">
+          <Select
+            v-model:model-value="quickReplyButtonForm.form.content_type"
+            id="type"
+            name="type"
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select a type" />
             </SelectTrigger>
@@ -355,12 +512,16 @@ const messageReplyButtonForm = reactive<MessageReplyButtonForm>({
             </SelectContent>
           </Select>
         </div>
-        <Button v-if="sheetState === 'create-quick-reply'" type="button">Add Quick Reply</Button>
+        <Button v-if="sheetState === 'create-quick-reply'" type="submit" data-action="create">
+          Add Quick Reply
+        </Button>
         <template v-else>
-          <Button type="button">Update Quick Reply</Button>
-          <Button type="button" variant="destructive">Remove Quick Reply</Button>
+          <Button type="submit" data-action="update">Update Quick Reply</Button>
+          <Button type="submit" variant="destructive" data-action="delete">
+            Remove Quick Reply
+          </Button>
         </template>
-      </main>
+      </form>
     </template>
   </SheetContent>
 </template>
