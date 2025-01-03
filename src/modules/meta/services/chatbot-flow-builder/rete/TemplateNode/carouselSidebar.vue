@@ -153,7 +153,7 @@ const quick_reply_button = reactive({
         if (node_obj.value && node_obj.value.data) {
             const quickreply_origin = createMetaTemplateOutIn({
                 node: node_obj.value,
-                socket: ReteSockets['quickreply'],
+                socket: ReteSockets['quickreply']
             })
             const postback_id = `${crypto.randomUUID()}` // Origin Id where it will be referenced
             node_obj.value.data.giver_data[quickreply_origin.key] = postback_id

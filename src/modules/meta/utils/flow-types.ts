@@ -10,6 +10,7 @@ export interface NodeType {
   generic_node: GenericNode
   carousel_node: CarouselNode
   reference_node: ReferenceNode
+  media_node: MediaNode
 }
 
 export interface CarouselCard {
@@ -42,20 +43,33 @@ export interface ReferenceNode {
 export interface GenericNode extends CarouselCard {
   name: string
   postbackid?: string
+  delay?:string,
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
 export interface CarouselNode {
   name: string
   postbackid?: string
+  delay?:string,
   cards: CarouselCard[]
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
-interface MessageNode {
+export interface MessageNode {
   name: string
   postbackid?: string
+  delay?:string,
   text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+export interface MediaNode {
+  name:string,
+  url:string,
+  type:string,
+  delay?:string,
+  postbackid?: string
   buttons: Record<string, Button>
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
@@ -159,9 +173,7 @@ export namespace ReteTemplates {
         text: '',
         buttons: {},
         quick_replies: {},
-        giver_data: {
-          'num1': num1_postback
-        },
+        giver_data: {},
       }
       node.id = crypto.randomUUID()
       createMetaTemplateOutIn(
@@ -191,9 +203,7 @@ export namespace ReteTemplates {
         image_aspect_ratio: 'horizontal',
         title: 'Sample Title',
         text: 'Sample Description',
-        giver_data: {
-          'num1': num1_postback
-        },
+        giver_data: {},
         quick_replies: {},
         buttons: {}
       }
@@ -230,9 +240,7 @@ export namespace ReteTemplates {
             buttons: {}
           }
         ],
-        giver_data: {
-          'num1': num1_postback
-        },
+        giver_data: {},
         quick_replies: {},
         
       }
@@ -254,6 +262,37 @@ export namespace ReteTemplates {
       )
       return node
     },
+    media_node() {
+      const node = new Node('media_node')
+      const num1_postback = crypto.randomUUID()
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Media Node',
+        url: '',
+        type:'',
+        giver_data: {},
+        quick_replies: {},
+        buttons: {},
+      }
+      node.id = crypto.randomUUID()
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['facebookmedia'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['facebookmedia'],
+        },
+        'num1',
+      )
+      return node
+    },
+    
 
     //Should be generic node
     message_node() {
@@ -265,9 +304,7 @@ export namespace ReteTemplates {
         text: '',
         buttons: {},
         quick_replies: {},
-        giver_data: {
-          'num1': num1_postback
-        },
+        giver_data: {},
       }
       createMetaTemplateOutIn(
         {
@@ -386,6 +423,7 @@ export class MetaTemplateOutput extends ClassicPreset.Output<CustomSocket> {
     super(args.socket) // Initialize with socket
     this.id = args.key // Set the ID (provided as part of args)
     this.label = args.socket.name // Set the ID (provided as part of args)
+    this.multipleConnections = false
   }
 }
 

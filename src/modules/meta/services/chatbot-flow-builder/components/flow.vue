@@ -296,9 +296,42 @@ function isMouseOutsideNode(details: {
 function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
   area.addPipe((context) => {
     const mouse_inside_nodes: string[] = []
+    if(context.type === 'connectionremove'){
+      if (rete_init.editor) {
+        const soure_node = rete_init.editor.getNode(context.data.source)
+        if (soure_node && soure_node.data) {
+          const origin = soure_node.data.giver_data[context.data.sourceOutput]
+          console.log(context.data)
+          console.log(soure_node)
+          if (!origin) {
+            toast({
+              title: 'Something went wrong',
+              variant: 'destructive',
+              duration: 2000,
+            })
+            return
+          } else {
+            const target_node = rete_init.editor.getNode(context.data.target)
+            if (target_node && target_node.data) {
+              if(target_node.data.postbackid){
+                delete target_node.data['postbackid']
+              }
+            } else {
+              toast({
+                title: 'Something went wrong here',
+                variant: 'destructive',
+                duration: 2000,
+              })
+              return
+            }
+          }
+        }
+      }
+    }
 
     if (context.type === 'connectioncreate') {
       const check = checkConnectionSocket(context.data)
+      console.log(context.data)
       if (check) {
         toast({
           title: 'Copatible',
@@ -317,20 +350,11 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
       if (rete_init.editor) {
         const soure_node = rete_init.editor.getNode(context.data.source)
         if (soure_node && soure_node.data) {
-          const origin = soure_node.data.giver_data[context.data.sourceOutput]
-          console.log(context.data)
-          console.log(soure_node)
-          if (!origin) {
-            toast({
-              title: 'Something went wrong',
-              variant: 'destructive',
-              duration: 2000,
-            })
-            return
-          } else {
-            const target_node = rete_init.editor.getNode(context.data.target)
+          const target_node = rete_init.editor.getNode(context.data.target)
             if (target_node && target_node.data) {
-              target_node.data.postbackid = soure_node.data.giver_data[context.data.sourceOutput]
+              if(!target_node.data.postbackid && soure_node.data.giver_data[context.data.sourceOutput]){
+                target_node.data.postbackid = soure_node.data.giver_data[context.data.sourceOutput]
+              }
             } else {
               toast({
                 title: 'Something went wrong here',
@@ -339,13 +363,12 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
               })
               return
             }
-          }
           // if (isNodeOfType(soure_node, 'message_node')) {
           //   //do something here
           // }
         }
       }
-    }
+    }    
 
     if (context.type === 'zoom') {
       closeMenu()
@@ -548,7 +571,7 @@ const saveEditorState = async () => {
 
   const parse_serial = JSON.stringify(serializedState)
   //Print the serialized node and save to firestore
-  console.log(rete_init.editor)
+  console.log(serializedState)
 
   //Save The Flow to json
   active_flow.json = parse_serial
@@ -631,7 +654,7 @@ watch(
         <div @click="removeNode()">❌ Remove</div>
         <div @click="closeNodeOption()">❌ Close</div>
       </div>
-      <div id="no-right-click" ref="reteContainer" class="h-svh bg-dotted"></div>
+      <div id="no-right-click" ref="reteContainer" class="rete-container bg-dotted h-svh"></div>
     </div>
 
     <div class="absolute top-0 flex justify-between p-4">
