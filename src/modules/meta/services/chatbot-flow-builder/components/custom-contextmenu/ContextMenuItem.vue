@@ -1,25 +1,25 @@
 <template>
-  <div class="block" :class="[subitems ? 'hasSubitems' : '']">
+  <div class="rounded-md p-2 font-medium hover:bg-neutral-200">
     <div
-      class="content text-gray-800"
+      class="flex items-center gap-x-1.5"
       @click.stop="(emits('select', $event), emits('hide'))"
       @wheel.stop=""
       @pointerover="(hide.cancel(), (visibleSubitems = true))"
       @pointerleave="hide()"
       @pointerdown.stop=""
     >
-      <slot />
-      <div v-if="subitems && visibleSubitems" class="subitems">
+      <Icon :icon class="size-4" />
+      {{ label }}
+      <div v-if="subItems && visibleSubitems" class="subitems">
         <ContextMenuItem
-          v-for="item in subitems"
+          v-for="item in subItems"
           :key="item.key"
-          @select="item.handler($event)"
-          :delay="delay"
-          @hide="emits('hide')"
-          :subitems="item.subitems"
-        >
-          {{ item.label }}
-        </ContextMenuItem>
+          :sub-items="item.subItems"
+          :label="item.label"
+          :delay
+          @select="item.handler"
+          @hide="typeof onHide === 'function' ? onHide : () => {}"
+        />
       </div>
     </div>
   </div>
@@ -27,17 +27,19 @@
 
 <script lang="ts" setup>
 import type { ContextMenuItemType } from './types'
+import { Icon } from '@iconify/vue'
 import { debounce } from 'lodash'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 defineOptions({
   name: 'ContextMenuItem',
 })
 
-const props = defineProps({
-  subitems: Array<ContextMenuItemType>,
-  delay: Number,
-})
+const props = defineProps<{
+  subItems: ContextMenuItemType[] | undefined
+  delay: number
+  label: string
+}>()
 
 const emits = defineEmits(['select', 'hide'])
 
@@ -45,17 +47,19 @@ const visibleSubitems = ref(false)
 const hide = debounce(() => {
   visibleSubitems.value = false
 }, props.delay)
+
+const iconMapping: Record<string, string> = {
+  delete: 'bx:bx-trash',
+  clone: 'bx:bx-duplicate',
+  reference: 'bx:bolt-circle',
+  text: 'bx:font',
+  carousel: 'bx:carousel',
+}
+
+const icon = computed(() => iconMapping[props.label.toLocaleLowerCase()])
 </script>
 
 <style scoped>
-.block {
-  padding: 0;
-}
-
-.content {
-  padding: 4px;
-}
-
 .hasSubitems::after {
   content: '►';
   position: absolute;

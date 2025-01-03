@@ -1,6 +1,6 @@
 export interface ContextMenuItemType {
   label: string
-  subitems?: ContextMenuItemType[]
+  subItems?: ContextMenuItemType[]
   handler: (event: any) => void
   key: string
 }
@@ -10,10 +10,10 @@ export interface ContextMenuRenderContext {
   data: {
     type: string
     payload: null
-    element: Record<string, any>,
-    items: ContextMenuItemType[],
-    searchBar: boolean,
-    onHide: () => void,
+    element: Record<string, any>
+    items: ContextMenuItemType[]
+    searchBar: boolean
+    onHide: () => void
     delay: number
   }
 }

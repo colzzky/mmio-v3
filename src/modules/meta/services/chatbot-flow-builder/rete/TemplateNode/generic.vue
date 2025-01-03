@@ -10,10 +10,10 @@ import { objectEntries } from '@vueuse/core'
 import Label from '@/core/components/ui/label/Label.vue'
 
 const props = defineProps<{ data: Schemes['Node']; emit: any; seed: number }>()
-const node = ref<Node<'message_node'> | null>(null)
+const node = ref<Node<'generic_node'> | null>(null)
 
 onMounted(() => {
-  node.value = props.data as Node<'message_node'>
+  node.value = props.data as Node<'generic_node'>
 })
 
 const inputs = computed(() => {
@@ -26,43 +26,14 @@ const outputs = computed(() => {
   return sortByIndex(entries)
 })
 
-// const quickReplies = ref(sortByIndex(
-//   Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('quickReply')) as [
-//     string,
-//     MetaTemplateOutput,
-//   ][],
-// ),
-// )
-
-// const replies = ref(sortByIndex(
-//   Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('reply')) as [
-//     string,
-//     MetaTemplateOutput,
-//   ][],
-// ))
-
-// onUpdated(() => {
-//   quickReplies.value = sortByIndex(
-//     Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('quickReply')) as [
-//       string,
-//       MetaTemplateOutput,
-//     ][],
-//   )
-
-//   replies.value = sortByIndex(
-//     Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('reply')) as [
-//       string,
-//       MetaTemplateOutput,
-//     ][],
-//   )
-// })
 </script>
 
 <template>
   <div class="space-y-2">
-    <div class="w-full p-2 border rounded-lg border-neutral-200 bg-neutral-100 flex">
-      <span class="text-xs font-semibold text-gray-600">{{ node?.data?.name }}</span>
+    <div class="w-full p-2 border rounded-lg border-neutral-200 bg-neutral-100 flex justify-between items-center gap-4">
+      <span class="text-xs font-semibold text-gray-600">{{ node?.data?.name ? node?.data?.name : 'Untitled Generic Node'}}</span>
     </div>
+
     <NodeCard :data-selected="data.selected" class="flex flex-col gap-y-3 pb-0">
       <!-- inputs -->
       <section>
@@ -72,7 +43,7 @@ const outputs = computed(() => {
               <div class="w-full h-9 rounded-md px-3 flex items-center">
                 <span class="flex items-center gap-x-2 font-semibold">
                   <Icon icon="bx:message" class="size-6" />
-                  Message
+                  Generic
                 </span>
               </div>
             </div>
@@ -92,26 +63,37 @@ const outputs = computed(() => {
         </template>
       </section>
 
-      <!-- <div class="relative">
-      <div class="px-5 flex justify-center items-center rounded-lg">
-        <div class="w-full h-9 rounded-md px-3 border flex items-center justify-center">test</div>
-      </div>
-      <div class="absolute top-1.5 -right-3 w-6 h-6 bg-blue-500 rounded-full border-2 border-gray-500"></div>
-    </div> -->
-
       <!-- replies -->
       <section class="space-y-2">
         <div class="px-5 space-y-2">
-          <Label>Message:</Label>
-          <div class="max-h-48 bg-white rounded-lg border border-gray-200 p-3">
-            <div v-if="node?.data?.text" class="overflow-hidden line-clamp-6">
-              {{ node?.data?.text }}
-            </div>
-            <div v-else>
-              <p class="text-gray-400">No Message Available</p>
+          <div class="min-h-28 border-4 border-dotted rounded-lg p-2 border-gray-400 flex items-center justify-center">
+            <img v-if="node?.data?.image" :src="node?.data?.image" alt="Placeholder Image"
+              class="max-w-full max-h-full object-contain rounded-lg" />
+            <span v-else>No available Image</span>
+          </div>
+          <div>
+            <Label>Heding:</Label>
+            <div class="max-h-28 bg-white rounded-lg border border-gray-200 p-3">
+              <div v-if="node?.data?.title" class="overflow-hidden line-clamp-2">
+                {{ node?.data?.title }}
+              </div>
+              <div v-else>
+                <p class="text-gray-400">No Message Available</p>
+              </div>
             </div>
           </div>
-          <p class></p>
+          <div>
+            <Label>Description:</Label>
+            <div class="max-h-48 bg-white rounded-lg border border-gray-200 p-3">
+              <div v-if="node?.data?.text" class="overflow-hidden line-clamp-6">
+                {{ node?.data?.text }}
+              </div>
+              <div v-else>
+                <p class="text-gray-400">No Message Available</p>
+              </div>
+            </div>
+          </div>
+
         </div>
         <div v-if="node && node.data">
           <div v-if="objectEntries(node.data.buttons).length > 0" class="flex flex-col gap-2">
