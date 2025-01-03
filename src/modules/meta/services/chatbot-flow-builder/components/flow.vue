@@ -132,7 +132,7 @@ async function initializeFlow() {
           }
         },
         connection() {
-          return Presets.classic.Connection
+          return CustomConnection
         },
       },
     }),
@@ -607,7 +607,7 @@ function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
   const background = document.createElement('div')
 
   background.classList.add('background')
-  background.classList.add('fill-area')
+  background.classList.add('bg-dotted')
 
   area.area.content.add(background)
 }
@@ -631,7 +631,7 @@ watch(
         <div @click="removeNode()">❌ Remove</div>
         <div @click="closeNodeOption()">❌ Close</div>
       </div>
-      <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
+      <div id="no-right-click" ref="reteContainer" class="h-svh bg-dotted"></div>
     </div>
 
     <div class="absolute top-0 flex justify-between p-4">
@@ -676,7 +676,7 @@ watch(
   background-image: radial-gradient(currentColor 0.5px, transparent 0.5px);
   background-size: 10px 10px;
   /* Adjust size of dots */
-  color: #c5c5c5;
+
   /* Change dot color */
 }
 

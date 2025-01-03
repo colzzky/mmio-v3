@@ -73,7 +73,7 @@ const card_form = reactive({
     data: {
         image: '',
         image_aspect_ratio: 'horizontal',
-        title: 'Untitled Button',
+        title: 'Untitled Card',
         text: '',
         buttons: {}
     } as CarouselCard,
@@ -119,6 +119,24 @@ const card_form = reactive({
         }
         initialize()
         props.area.update('node', props.node.id)
+
+        this.data = {
+            image: '',
+            image_aspect_ratio: 'horizontal',
+            title: 'Untitled Card',
+            text: '',
+            buttons: {}
+        }
+        this.button_list = []
+        this.button = {
+            title: 'Untitled Button',
+            type: 'postback',
+            messenger_extensions: 'FALSE',
+            url: '',
+            payload: ''
+        }
+
+
         handleChangeSheetState('main')
         toast({
             title: 'New Reply Button Added',

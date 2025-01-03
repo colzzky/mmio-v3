@@ -135,14 +135,7 @@ const outputs = computed(() => {
           </div>
         </section>
       </NodeCard>
-      <div v-if="node && node.data" class="grid grid-cols-2 gap-3 items-stretch">
-        <div v-if="node.data.cards.length < 11" class="border-4 border-neutral-200 border-dashed py-4 rounded-xl flex justify-center items-center">
-          <section>
-            <div class="px-5 space-y-2">
-              Add more Cards
-            </div>
-          </section>
-        </div>
+      <div v-if="node && node.data" class="grid grid-cols-1 gap-3 items-stretch">
         <div v-for="(card, key) in node.data.cards" :key="key + seed"
           class="w-64 border border-neutral-200 bg-neutral-100 py-4 rounded-xl">
           <section class="space-y-2">
@@ -216,6 +209,13 @@ const outputs = computed(() => {
                   </div>
                 </div>
               </div>
+            </div>
+          </section>
+        </div>
+        <div v-if="node.data.cards.length < 11" class="border-4 border-neutral-200 border-dashed py-4 rounded-xl flex justify-center items-center">
+          <section>
+            <div class="px-5 space-y-2 font-semibold">
+              You can add more Cards
             </div>
           </section>
         </div>
