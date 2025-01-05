@@ -160,7 +160,7 @@ export const useAuthStore = defineStore(
       async fetch_team_list(): Promise<void> {
         this.isLoading = true
         const user_teams: string[] = []
-        if (user.data && user.data.team_refs) {
+        if (user.data && user.data.team_refs && user.data.team_refs.length > 0) {
           user.data.team_refs.forEach((team) => {
             user_teams.push(team.tm_id)
           })
