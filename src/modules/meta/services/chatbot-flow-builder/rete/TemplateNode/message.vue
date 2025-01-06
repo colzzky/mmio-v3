@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import NodeCard from '../node-card.vue'
-import NodeSheet from '../node-sheet.vue'
 import NodeSocket from '../node-socket.vue'
 import { sortByIndex } from '../utils'
 import Label from '@/core/components/ui/label/Label.vue'
@@ -56,6 +55,14 @@ const outputs = computed(() => {
 //     ][],
 //   )
 // })
+
+// @temporary: open for refactoring
+const event = new CustomEvent('triggerNodeSheet', {
+  detail: props.data,
+})
+function handleTriggerNodeSheet() {
+  document.dispatchEvent(event)
+}
 </script>
 
 <template>
@@ -95,17 +102,10 @@ const outputs = computed(() => {
         </template>
       </section>
 
-      <!-- <div class="relative">
-      <div class="px-5 flex justify-center items-center rounded-lg">
-        <div class="w-full h-9 rounded-md px-3 border flex items-center justify-center">test</div>
-      </div>
-      <div class="absolute top-1.5 -right-3 w-6 h-6 bg-blue-500 rounded-full border-2 border-gray-500"></div>
-    </div> -->
-
       <!-- replies -->
       <section class="space-y-2">
         <div class="space-y-2 px-5">
-          <Label>Message:</Label>
+          <div class="font-bold">Message</div>
           <div class="max-h-48 rounded-lg border border-gray-200 bg-white p-3">
             <div v-if="node?.data?.text" class="line-clamp-6 overflow-hidden">
               {{ node?.data?.text }}
@@ -212,33 +212,36 @@ const outputs = computed(() => {
       </section>
 
       <section class="border-t py-2">
-          <div v-if="node && node.data">
-            <div class="flex flex-col gap-4">
-              <template v-for="[key, output] in outputs" :key="key + seed" class="flex flex-col gap-4">
-                <div v-if="output && key === 'num1'" :data-testid="`input-${key}`" class="relative">
-                <div class="px-5 flex rounded-lg justify-end items-center">
+        <div v-if="node && node.data">
+          <div class="flex flex-col gap-4">
+            <template v-for="[key, output] in outputs" :key="key + seed">
+              <div v-if="output && key === 'num1'" :data-testid="`input-${key}`" class="relative">
+                <div class="flex items-center justify-end rounded-lg px-5">
                   <span class="flex items-center gap-x-2 font-semibold text-gray-400">
                     Continue to Next Step
                   </span>
-
                 </div>
                 <!-- Circle overlapping the border of the main div -->
-                <div class="absolute -top-0.5 -right-2.5 rounded-full">
-                  <NodeSocket :emit :data="{
-                    type: 'socket',
-                    side: 'output',
-                    key,
-                    nodeId: data.id,
-                    payload: output.socket,
-                  }" class="[--socket-size:16px]" />
+                <div class="absolute -right-2.5 -top-0.5 rounded-full">
+                  <NodeSocket
+                    :emit
+                    :data="{
+                      type: 'socket',
+                      side: 'output',
+                      key,
+                      nodeId: data.id,
+                      payload: output.socket,
+                    }"
+                    class="[--socket-size:16px]"
+                  />
                 </div>
               </div>
-            </div>
+            </template>
           </div>
         </div>
       </section>
 
-      <NodeSheet :data />
+      <button type="button" @click="handleTriggerNodeSheet">edit</button>
     </NodeCard>
   </div>
 </template>

@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="S extends BaseSchemes, K">
 import { Button } from '@/core/components/ui/button'
 import {
   DropdownMenu,
@@ -19,6 +19,7 @@ import {
 import { SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/core/components/ui/sheet'
 import { Textarea } from '@/core/components/ui/textarea'
 import { toast } from '@/core/components/ui/toast'
+import { uiHelpers } from '@/core/utils/ui-helper'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import {
   createMetaTemplateOutIn,
@@ -28,11 +29,13 @@ import {
   type QuickReply,
 } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
-import { reactive, ref } from 'vue'
+import type { BaseSchemes } from 'rete'
+import type { AreaPlugin } from 'rete-area-plugin'
+import { reactive, ref, watch } from 'vue'
 
-const props = defineProps<{ data: Node<'message_node'> }>()
+const props = defineProps<{ data: Node<'message_node'>; area: AreaPlugin<S, K> }>()
 
-const localData = ref<Node<'message_node'>>(props.data)
+const localData = ref<Node<'message_node'>>(uiHelpers.deepCopy(props.data))
 
 // CHANGE SHEET STATE
 type State =
@@ -160,6 +163,7 @@ const messageReplyButtonForm = reactive<Form<'message-reply'>>({
     this.initialState()
 
     if (args.intent === 'edit-message-reply') {
+      this.buttonKey = args.key
       this.form = { ...args.reply }
     }
   },
@@ -271,10 +275,20 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
     })
   },
 })
+
+watch(
+  () => localData.value.data,
+  (value) => {
+    // @todo: update node data
+  },
+  {
+    deep: true,
+  },
+)
 </script>
 
 <template>
-  <SheetContent side="left" class="p-0" v-if="localData.data">
+  <SheetContent v-if="localData.data" side="left" class="p-0">
     <!-- default state -->
     <template v-if="sheetState === 'default'">
       <SheetHeader
@@ -310,7 +324,7 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
           <h3 class="font-medium">Message Reply Buttons</h3>
           <ul class="grid gap-y-1.5 text-xs">
             <li
-              v-for="(reply, key) in localData.data?.buttons"
+              v-for="(reply, key) in localData.data.buttons"
               :key
               class="flex items-center justify-between"
             >
@@ -367,7 +381,7 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
           </div>
           <ul class="grid gap-y-1.5 text-xs">
             <li
-              v-for="(quickReply, key) in localData.data?.quick_replies"
+              v-for="(quickReply, key) in localData.data.quick_replies"
               :key
               class="flex items-center justify-between"
             >

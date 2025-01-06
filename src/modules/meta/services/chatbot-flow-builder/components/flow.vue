@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import Carousel from '../rete/TemplateNode/carousel.vue'
 import CarouselSidebar from '../rete/TemplateNode/carouselSidebar.vue'
+import Generic from '../rete/TemplateNode/generic.vue'
+import GenericSidebar from '../rete/TemplateNode/genericSidebar.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
 import Sidebar from '../rete/TemplateNode/sidebar.vue'
-import GenericSidebar from '../rete/TemplateNode/genericSidebar.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
+import NodeSheet from '../rete/node-sheet.vue'
 import Menu from './custom-contextmenu/index.vue'
 import type { ContextMenuRenderContext } from './custom-contextmenu/types'
 import { toast } from '@/core/components/ui/toast'
@@ -23,14 +25,13 @@ import {
   MetaTemplateOutput,
 } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
-import { NodeEditor, ClassicPreset, type BaseSchemes } from 'rete'
+import { NodeEditor, ClassicPreset, type NodeId, type BaseSchemes } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
 import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-menu-plugin'
 import { VuePlugin, Presets } from 'rete-vue-plugin'
 import type { Input } from 'rete/_types/presets/classic'
-import { ref, onMounted, reactive, watch } from 'vue'
-import Generic from '../rete/TemplateNode/generic.vue'
+import { ref, onMounted, reactive, watch, useTemplateRef, provide } from 'vue'
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -46,15 +47,15 @@ const { active_flow } = authWorkspace
 const menuVisible = ref(false)
 const nodeOptionVisible = ref(false)
 const menuPosition = ref<MousePosition>({ x: 0, y: 0 })
-// const mousePosition = ref<MousePosition>({ x: 0, y: 0 })
+const mousePosition = ref<MousePosition>({ x: 0, y: 0 })
 const reteContainer = ref<HTMLDivElement>()
-// const socket = new ClassicPreset.Socket('socket')
+const socket = new ClassicPreset.Socket('socket')
 
 const selector = AreaExtensions.selector()
 const accumulating = AreaExtensions.accumulateOnCtrl()
-// const selected_node = ref<NodeId>('')
-// const selected_node_obj = ref<Node<keyof NodeType> | null>(null)
-// const multi_selected_node = ref<NodeId[]>([])
+const selected_node = ref<NodeId>('')
+const selected_node_obj = ref<Node<keyof NodeType> | null>(null)
+const multi_selected_node = ref<NodeId[]>([])
 
 let area = null as AreaPlugin<Schemes, AreaExtra> | null
 const rete_init = reactive({
@@ -67,16 +68,16 @@ const rete_init = reactive({
 function closeMenu() {
   menuVisible.value = false
 }
-// function closeNodeOption(reset_selected: boolean = true) {
-//   nodeOptionVisible.value = false
-//   if (reset_selected) {
-//     const multi_index = multi_selected_node.value.indexOf(selected_node.value)
-//     if (multi_index > -1) {
-//       multi_selected_node.value.splice(multi_index, 1)
-//     }
-//     selected_node.value = ''
-//   }
-// }
+function closeNodeOption(reset_selected: boolean = true) {
+  nodeOptionVisible.value = false
+  if (reset_selected) {
+    const multi_index = multi_selected_node.value.indexOf(selected_node.value)
+    if (multi_index > -1) {
+      multi_selected_node.value.splice(multi_index, 1)
+    }
+    selected_node.value = ''
+  }
+}
 
 async function initializeFlow() {
   if (!reteContainer.value) return
@@ -91,7 +92,7 @@ async function initializeFlow() {
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
       ['Reference', () => ReteTemplates.node_templates.reference_node()],
-      ['Message', () => ReteTemplates.node_templates.message_node()],
+      ['Text', () => ReteTemplates.node_templates.message_node()],
       ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
       ['Generic Node', () => ReteTemplates.node_templates.generic_node()],
     ]),
@@ -161,6 +162,7 @@ async function initializeFlow() {
         'undefined'
           ? 200
           : context.data.delay
+      console.log({ render: context })
       if (context.data.type === 'contextmenu') {
         return {
           component: Menu,
@@ -185,7 +187,7 @@ async function initializeFlow() {
   }
 
   AreaExtensions.selectableNodes(area, selector, { accumulating })
-  // trackMouseEvents(area)
+  trackMouseEvents(area)
 
   addCustomBackground(area)
 }
@@ -295,7 +297,7 @@ function isMouseOutsideNode(details: {
 function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
   area.addPipe((context) => {
     const mouse_inside_nodes: string[] = []
-    if(context.type === 'connectionremove'){
+    if (context.type === 'connectionremove') {
       if (rete_init.editor) {
         const soure_node = rete_init.editor.getNode(context.data.source)
         if (soure_node && soure_node.data) {
@@ -312,7 +314,7 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
           } else {
             const target_node = rete_init.editor.getNode(context.data.target)
             if (target_node && target_node.data) {
-              if(target_node.data.postbackid){
+              if (target_node.data.postbackid) {
                 delete target_node.data['postbackid']
               }
             } else {
@@ -350,194 +352,197 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
         const soure_node = rete_init.editor.getNode(context.data.source)
         if (soure_node && soure_node.data) {
           const target_node = rete_init.editor.getNode(context.data.target)
-            if (target_node && target_node.data) {
-              if(!target_node.data.postbackid && soure_node.data.giver_data[context.data.sourceOutput]){
-                target_node.data.postbackid = soure_node.data.giver_data[context.data.sourceOutput]
-              }
-            } else {
-              toast({
-                title: 'Something went wrong here',
-                variant: 'destructive',
-                duration: 2000,
-              })
-              return
+          if (target_node && target_node.data) {
+            if (
+              !target_node.data.postbackid &&
+              soure_node.data.giver_data[context.data.sourceOutput]
+            ) {
+              target_node.data.postbackid = soure_node.data.giver_data[context.data.sourceOutput]
             }
+          } else {
+            toast({
+              title: 'Something went wrong here',
+              variant: 'destructive',
+              duration: 2000,
+            })
+            return
+          }
           // if (isNodeOfType(soure_node, 'message_node')) {
           //   //do something here
           // }
         }
       }
-    }    
+    }
 
-//     if (context.type === 'zoom') {
-//       closeMenu()
-//       closeNodeOption(false)
-//     }
+    if (context.type === 'zoom') {
+      closeMenu()
+      closeNodeOption(false)
+    }
 
-//     if (context.type === 'pointerdown' && context.data.event.button === 2 && rete_init.editor) {
-//       menuVisible.value = false
-//       nodeOptionVisible.value = false
-//       selected_node.value = ''
+    if (context.type === 'pointerdown' && context.data.event.button === 2 && rete_init.editor) {
+      menuVisible.value = false
+      nodeOptionVisible.value = false
+      selected_node.value = ''
 
-//       menuPosition.value = {
-//         x: context.data.event.clientX,
-//         y: context.data.event.clientY,
-//       }
+      menuPosition.value = {
+        x: context.data.event.clientX,
+        y: context.data.event.clientY,
+      }
 
-//       area.nodeViews.forEach((ar, key) => {
-//         const check_in_position = trackMouseInsideNode({
-//           nodeHeight: ar.element.offsetHeight,
-//           nodeWidth: ar.element.offsetWidth,
-//           nodePosition: ar.position,
-//           mousePosition: context.data.position,
-//         })
-//         if (check_in_position) {
-//           mouse_inside_nodes.push(key)
-//         }
-//       })
+      area.nodeViews.forEach((ar, key) => {
+        const check_in_position = trackMouseInsideNode({
+          nodeHeight: ar.element.offsetHeight,
+          nodeWidth: ar.element.offsetWidth,
+          nodePosition: ar.position,
+          mousePosition: context.data.position,
+        })
+        if (check_in_position) {
+          mouse_inside_nodes.push(key)
+        }
+      })
 
-//       if (!(mouse_inside_nodes.length > 0)) {
-//         menuVisible.value = true
-//       }
-//     }
+      if (!(mouse_inside_nodes.length > 0)) {
+        menuVisible.value = true
+      }
+    }
 
-//     if (context.type === 'nodepicked') {
-//       menuVisible.value = false
-//       nodeOptionVisible.value = false
-//       selected_node.value = context.data.id
-//       multi_selected_node.value = [context.data.id]
-//     }
+    if (context.type === 'nodepicked') {
+      menuVisible.value = false
+      nodeOptionVisible.value = false
+      selected_node.value = context.data.id
+      multi_selected_node.value = [context.data.id]
+    }
 
-//     if (context.type === 'pointerup' && selected_node.value) {
-//       area.nodeViews.forEach((ar, node_key) => {
-//         if (node_key === selected_node.value) {
-//           const mouse_outside = isMouseOutsideNode({
-//             nodeHeight: ar.element.offsetHeight,
-//             nodeWidth: ar.element.offsetWidth,
-//             nodePosition: ar.position,
-//             mousePosition: context.data.position,
-//           })
-//           if (mouse_outside) {
-//             const node = rete_init.editor?.getNode(selected_node.value)
-//             if (node?.selected) {
-//               closeNodeOption(false)
-//             } else {
-//               closeNodeOption()
-//             }
-//           }
-//         }
-//       })
-//     }
+    if (context.type === 'pointerup' && selected_node.value) {
+      area.nodeViews.forEach((ar, node_key) => {
+        if (node_key === selected_node.value) {
+          const mouse_outside = isMouseOutsideNode({
+            nodeHeight: ar.element.offsetHeight,
+            nodeWidth: ar.element.offsetWidth,
+            nodePosition: ar.position,
+            mousePosition: context.data.position,
+          })
+          if (mouse_outside) {
+            const node = rete_init.editor?.getNode(selected_node.value)
+            if (node?.selected) {
+              closeNodeOption(false)
+            } else {
+              closeNodeOption()
+            }
+          }
+        }
+      })
+    }
 
-//     if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
-//       const checker: boolean[] = []
-//       multi_selected_node.value.forEach((node) => {
-//         const e_n = area.nodeViews.get(node)
-//         if (e_n) {
-//           const mouse_outside = isMouseOutsideNode({
-//             nodeHeight: e_n.element.offsetHeight,
-//             nodeWidth: e_n.element.offsetWidth,
-//             nodePosition: e_n.position,
-//             mousePosition: context.data.position,
-//           })
-//           checker.push(mouse_outside)
-//         }
-//       })
-//       if (!checker.includes(false)) {
-//         multi_selected_node.value = []
-//         closeNodeOption(false)
-//       }
-//     }
+    if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
+      const checker: boolean[] = []
+      multi_selected_node.value.forEach((node) => {
+        const e_n = area.nodeViews.get(node)
+        if (e_n) {
+          const mouse_outside = isMouseOutsideNode({
+            nodeHeight: e_n.element.offsetHeight,
+            nodeWidth: e_n.element.offsetWidth,
+            nodePosition: e_n.position,
+            mousePosition: context.data.position,
+          })
+          checker.push(mouse_outside)
+        }
+      })
+      if (!checker.includes(false)) {
+        multi_selected_node.value = []
+        closeNodeOption(false)
+      }
+    }
 
-//     if (
-//       context.type === 'pointerup' &&
-//       context.data.event.button === 0 &&
-//       context.data.event.altKey &&
-//       selected_node.value
-//     ) {
-//       console.log(selected_node.value)
-//       menuPosition.value = {
-//         x: context.data.event.clientX,
-//         y: context.data.event.clientY,
-//       }
-//       console.log(context.data.position)
-//       console.log(menuPosition.value)
-//       nodeOptionVisible.value = true
-//     }
+    if (
+      context.type === 'pointerup' &&
+      context.data.event.button === 0 &&
+      context.data.event.altKey &&
+      selected_node.value
+    ) {
+      console.log(selected_node.value)
+      menuPosition.value = {
+        x: context.data.event.clientX,
+        y: context.data.event.clientY,
+      }
+      console.log(context.data.position)
+      console.log(menuPosition.value)
+      nodeOptionVisible.value = true
+    }
 
-//     return context
-//   })
+    return context
+  })
 
-//   document.addEventListener('click', (e) => {
-//     if (menuVisible.value) {
-//       const target = e.target as HTMLElement
-//       if (!target.closest('.floating-menu')) {
-//         closeMenu()
-//       }
-//     }
-//   })
+  document.addEventListener('click', (e) => {
+    if (menuVisible.value) {
+      const target = e.target as HTMLElement
+      if (!target.closest('.floating-menu')) {
+        closeMenu()
+      }
+    }
+  })
 
-//   document.addEventListener('pointerup', (e) => {
-//     if (e.metaKey || e.ctrlKey) {
-//       const multi_selected: string[] = []
-//       console.log('hey add multi')
-//       if (rete_init.editor && rete_init.editor.getNodes().length > 0) {
-//         rete_init.editor.getNodes().forEach((node) => {
-//           if (node.selected === true) {
-//             multi_selected.push(node.id)
-//           }
-//         })
-//       }
-//       if (multi_selected.length > 1) {
-//         closeNodeOption()
-//         closeMenu()
-//       }
-//       multi_selected_node.value = [...multi_selected]
-//       console.log(multi_selected_node.value)
-//       console.log(selected_node.value)
-//     }
-//   })
-// }
+  document.addEventListener('pointerup', (e) => {
+    if (e.metaKey || e.ctrlKey) {
+      const multi_selected: string[] = []
+      console.log('hey add multi')
+      if (rete_init.editor && rete_init.editor.getNodes().length > 0) {
+        rete_init.editor.getNodes().forEach((node) => {
+          if (node.selected === true) {
+            multi_selected.push(node.id)
+          }
+        })
+      }
+      if (multi_selected.length > 1) {
+        closeNodeOption()
+        closeMenu()
+      }
+      multi_selected_node.value = [...multi_selected]
+      console.log(multi_selected_node.value)
+      console.log(selected_node.value)
+    }
+  })
+}
 
-// function checkConnectionSocket(data: {
-//   source: string
-//   sourceOutput: string
-//   target: string
-//   targetInput: string
-// }) {
-//   if (rete_init.editor) {
-//     const source_node = rete_init.editor.getNode(data.source)
-//     const target_node = rete_init.editor.getNode(data.target)
+function checkConnectionSocket(data: {
+  source: string
+  sourceOutput: string
+  target: string
+  targetInput: string
+}) {
+  if (rete_init.editor) {
+    const source_node = rete_init.editor.getNode(data.source)
+    const target_node = rete_init.editor.getNode(data.target)
 
-//     if (source_node && target_node) {
-//       const output_socket = source_node.outputs[data.sourceOutput]
-//       const Input_socket = target_node.inputs[data.targetInput]
-//       console.log(output_socket, Input_socket)
-//       if (output_socket && Input_socket) {
-//         return output_socket.socket.isCompatibleWith(Input_socket.socket)
-//       }
-//     }
-//   }
-//   return false
-// }
+    if (source_node && target_node) {
+      const output_socket = source_node.outputs[data.sourceOutput]
+      const Input_socket = target_node.inputs[data.targetInput]
+      console.log(output_socket, Input_socket)
+      if (output_socket && Input_socket) {
+        return output_socket.socket.isCompatibleWith(Input_socket.socket)
+      }
+    }
+  }
+  return false
+}
 
-// function getTranslatedMousePosition(event: MousePosition) {
-//   if (area) {
-//     const { transform } = area.area // Rete.js area transform
+function getTranslatedMousePosition(event: MousePosition) {
+  if (area) {
+    const { transform } = area.area // Rete.js area transform
 
-//     // Step 1: Get the mouse position relative to the Rete.js container
-//     const containerRect = area.container.getBoundingClientRect()
-//     const mouseX = event.x - containerRect.left
-//     const mouseY = event.y - containerRect.top
+    // Step 1: Get the mouse position relative to the Rete.js container
+    const containerRect = area.container.getBoundingClientRect()
+    const mouseX = event.x - containerRect.left
+    const mouseY = event.y - containerRect.top
 
-//     // Step 2: Apply pan (transform.x/y) and zoom (transform.k)
-//     const actualX = (mouseX - transform.x) / transform.k
-//     const actualY = (mouseY - transform.y) / transform.k
-//     return { x: actualX, y: actualY }
-//   } else {
-//     return { x: 0, y: 0 }
-//   }
-// }
+    // Step 2: Apply pan (transform.x/y) and zoom (transform.k)
+    const actualX = (mouseX - transform.x) / transform.k
+    const actualY = (mouseY - transform.y) / transform.k
+    return { x: actualX, y: actualY }
+  } else {
+    return { x: 0, y: 0 }
+  }
+}
 
 // Save editor state as JSON
 const saveEditorState = async () => {
@@ -598,20 +603,32 @@ watch(
   { deep: true },
 )
 
-// function removeNode(): void {
-//   if (selected_node.value && area && rete_init.editor) {
-//     const connections = rete_init.editor.getConnections()
-//     connections.forEach((conn) => {
-//       if (conn.source === selected_node.value || conn.target === selected_node.value) {
-//         rete_init.editor?.removeConnection(conn.id)
-//       }
-//     })
-//     console.log(selected_node.value)
-//     rete_init.editor?.removeNode(selected_node.value)
+watch(
+  () => selected_node.value,
+  async (new_node) => {
+    if (new_node && rete_init.editor) {
+      const node = rete_init.editor.getNode(new_node)
+      if (node) {
+        selected_node_obj.value = node
+      }
+    }
+  },
+)
 
-//     closeNodeOption()
-//   }
-// }
+function removeNode(): void {
+  if (selected_node.value && area && rete_init.editor) {
+    const connections = rete_init.editor.getConnections()
+    connections.forEach((conn) => {
+      if (conn.source === selected_node.value || conn.target === selected_node.value) {
+        rete_init.editor?.removeConnection(conn.id)
+      }
+    })
+    console.log(selected_node.value)
+    rete_init.editor?.removeNode(selected_node.value)
+
+    closeNodeOption()
+  }
+}
 
 function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
   const background = document.createElement('div')
@@ -627,8 +644,11 @@ function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
   <div class="">
     <!-- Rete.js Canvas -->
     <div class="h-screen">
-      <div v-if="nodeOptionVisible" class="floating-menu"
-        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }">
+      <div
+        v-if="nodeOptionVisible"
+        class="floating-menu"
+        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }"
+      >
         <div>Node Option</div>
         <div>{{ menuPosition }}</div>
         <div @click="removeNode()">❌ Remove</div>
@@ -641,11 +661,22 @@ function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
       <div class="space-y-2">
         <div class="flex gap-4">
           <button class="font-bold" @click="saveEditorState">Save</button>
+          <span>
+            {{ multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : '' }}
+          </span>
         </div>
       </div>
     </div>
-    <div v-if="selected_node && selected_node_obj && area && selected_node_obj.label != 'reference_node'">
-      <div class="fixed left-0 top-0 h-screen w-[20%] flex flex-col overflow-auto border border-gray-300 bg-gray-100 p-3 overflow-y-auto">
+
+    <NodeSheet v-if="area" :area />
+    <!-- <div
+      v-if="
+        selected_node && selected_node_obj && area && selected_node_obj.label != 'reference_node'
+      "
+    >
+      <div
+        class="fixed left-0 top-0 flex h-screen w-[20%] flex-col overflow-auto overflow-y-auto border border-gray-300 bg-gray-100 p-3"
+      >
         <Sidebar
           v-if="selected_node_obj.label === 'message_node'"
           :node="selected_node_obj"
@@ -665,12 +696,9 @@ function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
           :area
         />
       </div>
-    </div>
+    </div> -->
 
     <!-- Floating Menu -->
-
-    <!-- open for refactoring: instance should be declared here instead of every node -->
-    <!-- <NodeSheet /> -->
   </div>
 </template>
 
