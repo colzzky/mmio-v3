@@ -19,13 +19,13 @@ import {
 import { SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/core/components/ui/sheet'
 import { Textarea } from '@/core/components/ui/textarea'
 import { toast } from '@/core/components/ui/toast'
-import { uiHelpers } from '@/core/utils/ui-helper'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import {
   createMetaTemplateOutIn,
+  Node,
   ReteSockets,
   type Button as MetaButton,
-  type Node,
+  type NodeType,
   type QuickReply,
 } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -33,14 +33,24 @@ import { Icon } from '@iconify/vue'
 import { storeToRefs } from 'pinia'
 import type { BaseSchemes } from 'rete'
 import type { AreaPlugin } from 'rete-area-plugin'
-import { reactive, ref, watch } from 'vue'
-
-const props = defineProps<{ data: Node<'message_node'>; area: AreaPlugin<S, K> }>()
-
-const localData = ref<Node<'message_node'>>(uiHelpers.deepCopy(props.data))
+import { onMounted, reactive, ref } from 'vue'
 
 const { active_flow } = storeToRefs(useAuthWorkspaceStore())
 const { rete_init } = active_flow.value
+
+const props = defineProps<{
+  data: { id: string; label: keyof Omit<NodeType, 'reference_node'> }
+  area: AreaPlugin<S, K>
+}>()
+
+const localNodeData = ref<Node<'message_node'> | undefined>(undefined)
+
+onMounted(() => {
+  const node = rete_init.editor?.getNode(props.data.id)
+  if (!node) throw new Error('No Node found with the given ID')
+
+  localNodeData.value = node as Node<'message_node'>
+})
 
 // CHANGE SHEET STATE
 type State =
@@ -111,16 +121,19 @@ const messageReplyButtonForm = reactive<Form<'message-reply'>>({
     }
   },
   createButton() {
-    if (!localData.value.data) throw new Error('no localData.data')
+    if (!localNodeData.value) throw new Error('no localData')
+    if (!localNodeData.value.data) throw new Error('no localData.data')
+
+    console.log(localNodeData.value)
 
     const newButton = createMetaTemplateOutIn({
-      node: props.data,
+      node: localNodeData.value,
       socket: ReteSockets['button'],
     })
 
     const postbackId = crypto.randomUUID()
-    localData.value.data.giver_data[newButton.key] = postbackId
-    localData.value.data.buttons[newButton.key] = { ...this.form }
+    localNodeData.value.data.giver_data[newButton.key] = postbackId
+    localNodeData.value.data.buttons[newButton.key] = { ...this.form }
 
     toast({
       title: 'Message Reply Button Added',
@@ -131,10 +144,11 @@ const messageReplyButtonForm = reactive<Form<'message-reply'>>({
     this.changeIntent({ intent: 'default' })
   },
   updateButton() {
-    if (!localData.value.data) throw new Error('no localData.data')
+    if (!localNodeData.value) throw new Error('no localData')
+    if (!localNodeData.value.data) throw new Error('no localData.data')
     if (!this.buttonKey) throw new Error('no buttonKey')
 
-    localData.value.data.buttons[this.buttonKey] = { ...this.form }
+    localNodeData.value.data.buttons[this.buttonKey] = { ...this.form }
 
     toast({
       title: 'Message Reply Button Edited',
@@ -145,10 +159,11 @@ const messageReplyButtonForm = reactive<Form<'message-reply'>>({
     this.changeIntent({ intent: 'default' })
   },
   deleteButton(key: string) {
-    if (!localData.value.data) throw new Error('no localData.data')
+    if (!localNodeData.value) throw new Error('no localData')
+    if (!localNodeData.value.data) throw new Error('no localData.data')
     if (!key) throw new Error('no key')
 
-    delete localData.value.data.buttons[key]
+    delete localNodeData.value.data.buttons[key]
 
     toast({
       title: 'Message Reply Button Deleted',
@@ -206,16 +221,17 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
     }
   },
   createButton() {
-    if (!localData.value.data) throw new Error('no localData.data')
+    if (!localNodeData.value) throw new Error('no localData')
+    if (!localNodeData.value.data) throw new Error('no localData.data')
 
     const newButton = createMetaTemplateOutIn({
-      node: props.data,
+      node: localNodeData.value,
       socket: ReteSockets['quickreply'],
     })
 
     const postbackId = crypto.randomUUID()
-    localData.value.data.giver_data[newButton.key] = postbackId
-    localData.value.data.quick_replies[newButton.key] = { ...this.form }
+    localNodeData.value.data.giver_data[newButton.key] = postbackId
+    localNodeData.value.data.quick_replies[newButton.key] = { ...this.form }
 
     toast({
       title: 'Quick Reply Button Added',
@@ -226,10 +242,11 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
     this.changeIntent({ intent: 'default' })
   },
   updateButton() {
-    if (!localData.value.data) throw new Error('no localData.data')
+    if (!localNodeData.value) throw new Error('no localData')
+    if (!localNodeData.value.data) throw new Error('no localData.data')
     if (!this.buttonKey) throw new Error('no buttonKey')
 
-    localData.value.data.quick_replies[this.buttonKey] = { ...this.form }
+    localNodeData.value.data.quick_replies[this.buttonKey] = { ...this.form }
 
     toast({
       title: 'Quick Reply Button Edited',
@@ -240,10 +257,11 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
     this.changeIntent({ intent: 'default' })
   },
   deleteButton(key: string) {
-    if (!localData.value.data) throw new Error('no localData.data')
+    if (!localNodeData.value) throw new Error('no localData')
+    if (!localNodeData.value.data) throw new Error('no localData.data')
     if (!key) throw new Error('no key')
 
-    delete localData.value.data.quick_replies[key]
+    delete localNodeData.value.data.quick_replies[key]
 
     toast({
       title: 'Quick Reply Button Deleted',
@@ -269,9 +287,10 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
   },
 
   deleteAllButtons() {
-    if (!localData.value.data) throw new Error('no localData.data')
+    if (!localNodeData.value) throw new Error('no localData')
+    if (!localNodeData.value.data) throw new Error('no localData.data')
 
-    localData.value.data.quick_replies = {}
+    localNodeData.value.data.quick_replies = {}
 
     toast({
       title: 'All Quick Reply Buttons Cleared',
@@ -280,38 +299,24 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
     })
   },
 })
-
-watch(
-  () => localData.value,
-  (value) => {
-    const node = rete_init.editor?.getNode(value.id)
-    if (!node) throw new Error('no node found')
-
-    node.data = value.data
-    props.area.update('node', node.id)
-  },
-  {
-    deep: true,
-  },
-)
 </script>
 
 <template>
-  <SheetContent v-if="localData.data" side="left" class="p-0">
+  <SheetContent v-if="localNodeData && localNodeData.data" side="left" class="p-0">
     <!-- default state -->
     <template v-if="sheetState === 'default'">
       <SheetHeader
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
         <Icon icon="bx:message" class="row-span-full size-[var(--icon-size)] self-center" />
-        <SheetTitle class="leading-none">{{ localData.data.name }}</SheetTitle>
+        <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none"> Message </SheetDescription>
       </SheetHeader>
       <main class="grid gap-y-4 px-6 py-3">
         <div>
           <Label for="name">Node Name</Label>
           <Input
-            v-model:model-value="localData.data.name"
+            v-model:model-value="localNodeData.data.name"
             id="name"
             type="text"
             name="name"
@@ -321,7 +326,7 @@ watch(
         <div>
           <Label for="text">Text Message</Label>
           <Textarea
-            v-model:model-value="localData.data.text"
+            v-model:model-value="localNodeData.data.text"
             id="text"
             name="text"
             rows="5"
@@ -333,7 +338,7 @@ watch(
           <h3 class="font-medium">Message Reply Buttons</h3>
           <ul class="grid gap-y-1.5 text-xs">
             <li
-              v-for="(reply, key) in localData.data.buttons"
+              v-for="(reply, key) in localNodeData.data.buttons"
               :key
               class="flex items-center justify-between"
             >
@@ -390,7 +395,7 @@ watch(
           </div>
           <ul class="grid gap-y-1.5 text-xs">
             <li
-              v-for="(quickReply, key) in localData.data.quick_replies"
+              v-for="(quickReply, key) in localNodeData.data.quick_replies"
               :key
               class="flex items-center justify-between"
             >
@@ -448,7 +453,7 @@ watch(
         >
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
-        <SheetTitle class="leading-none">{{ localData.data.name }}</SheetTitle>
+        <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">
           <button
             type="button"
@@ -460,8 +465,8 @@ watch(
           > Buttons
         </SheetDescription>
       </SheetHeader>
-      <!-- @note: have to **manually assert** since vue's typing for form submits are `Event` -->
-      <!-- while the browser instance is typed as `SubmitEvent` -->
+      <!-- @note: have to **manually assert** since vue's typing for form submits are `Event`
+      while the browser instance is typed as `SubmitEvent` -->
       <form
         class="grid gap-y-4 px-6 py-3"
         @submit.prevent="messageReplyButtonForm.submitForm($event as SubmitEvent)"
@@ -512,7 +517,7 @@ watch(
         >
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
-        <SheetTitle class="leading-none">{{ localData.data.name }}</SheetTitle>
+        <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">
           <button
             type="button"
@@ -524,8 +529,8 @@ watch(
           > Quick Reply
         </SheetDescription>
       </SheetHeader>
-      <!-- @note: have to **manually assert** since vue's typing for form submits are `Event` -->
-      <!-- while the browser instance is typed as `SubmitEvent` -->
+      <!-- @note: have to **manually assert** since vue's typing for form submits are `Event`
+      while the browser instance is typed as `SubmitEvent` -->
       <form
         class="grid gap-y-4 px-6 py-3"
         @submit.prevent="quickReplyButtonForm.submitForm($event as SubmitEvent)"

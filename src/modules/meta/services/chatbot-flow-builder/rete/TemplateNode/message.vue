@@ -2,7 +2,6 @@
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
 import { sortByIndex } from '../utils'
-import Label from '@/core/components/ui/label/Label.vue'
 import type { Node, Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { objectEntries } from '@vueuse/core'
@@ -25,40 +24,9 @@ const outputs = computed(() => {
   return sortByIndex(entries)
 })
 
-// const quickReplies = ref(sortByIndex(
-//   Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('quickReply')) as [
-//     string,
-//     MetaTemplateOutput,
-//   ][],
-// ),
-// )
-
-// const replies = ref(sortByIndex(
-//   Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('reply')) as [
-//     string,
-//     MetaTemplateOutput,
-//   ][],
-// ))
-
-// onUpdated(() => {
-//   quickReplies.value = sortByIndex(
-//     Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('quickReply')) as [
-//       string,
-//       MetaTemplateOutput,
-//     ][],
-//   )
-
-//   replies.value = sortByIndex(
-//     Object.entries(node.value?.inputs || {}).filter(([key]) => key.split('_').includes('reply')) as [
-//       string,
-//       MetaTemplateOutput,
-//     ][],
-//   )
-// })
-
 // @temporary: open for refactoring
 const event = new CustomEvent('triggerNodeSheet', {
-  detail: props.data,
+  detail: { id: props.data.id, label: props.data.label },
 })
 function handleTriggerNodeSheet() {
   document.dispatchEvent(event)
