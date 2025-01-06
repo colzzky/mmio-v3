@@ -31,7 +31,7 @@ import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-
 import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-menu-plugin'
 import { VuePlugin, Presets } from 'rete-vue-plugin'
 import type { Input } from 'rete/_types/presets/classic'
-import { ref, onMounted, reactive, watch, useTemplateRef, provide } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -42,6 +42,7 @@ interface MousePosition {
 
 const authWorkspace = useAuthWorkspaceStore()
 const { active_flow } = authWorkspace
+const { rete_init } = active_flow
 
 // Menu states
 const menuVisible = ref(false)
@@ -58,11 +59,6 @@ const selected_node_obj = ref<Node<keyof NodeType> | null>(null)
 const multi_selected_node = ref<NodeId[]>([])
 
 let area = null as AreaPlugin<Schemes, AreaExtra> | null
-const rete_init = reactive({
-  editor: null as NodeEditor<Schemes> | null,
-  render: null as VuePlugin<Schemes, AreaExtra> | null,
-  connection: null as ConnectionPlugin<Schemes, AreaExtra> | null,
-})
 
 // Close the floating menu
 function closeMenu() {
@@ -92,7 +88,7 @@ async function initializeFlow() {
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
       ['Reference', () => ReteTemplates.node_templates.reference_node()],
-      ['Text', () => ReteTemplates.node_templates.message_node()],
+      ['Message', () => ReteTemplates.node_templates.message_node()],
       ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
       ['Generic Node', () => ReteTemplates.node_templates.generic_node()],
     ]),
@@ -644,17 +640,7 @@ function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
   <div class="">
     <!-- Rete.js Canvas -->
     <div class="h-screen">
-      <div
-        v-if="nodeOptionVisible"
-        class="floating-menu"
-        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }"
-      >
-        <div>Node Option</div>
-        <div>{{ menuPosition }}</div>
-        <div @click="removeNode()">❌ Remove</div>
-        <div @click="closeNodeOption()">❌ Close</div>
-      </div>
-      <div id="no-right-click" ref="reteContainer" class="rete-container bg-dotted h-svh"></div>
+      <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
     </div>
 
     <div class="absolute top-0 flex justify-between p-4">

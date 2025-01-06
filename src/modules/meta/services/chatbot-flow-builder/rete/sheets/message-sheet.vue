@@ -28,7 +28,9 @@ import {
   type Node,
   type QuickReply,
 } from '@/modules/meta/utils/flow-types'
+import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
+import { storeToRefs } from 'pinia'
 import type { BaseSchemes } from 'rete'
 import type { AreaPlugin } from 'rete-area-plugin'
 import { reactive, ref, watch } from 'vue'
@@ -36,6 +38,9 @@ import { reactive, ref, watch } from 'vue'
 const props = defineProps<{ data: Node<'message_node'>; area: AreaPlugin<S, K> }>()
 
 const localData = ref<Node<'message_node'>>(uiHelpers.deepCopy(props.data))
+
+const { active_flow } = storeToRefs(useAuthWorkspaceStore())
+const { rete_init } = active_flow.value
 
 // CHANGE SHEET STATE
 type State =
@@ -277,9 +282,13 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
 })
 
 watch(
-  () => localData.value.data,
+  () => localData.value,
   (value) => {
-    // @todo: update node data
+    const node = rete_init.editor?.getNode(value.id)
+    if (!node) throw new Error('no node found')
+
+    node.data = value.data
+    props.area.update('node', node.id)
   },
   {
     deep: true,
