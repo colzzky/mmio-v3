@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
-import { sortByIndex } from '../utils'
+import { dispatchTriggerNodeSheetEvent, sortByIndex } from '../utils'
 import type { Node, Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { objectEntries } from '@vueuse/core'
@@ -23,14 +23,6 @@ const outputs = computed(() => {
   const entries = Object.entries(node.value?.outputs || {})
   return sortByIndex(entries)
 })
-
-// @temporary: open for refactoring
-const event = new CustomEvent('triggerNodeSheet', {
-  detail: { id: props.data.id, label: props.data.label },
-})
-function handleTriggerNodeSheet() {
-  document.dispatchEvent(event)
-}
 </script>
 
 <template>
@@ -209,7 +201,13 @@ function handleTriggerNodeSheet() {
         </div>
       </section>
 
-      <button type="button" @click="handleTriggerNodeSheet">edit</button>
+      <!-- @temporary: open for refactoring -->
+      <button
+        type="button"
+        @click="dispatchTriggerNodeSheetEvent({ id: props.data.id, label: props.data.label })"
+      >
+        edit
+      </button>
     </NodeCard>
   </div>
 </template>

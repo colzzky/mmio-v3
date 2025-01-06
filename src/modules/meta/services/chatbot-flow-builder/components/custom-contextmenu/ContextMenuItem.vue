@@ -53,7 +53,8 @@ const iconMapping: Record<string, string> = {
   clone: 'bx:bx-duplicate',
   reference: 'bx:bolt-circle',
   message: 'bx:message',
-  carousel: 'bx:carousel',
+  carousel: 'solar:posts-carousel-horizontal-bold',
+  generic: 'solar:posts-carousel-horizontal-bold-duotone',
 }
 
 const icon = computed(() => iconMapping[props.label.toLocaleLowerCase()])

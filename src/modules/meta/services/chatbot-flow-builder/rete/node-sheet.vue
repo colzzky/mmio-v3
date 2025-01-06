@@ -1,4 +1,5 @@
 <script setup lang="ts" generic="S extends BaseSchemes, K">
+import GenericSheet from './sheets/generic-sheet.vue'
 import MessageSheet from './sheets/message-sheet.vue'
 import { Sheet } from '@/core/components/ui/sheet'
 import { type NodeType } from '@/modules/meta/utils/flow-types'
@@ -48,6 +49,7 @@ const sheet = reactive<SheetState>({
 
 const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   message_node: MessageSheet,
+  generic_node: GenericSheet,
 }
 
 document.addEventListener('triggerNodeSheet', (event) => sheet.initializeData(event), true)
