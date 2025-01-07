@@ -32,7 +32,7 @@ function handleChangeState(state: State) {
 </script>
 
 <template>
-  <SheetContent side="left" class="p-0">
+  <SheetContent side="right" class="p-0 w-[15%]">
     <template v-if="sheetState === 'default'">
       <SheetHeader
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"

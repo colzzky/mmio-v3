@@ -34,23 +34,31 @@ import { Icon } from '@iconify/vue'
 import { storeToRefs } from 'pinia'
 import type { BaseSchemes } from 'rete'
 import type { AreaPlugin } from 'rete-area-plugin'
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 
 const { active_flow } = storeToRefs(useAuthWorkspaceStore())
 const { rete_init } = active_flow.value
 
 const props = defineProps<{
   data: { id: string; label: keyof Omit<NodeType, 'reference_node'> }
-  area: AreaPlugin<S, K>
 }>()
 
 const localNodeData = ref<Node<'generic_node'> | undefined>(undefined)
 
 onMounted(() => {
-  const node = rete_init.editor?.getNode(props.data.id)
+  const node = rete_init.editor?.getNode(rete_init.selected_node_id)
   if (!node) throw new Error('No Node found with the given ID')
 
   localNodeData.value = node as Node<'generic_node'>
+})
+
+watch(() => rete_init.selected_node_id, (node_id) => {
+  if (node_id) {
+    const node = rete_init.editor?.getNode(node_id)
+    if (!node) throw new Error('No Node found with the given ID')
+
+    localNodeData.value = node as Node<'generic_node'>
+  }
 })
 
 // CHANGE SHEET STATE
@@ -72,20 +80,20 @@ interface Form<T extends 'message-reply' | 'quick-reply'> {
   deleteButton: (key: string) => void
 
   intent: T extends 'message-reply'
-    ? Extract<State, 'default' | 'create-message-reply' | 'edit-message-reply'>
-    : Extract<State, 'default' | 'create-quick-reply' | 'edit-quick-reply'>
+  ? Extract<State, 'default' | 'create-message-reply' | 'edit-message-reply'>
+  : Extract<State, 'default' | 'create-quick-reply' | 'edit-quick-reply'>
   buttonKey: string | null
   changeIntent: T extends 'message-reply'
-    ? (
-        args:
-          | { intent: Extract<State, 'default' | 'create-message-reply'> }
-          | { intent: Extract<State, 'edit-message-reply'>; key: string; reply: MetaButton },
-      ) => void
-    : (
-        args:
-          | { intent: Extract<State, 'default' | 'create-quick-reply'> }
-          | { intent: Extract<State, 'edit-quick-reply'>; key: string; quickReply: QuickReply },
-      ) => void
+  ? (
+    args:
+      | { intent: Extract<State, 'default' | 'create-message-reply'> }
+      | { intent: Extract<State, 'edit-message-reply'>; key: string; reply: MetaButton },
+  ) => void
+  : (
+    args:
+      | { intent: Extract<State, 'default' | 'create-quick-reply'> }
+      | { intent: Extract<State, 'edit-quick-reply'>; key: string; quickReply: QuickReply },
+  ) => void
 
   deleteAllButtons?: () => void
 }
@@ -303,16 +311,13 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
 </script>
 
 <template>
-  <SheetContent v-if="localNodeData && localNodeData.data" side="left" class="p-0">
+  <div v-if="localNodeData && localNodeData.data">
     <!-- default state -->
     <template v-if="sheetState === 'default'">
       <SheetHeader
-        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
-      >
-        <Icon
-          icon="solar:posts-carousel-horizontal-bold-duotone"
-          class="row-span-full size-[var(--icon-size)] self-center"
-        />
+        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]">
+        <Icon icon="solar:posts-carousel-horizontal-bold-duotone"
+          class="row-span-full size-[var(--icon-size)] self-center" />
         <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">Generic</SheetDescription>
       </SheetHeader>
@@ -324,12 +329,7 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
         <div class="grid gap-y-4">
           <div>
             <Label for="image-url">Image URL</Label>
-            <Input
-              v-model:model-value="localNodeData.data.image"
-              id="image-url"
-              type="text"
-              name="image-url"
-            />
+            <Input v-model:model-value="localNodeData.data.image" id="image-url" type="text" name="image-url" />
           </div>
           <Separator label="OR" />
           <div class="rounded border-2 border-dashed p-1">
@@ -338,23 +338,12 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
         </div>
         <div>
           <Label for="title">Title</Label>
-          <Input
-            v-model:model-value="localNodeData.data.title"
-            id="title"
-            type="text"
-            name="title"
-          />
+          <Input v-model:model-value="localNodeData.data.title" id="title" type="text" name="title" />
         </div>
         <div>
           <Label for="text">Text Message</Label>
-          <Textarea
-            v-model:model-value="localNodeData.data.text"
-            id="text"
-            name="text"
-            rows="5"
-            class="resize-none"
-            placeholder=""
-          />
+          <Textarea v-model:model-value="localNodeData.data.text" id="text" name="text" rows="5" class="resize-none"
+            placeholder="" />
         </div>
         <div>
           <Label for="image-redirect-url">Image Redirect URL</Label>
@@ -364,11 +353,7 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
         <div class="grid gap-y-3 text-sm">
           <h3 class="font-medium">Message Reply Buttons</h3>
           <ul class="grid gap-y-1.5 text-xs">
-            <li
-              v-for="(reply, key) in localNodeData.data.buttons"
-              :key
-              class="flex items-center justify-between"
-            >
+            <li v-for="(reply, key) in localNodeData.data.buttons" :key class="flex items-center justify-between">
               {{ reply.title }}
               <DropdownMenu>
                 <DropdownMenuTrigger>
@@ -376,23 +361,17 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
                   <Icon icon="bx:dots-vertical-rounded" class="size-5" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem
-                    class="gap-x-2"
-                    @click="
-                      messageReplyButtonForm.changeIntent({
-                        intent: 'edit-message-reply',
-                        key,
-                        reply,
-                      })
-                    "
-                  >
+                  <DropdownMenuItem class="gap-x-2" @click="
+                    messageReplyButtonForm.changeIntent({
+                      intent: 'edit-message-reply',
+                      key,
+                      reply,
+                    })
+                    ">
                     <Icon icon="bx:pencil" class="size-4" />
                     Edit
                   </DropdownMenuItem>
-                  <DropdownMenuItem
-                    class="gap-x-2"
-                    @click="messageReplyButtonForm.deleteButton(key)"
-                  >
+                  <DropdownMenuItem class="gap-x-2" @click="messageReplyButtonForm.deleteButton(key)">
                     <Icon icon="bx:trash" class="size-4" />
                     Delete
                   </DropdownMenuItem>
@@ -400,32 +379,21 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
               </DropdownMenu>
             </li>
           </ul>
-          <Button
-            type="button"
-            variant="ghost"
-            class="w-full border-2 border-dashed text-muted-foreground"
-            @click="messageReplyButtonForm.changeIntent({ intent: 'create-message-reply' })"
-          >
+          <Button type="button" variant="ghost" class="w-full border-2 border-dashed text-muted-foreground"
+            @click="messageReplyButtonForm.changeIntent({ intent: 'create-message-reply' })">
             Add Buttons
           </Button>
         </div>
         <div class="mt-2 grid gap-y-3 text-sm">
           <div class="flex items-center justify-between">
             <h3 class="font-medium">Quick Reply Buttons</h3>
-            <button
-              type="button"
-              class="font-medium text-destructive"
-              @click="quickReplyButtonForm.deleteAllButtons"
-            >
+            <button type="button" class="font-medium text-destructive" @click="quickReplyButtonForm.deleteAllButtons">
               Clear
             </button>
           </div>
           <ul class="grid gap-y-1.5 text-xs">
-            <li
-              v-for="(quickReply, key) in localNodeData.data.quick_replies"
-              :key
-              class="flex items-center justify-between"
-            >
+            <li v-for="(quickReply, key) in localNodeData.data.quick_replies" :key
+              class="flex items-center justify-between">
               {{ quickReply.title }}
               <DropdownMenu>
                 <DropdownMenuTrigger>
@@ -433,16 +401,13 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
                   <Icon icon="bx:dots-vertical-rounded" class="size-5" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem
-                    class="gap-x-2"
-                    @click="
-                      quickReplyButtonForm.changeIntent({
-                        intent: 'edit-quick-reply',
-                        key,
-                        quickReply,
-                      })
-                    "
-                  >
+                  <DropdownMenuItem class="gap-x-2" @click="
+                    quickReplyButtonForm.changeIntent({
+                      intent: 'edit-quick-reply',
+                      key,
+                      quickReply,
+                    })
+                    ">
                     <Icon icon="bx:pencil" class="size-4" />
                     Edit
                   </DropdownMenuItem>
@@ -454,12 +419,8 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
               </DropdownMenu>
             </li>
           </ul>
-          <Button
-            type="button"
-            variant="ghost"
-            class="w-full border-2 border-dashed text-muted-foreground"
-            @click="quickReplyButtonForm.changeIntent({ intent: 'create-quick-reply' })"
-          >
+          <Button type="button" variant="ghost" class="w-full border-2 border-dashed text-muted-foreground"
+            @click="quickReplyButtonForm.changeIntent({ intent: 'create-quick-reply' })">
             Add Quick Reply
           </Button>
         </div>
@@ -467,29 +428,17 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
     </template>
 
     <!-- message reply button state -->
-    <template
-      v-else-if="sheetState === 'create-message-reply' || sheetState === 'edit-message-reply'"
-    >
+    <template v-else-if="sheetState === 'create-message-reply' || sheetState === 'edit-message-reply'">
       <SheetHeader
-        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
-      >
-        <button
-          type="button"
-          class="row-span-full self-center"
-          @click="messageReplyButtonForm.changeIntent({ intent: 'default' })"
-        >
-          <Icon
-            icon="solar:posts-carousel-horizontal-bold-duotone"
-            class="size-[var(--icon-size)]"
-          />
+        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]">
+        <button type="button" class="row-span-full self-center"
+          @click="messageReplyButtonForm.changeIntent({ intent: 'default' })">
+          <Icon icon="solar:posts-carousel-horizontal-bold-duotone" class="size-[var(--icon-size)]" />
         </button>
         <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">
-          <button
-            type="button"
-            class="font-medium text-blue-600"
-            @click="messageReplyButtonForm.changeIntent({ intent: 'default' })"
-          >
+          <button type="button" class="font-medium text-blue-600"
+            @click="messageReplyButtonForm.changeIntent({ intent: 'default' })">
             Generic
           </button>
           > Buttons
@@ -497,19 +446,11 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
       </SheetHeader>
       <!-- @note: have to **manually assert** since vue's typing for form submits are `Event`
       while the browser instance is typed as `SubmitEvent` -->
-      <form
-        class="grid gap-y-4 px-6 py-3"
-        @submit.prevent="messageReplyButtonForm.submitForm($event as SubmitEvent)"
-      >
+      <form class="grid gap-y-4 px-6 py-3" @submit.prevent="messageReplyButtonForm.submitForm($event as SubmitEvent)">
         <div>
           <Label for="title">Button Title</Label>
-          <Input
-            v-model:model-value="messageReplyButtonForm.form.title"
-            id="title"
-            type="text"
-            name="title"
-            placeholder="What do you call this button?"
-          />
+          <Input v-model:model-value="messageReplyButtonForm.form.title" id="title" type="text" name="title"
+            placeholder="What do you call this button?" />
         </div>
         <div>
           <Label for="type">Button Type</Label>
@@ -538,25 +479,15 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
     <!-- quick reply button state -->
     <template v-else-if="sheetState === 'create-quick-reply' || sheetState === 'edit-quick-reply'">
       <SheetHeader
-        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
-      >
-        <button
-          type="button"
-          class="row-span-full self-center"
-          @click="quickReplyButtonForm.changeIntent({ intent: 'default' })"
-        >
-          <Icon
-            icon="solar:posts-carousel-horizontal-bold-duotone"
-            class="size-[var(--icon-size)]"
-          />
+        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]">
+        <button type="button" class="row-span-full self-center"
+          @click="quickReplyButtonForm.changeIntent({ intent: 'default' })">
+          <Icon icon="solar:posts-carousel-horizontal-bold-duotone" class="size-[var(--icon-size)]" />
         </button>
         <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">
-          <button
-            type="button"
-            class="font-medium text-blue-600"
-            @click="messageReplyButtonForm.changeIntent({ intent: 'default' })"
-          >
+          <button type="button" class="font-medium text-blue-600"
+            @click="messageReplyButtonForm.changeIntent({ intent: 'default' })">
             Generic
           </button>
           > Quick Reply
@@ -564,27 +495,15 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
       </SheetHeader>
       <!-- @note: have to **manually assert** since vue's typing for form submits are `Event`
       while the browser instance is typed as `SubmitEvent` -->
-      <form
-        class="grid gap-y-4 px-6 py-3"
-        @submit.prevent="quickReplyButtonForm.submitForm($event as SubmitEvent)"
-      >
+      <form class="grid gap-y-4 px-6 py-3" @submit.prevent="quickReplyButtonForm.submitForm($event as SubmitEvent)">
         <div>
           <Label for="title">Quick Reply Title</Label>
-          <Input
-            v-model:model-value="quickReplyButtonForm.form.title"
-            id="title"
-            type="text"
-            name="title"
-            placeholder="What do you call this quick reply?"
-          />
+          <Input v-model:model-value="quickReplyButtonForm.form.title" id="title" type="text" name="title"
+            placeholder="What do you call this quick reply?" />
         </div>
         <div>
           <Label for="type">Quick Reply Type</Label>
-          <Select
-            v-model:model-value="quickReplyButtonForm.form.content_type"
-            id="type"
-            name="type"
-          >
+          <Select v-model:model-value="quickReplyButtonForm.form.content_type" id="type" name="type">
             <SelectTrigger>
               <SelectValue placeholder="Select a type" />
             </SelectTrigger>
@@ -608,5 +527,5 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
         </template>
       </form>
     </template>
-  </SheetContent>
+  </div>
 </template>

@@ -302,7 +302,7 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
 </script>
 
 <template>
-  <SheetContent v-if="localNodeData && localNodeData.data" side="left" class="p-0">
+  <SheetContent v-if="localNodeData && localNodeData.data" side="right" class="h-screen p-0 w-[15%] overflow-y-scroll">
     <!-- default state -->
     <template v-if="sheetState === 'default'">
       <SheetHeader

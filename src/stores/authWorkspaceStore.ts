@@ -26,12 +26,13 @@ import {
   postCollection,
 } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import type { AreaExtra, Schemes } from '@/modules/meta/utils/flow-types'
+import type { AreaExtra, Node, NodeType, Schemes } from '@/modules/meta/utils/flow-types'
 import { defineStore } from 'pinia'
 import type { NodeEditor } from 'rete'
 import type { ConnectionPlugin } from 'rete-connection-plugin'
 import type { VuePlugin } from 'rete-vue-plugin'
 import { reactive } from 'vue'
+import type { AreaPlugin } from 'rete-area-plugin'
 
 export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
   const active_workspace = reactive<ActiveWorkspace>({
@@ -393,9 +394,35 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
   const active_flow = reactive({
     json: '' as string,
     rete_init: {
+      selected_node_id:'' as string,
+      selected_node: null as Node<keyof NodeType> | null,
+      async node_select(id:string){
+        this.remove_selected_node()
+        const node = this.editor?.getNode(id)
+        if(node && this.area){
+          if(!node.selected){
+            node.selected = true
+            this.area.update('node', node.id)
+          }
+          this.selected_node_id = id
+          this.selected_node = node
+        }
+      },
+      remove_selected_node(){
+        if(this.selected_node && this.area){
+          const node = this.editor?.getNode(this.selected_node.id)
+          if(node){
+            node.selected = false
+            this.area.update('node', this.selected_node.id)
+          }
+        }
+        this.selected_node_id = ''
+        this.selected_node = null
+      },
       editor: null as NodeEditor<Schemes> | null,
       render: null as VuePlugin<Schemes, AreaExtra> | null,
       connection: null as ConnectionPlugin<Schemes, AreaExtra> | null,
+      area:null as AreaPlugin<Schemes, AreaExtra> | null
     },
   })
 
