@@ -394,25 +394,25 @@ function trackMouseEvents() {
         rete_init.remove_selected_node()
       }
 
-      if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
-        const checker: boolean[] = []
-        multi_selected_node.value.forEach((node) => {
-          const e_n = area.nodeViews.get(node)
-          if (e_n) {
-            const mouse_outside = isMouseOutsideNode({
-              nodeHeight: e_n.element.offsetHeight,
-              nodeWidth: e_n.element.offsetWidth,
-              nodePosition: e_n.position,
-              mousePosition: context.data.position,
-            })
-            checker.push(mouse_outside)
-          }
-        })
-        if (!checker.includes(false)) {
-          multi_selected_node.value = []
-          closeNodeOption(false)
-        }
-      }
+      // if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
+      //   const checker: boolean[] = []
+      //   multi_selected_node.value.forEach((node) => {
+      //     const e_n = area.nodeViews.get(node)
+      //     if (e_n) {
+      //       const mouse_outside = isMouseOutsideNode({
+      //         nodeHeight: e_n.element.offsetHeight,
+      //         nodeWidth: e_n.element.offsetWidth,
+      //         nodePosition: e_n.position,
+      //         mousePosition: context.data.position,
+      //       })
+      //       checker.push(mouse_outside)
+      //     }
+      //   })
+      //   if (!checker.includes(false)) {
+      //     multi_selected_node.value = []
+      //     closeNodeOption(false)
+      //   }
+      // }
       return context
     })
   }
