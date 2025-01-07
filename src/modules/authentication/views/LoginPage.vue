@@ -51,6 +51,8 @@ const loginUser = async (email: string, password: string): Promise<void> => {
             photoURL: auth.currentUser.photoURL,
             uid: auth.currentUser.uid,
           })
+          user_auth.listener_refresh()
+      await user_auth.user_auth_initialization();
           router.replace({ name: 'home' })
         }
       })
@@ -78,6 +80,8 @@ async function registerFacebook(): Promise<void> {
         photoURL: result.user.photoURL,
         uid: result.user.uid,
       })
+      user_auth.listener_refresh()
+      await user_auth.user_auth_initialization();
       router.replace({ name: 'home' })
     })
     .catch((error) => {

@@ -1,12 +1,16 @@
 <script lang="ts" setup>
-import MessageSheet from '../rete/TemplateNode/message-sheet.vue'
+import Carousel from '../rete/TemplateNode/carousel.vue'
+import CarouselSidebar from '../rete/TemplateNode/carouselSidebar.vue'
+import Generic from '../rete/TemplateNode/generic.vue'
+import GenericSidebar from '../rete/TemplateNode/genericSidebar.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
 import Sidebar from '../rete/TemplateNode/sidebar.vue'
-import Text from '../rete/TemplateNode/text.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
-import CustomNode from '../rete/customNode.vue'
+import NodeSheet from '../rete/node-sheet.vue'
+import Menu from './custom-contextmenu/index.vue'
+import type { ContextMenuRenderContext } from './custom-contextmenu/types'
 import { toast } from '@/core/components/ui/toast'
 import {
   CustomControls,
@@ -18,20 +22,16 @@ import {
   type SerializedFlow,
   ReteTemplates,
   type NodeType,
-  createMetaTemplateOutIn,
   MetaTemplateOutput,
-  isNodeOfType,
 } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
-import { NodeEditor, type GetSchemes, ClassicPreset, type NodeId, Signal } from 'rete'
-import { AreaPlugin, AreaExtensions, NodeView } from 'rete-area-plugin'
+import { NodeEditor, ClassicPreset, type NodeId, type BaseSchemes } from 'rete'
+import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
 import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-menu-plugin'
-import { VuePlugin, Presets, type VueArea2D } from 'rete-vue-plugin'
-import type { Input, Output, Socket } from 'rete/_types/presets/classic'
-import { ref, onMounted, type Ref, reactive, watch, useTemplateRef } from 'vue'
-import Menu from './custom-contextmenu/index.vue'
-import type { ContextMenuRenderContext } from './custom-contextmenu/types'
+import { VuePlugin, Presets } from 'rete-vue-plugin'
+import type { Input } from 'rete/_types/presets/classic'
+import { ref, onMounted, watch } from 'vue'
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -42,6 +42,7 @@ interface MousePosition {
 
 const authWorkspace = useAuthWorkspaceStore()
 const { active_flow } = authWorkspace
+const { rete_init } = active_flow
 
 // Menu states
 const menuVisible = ref(false)
@@ -58,11 +59,6 @@ const selected_node_obj = ref<Node<keyof NodeType> | null>(null)
 const multi_selected_node = ref<NodeId[]>([])
 
 let area = null as AreaPlugin<Schemes, AreaExtra> | null
-const rete_init = reactive({
-  editor: null as NodeEditor<Schemes> | null,
-  render: null as VuePlugin<Schemes, AreaExtra> | null,
-  connection: null as ConnectionPlugin<Schemes, AreaExtra> | null,
-})
 
 // Close the floating menu
 function closeMenu() {
@@ -88,12 +84,13 @@ async function initializeFlow() {
   rete_init.render = new VuePlugin<Schemes, AreaExtra>()
   rete_init.connection = new ConnectionPlugin<Schemes, AreaExtra>()
   rete_init.connection.addPreset(ConnectionPresets.classic.setup())
-  
+
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
-      ["Reference", () => ReteTemplates.node_templates.reference_node()],
-      ["Text", () => ReteTemplates.node_templates.message_node()],
-      ["Carousel", () => ReteTemplates.node_templates.carousel_node()],
+      ['Reference', () => ReteTemplates.node_templates.reference_node()],
+      ['Message', () => ReteTemplates.node_templates.message_node()],
+      ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
+      ['Generic Node', () => ReteTemplates.node_templates.generic_node()],
     ]),
   })
 
@@ -114,6 +111,13 @@ async function initializeFlow() {
           if (context.payload.label === 'message_node') {
             return Message
           }
+          if (context.payload.label === 'carousel_node') {
+            return Carousel
+          }
+          if (context.payload.label === 'generic_node') {
+            return Generic
+          }
+
           return Presets.classic.Node
         },
         control(context) {
@@ -134,7 +138,11 @@ async function initializeFlow() {
   rete_init.render.addPreset({
     update: function update(context: ContextMenuRenderContext) {
       console.log({ update: context })
-      const delay = typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) === 'undefined' ? 200 : context.data.delay;
+      const delay =
+        typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
+        'undefined'
+          ? 200
+          : context.data.delay
       if (context.data.type === 'contextmenu') {
         return {
           items: context.data.items,
@@ -145,7 +153,11 @@ async function initializeFlow() {
       }
     },
     render: function render(context: ContextMenuRenderContext) {
-      const delay = typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) === 'undefined' ? 200 : context.data.delay;
+      const delay =
+        typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
+        'undefined'
+          ? 200
+          : context.data.delay
       console.log({ render: context })
       if (context.data.type === 'contextmenu') {
         return {
@@ -173,6 +185,7 @@ async function initializeFlow() {
   AreaExtensions.selectableNodes(area, selector, { accumulating })
   trackMouseEvents(area)
 
+  addCustomBackground(area)
 }
 
 const reloadEditorState = async () => {
@@ -280,9 +293,42 @@ function isMouseOutsideNode(details: {
 function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
   area.addPipe((context) => {
     const mouse_inside_nodes: string[] = []
+    if (context.type === 'connectionremove') {
+      if (rete_init.editor) {
+        const soure_node = rete_init.editor.getNode(context.data.source)
+        if (soure_node && soure_node.data) {
+          const origin = soure_node.data.giver_data[context.data.sourceOutput]
+          console.log(context.data)
+          console.log(soure_node)
+          if (!origin) {
+            toast({
+              title: 'Something went wrong',
+              variant: 'destructive',
+              duration: 2000,
+            })
+            return
+          } else {
+            const target_node = rete_init.editor.getNode(context.data.target)
+            if (target_node && target_node.data) {
+              if (target_node.data.postbackid) {
+                delete target_node.data['postbackid']
+              }
+            } else {
+              toast({
+                title: 'Something went wrong here',
+                variant: 'destructive',
+                duration: 2000,
+              })
+              return
+            }
+          }
+        }
+      }
+    }
 
     if (context.type === 'connectioncreate') {
       const check = checkConnectionSocket(context.data)
+      console.log(context.data)
       if (check) {
         toast({
           title: 'Copatible',
@@ -301,28 +347,21 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
       if (rete_init.editor) {
         const soure_node = rete_init.editor.getNode(context.data.source)
         if (soure_node && soure_node.data) {
-          const origin = soure_node.data.giver_data[context.data.sourceOutput]
-          console.log(context.data)
-          console.log(soure_node)
-          if (!origin) {
+          const target_node = rete_init.editor.getNode(context.data.target)
+          if (target_node && target_node.data) {
+            if (
+              !target_node.data.postbackid &&
+              soure_node.data.giver_data[context.data.sourceOutput]
+            ) {
+              target_node.data.postbackid = soure_node.data.giver_data[context.data.sourceOutput]
+            }
+          } else {
             toast({
-              title: 'Something went wrong',
+              title: 'Something went wrong here',
               variant: 'destructive',
               duration: 2000,
             })
             return
-          } else {
-            const target_node = rete_init.editor.getNode(context.data.target)
-            if (target_node && target_node.data) {
-              target_node.data.postbackid = soure_node.data.giver_data[context.data.sourceOutput]
-            } else {
-              toast({
-                title: 'Something went wrong here',
-                variant: 'destructive',
-                duration: 2000,
-              })
-              return
-            }
           }
           // if (isNodeOfType(soure_node, 'message_node')) {
           //   //do something here
@@ -368,7 +407,6 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
       nodeOptionVisible.value = false
       selected_node.value = context.data.id
       multi_selected_node.value = [context.data.id]
-      console.log('select')
     }
 
     if (context.type === 'pointerup' && selected_node.value) {
@@ -381,7 +419,6 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
             mousePosition: context.data.position,
           })
           if (mouse_outside) {
-            console.log('after  select')
             const node = rete_init.editor?.getNode(selected_node.value)
             if (node?.selected) {
               closeNodeOption(false)
@@ -463,7 +500,12 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
   })
 }
 
-function checkConnectionSocket(data: { source: string, sourceOutput: string, target: string, targetInput: string }) {
+function checkConnectionSocket(data: {
+  source: string
+  sourceOutput: string
+  target: string
+  targetInput: string
+}) {
   if (rete_init.editor) {
     const source_node = rete_init.editor.getNode(data.source)
     const target_node = rete_init.editor.getNode(data.target)
@@ -479,7 +521,6 @@ function checkConnectionSocket(data: { source: string, sourceOutput: string, tar
   }
   return false
 }
-
 
 function getTranslatedMousePosition(event: MousePosition) {
   if (area) {
@@ -508,9 +549,7 @@ const saveEditorState = async () => {
       id: node.id,
       label: node.label,
       controls: node.controls as { [key: string]: ControlInterface },
-      outputs: node.outputs as
-        | { [key: string]: MetaTemplateOutput }
-        | undefined,
+      outputs: node.outputs as { [key: string]: MetaTemplateOutput } | undefined,
       inputs: node.inputs as { [key: string]: Input<ClassicPreset.Socket> } | undefined,
       position: position || { x: 0, y: 0 },
       data: node.data, // Any extra props you attached
@@ -532,7 +571,7 @@ const saveEditorState = async () => {
 
   const parse_serial = JSON.stringify(serializedState)
   //Print the serialized node and save to firestore
-  console.log(rete_init.editor)
+  console.log(serializedState)
 
   //Save The Flow to json
   active_flow.json = parse_serial
@@ -551,7 +590,7 @@ onMounted(async () => {
 
 watch(
   () => rete_init.editor,
-  async (init_new, init_old) => {
+  async (init_new) => {
     if (init_new && init_new.getNodes().length > 0) {
       //console.log(rete_init.editor)
       //await saveEditorState()
@@ -562,10 +601,9 @@ watch(
 
 watch(
   () => selected_node.value,
-  async (new_node, old_node) => {
+  async (new_node) => {
     if (new_node && rete_init.editor) {
       const node = rete_init.editor.getNode(new_node)
-      console.log(node)
       if (node) {
         selected_node_obj.value = node
       }
@@ -588,52 +626,63 @@ function removeNode(): void {
   }
 }
 
-function handleClearEditor() {
-  rete_init.editor?.clear()
-  closeMenu()
+function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
+  const background = document.createElement('div')
+
+  background.classList.add('background')
+  background.classList.add('bg-dotted')
+
+  area.area.content.add(background)
 }
 </script>
 
 <template>
   <div class="">
     <!-- Rete.js Canvas -->
-    <div class="h-screen bg-pink-50">
-      <div v-if="nodeOptionVisible" class="floating-menu"
-        :style="{ left: `${menuPosition.x}px`, top: `${menuPosition.y}px` }">
-        <div>Node Option</div>
-        <div>{{ menuPosition }}</div>
-        <div @click="removeNode()">❌ Remove</div>
-        <div @click="closeNodeOption()">❌ Close</div>
-      </div>
-      <div id="no-right-click" ref="reteContainer" class="bg-dotted h-screen bg-gray-50"></div>
+    <div class="h-screen">
+      <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
     </div>
 
     <div class="absolute top-0 flex justify-between p-4">
       <div class="space-y-2">
         <div class="flex gap-4">
           <button class="font-bold" @click="saveEditorState">Save</button>
-          <span>{{
-            multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : ''
-          }}</span>
+          <span>
+            {{ multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : '' }}
+          </span>
         </div>
-        <div>
-          <div class="flex flex-col gap-4">
-            <span>Left Click - Show Menu Options</span>
-            <span>Alt + Right Click inside Node - Show Node Option</span>
-            <span>Cmd + Right Click - Select Multiple Nodes</span>
-          </div>
-        </div>
-      </div>
-      <div
-        class="fixed right-4 flex max-h-[80vh] min-w-2 max-w-[20%] flex-col overflow-auto rounded-lg border border-gray-300 bg-gray-100 p-3">
-        <div v-if="selected_node && selected_node_obj && area">
-          <div v-if="selected_node_obj.label === 'message_node'">
-            <Sidebar :node="selected_node_obj" :node_id="selected_node_obj.id" :area />
-          </div>
-        </div>
-        <div v-else>Selection bar</div>
       </div>
     </div>
+
+    <NodeSheet v-if="area" :area />
+    <!-- <div
+      v-if="
+        selected_node && selected_node_obj && area && selected_node_obj.label != 'reference_node'
+      "
+    >
+      <div
+        class="fixed left-0 top-0 flex h-screen w-[20%] flex-col overflow-auto overflow-y-auto border border-gray-300 bg-gray-100 p-3"
+      >
+        <Sidebar
+          v-if="selected_node_obj.label === 'message_node'"
+          :node="selected_node_obj"
+          :node_id="selected_node_obj.id"
+          :area
+        />
+        <GenericSidebar
+          v-if="selected_node_obj.label === 'generic_node'"
+          :node="selected_node_obj"
+          :node_id="selected_node_obj.id"
+          :area
+        />
+        <CarouselSidebar
+          v-if="selected_node_obj.label === 'carousel_node'"
+          :node="selected_node_obj"
+          :node_id="selected_node_obj.id"
+          :area
+        />
+      </div>
+    </div> -->
 
     <!-- Floating Menu -->
   </div>
@@ -644,7 +693,7 @@ function handleClearEditor() {
   background-image: radial-gradient(currentColor 0.5px, transparent 0.5px);
   background-size: 10px 10px;
   /* Adjust size of dots */
-  color: #c5c5c5;
+
   /* Change dot color */
 }
 

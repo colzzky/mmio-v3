@@ -1,12 +1,6 @@
 import { firestore } from './firebase-client'
 import type { CollectionsInterface, SubCollectionKey } from '@/core/types/FirestoreTypes'
-import type {
-  UserData,
-  WorkspaceData,
-  PlatformApiData,
-  MetaPageData,
-  ChatBotFlowData,
-} from '@/core/utils/types'
+
 import {
   collection,
   doc,
@@ -35,14 +29,6 @@ type Collections = {
   platform_api: 'pa_id'
   meta_pages: 'mp_id'
   chat_bot_flow: 'cb_id'
-}
-
-type CollectionFields = {
-  user_profile: keyof UserData
-  workspaces: keyof WorkspaceData
-  platform_api: keyof PlatformApiData
-  meta_pages: keyof MetaPageData
-  chat_bot_flow: keyof ChatBotFlowData
 }
 
 export type FirebaseOperators =
@@ -74,16 +60,7 @@ interface FirebaseModelReturn<T> {
   error: string
 }
 
-export type FirebaseWhereCondition<T extends keyof Collections> = {
-  fieldName: CollectionFields[T] // This will reference the fields for the collection type
-  operator: FirebaseOperators
-  value: any
-}
 
-export type FirebaseOrderCondition<T extends keyof Collections> = {
-  fieldName: CollectionFields[T]
-  direction?: 'asc' | 'desc'
-}
 
 type NestedKeyOf<ObjectType> = ObjectType extends object
   ? {
@@ -412,86 +389,6 @@ export async function getBySub(
   }
 }
 
-export async function getCollectionByField<T extends keyof Collections>(
-  $col: T,
-  $operation: {
-    $id: Collections[T]
-    // fieldName: F,
-    whereConditions: FirebaseWhereCondition<T>[]
-    limitResults?: number
-    orderConditions?: FirebaseOrderCondition<T>[]
-    lastDocumentId?: string
-  },
-): Promise<FirebaseReturn> {
-  const { whereConditions = [], limitResults, orderConditions, lastDocumentId } = $operation
-  const collectionRef = collection(firestore, $col)
-
-  // Create a base query
-  let q = query(collectionRef)
-
-  // Apply where conditions
-  for (const condition of whereConditions) {
-    q = query(q, where(condition.fieldName as string, condition.operator, condition.value))
-  }
-
-  // Apply order conditions
-  if (orderConditions) {
-    for (const condition of orderConditions) {
-      q = query(
-        q,
-        orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),
-      )
-      q = query(
-        q,
-        orderBy(condition.fieldName as string, !condition.direction ? 'asc' : condition.direction),
-      )
-    }
-  }
-
-  // Apply limit if specified
-  if (limitResults) {
-    q = query(q, limit(limitResults))
-  }
-
-  // Apply startAfter if a document is provided
-  if (lastDocumentId) {
-    const lastDocumentSnapshot = await getDoc(doc(firestore, $col, lastDocumentId)) // Fetch last document snapshot
-    if (lastDocumentSnapshot.exists()) {
-      q = query(q, startAfter(lastDocumentSnapshot)) // Use the snapshot for pagination
-    } else {
-      console.warn(`Document with ID ${lastDocumentId} does not exist.`)
-      // Optional: handle non-existing document scenario, e.g., reset to initial query
-    }
-  }
-
-  try {
-    const querySnapshot = await getDocs(q) // Fetch the documents
-    if (!querySnapshot.empty) {
-      const data = querySnapshot.docs.map((doc) => ({
-        ...doc.data(),
-        createdAt: doc.data().createdAt.toDate().toISOString(),
-        updatedAt: doc.data().updatedAt.toDate().toISOString(),
-      })) // Include document ID if needed
-      return {
-        status: true,
-        data: data,
-        error: '',
-      }
-    } else {
-      return {
-        status: false,
-        error: `No data found.`,
-        data: [],
-      }
-    }
-  } catch (error) {
-    return {
-      status: false,
-      error: `Error fetching data ${error}`,
-      data: undefined,
-    }
-  }
-}
 
 export async function getWhereAny<T extends keyof CollectionsInterface>(
   $col: T, // Path like 'collection/id',
