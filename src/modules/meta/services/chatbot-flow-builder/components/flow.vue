@@ -638,7 +638,9 @@ function addCustomBackground() {
 
 <style scoped>
 .bg-dotted {
+  background: rgb(42, 42, 42);
   background-image: radial-gradient(currentColor 0.5px, transparent 0.5px);
+  color: #404040; /* Text color for contrast */
   background-size: 10px 10px;
   /* Adjust size of dots */
 
