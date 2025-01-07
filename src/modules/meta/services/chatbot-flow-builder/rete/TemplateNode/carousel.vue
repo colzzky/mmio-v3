@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import NodeCard from '../node-card.vue'
-import NodeSheet from '../node-sheet.vue'
 import NodeSocket from '../node-socket.vue'
-import { sortByIndex } from '../utils'
-import type { MetaTemplateOutput, Node, Schemes } from '@/modules/meta/utils/flow-types'
+import { dispatchTriggerNodeSheetEvent, sortByIndex } from '../utils'
+import type { Node, Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { objectEntries } from '@vueuse/core'
-import { computed, onUpdated, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { onMounted } from 'vue'
 
 const props = defineProps<{ data: Schemes['Node']; emit: any; seed: number }>()
@@ -45,7 +44,7 @@ const outputs = computed(() => {
     >
       <NodeCard class="flex !h-auto !w-auto flex-col gap-y-3 pb-0 hover:ring-0">
         <section>
-          <template v-for="[key, input] in inputs" :key="key + seed" class="flex flex-col gap-4">
+          <template v-for="[key, input] in inputs" :key="key + seed">
             <div v-if="input" :data-testid="`input-${key}`" class="relative">
               <div class="flex items-center justify-center rounded-lg px-2">
                 <div class="flex h-9 w-full items-center rounded-md px-3">
@@ -127,11 +126,7 @@ const outputs = computed(() => {
         <section class="border-t py-2">
           <div v-if="node && node.data">
             <div class="flex flex-col gap-4">
-              <template
-                v-for="[key, output] in outputs"
-                :key="key + seed"
-                class="flex flex-col gap-4"
-              >
+              <template v-for="[key, output] in outputs" :key="key + seed">
                 <div v-if="output && key === 'num1'" :data-testid="`input-${key}`" class="relative">
                   <div class="flex items-center justify-end rounded-lg px-5">
                     <span class="flex items-center gap-x-2 font-semibold text-gray-400">
@@ -255,6 +250,14 @@ const outputs = computed(() => {
           </section>
         </div>
       </div>
+
+      <!-- @temporary: open for refactoring -->
+      <button
+        type="button"
+        @click="dispatchTriggerNodeSheetEvent({ id: props.data.id, label: props.data.label })"
+      >
+        edit
+      </button>
     </div>
   </div>
 </template>

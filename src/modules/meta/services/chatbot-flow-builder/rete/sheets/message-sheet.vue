@@ -1,4 +1,5 @@
-<script setup lang="ts" generic="S extends BaseSchemes, K">
+<script setup lang="ts">
+import type { MessageReplyForm, QuickReplyForm } from '../utils'
 import { Button } from '@/core/components/ui/button'
 import {
   DropdownMenu,
@@ -16,41 +17,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/core/components/ui/select'
-import { SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/core/components/ui/sheet'
+import { SheetHeader, SheetTitle, SheetDescription } from '@/core/components/ui/sheet'
 import { Textarea } from '@/core/components/ui/textarea'
 import { toast } from '@/core/components/ui/toast'
-import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
-import {
-  createMetaTemplateOutIn,
-  Node,
-  ReteSockets,
-  type Button as MetaButton,
-  type NodeType,
-  type QuickReply,
-} from '@/modules/meta/utils/flow-types'
+import { createMetaTemplateOutIn, Node, ReteSockets } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
 import { storeToRefs } from 'pinia'
-import type { BaseSchemes } from 'rete'
-import type { AreaPlugin } from 'rete-area-plugin'
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 
 const { active_flow } = storeToRefs(useAuthWorkspaceStore())
 const { rete_init } = active_flow.value
 
-const props = defineProps<{
-  data: { id: string; label: keyof Omit<NodeType, 'reference_node'> }
-  area: AreaPlugin<S, K>
-}>()
-
-const localNodeData = ref<Node<'message_node'> | undefined>(undefined)
+const localNodeData = ref<Node<'generic_node'> | undefined>(undefined)
 
 onMounted(() => {
-  const node = rete_init.editor?.getNode(props.data.id)
+  const node = rete_init.editor?.getNode(rete_init.selected_node_id)
   if (!node) throw new Error('No Node found with the given ID')
 
-  localNodeData.value = node as Node<'message_node'>
+  localNodeData.value = node as Node<'generic_node'>
 })
+
+watch(
+  () => rete_init.selected_node_id,
+  (node_id) => {
+    if (node_id) {
+      const node = rete_init.editor?.getNode(node_id)
+      if (!node) throw new Error('No Node found with the given ID')
+
+      localNodeData.value = node as Node<'generic_node'>
+    }
+  },
+)
 
 // CHANGE SHEET STATE
 type State =
@@ -60,37 +58,15 @@ type State =
   | 'create-quick-reply'
   | 'edit-quick-reply'
 const sheetState = ref<State>('default')
+function handleChangeState(state: State) {
+  sheetState.value = state
 
-interface Form<T extends 'message-reply' | 'quick-reply'> {
-  form: T extends 'message-reply' ? FBAttachmentTemplate.Button : FBAttachmentTemplate.QuickReply
-  initialState: () => void
-
-  submitForm: (event: SubmitEvent) => void
-  createButton: () => void
-  updateButton: () => void
-  deleteButton: (key: string) => void
-
-  intent: T extends 'message-reply'
-    ? Extract<State, 'default' | 'create-message-reply' | 'edit-message-reply'>
-    : Extract<State, 'default' | 'create-quick-reply' | 'edit-quick-reply'>
-  buttonKey: string | null
-  changeIntent: T extends 'message-reply'
-    ? (
-        args:
-          | { intent: Extract<State, 'default' | 'create-message-reply'> }
-          | { intent: Extract<State, 'edit-message-reply'>; key: string; reply: MetaButton },
-      ) => void
-    : (
-        args:
-          | { intent: Extract<State, 'default' | 'create-quick-reply'> }
-          | { intent: Extract<State, 'edit-quick-reply'>; key: string; quickReply: QuickReply },
-      ) => void
-
-  deleteAllButtons?: () => void
+  messageReplyButtonForm.initialState()
+  quickReplyButtonForm.initialState()
 }
 
 // MESSAGE REPLY BUTTON FORM
-const messageReplyButtonForm = reactive<Form<'message-reply'>>({
+const messageReplyButtonForm = reactive<MessageReplyForm>({
   form: {
     title: 'Untitled Button',
     type: 'postback',
@@ -123,8 +99,6 @@ const messageReplyButtonForm = reactive<Form<'message-reply'>>({
   createButton() {
     if (!localNodeData.value) throw new Error('no localData')
     if (!localNodeData.value.data) throw new Error('no localData.data')
-
-    console.log(localNodeData.value)
 
     const newButton = createMetaTemplateOutIn({
       node: localNodeData.value,
@@ -178,9 +152,7 @@ const messageReplyButtonForm = reactive<Form<'message-reply'>>({
   buttonKey: null,
   changeIntent(args) {
     this.intent = args.intent
-    sheetState.value = args.intent
-
-    this.initialState()
+    handleChangeState(args.intent)
 
     if (args.intent === 'edit-message-reply') {
       this.buttonKey = args.key
@@ -190,7 +162,7 @@ const messageReplyButtonForm = reactive<Form<'message-reply'>>({
 })
 
 // QUICK REPLY BUTTON FORM
-const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
+const quickReplyButtonForm = reactive<QuickReplyForm>({
   form: {
     title: 'Untitled Button',
     content_type: 'text',
@@ -276,9 +248,7 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
   buttonKey: null,
   changeIntent(args) {
     this.intent = args.intent
-    sheetState.value = args.intent
-
-    this.initialState()
+    handleChangeState(args.intent)
 
     if (args.intent === 'edit-quick-reply') {
       this.buttonKey = args.key
@@ -302,7 +272,7 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
 </script>
 
 <template>
-  <SheetContent v-if="localNodeData && localNodeData.data" side="right" class="h-screen p-0 w-[15%] overflow-y-scroll">
+  <template v-if="localNodeData && localNodeData.data">
     <!-- default state -->
     <template v-if="sheetState === 'default'">
       <SheetHeader
@@ -440,6 +410,8 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
     </template>
 
     <!-- message reply button state -->
+    <!-- @note: have to **manually assert** since vue's typing for form submits are `Event`
+      while the browser instance is typed as `SubmitEvent` -->
     <template
       v-else-if="sheetState === 'create-message-reply' || sheetState === 'edit-message-reply'"
     >
@@ -449,7 +421,7 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
         <button
           type="button"
           class="row-span-full self-center"
-          @click="messageReplyButtonForm.changeIntent({ intent: 'default' })"
+          @click="handleChangeState('default')"
         >
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
@@ -458,15 +430,14 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
           <button
             type="button"
             class="font-medium text-blue-600"
-            @click="messageReplyButtonForm.changeIntent({ intent: 'default' })"
+            @click="handleChangeState('default')"
           >
             Message
           </button>
           > Buttons
         </SheetDescription>
       </SheetHeader>
-      <!-- @note: have to **manually assert** since vue's typing for form submits are `Event`
-      while the browser instance is typed as `SubmitEvent` -->
+
       <form
         class="grid gap-y-4 px-6 py-3"
         @submit.prevent="messageReplyButtonForm.submitForm($event as SubmitEvent)"
@@ -506,14 +477,16 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
     </template>
 
     <!-- quick reply button state -->
-    <template v-else-if="sheetState === 'create-quick-reply' || sheetState === 'edit-quick-reply'">
+    <!-- @note: have to **manually assert** since vue's typing for form submits are `Event`
+      while the browser instance is typed as `SubmitEvent` -->
+    <template v-else>
       <SheetHeader
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
         <button
           type="button"
           class="row-span-full self-center"
-          @click="quickReplyButtonForm.changeIntent({ intent: 'default' })"
+          @click="handleChangeState('default')"
         >
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
@@ -522,15 +495,13 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
           <button
             type="button"
             class="font-medium text-blue-600"
-            @click="messageReplyButtonForm.changeIntent({ intent: 'default' })"
+            @click="handleChangeState('default')"
           >
             Message
           </button>
-          > Quick Reply
+          > Quick Replies
         </SheetDescription>
       </SheetHeader>
-      <!-- @note: have to **manually assert** since vue's typing for form submits are `Event`
-      while the browser instance is typed as `SubmitEvent` -->
       <form
         class="grid gap-y-4 px-6 py-3"
         @submit.prevent="quickReplyButtonForm.submitForm($event as SubmitEvent)"
@@ -575,5 +546,5 @@ const quickReplyButtonForm = reactive<Form<'quick-reply'>>({
         </template>
       </form>
     </template>
-  </SheetContent>
+  </template>
 </template>
