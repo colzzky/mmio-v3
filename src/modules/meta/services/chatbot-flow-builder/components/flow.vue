@@ -89,8 +89,8 @@ async function initializeFlow() {
     items: ContextMenuPresets.classic.setup([
       ['Reference', () => ReteTemplates.node_templates.reference_node()],
       ['Message', () => ReteTemplates.node_templates.message_node()],
+      ['Generic', () => ReteTemplates.node_templates.generic_node()],
       ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
-      ['Generic Node', () => ReteTemplates.node_templates.generic_node()],
     ]),
   })
 
