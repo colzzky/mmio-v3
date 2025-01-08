@@ -2,9 +2,12 @@
 import Carousel from '../rete/TemplateNode/carousel.vue'
 import CarouselSidebar from '../rete/TemplateNode/carouselSidebar.vue'
 import Generic from '../rete/TemplateNode/generic.vue'
+import  Trigger from '../rete/TemplateNode/trigger.vue'
 import GenericSidebar from '../rete/TemplateNode/genericSidebar.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Media from '../rete/TemplateNode/media.vue'
+import Image from '../rete/TemplateNode/image.vue'
+import Audio from '../rete/TemplateNode/audio.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
 import Sidebar from '../rete/TemplateNode/sidebar.vue'
 import CustomConnection from '../rete/custom-connection.vue'
@@ -96,6 +99,9 @@ async function initializeFlow() {
       ['Generic', () => ReteTemplates.node_templates.generic_node()],
       ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
       ['Media', () => ReteTemplates.node_templates.media_node()],
+      ['Image', () => ReteTemplates.node_templates.image_node()],
+      ['Audio', () => ReteTemplates.node_templates.audio_node()],
+      ['Trigger', () => ReteTemplates.node_templates.trigger_node()],
     ]),
   })
 
@@ -124,6 +130,15 @@ async function initializeFlow() {
           }
           if (context.payload.label === 'media_node') {
             return Media
+          }
+          if (context.payload.label === 'image_node') {
+            return Image
+          }
+          if (context.payload.label === 'audio_node') {
+            return Audio
+          }
+          if (context.payload.label === 'trigger_node') {
+            return Trigger
           }
 
           return Presets.classic.Node

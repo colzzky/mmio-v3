@@ -11,6 +11,9 @@ export interface NodeType {
   carousel_node: CarouselNode
   reference_node: ReferenceNode
   media_node: MediaNode
+  image_node: ImageNode
+  audio_node: AudioNode
+  trigger_node: TriggerNode
 }
 
 export interface CarouselCard {
@@ -64,6 +67,7 @@ export interface MessageNode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
+
 export interface MediaNode {
   name: string
   url: string
@@ -72,6 +76,37 @@ export interface MediaNode {
   postbackid?: string
   buttons: Record<string, Button>
   quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface ImageNode {
+  name: string
+  url: string
+  type: string
+  delay?: string
+  postbackid?: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface AudioNode {
+  name: string
+  url: string
+  type: string
+  delay?: string
+  postbackid?: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface TriggerNode {
+  name: string
+  trigger_type: string
+  trigger_keyword?: string
+  keyword_strictness?: string
+  postbackid?: string
   giver_data: Record<string, string>
 }
 
@@ -165,6 +200,29 @@ export namespace ReteTemplates {
         'num1',
       )
 
+      return node
+    },
+    trigger_node() {
+      const node = new Node('trigger_node')
+      const num1_postback = crypto.randomUUID()
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Trigger Node',
+        keyword_strictness: 'wide',
+        trigger_type: 'keyword',
+        trigger_keyword: '',
+        giver_data: {
+          num1:num1_postback
+        },
+      }
+      node.id = crypto.randomUUID()
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['triggers'],
+        },
+        'num1',
+      )
       return node
     },
     text_node() {
@@ -297,6 +355,67 @@ export namespace ReteTemplates {
       return node
     },
 
+    image_node() {
+      const node = new Node('image_node')
+      const num1_postback = crypto.randomUUID()
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Image Node',
+        url: '',
+        type: '',
+        giver_data: {},
+        quick_replies: {},
+        buttons: {},
+      }
+      node.id = crypto.randomUUID()
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['image'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['image'],
+        },
+        'num1',
+      )
+      return node
+    },
+
+    audio_node() {
+      const node = new Node('audio_node')
+      const num1_postback = crypto.randomUUID()
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Audio Node',
+        url: '',
+        type: '',
+        giver_data: {},
+        quick_replies: {},
+        buttons: {},
+      }
+      node.id = crypto.randomUUID()
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['audio'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['audio'],
+        },
+        'num1',
+      )
+      return node
+    },
     //Should be generic node
     message_node() {
       const node = new Node('message_node')
@@ -452,6 +571,7 @@ const socketNames = [
   'file',
   'facebookmedia',
   'delay',
+  'audio',
   'delayO',
   'Esequence',
   'Ssequence',
@@ -593,6 +713,19 @@ export const socketDefinitions: Record<
     'Accept All',
   ],
   video: [
+    'carouselItem',
+    'carousel',
+    'text',
+    'image',
+    'file',
+    'video',
+    'facebookmedia',
+    'delay',
+    'timegap',
+    'actions',
+    'Accept All',
+  ],
+  audio: [
     'carouselItem',
     'carousel',
     'text',
