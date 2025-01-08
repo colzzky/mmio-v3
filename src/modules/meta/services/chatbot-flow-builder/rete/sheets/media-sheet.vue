@@ -17,9 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/core/components/ui/select'
-import { Separator } from '@/core/components/ui/separator'
 import { SheetHeader, SheetTitle, SheetDescription } from '@/core/components/ui/sheet'
-import { Textarea } from '@/core/components/ui/textarea'
 import { toast } from '@/core/components/ui/toast'
 import { createMetaTemplateOutIn, Node, ReteSockets } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -30,13 +28,13 @@ import { onMounted, reactive, ref, watch } from 'vue'
 const { active_flow } = storeToRefs(useAuthWorkspaceStore())
 const { rete_init } = active_flow.value
 
-const localNodeData = ref<Node<'generic_node'> | undefined>(undefined)
+const localNodeData = ref<Node<'media_node'> | undefined>(undefined)
 
 onMounted(() => {
   const node = rete_init.editor?.getNode(rete_init.selected_node_id)
   if (!node) throw new Error('No Node found with the given ID')
 
-  localNodeData.value = node as Node<'generic_node'>
+  localNodeData.value = node as Node<'media_node'>
 })
 
 watch(
@@ -46,7 +44,7 @@ watch(
       const node = rete_init.editor?.getNode(node_id)
       if (!node) throw new Error('No Node found with the given ID')
 
-      localNodeData.value = node as Node<'generic_node'>
+      localNodeData.value = node as Node<'media_node'>
     }
   },
 )
@@ -291,18 +289,20 @@ function handleRemoveDelay() {
       <SheetHeader
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
-        <Icon
-          icon="solar:posts-carousel-horizontal-bold-duotone"
-          class="row-span-full size-[var(--icon-size)] self-center"
-        />
+        <Icon icon="bx:image" class="row-span-full size-[var(--icon-size)] self-center" />
         <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
-        <SheetDescription class="leading-none">Generic</SheetDescription>
+        <SheetDescription class="leading-none">Facebook Media</SheetDescription>
       </SheetHeader>
-
       <main class="grid gap-y-4 px-6 py-3">
         <div>
           <Label for="name">Name</Label>
-          <Input v-model:model-value="localNodeData.data.name" id="name" type="text" name="name" />
+          <Input
+            v-model:model-value="localNodeData.data.name"
+            id="name"
+            type="text"
+            name="name"
+            placeholder="What do you call this node?"
+          />
         </div>
         <div class="text-sm">
           <div class="flex items-center justify-between">
@@ -327,23 +327,10 @@ function handleRemoveDelay() {
             </span>
           </div>
         </div>
-        <div class="grid gap-y-4">
-          <div>
-            <Label for="image-url">Image URL</Label>
-            <Input
-              v-model:model-value="localNodeData.data.image"
-              id="image-url"
-              type="text"
-              name="image-url"
-            />
-          </div>
-          <Separator label="OR" />
+        <div>
+          <Label for="media">Media</Label>
           <div class="relative aspect-video rounded border-2 border-dashed p-1">
-            <img
-              :src="localNodeData.data.image"
-              alt=""
-              class="size-full rounded object-cover object-center"
-            />
+            <!-- <img alt="" class="size-full rounded object-cover object-center" /> -->
             <small
               class="absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 text-balance text-center text-muted-foreground"
             >
@@ -351,39 +338,15 @@ function handleRemoveDelay() {
             </small>
           </div>
         </div>
-        <div>
-          <Label for="title">Title</Label>
-          <Input
-            v-model:model-value="localNodeData.data.title"
-            id="title"
-            type="text"
-            name="title"
-          />
-        </div>
-        <div>
-          <Label for="text">Text Message</Label>
-          <Textarea
-            v-model:model-value="localNodeData.data.text"
-            id="text"
-            name="text"
-            rows="5"
-            class="resize-none"
-            placeholder=""
-          />
-        </div>
-        <div>
-          <Label for="image-redirect-url">Image Redirect URL</Label>
-          <Input id="image-redirect-url" type="text" name="image-redirect-url" />
-        </div>
         <div class="grid gap-y-3 text-sm">
           <h3 class="font-medium">Message Reply Buttons</h3>
           <ul class="grid gap-y-1.5 text-xs">
             <li
-              v-for="(button, key) in localNodeData.data.buttons"
+              v-for="(reply, key) in localNodeData.data.buttons"
               :key
               class="flex items-center justify-between"
             >
-              {{ button.title }}
+              {{ reply.title }}
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <span class="sr-only">open dropdown menu</span>
@@ -396,7 +359,7 @@ function handleRemoveDelay() {
                       messageReplyButtonForm.changeIntent({
                         intent: 'edit-message-reply',
                         key,
-                        reply: button,
+                        reply,
                       })
                     "
                   >
@@ -503,7 +466,7 @@ function handleRemoveDelay() {
             class="font-medium text-blue-600"
             @click="handleChangeState('default')"
           >
-            Generic
+            Facebook Media
           </button>
           > Buttons
         </SheetDescription>
@@ -550,7 +513,7 @@ function handleRemoveDelay() {
     <!-- quick reply button state -->
     <!-- @note: have to **manually assert** since vue's typing for form submits are `Event`
       while the browser instance is typed as `SubmitEvent` -->
-    <template v-else-if="sheetState === 'create-quick-reply' || sheetState === 'edit-quick-reply'">
+    <template v-else>
       <SheetHeader
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
@@ -568,12 +531,11 @@ function handleRemoveDelay() {
             class="font-medium text-blue-600"
             @click="handleChangeState('default')"
           >
-            Generic
+            Facebook Media
           </button>
           > Quick Replies
         </SheetDescription>
       </SheetHeader>
-
       <form
         class="grid gap-y-4 px-6 py-3"
         @submit.prevent="quickReplyButtonForm.submitForm($event as SubmitEvent)"

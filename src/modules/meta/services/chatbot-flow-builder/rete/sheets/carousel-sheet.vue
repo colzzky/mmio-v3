@@ -394,6 +394,18 @@ const carouselCardForm = reactive<CarouselCardForm>({
     }
   },
 })
+
+function handleRemoveDelay() {
+  if (!localNodeData.value?.data) return
+
+  localNodeData.value.data.delay = '0'
+
+  toast({
+    title: 'Removed delay',
+    variant: 'success',
+    duration: 2000,
+  })
+}
 </script>
 
 <template>
@@ -414,6 +426,29 @@ const carouselCardForm = reactive<CarouselCardForm>({
         <div>
           <Label for="name">Name</Label>
           <Input v-model:model-value="localNodeData.data.name" id="name" type="text" name="name" />
+        </div>
+        <div class="text-sm">
+          <div class="flex items-center justify-between">
+            <h3 class="font-medium">Delay</h3>
+            <button type="button" class="font-medium text-destructive" @click="handleRemoveDelay">
+              Remove Delay
+            </button>
+          </div>
+          <div class="flex items-center gap-x-4">
+            <Input
+              v-model:model-value="localNodeData.data.delay"
+              id="delay"
+              type="range"
+              name="delay"
+              min="0"
+              max="10"
+              default-value="0"
+            />
+            <span class="whitespace-nowrap">
+              {{ localNodeData.data.delay ?? '0' }}
+              seconds
+            </span>
+          </div>
         </div>
         <div class="grid gap-y-3 text-sm">
           <h3 class="font-medium">Carousel Cards</h3>
@@ -572,7 +607,7 @@ const carouselCardForm = reactive<CarouselCardForm>({
               class="size-full rounded object-cover object-center"
             />
             <small
-              class="absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 text-muted-foreground"
+              class="absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 text-balance text-center text-muted-foreground"
             >
               Drag and drop media here
             </small>

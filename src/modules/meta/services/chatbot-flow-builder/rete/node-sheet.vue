@@ -1,6 +1,7 @@
 <script setup lang="ts" generic="S extends BaseSchemes, K">
 import CarouselSheet from './sheets/carousel-sheet.vue'
 import GenericSheet from './sheets/generic-sheet.vue'
+import MediaSheet from './sheets/media-sheet.vue'
 import MessageSheet from './sheets/message-sheet.vue'
 import { Button } from '@/core/components/ui/button'
 import { Sheet, SheetContent } from '@/core/components/ui/sheet'
@@ -56,6 +57,7 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   message_node: MessageSheet,
   generic_node: GenericSheet,
   carousel_node: CarouselSheet,
+  media_node: MediaSheet,
 }
 
 function selectNode(id: string) {
@@ -79,7 +81,7 @@ watch(
     <SheetContent
       class="w-[clamp(300px,100%,15%)] overflow-y-scroll p-0 shadow-none [&>button]:hidden"
     >
-      <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" :data="sheet.data" />
+      <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" />
     </SheetContent>
   </Sheet>
 

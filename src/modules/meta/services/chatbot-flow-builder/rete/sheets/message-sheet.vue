@@ -269,6 +269,18 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
     })
   },
 })
+
+function handleRemoveDelay() {
+  if (!localNodeData.value?.data) return
+
+  localNodeData.value.data.delay = '0'
+
+  toast({
+    title: 'Removed delay',
+    variant: 'success',
+    duration: 2000,
+  })
+}
 </script>
 
 <template>
@@ -284,7 +296,7 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
       </SheetHeader>
       <main class="grid gap-y-4 px-6 py-3">
         <div>
-          <Label for="name">Node Name</Label>
+          <Label for="name">Name</Label>
           <Input
             v-model:model-value="localNodeData.data.name"
             id="name"
@@ -292,6 +304,29 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
             name="name"
             placeholder="What do you call this node?"
           />
+        </div>
+        <div class="text-sm">
+          <div class="flex items-center justify-between">
+            <h3 class="font-medium">Delay</h3>
+            <button type="button" class="font-medium text-destructive" @click="handleRemoveDelay">
+              Remove Delay
+            </button>
+          </div>
+          <div class="flex items-center gap-x-4">
+            <Input
+              v-model:model-value="localNodeData.data.delay"
+              id="delay"
+              type="range"
+              name="delay"
+              min="0"
+              max="10"
+              default-value="0"
+            />
+            <span class="whitespace-nowrap">
+              {{ localNodeData.data.delay ?? '0' }}
+              seconds
+            </span>
+          </div>
         </div>
         <div>
           <Label for="text">Text Message</Label>

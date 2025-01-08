@@ -3,7 +3,7 @@ import type { FBAttachmentTemplate } from './flow-meta-types'
 import { toast } from '@/core/components/ui/toast'
 import { ClassicPreset, type GetSchemes } from 'rete'
 import type { VueArea2D } from 'rete-vue-plugin'
-import type { Input, Output } from 'rete/_types/presets/classic'
+import type { Input } from 'rete/_types/presets/classic'
 
 export interface NodeType {
   message_node: MessageNode

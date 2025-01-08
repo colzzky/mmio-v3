@@ -44,7 +44,7 @@ const outputs = computed(() => {
             <div class="flex items-center justify-center rounded-lg px-2">
               <div class="flex h-9 w-full items-center rounded-md px-3">
                 <span class="flex items-center gap-x-2 font-semibold">
-                  <Icon icon="bx:message" class="size-6" />
+                  <Icon icon="solar:posts-carousel-horizontal-bold-duotone" class="size-6" />
                   Generic
                 </span>
               </div>
