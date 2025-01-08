@@ -6,6 +6,7 @@ import type {
   QuickReply,
   Button as MetaButton,
   Button,
+  Condition,
 } from '@/modules/meta/utils/flow-types'
 import type { Input, Output, Socket } from 'rete/_types/presets/classic'
 
@@ -94,5 +95,23 @@ export interface CarouselCardForm {
       | { intent: 'default' | 'create-carousel-card' | 'create-carousel-card-button' }
       | { intent: 'edit-carousel-card-button'; key: string; button: Button }
       | { intent: 'edit-carousel-card'; key: number; card?: CarouselCard },
+  ): void
+}
+
+export interface ConditionForm {
+  form: Condition
+  initialState(): void
+
+  submitForm(event: SubmitEvent): void
+  createCondition(): void
+  updateCondition(): void
+  deleteCondition(key: number): void
+
+  intent: 'default' | 'create-condition' | 'edit-condition'
+  conditionKey: number | null
+  changeIntent(
+    args:
+      | { intent: 'default' | 'create-condition' }
+      | { intent: 'edit-condition'; key: number; condition: Condition },
   ): void
 }

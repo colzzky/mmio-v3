@@ -1,8 +1,5 @@
 <script setup lang="ts" generic="S extends BaseSchemes, K">
-import CarouselSheet from './sheets/carousel-sheet.vue'
-import GenericSheet from './sheets/generic-sheet.vue'
-import MediaSheet from './sheets/media-sheet.vue'
-import MessageSheet from './sheets/message-sheet.vue'
+import { MessageSheet, GenericSheet, CarouselSheet, MediaSheet, ConditionSheet } from './sheets'
 import { Button } from '@/core/components/ui/button'
 import { Sheet, SheetContent } from '@/core/components/ui/sheet'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
@@ -58,6 +55,7 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   generic_node: GenericSheet,
   carousel_node: CarouselSheet,
   media_node: MediaSheet,
+  condition_node: ConditionSheet,
 }
 
 function selectNode(id: string) {

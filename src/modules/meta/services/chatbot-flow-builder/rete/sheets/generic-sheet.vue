@@ -111,7 +111,7 @@ const messageReplyButtonForm = reactive<MessageReplyForm>({
     localNodeData.value.data.buttons[newButton.key] = { ...this.form }
 
     toast({
-      title: 'Message Reply Button Added',
+      title: 'Message Reply Button Created',
       variant: 'success',
       duration: 2000,
     })
@@ -207,7 +207,7 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
     localNodeData.value.data.quick_replies[newButton.key] = { ...this.form }
 
     toast({
-      title: 'Quick Reply Button Added',
+      title: 'Quick Reply Button Created',
       variant: 'success',
       duration: 2000,
     })

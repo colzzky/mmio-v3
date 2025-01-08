@@ -11,6 +11,7 @@ export interface NodeType {
   carousel_node: CarouselNode
   reference_node: ReferenceNode
   media_node: MediaNode
+  condition_node: ConditionNode
   image_node: ImageNode
   audio_node: AudioNode
   trigger_node: TriggerNode
@@ -76,6 +77,22 @@ export interface MediaNode {
   postbackid?: string
   buttons: Record<string, Button>
   quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface Condition {
+  label: string
+  type: string
+  qualifier: string
+  value: any
+}
+
+export interface ConditionNode {
+  name: string
+  conditions: Condition[]
+  type: string
+  delay?: string
+  postbackid?: string
   giver_data: Record<string, string>
 }
 
@@ -212,7 +229,7 @@ export namespace ReteTemplates {
         trigger_type: 'keyword',
         trigger_keyword: '',
         giver_data: {
-          num1:num1_postback
+          num1: num1_postback,
         },
       }
       node.id = crypto.randomUUID()

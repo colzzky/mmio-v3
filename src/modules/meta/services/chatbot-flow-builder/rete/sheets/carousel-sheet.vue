@@ -115,7 +115,7 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
     localNodeData.value.data.quick_replies[newButton.key] = { ...this.form }
 
     toast({
-      title: 'Quick Reply Button Added',
+      title: 'Quick Reply Button Created',
       variant: 'success',
       duration: 2000,
     })
@@ -236,7 +236,6 @@ const carouselCardForm = reactive<CarouselCardForm>({
 
       case 'delete-card':
         if (this.cardKey === null) return
-        console.log(this.cardKey)
         this.deleteCard(this.cardKey)
         break
 
@@ -259,7 +258,7 @@ const carouselCardForm = reactive<CarouselCardForm>({
     this.form.buttons[newButton.key] = { ...this.buttonForm }
 
     toast({
-      title: 'Carousel Card Button Added',
+      title: 'Carousel Card Button Created',
       variant: 'success',
       duration: 2000,
     })
