@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/core/components/ui/select'
+import { Separator } from '@/core/components/ui/separator'
 import { SheetHeader, SheetTitle, SheetDescription } from '@/core/components/ui/sheet'
 import { Textarea } from '@/core/components/ui/textarea'
 import { toast } from '@/core/components/ui/toast'
@@ -278,19 +279,50 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
       <SheetHeader
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
-        <Icon icon="bx:message" class="row-span-full size-[var(--icon-size)] self-center" />
+        <Icon
+          icon="solar:posts-carousel-horizontal-bold-duotone"
+          class="row-span-full size-[var(--icon-size)] self-center"
+        />
         <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
-        <SheetDescription class="leading-none"> Message </SheetDescription>
+        <SheetDescription class="leading-none">Generic</SheetDescription>
       </SheetHeader>
+
       <main class="grid gap-y-4 px-6 py-3">
         <div>
-          <Label for="name">Node Name</Label>
+          <Label for="name">Name</Label>
+          <Input v-model:model-value="localNodeData.data.name" id="name" type="text" name="name" />
+        </div>
+        <div class="grid gap-y-4">
+          <div>
+            <Label for="image-url">Image URL</Label>
+            <Input
+              v-model:model-value="localNodeData.data.image"
+              id="image-url"
+              type="text"
+              name="image-url"
+            />
+          </div>
+          <Separator label="OR" />
+          <div class="relative aspect-video rounded border-2 border-dashed p-1">
+            <img
+              :src="localNodeData.data.image"
+              alt=""
+              class="size-full rounded object-cover object-center"
+            />
+            <small
+              class="absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 text-muted-foreground"
+            >
+              Drag and drop media here
+            </small>
+          </div>
+        </div>
+        <div>
+          <Label for="title">Title</Label>
           <Input
-            v-model:model-value="localNodeData.data.name"
-            id="name"
+            v-model:model-value="localNodeData.data.title"
+            id="title"
             type="text"
-            name="name"
-            placeholder="What do you call this node?"
+            name="title"
           />
         </div>
         <div>
@@ -304,15 +336,19 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
             placeholder=""
           />
         </div>
+        <div>
+          <Label for="image-redirect-url">Image Redirect URL</Label>
+          <Input id="image-redirect-url" type="text" name="image-redirect-url" />
+        </div>
         <div class="grid gap-y-3 text-sm">
           <h3 class="font-medium">Message Reply Buttons</h3>
           <ul class="grid gap-y-1.5 text-xs">
             <li
-              v-for="(reply, key) in localNodeData.data.buttons"
+              v-for="(button, key) in localNodeData.data.buttons"
               :key
               class="flex items-center justify-between"
             >
-              {{ reply.title }}
+              {{ button.title }}
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <span class="sr-only">open dropdown menu</span>
@@ -325,7 +361,7 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
                       messageReplyButtonForm.changeIntent({
                         intent: 'edit-message-reply',
                         key,
-                        reply,
+                        reply: button,
                       })
                     "
                   >
@@ -432,7 +468,7 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
             class="font-medium text-blue-600"
             @click="handleChangeState('default')"
           >
-            Message
+            Generic
           </button>
           > Buttons
         </SheetDescription>
@@ -479,7 +515,7 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
     <!-- quick reply button state -->
     <!-- @note: have to **manually assert** since vue's typing for form submits are `Event`
       while the browser instance is typed as `SubmitEvent` -->
-    <template v-else>
+    <template v-else-if="sheetState === 'create-quick-reply' || sheetState === 'edit-quick-reply'">
       <SheetHeader
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
@@ -497,11 +533,12 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
             class="font-medium text-blue-600"
             @click="handleChangeState('default')"
           >
-            Message
+            Generic
           </button>
           > Quick Replies
         </SheetDescription>
       </SheetHeader>
+
       <form
         class="grid gap-y-4 px-6 py-3"
         @submit.prevent="quickReplyButtonForm.submitForm($event as SubmitEvent)"

@@ -9,6 +9,7 @@ import Sidebar from '../rete/TemplateNode/sidebar.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
 import NodeSheet from '../rete/node-sheet.vue'
+import { dispatchTriggerNodeSheetEvent } from '../rete/utils'
 import Menu from './custom-contextmenu/index.vue'
 import type { ContextMenuRenderContext } from './custom-contextmenu/types'
 import { toast } from '@/core/components/ui/toast'
@@ -51,14 +52,13 @@ const menuPosition = ref<MousePosition>({ x: 0, y: 0 })
 const mousePosition = ref<MousePosition>({ x: 0, y: 0 })
 const reteContainer = ref<HTMLDivElement>()
 const socket = new ClassicPreset.Socket('socket')
+const editor_load = ref<boolean>(true)
 
 const selector = AreaExtensions.selector()
 const accumulating = AreaExtensions.accumulateOnCtrl()
 const selected_node = ref<NodeId>('')
 const selected_node_obj = ref<Node<keyof NodeType> | null>(null)
 const multi_selected_node = ref<NodeId[]>([])
-
-let area = null as AreaPlugin<Schemes, AreaExtra> | null
 
 // Close the floating menu
 function closeMenu() {
@@ -76,26 +76,29 @@ function closeNodeOption(reset_selected: boolean = true) {
 }
 
 async function initializeFlow() {
+  editor_load.value = true
   if (!reteContainer.value) return
 
   // Initialize the Area and Rete
-  area = new AreaPlugin<Schemes, AreaExtra>(reteContainer.value)
+  rete_init.area = new AreaPlugin<Schemes, AreaExtra>(reteContainer.value)
   rete_init.editor = new NodeEditor<Schemes>()
   rete_init.render = new VuePlugin<Schemes, AreaExtra>()
   rete_init.connection = new ConnectionPlugin<Schemes, AreaExtra>()
   rete_init.connection.addPreset(ConnectionPresets.classic.setup())
 
+  if (!rete_init.area) return
+
   const contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
       ['Reference', () => ReteTemplates.node_templates.reference_node()],
       ['Message', () => ReteTemplates.node_templates.message_node()],
+      ['Generic', () => ReteTemplates.node_templates.generic_node()],
       ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
-      ['Generic Node', () => ReteTemplates.node_templates.generic_node()],
     ]),
   })
 
   /* @ts-ignore */
-  area.use(contextMenu)
+  rete_init.area.use(contextMenu)
 
   // Use the customized preset
   rete_init.render.addPreset(
@@ -140,7 +143,7 @@ async function initializeFlow() {
       console.log({ update: context })
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-        'undefined'
+          'undefined'
           ? 200
           : context.data.delay
       if (context.data.type === 'contextmenu') {
@@ -155,7 +158,7 @@ async function initializeFlow() {
     render: function render(context: ContextMenuRenderContext) {
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-        'undefined'
+          'undefined'
           ? 200
           : context.data.delay
       console.log({ render: context })
@@ -173,23 +176,27 @@ async function initializeFlow() {
     },
   })
 
-  rete_init.editor.use(area)
-  area.use(rete_init.connection)
-  area.use(rete_init.render)
+  rete_init.editor.use(rete_init.area)
+  rete_init.area.use(rete_init.connection)
+  rete_init.area.use(rete_init.render)
 
   if (active_flow.json) {
     //Reload saved flow if there is an existing state
     //reloadEditorState()
   }
 
-  AreaExtensions.selectableNodes(area, selector, { accumulating })
-  trackMouseEvents(area)
 
-  addCustomBackground(area)
+  AreaExtensions.selectableNodes(rete_init.area, selector, { accumulating })
+  trackMouseEvents()
+
+  addCustomBackground()
+  editor_load.value = false
+
+  console.log(editor_load.value)
 }
 
 const reloadEditorState = async () => {
-  if (!active_flow.json || !area || !rete_init.editor) return
+  if (!active_flow.json || !rete_init.area || !rete_init.editor) return
 
   const parsedState: SerializedFlow.State = JSON.parse(active_flow.json)
   console.log(parsedState)
@@ -235,7 +242,7 @@ const reloadEditorState = async () => {
     // Add the node back to the editor
     await rete_init.editor.addNode(node)
     // Restore node position
-    await area.translate(node.id, nodeData.position)
+    await rete_init.area.translate(node.id, nodeData.position)
   }
 
   // Step 4: Rebuild connections
@@ -290,28 +297,71 @@ function isMouseOutsideNode(details: {
 }
 
 // Track mouse events and handle right-click
-function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
-  area.addPipe((context) => {
-    const mouse_inside_nodes: string[] = []
-    if (context.type === 'connectionremove') {
-      if (rete_init.editor) {
-        const soure_node = rete_init.editor.getNode(context.data.source)
-        if (soure_node && soure_node.data) {
-          const origin = soure_node.data.giver_data[context.data.sourceOutput]
-          console.log(context.data)
-          console.log(soure_node)
-          if (!origin) {
-            toast({
-              title: 'Something went wrong',
-              variant: 'destructive',
-              duration: 2000,
-            })
-            return
-          } else {
+function trackMouseEvents() {
+  const area = rete_init.area
+  if (area) {
+    area.addPipe((context) => {
+      if (context.type === 'connectionremove') {
+        if (rete_init.editor) {
+          const soure_node = rete_init.editor.getNode(context.data.source)
+          if (soure_node && soure_node.data) {
+            const origin = soure_node.data.giver_data[context.data.sourceOutput]
+            console.log(context.data)
+            console.log(soure_node)
+            if (!origin) {
+              toast({
+                title: 'Something went wrong',
+                variant: 'destructive',
+                duration: 2000,
+              })
+              return
+            } else {
+              const target_node = rete_init.editor.getNode(context.data.target)
+              if (target_node && target_node.data) {
+                if (target_node.data.postbackid) {
+                  delete target_node.data['postbackid']
+                }
+              } else {
+                toast({
+                  title: 'Something went wrong here',
+                  variant: 'destructive',
+                  duration: 2000,
+                })
+                return
+              }
+            }
+          }
+        }
+      }
+
+      if (context.type === 'connectioncreate') {
+        const check = checkConnectionSocket(context.data)
+        console.log(context.data)
+        if (check) {
+          toast({
+            title: 'Copatible',
+            variant: 'success',
+            duration: 2000,
+          })
+        } else {
+          toast({
+            title: 'Not Copatible',
+            variant: 'destructive',
+            duration: 2000,
+          })
+          return
+        }
+
+        if (rete_init.editor) {
+          const soure_node = rete_init.editor.getNode(context.data.source)
+          if (soure_node && soure_node.data) {
             const target_node = rete_init.editor.getNode(context.data.target)
             if (target_node && target_node.data) {
-              if (target_node.data.postbackid) {
-                delete target_node.data['postbackid']
+              if (
+                !target_node.data.postbackid &&
+                soure_node.data.giver_data[context.data.sourceOutput]
+              ) {
+                target_node.data.postbackid = soure_node.data.giver_data[context.data.sourceOutput]
               }
             } else {
               toast({
@@ -321,153 +371,52 @@ function trackMouseEvents(area: AreaPlugin<Schemes, AreaExtra>) {
               })
               return
             }
+            // if (isNodeOfType(soure_node, 'message_node')) {
+            //   //do something here
+            // }
           }
         }
       }
-    }
 
-    if (context.type === 'connectioncreate') {
-      const check = checkConnectionSocket(context.data)
-      console.log(context.data)
-      if (check) {
-        toast({
-          title: 'Copatible',
-          variant: 'success',
-          duration: 2000,
-        })
-      } else {
-        toast({
-          title: 'Not Copatible',
-          variant: 'destructive',
-          duration: 2000,
-        })
-        return
-      }
-
-      if (rete_init.editor) {
-        const soure_node = rete_init.editor.getNode(context.data.source)
-        if (soure_node && soure_node.data) {
-          const target_node = rete_init.editor.getNode(context.data.target)
-          if (target_node && target_node.data) {
-            if (
-              !target_node.data.postbackid &&
-              soure_node.data.giver_data[context.data.sourceOutput]
-            ) {
-              target_node.data.postbackid = soure_node.data.giver_data[context.data.sourceOutput]
-            }
-          } else {
-            toast({
-              title: 'Something went wrong here',
-              variant: 'destructive',
-              duration: 2000,
-            })
-            return
-          }
-          // if (isNodeOfType(soure_node, 'message_node')) {
-          //   //do something here
-          // }
-        }
-      }
-    }
-
-    if (context.type === 'zoom') {
-      closeMenu()
-      closeNodeOption(false)
-    }
-
-    if (context.type === 'pointerdown' && context.data.event.button === 2 && rete_init.editor) {
-      menuVisible.value = false
-      nodeOptionVisible.value = false
-      selected_node.value = ''
-
-      menuPosition.value = {
-        x: context.data.event.clientX,
-        y: context.data.event.clientY,
-      }
-
-      area.nodeViews.forEach((ar, key) => {
-        const check_in_position = trackMouseInsideNode({
-          nodeHeight: ar.element.offsetHeight,
-          nodeWidth: ar.element.offsetWidth,
-          nodePosition: ar.position,
-          mousePosition: context.data.position,
-        })
-        if (check_in_position) {
-          mouse_inside_nodes.push(key)
-        }
-      })
-
-      if (!(mouse_inside_nodes.length > 0)) {
-        menuVisible.value = true
-      }
-    }
-
-    if (context.type === 'nodepicked') {
-      menuVisible.value = false
-      nodeOptionVisible.value = false
-      selected_node.value = context.data.id
-      multi_selected_node.value = [context.data.id]
-    }
-
-    if (context.type === 'pointerup' && selected_node.value) {
-      area.nodeViews.forEach((ar, node_key) => {
-        if (node_key === selected_node.value) {
-          const mouse_outside = isMouseOutsideNode({
-            nodeHeight: ar.element.offsetHeight,
-            nodeWidth: ar.element.offsetWidth,
-            nodePosition: ar.position,
-            mousePosition: context.data.position,
-          })
-          if (mouse_outside) {
-            const node = rete_init.editor?.getNode(selected_node.value)
-            if (node?.selected) {
-              closeNodeOption(false)
-            } else {
-              closeNodeOption()
-            }
-          }
-        }
-      })
-    }
-
-    if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
-      const checker: boolean[] = []
-      multi_selected_node.value.forEach((node) => {
-        const e_n = area.nodeViews.get(node)
-        if (e_n) {
-          const mouse_outside = isMouseOutsideNode({
-            nodeHeight: e_n.element.offsetHeight,
-            nodeWidth: e_n.element.offsetWidth,
-            nodePosition: e_n.position,
-            mousePosition: context.data.position,
-          })
-          checker.push(mouse_outside)
-        }
-      })
-      if (!checker.includes(false)) {
-        multi_selected_node.value = []
+      if (context.type === 'zoom') {
+        closeMenu()
         closeNodeOption(false)
       }
-    }
 
-    if (
-      context.type === 'pointerup' &&
-      context.data.event.button === 0 &&
-      context.data.event.altKey &&
-      selected_node.value
-    ) {
-      console.log(selected_node.value)
-      menuPosition.value = {
-        x: context.data.event.clientX,
-        y: context.data.event.clientY,
+      if (context.type === 'nodepicked') {
+        menuVisible.value = false
+        nodeOptionVisible.value = false
+        selected_node.value = context.data.id
+        multi_selected_node.value = [context.data.id]
+        rete_init.node_select(context.data.id)
       }
-      console.log(context.data.position)
-      console.log(menuPosition.value)
-      nodeOptionVisible.value = true
-    }
+      if (context.type === 'pointerdown' && rete_init.selected_node) {
+        rete_init.remove_selected_node()
+      }
 
-    return context
-  })
+      // if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
+      //   const checker: boolean[] = []
+      //   multi_selected_node.value.forEach((node) => {
+      //     const e_n = area.nodeViews.get(node)
+      //     if (e_n) {
+      //       const mouse_outside = isMouseOutsideNode({
+      //         nodeHeight: e_n.element.offsetHeight,
+      //         nodeWidth: e_n.element.offsetWidth,
+      //         nodePosition: e_n.position,
+      //         mousePosition: context.data.position,
+      //       })
+      //       checker.push(mouse_outside)
+      //     }
+      //   })
+      //   if (!checker.includes(false)) {
+      //     multi_selected_node.value = []
+      //     closeNodeOption(false)
+      //   }
+      // }
+      return context
+    })
+  }
+
 
   document.addEventListener('click', (e) => {
     if (menuVisible.value) {
@@ -523,11 +472,11 @@ function checkConnectionSocket(data: {
 }
 
 function getTranslatedMousePosition(event: MousePosition) {
-  if (area) {
-    const { transform } = area.area // Rete.js area transform
+  if (rete_init.area) {
+    const { transform } = rete_init.area.area // Rete.js area transform
 
     // Step 1: Get the mouse position relative to the Rete.js container
-    const containerRect = area.container.getBoundingClientRect()
+    const containerRect = rete_init.area.container.getBoundingClientRect()
     const mouseX = event.x - containerRect.left
     const mouseY = event.y - containerRect.top
 
@@ -544,7 +493,7 @@ function getTranslatedMousePosition(event: MousePosition) {
 const saveEditorState = async () => {
   if (!rete_init.editor) return
   const serializedNodes: SerializedFlow.Node[] = rete_init.editor.getNodes().map((node) => {
-    const position = area?.nodeViews.get(node.id)?.position // Get node position
+    const position = rete_init.area?.nodeViews.get(node.id)?.position // Get node position
     return {
       id: node.id,
       label: node.label,
@@ -612,7 +561,7 @@ watch(
 )
 
 function removeNode(): void {
-  if (selected_node.value && area && rete_init.editor) {
+  if (selected_node.value && rete_init.area && rete_init.editor) {
     const connections = rete_init.editor.getConnections()
     connections.forEach((conn) => {
       if (conn.source === selected_node.value || conn.target === selected_node.value) {
@@ -626,36 +575,36 @@ function removeNode(): void {
   }
 }
 
-function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
-  const background = document.createElement('div')
+function addCustomBackground() {
+  if (rete_init.area) {
+    rete_init.area.container.classList.add('background')
+    rete_init.area.container.classList.add('bg-dotted')    
+  }
 
-  background.classList.add('background')
-  background.classList.add('bg-dotted')
-
-  area.area.content.add(background)
 }
 </script>
 
 <template>
-  <div class="">
-    <!-- Rete.js Canvas -->
-    <div class="h-screen">
-      <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
-    </div>
 
-    <div class="absolute top-0 flex justify-between p-4">
-      <div class="space-y-2">
-        <div class="flex gap-4">
-          <button class="font-bold" @click="saveEditorState">Save</button>
-          <span>
-            {{ multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : '' }}
-          </span>
-        </div>
+  <!-- Rete.js Canvas -->
+  <div class="h-screen">
+    <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
+  </div>
+
+  <div class="absolute top-0 flex justify-between p-4">
+    <div class="space-y-2">
+      <div class="flex gap-4">
+        <button class="font-bold" @click="saveEditorState">Save</button>
+        <span>
+          {{ multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : '' }}
+        </span>
       </div>
     </div>
+  </div>
 
-    <NodeSheet v-if="area" :area />
-    <!-- <div
+
+  <NodeSheet v-if="!editor_load"/>
+  <!-- <div
       v-if="
         selected_node && selected_node_obj && area && selected_node_obj.label != 'reference_node'
       "
@@ -684,13 +633,14 @@ function addCustomBackground<S extends BaseSchemes, K>(area: AreaPlugin<S, K>) {
       </div>
     </div> -->
 
-    <!-- Floating Menu -->
-  </div>
+  <!-- Floating Menu -->
 </template>
 
 <style scoped>
 .bg-dotted {
+  background: rgb(42, 42, 42);
   background-image: radial-gradient(currentColor 0.5px, transparent 0.5px);
+  color: #404040; /* Text color for contrast */
   background-size: 10px 10px;
   /* Adjust size of dots */
 

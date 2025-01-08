@@ -1,21 +1,32 @@
 <script setup lang="ts" generic="S extends BaseSchemes, K">
+import CarouselSheet from './sheets/carousel-sheet.vue'
+import GenericSheet from './sheets/generic-sheet.vue'
 import MessageSheet from './sheets/message-sheet.vue'
-import { Sheet } from '@/core/components/ui/sheet'
+import { Button } from '@/core/components/ui/button'
+import { Sheet, SheetContent } from '@/core/components/ui/sheet'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
+import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import type { BaseSchemes } from 'rete'
-import type { AreaPlugin } from 'rete-area-plugin'
-import { onUnmounted, reactive } from 'vue'
+import { reactive, watch } from 'vue'
 
-defineProps<{ area: AreaPlugin<S, K> }>()
+const authWorkspaceStore = useAuthWorkspaceStore()
+const { active_flow } = authWorkspaceStore
+const { rete_init } = active_flow
 
+type Data =
+  | {
+      id: string
+      label: keyof Omit<NodeType, 'reference_node'>
+    }
+  | undefined
 type SheetState = {
   isOpen: boolean
-  data: Node<keyof Omit<NodeType, 'reference_node'>> | undefined
+  data: Data
 
   initialState(): void
   open(): void
   close(): void
-  initializeData(event: Event): void
+  initializeData(node: Node<keyof NodeType>): void
 }
 const sheet = reactive<SheetState>({
   isOpen: false,
@@ -31,28 +42,65 @@ const sheet = reactive<SheetState>({
   close() {
     this.initialState()
   },
-  initializeData(event) {
-    const { detail } = event as CustomEvent
-
-    this.data = detail as Node<keyof Omit<NodeType, 'reference_node'>>
-
-    this.open()
+  initializeData(node) {
+    if (node) {
+      this.data = {
+        id: node.id,
+        label: node.label,
+      } as Data
+    }
   },
 })
 
 const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   message_node: MessageSheet,
+  generic_node: GenericSheet,
+  carousel_node: CarouselSheet,
 }
 
-document.addEventListener('triggerNodeSheet', (event) => sheet.initializeData(event), true)
+function selectNode(id: string) {
+  rete_init.node_select(id)
+}
 
-onUnmounted(() => {
-  document.removeEventListener('triggerNodeSheet', (event) => sheet.initializeData(event), true)
-})
+watch(
+  () => rete_init.selected_node,
+  (node) => {
+    if (node) {
+      sheet.initializeData(node)
+    } else {
+      sheet.initialState()
+    }
+  },
+)
 </script>
 
 <template>
-  <Sheet v-if="sheet.data" :modal="false" :open="sheet.isOpen" @update:open="sheet.close()">
-    <component :is="componentMapping[sheet.data.label]" :data="sheet.data" :area />
+  <Sheet :modal="false" :open="true">
+    <SheetContent
+      class="w-[clamp(300px,100%,15%)] overflow-y-scroll p-0 shadow-none [&>button]:hidden"
+    >
+      <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" :data="sheet.data" />
+    </SheetContent>
+  </Sheet>
+
+  <Sheet :modal="false" :open="true">
+    <SheetContent
+      side="left"
+      class="w-[clamp(300px,100%,15%)] overflow-y-scroll p-0 shadow-none [&>button]:hidden"
+    >
+      <div v-if="rete_init.editor && rete_init.editor.getNodes().length >= 1">
+        <Button
+          v-for="(node, key) in rete_init.editor.getNodes()"
+          :key
+          @click="selectNode(node.id)"
+          class="w-full justify-start border-none"
+          variant="outline"
+          :class="{ 'bg-slate-100': node.id === rete_init.selected_node_id }"
+        >
+          {{ node.data?.name }}
+        </Button>
+      </div>
+      <template v-else> No node available </template>
+    </SheetContent>
   </Sheet>
 </template>
