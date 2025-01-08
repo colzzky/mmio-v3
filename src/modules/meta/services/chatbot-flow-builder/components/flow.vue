@@ -4,6 +4,7 @@ import CarouselSidebar from '../rete/TemplateNode/carouselSidebar.vue'
 import Generic from '../rete/TemplateNode/generic.vue'
 import GenericSidebar from '../rete/TemplateNode/genericSidebar.vue'
 import Message from '../rete/TemplateNode/message.vue'
+import Media from '../rete/TemplateNode/media.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
 import Sidebar from '../rete/TemplateNode/sidebar.vue'
 import CustomConnection from '../rete/custom-connection.vue'
@@ -94,6 +95,7 @@ async function initializeFlow() {
       ['Message', () => ReteTemplates.node_templates.message_node()],
       ['Generic', () => ReteTemplates.node_templates.generic_node()],
       ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
+      ['Media', () => ReteTemplates.node_templates.media_node()],
     ]),
   })
 
@@ -119,6 +121,9 @@ async function initializeFlow() {
           }
           if (context.payload.label === 'generic_node') {
             return Generic
+          }
+          if (context.payload.label === 'media_node') {
+            return Media
           }
 
           return Presets.classic.Node
@@ -339,13 +344,13 @@ function trackMouseEvents() {
         console.log(context.data)
         if (check) {
           toast({
-            title: 'Copatible',
+            title: 'Compatible',
             variant: 'success',
             duration: 2000,
           })
         } else {
           toast({
-            title: 'Not Copatible',
+            title: 'Not Compatible',
             variant: 'destructive',
             duration: 2000,
           })
