@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
-import { dispatchTriggerNodeSheetEvent, sortByIndex } from '../utils'
+import { dispatchTriggerNodeSheetEvent, nodeIconMapping, sortByIndex } from '../utils'
 import Label from '@/core/components/ui/label/Label.vue'
 import type { Node, Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
-import { objectEntries } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps<{ data: Schemes['Node']; emit: any; seed: number }>()
@@ -44,7 +43,7 @@ const outputs = computed(() => {
             <div class="flex items-center justify-center rounded-lg px-2">
               <div class="flex h-9 w-full items-center rounded-md px-3">
                 <span class="flex items-center gap-x-2 font-semibold">
-                  <Icon icon="solar:posts-carousel-horizontal-bold-duotone" class="size-6" />
+                  <Icon :icon="nodeIconMapping[data.label]" class="size-6" />
                   Condition
                 </span>
               </div>
@@ -73,8 +72,17 @@ const outputs = computed(() => {
           <div>
             <Label>Conditions:</Label>
             <div class="max-h-28 rounded-lg border border-gray-200 bg-white p-3">
-              <div v-if="node?.data?.conditions && node?.data?.conditions.length > 0" class="line-clamp-2 overflow-hidden flex gap-3">
-                <div v-for="condition in node?.data?.conditions" class="bg-blue-500 text-white px-2 py-1 rounded-full">{{ condition.label }}</div>
+              <div
+                v-if="node?.data?.conditions && node?.data?.conditions.length > 0"
+                class="line-clamp-2 flex gap-3 overflow-hidden"
+              >
+                <div
+                  v-for="(condition, key) in node?.data?.conditions"
+                  :key
+                  class="rounded-full bg-blue-500 px-2 py-1 text-white"
+                >
+                  {{ condition.label }}
+                </div>
               </div>
               <div v-else>
                 <p class="text-gray-400">No Message Node</p>
@@ -84,7 +92,7 @@ const outputs = computed(() => {
           <div>
             <Label>Condition Requirements:</Label>
             <div class="max-h-48 rounded-lg border border-gray-200 bg-white p-3">
-              {{node?.data?.type}}
+              {{ node?.data?.type }}
             </div>
           </div>
         </div>
@@ -107,7 +115,7 @@ const outputs = computed(() => {
                       :data="{
                         type: 'socket',
                         side: 'output',
-                        key:'num1',
+                        key: 'num1',
                         nodeId: data.id,
                         payload: output.socket,
                       }"
@@ -130,9 +138,9 @@ const outputs = computed(() => {
                     <NodeSocket
                       :emit
                       :data="{
-                      type: 'socket',
+                        type: 'socket',
                         side: 'output',
-                        key:'num2',
+                        key: 'num2',
                         nodeId: data.id,
                         payload: output.socket,
                       }"
@@ -141,7 +149,6 @@ const outputs = computed(() => {
                   </div>
                 </div>
               </div>
-
             </template>
           </div>
         </div>

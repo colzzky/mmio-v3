@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
-import { dispatchTriggerNodeSheetEvent, sortByIndex } from '../utils'
+import { dispatchTriggerNodeSheetEvent, nodeIconMapping, sortByIndex } from '../utils'
 import Label from '@/core/components/ui/label/Label.vue'
 import type { Node, Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
@@ -44,7 +44,7 @@ const outputs = computed(() => {
             <div class="flex items-center justify-center rounded-lg px-2">
               <div class="flex h-9 w-full items-center rounded-md px-3">
                 <span class="flex items-center gap-x-2 font-semibold">
-                  <Icon icon="solar:posts-carousel-horizontal-bold-duotone" class="size-6" />
+                  <Icon :icon="nodeIconMapping[data.label]" class="size-6" />
                   Generic
                 </span>
               </div>

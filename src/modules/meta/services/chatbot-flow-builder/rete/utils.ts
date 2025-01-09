@@ -123,4 +123,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   carousel_node: 'solar:posts-carousel-horizontal-bold',
   media_node: 'bx:image',
   trigger_node: 'bxs:bolt',
+  condition_node: 'ix:logic-diagram',
 }
