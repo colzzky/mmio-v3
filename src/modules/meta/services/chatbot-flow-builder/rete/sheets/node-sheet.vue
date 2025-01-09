@@ -1,6 +1,6 @@
 <script setup lang="ts" generic="S extends BaseSchemes, K">
-import { MessageSheet, GenericSheet, CarouselSheet, MediaSheet, ConditionSheet } from './sheets'
-import { Button } from '@/core/components/ui/button'
+import { MessageSheet, GenericSheet, CarouselSheet, MediaSheet, ConditionSheet } from '.'
+import NodeFlowDetailsSheet from './node-flow-details-sheet.vue'
 import { Sheet, SheetContent } from '@/core/components/ui/sheet'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -58,10 +58,6 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   condition_node: ConditionSheet,
 }
 
-function selectNode(id: string) {
-  rete_init.node_select(id)
-}
-
 watch(
   () => rete_init.selected_node,
   (node) => {
@@ -76,31 +72,14 @@ watch(
 
 <template>
   <Sheet :modal="false" :open="true">
-    <SheetContent
-      class="w-[clamp(300px,100%,15%)] overflow-y-scroll p-0 shadow-none [&>button]:hidden"
-    >
-      <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" />
-    </SheetContent>
+    <NodeFlowDetailsSheet />
   </Sheet>
 
   <Sheet :modal="false" :open="true">
     <SheetContent
-      side="left"
       class="w-[clamp(300px,100%,15%)] overflow-y-scroll p-0 shadow-none [&>button]:hidden"
     >
-      <div v-if="rete_init.editor && rete_init.editor.getNodes().length >= 1">
-        <Button
-          v-for="(node, key) in rete_init.editor.getNodes()"
-          :key
-          @click="selectNode(node.id)"
-          class="w-full justify-start border-none"
-          variant="outline"
-          :class="{ 'bg-slate-100': node.id === rete_init.selected_node_id }"
-        >
-          {{ node.data?.name }}
-        </Button>
-      </div>
-      <template v-else> No node available </template>
+      <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" />
     </SheetContent>
   </Sheet>
 </template>

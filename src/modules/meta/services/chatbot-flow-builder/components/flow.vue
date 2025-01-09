@@ -1,18 +1,18 @@
 <script lang="ts" setup>
+import Audio from '../rete/TemplateNode/audio.vue'
 import Carousel from '../rete/TemplateNode/carousel.vue'
 import CarouselSidebar from '../rete/TemplateNode/carouselSidebar.vue'
 import Generic from '../rete/TemplateNode/generic.vue'
-import  Trigger from '../rete/TemplateNode/trigger.vue'
 import GenericSidebar from '../rete/TemplateNode/genericSidebar.vue'
-import Message from '../rete/TemplateNode/message.vue'
-import Media from '../rete/TemplateNode/media.vue'
 import Image from '../rete/TemplateNode/image.vue'
-import Audio from '../rete/TemplateNode/audio.vue'
+import Media from '../rete/TemplateNode/media.vue'
+import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
 import Sidebar from '../rete/TemplateNode/sidebar.vue'
+import Trigger from '../rete/TemplateNode/trigger.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
-import NodeSheet from '../rete/node-sheet.vue'
+import NodeSheet from '../rete/sheets/node-sheet.vue'
 import { dispatchTriggerNodeSheetEvent } from '../rete/utils'
 import Menu from './custom-contextmenu/index.vue'
 import type { ContextMenuRenderContext } from './custom-contextmenu/types'
@@ -163,7 +163,7 @@ async function initializeFlow() {
       console.log({ update: context })
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-          'undefined'
+        'undefined'
           ? 200
           : context.data.delay
       if (context.data.type === 'contextmenu') {
@@ -178,7 +178,7 @@ async function initializeFlow() {
     render: function render(context: ContextMenuRenderContext) {
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-          'undefined'
+        'undefined'
           ? 200
           : context.data.delay
       console.log({ render: context })
@@ -204,7 +204,6 @@ async function initializeFlow() {
     //Reload saved flow if there is an existing state
     //reloadEditorState()
   }
-
 
   AreaExtensions.selectableNodes(rete_init.area, selector, { accumulating })
   trackMouseEvents()
@@ -437,7 +436,6 @@ function trackMouseEvents() {
     })
   }
 
-
   document.addEventListener('click', (e) => {
     if (menuVisible.value) {
       const target = e.target as HTMLElement
@@ -598,14 +596,12 @@ function removeNode(): void {
 function addCustomBackground() {
   if (rete_init.area) {
     rete_init.area.container.classList.add('background')
-    rete_init.area.container.classList.add('bg-dotted')    
+    rete_init.area.container.classList.add('bg-dotted')
   }
-
 }
 </script>
 
 <template>
-
   <!-- Rete.js Canvas -->
   <div class="h-screen">
     <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
@@ -622,8 +618,7 @@ function addCustomBackground() {
     </div>
   </div>
 
-
-  <NodeSheet v-if="!editor_load"/>
+  <NodeSheet v-if="!editor_load" />
   <!-- <div
       v-if="
         selected_node && selected_node_obj && area && selected_node_obj.label != 'reference_node'

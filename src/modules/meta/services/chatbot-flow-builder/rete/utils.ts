@@ -115,3 +115,11 @@ export interface ConditionForm {
       | { intent: 'edit-condition'; key: number; condition: Condition },
   ): void
 }
+
+export const nodeIconMapping: Record<keyof NodeType, string> = {
+  reference_node: 'bx:bolt-circle',
+  message_node: 'bx:message',
+  generic_node: 'solar:posts-carousel-horizontal-bold-duotone',
+  carousel_node: 'solar:posts-carousel-horizontal-bold',
+  media_node: 'bx:image',
+}
