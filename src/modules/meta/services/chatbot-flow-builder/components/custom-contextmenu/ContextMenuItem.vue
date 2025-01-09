@@ -26,7 +26,9 @@
 </template>
 
 <script lang="ts" setup>
+import { nodeIconMapping } from '../../rete/utils'
 import type { ContextMenuItemType } from './types'
+import type { NodeType } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { debounce } from 'lodash'
 import { computed, ref } from 'vue'
@@ -48,17 +50,23 @@ const hide = debounce(() => {
   visibleSubitems.value = false
 }, props.delay)
 
-const iconMapping: Record<string, string> = {
-  delete: 'bx:bx-trash',
-  clone: 'bx:bx-duplicate',
-  reference: 'bx:bolt-circle',
-  message: 'bx:message',
-  generic: 'solar:posts-carousel-horizontal-bold-duotone',
-  carousel: 'solar:posts-carousel-horizontal-bold',
-  media: 'bx:image',
+const labelMapping: Record<string, keyof NodeType> = {
+  reference: 'reference_node',
+  message: 'message_node',
+  generic: 'generic_node',
+  carousel: 'carousel_node',
+  media: 'media_node',
+  trigger: 'trigger_node',
 }
 
-const icon = computed(() => iconMapping[props.label.toLocaleLowerCase()])
+const icon = computed(() => {
+  const label = props.label.toLocaleLowerCase()
+
+  if (label === 'delete') return 'bx:trash'
+  else if (label === 'clone') return 'bx:duplicate'
+
+  return nodeIconMapping[labelMapping[label]]
+})
 </script>
 
 <style scoped>

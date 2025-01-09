@@ -1,6 +1,13 @@
 <script setup lang="ts" generic="S extends BaseSchemes, K">
-import { MessageSheet, GenericSheet, CarouselSheet, MediaSheet, ConditionSheet } from '.'
-import NodeFlowDetailsSheet from './node-flow-details-sheet.vue'
+import {
+  MessageSheet,
+  GenericSheet,
+  CarouselSheet,
+  MediaSheet,
+  ConditionSheet,
+  NodeFlowDetailsSheet,
+  TriggerSheet,
+} from '.'
 import { Sheet, SheetContent } from '@/core/components/ui/sheet'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -56,6 +63,7 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   carousel_node: CarouselSheet,
   media_node: MediaSheet,
   condition_node: ConditionSheet,
+  trigger_node: TriggerSheet,
 }
 
 watch(

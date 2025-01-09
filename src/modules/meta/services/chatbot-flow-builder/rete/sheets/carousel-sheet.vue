@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CarouselCardForm, QuickReplyForm } from '../utils'
+import { nodeIconMapping, type CarouselCardForm, type QuickReplyForm } from '../utils'
 import { Button } from '@/core/components/ui/button'
 import {
   DropdownMenu,
@@ -415,7 +415,7 @@ function handleRemoveDelay() {
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
         <Icon
-          icon="solar:posts-carousel-horizontal-bold"
+          :icon="nodeIconMapping[localNodeData.label]"
           class="row-span-full size-[var(--icon-size)] self-center"
         />
         <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
