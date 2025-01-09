@@ -31,16 +31,14 @@ const nodes = computed(() => {
 </script>
 
 <template>
-  <SheetContent
-    side="left"
-    class="w-[clamp(300px,100%,15%)] gap-y-0 overflow-hidden overflow-y-scroll p-0 shadow-none [&>button]:hidden"
-  >
+  <SheetContent v-if="!rete_init.ui.menuPanelMinimized" side="left"
+    class="w-[clamp(300px,100%,15%)] gap-y-0 overflow-hidden overflow-y-scroll p-0 shadow-none [&>button]:hidden">
     <header class="grid gap-y-1.5 border-b p-2 text-sm">
       <div class="flex items-center justify-end gap-x-2">
         <Icon icon="bxl:dev-to" class="me-auto size-10" />
         <AvatarDropdown />
         <Button size="icon" variant="ghost">
-          <Icon icon="mdi:arrow-vertical-collapse" class="size-5" />
+          <Icon @click="rete_init.ui.minimize()" icon="mdi:arrow-vertical-collapse" class="size-5" />
         </Button>
       </div>
       <h1 class="ps-1.5 font-bold leading-none">Flow Name</h1>
@@ -56,31 +54,17 @@ const nodes = computed(() => {
       </TabsList>
       <TabsContent value="node-list">
         <div class="relative [--gutter:theme(spacing.2)] [--icon-size:theme(spacing.5)]">
-          <Icon
-            icon="bx:search"
-            class="absolute left-[var(--gutter)] top-1/2 size-[var(--icon-size)] -translate-y-1/2"
-          />
-          <Input
-            v-model:model-value="searchNodeTerm"
-            type="search"
-            name="search"
-            id="search"
-            class="rounded-none border-x-0 ps-[calc(var(--gutter)+var(--icon-size)+var(--gutter))]"
-          />
+          <Icon icon="bx:search"
+            class="absolute left-[var(--gutter)] top-1/2 size-[var(--icon-size)] -translate-y-1/2" />
+          <Input v-model:model-value="searchNodeTerm" type="search" name="search" id="search"
+            class="rounded-none border-x-0 ps-[calc(var(--gutter)+var(--icon-size)+var(--gutter))]" />
         </div>
         <!-- @note: have to declare explicitly height of header(123px) + tabs(48px) + search(48px) for the scrollarea to work -->
-        <ScrollArea
-          v-if="nodes.length > 0"
-          class="h-[var(--height)] [--height:calc(100svh-(123px+48px+48px))] [&>div>div]:grid"
-        >
-          <Button
-            v-for="(node, key) in nodes"
-            :key
-            class="justify-start gap-x-2 rounded-none data-[selected=true]:bg-slate-200"
-            variant="ghost"
-            :data-selected="rete_init.selected_node_id === node.id"
-            @click="handleSelectNode(node.id)"
-          >
+        <ScrollArea v-if="nodes.length > 0"
+          class="h-[var(--height)] [--height:calc(100svh-(123px+48px+48px))] [&>div>div]:grid">
+          <Button v-for="(node, key) in nodes" :key
+            class="justify-start gap-x-2 rounded-none data-[selected=true]:bg-slate-200" variant="ghost"
+            :data-selected="rete_init.selected_node_id === node.id" @click="handleSelectNode(node.id)">
             <Icon :icon="nodeIconMapping[node.label]" class="size-4" />
             {{ node.data?.name }}
           </Button>
@@ -92,4 +76,26 @@ const nodes = computed(() => {
       <TabsContent value="flow-details">Flow details here</TabsContent>
     </Tabs>
   </SheetContent>
+  <div v-else class="fixed top-0 left-0 p-4">
+    <div
+      class="w-[clamp(350px,100%,15%)] gap-y-0 overflow-hidden overflow-y-scroll p-0 shadow-none [&>button]:hidden bg-white rounded-lg">
+      <header class="grid gap-y-1.5 border-b p-2 text-sm">
+        <div class="flex items-center justify-between gap-x-2">
+          <div class="flex gap-2 items-center">
+            <Icon icon="bxl:dev-to" class="me-auto size-10" />
+            <div class="">
+              <h1 class="ps-1.5 font-bold leading-none truncate w-40">Flow Name iasjndcaondsa asndaoidnoia daiodsnaoidnas basdbnoiand</h1>
+              <h2 class="ps-1.5 text-xs leading-none truncate w-40">Workspace Name jmsdcnaca san cionaso aoinsdopian</h2>
+            </div>
+          </div>
+          <div class="flex items-center gap-1">
+            <AvatarDropdown />
+            <Button @click="rete_init.ui.minimize()" size="icon" variant="ghost">
+              <Icon icon="mdi:arrow-vertical-collapse" class="size-5" />
+            </Button>
+          </div>
+        </div>
+      </header>
+    </div>
+  </div>
 </template>

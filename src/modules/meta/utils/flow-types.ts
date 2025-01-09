@@ -139,6 +139,7 @@ export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
     super(label) // Call the constructor of the base class (ClassicPreset.Node)
     this.label = label
   }
+  
 }
 
 export function isNodeOfType<T extends keyof NodeType>(

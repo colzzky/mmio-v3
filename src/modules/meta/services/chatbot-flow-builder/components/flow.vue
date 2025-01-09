@@ -181,11 +181,7 @@ async function initializeFlow() {
       }
     },
     render: function render(context: ContextMenuRenderContext) {
-      const delay =
-        typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-        'undefined'
-          ? 200
-          : context.data.delay
+      const delay = typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) === 'undefined' ? 200: context.data.delay
       console.log({ render: context })
       if (context.data.type === 'contextmenu') {
         return {
@@ -416,6 +412,10 @@ function trackMouseEvents() {
       }
       if (context.type === 'pointerdown' && rete_init.selected_node) {
         rete_init.remove_selected_node()
+      }
+
+      if(context.type === 'contextmenu'){
+        console.log(context)
       }
 
       // if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
