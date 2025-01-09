@@ -213,7 +213,7 @@ function handleRemoveDelay() {
         </div>
         <div class="grid gap-y-2">
           <h3 class="font-medium">Condition</h3>
-          <RadioGroup default-value="all">
+          <RadioGroup v-model:model-value="localNodeData.data.type" default-value="all">
             <div class="flex items-center space-x-2">
               <RadioGroupItem id="all" value="all" />
               <Label for="all">All conditions must be met</Label>

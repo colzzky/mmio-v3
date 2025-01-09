@@ -3,6 +3,7 @@ import Audio from '../rete/TemplateNode/audio.vue'
 import Carousel from '../rete/TemplateNode/carousel.vue'
 import CarouselSidebar from '../rete/TemplateNode/carouselSidebar.vue'
 import Generic from '../rete/TemplateNode/generic.vue'
+import Condition from '../rete/TemplateNode/condition.vue'
 import GenericSidebar from '../rete/TemplateNode/genericSidebar.vue'
 import Image from '../rete/TemplateNode/image.vue'
 import Media from '../rete/TemplateNode/media.vue'
@@ -102,6 +103,7 @@ async function initializeFlow() {
       ['Image', () => ReteTemplates.node_templates.image_node()],
       ['Audio', () => ReteTemplates.node_templates.audio_node()],
       ['Trigger', () => ReteTemplates.node_templates.trigger_node()],
+      ['Condition', () => ReteTemplates.node_templates.condition_node()],
     ]),
   })
 
@@ -139,6 +141,9 @@ async function initializeFlow() {
           }
           if (context.payload.label === 'trigger_node') {
             return Trigger
+          }
+          if (context.payload.label === 'condition_node') {
+            return Condition
           }
 
           return Presets.classic.Node

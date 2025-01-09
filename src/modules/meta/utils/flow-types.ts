@@ -402,7 +402,6 @@ export namespace ReteTemplates {
       )
       return node
     },
-
     audio_node() {
       const node = new Node('audio_node')
       const num1_postback = crypto.randomUUID()
@@ -430,6 +429,47 @@ export namespace ReteTemplates {
           socket: ReteSockets['audio'],
         },
         'num1',
+      )
+      return node
+    },
+    condition_node() {
+      const node = new Node('condition_node')
+      const num1_postback = crypto.randomUUID()
+      const num2_postback = crypto.randomUUID()
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Condition Node',
+        type: '',
+        giver_data: {
+          num1: num1_postback,
+          num2: num2_postback,
+        },
+        delay:'',
+        conditions:[],
+        postbackid:crypto.randomUUID()
+      }
+      node.id = crypto.randomUUID()
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['condition'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['condition'],
+        },
+        'num1',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['condition'],
+        },
+        'num2',
       )
       return node
     },
