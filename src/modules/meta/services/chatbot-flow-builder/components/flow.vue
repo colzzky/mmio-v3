@@ -11,6 +11,7 @@ import Trigger from '../rete/TemplateNode/trigger.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
 import NodeSheet from '../rete/sheets/node-sheet.vue'
+import ActionBar from './action-bar.vue'
 import Menu from './custom-contextmenu/index.vue'
 import type { ContextMenuRenderContext } from './custom-contextmenu/types'
 import { toast } from '@/core/components/ui/toast'
@@ -624,36 +625,7 @@ function addCustomBackground() {
   </div>
 
   <NodeSheet v-if="!editor_load" />
-  <!-- <div
-      v-if="
-        selected_node && selected_node_obj && area && selected_node_obj.label != 'reference_node'
-      "
-    >
-      <div
-        class="fixed left-0 top-0 flex h-screen w-[20%] flex-col overflow-auto overflow-y-auto border border-gray-300 bg-gray-100 p-3"
-      >
-        <Sidebar
-          v-if="selected_node_obj.label === 'message_node'"
-          :node="selected_node_obj"
-          :node_id="selected_node_obj.id"
-          :area
-        />
-        <GenericSidebar
-          v-if="selected_node_obj.label === 'generic_node'"
-          :node="selected_node_obj"
-          :node_id="selected_node_obj.id"
-          :area
-        />
-        <CarouselSidebar
-          v-if="selected_node_obj.label === 'carousel_node'"
-          :node="selected_node_obj"
-          :node_id="selected_node_obj.id"
-          :area
-        />
-      </div>
-    </div> -->
-
-  <!-- Floating Menu -->
+  <ActionBar />
 </template>
 
 <style scoped>
@@ -665,28 +637,6 @@ function addCustomBackground() {
   /* Adjust size of dots */
 
   /* Change dot color */
-}
-
-.floating-menu {
-  position: absolute;
-  user-select: none;
-  background: white;
-  border: 1px solid black;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-  z-index: 1000;
-  padding: 8px;
-  min-width: 150px;
-}
-
-.floating-menu div {
-  cursor: pointer;
-  padding: 4px 8px;
-  transition: background 0.2s;
-}
-
-.floating-menu div:hover {
-  background: #f0f0f0;
 }
 
 .pause-overlay {

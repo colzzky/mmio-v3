@@ -67,8 +67,8 @@ const nodeMapping: Record<
       300%
     </span>
     <span class="flex items-center gap-x-2">
-      <Button type="button" class="bg-green-500 hover:bg-green-600" size="sm">Publish</Button>
-      <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="sm">Save</Button>
+      <Button type="button" class="bg-green-500 hover:bg-green-600" size="xs">Publish</Button>
+      <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="xs">Save</Button>
     </span>
   </header>
   <Tabs default-value="settings">
