@@ -29,7 +29,7 @@ import { uiHelpers } from '@/core/utils/ui-helper'
 import type { AreaExtra, Node, NodeType, Schemes } from '@/modules/meta/utils/flow-types'
 import { defineStore } from 'pinia'
 import type { NodeEditor } from 'rete'
-import type { ConnectionPlugin } from 'rete-connection-plugin'
+import type { ConnectionPlugin, SocketData } from 'rete-connection-plugin'
 import type { VuePlugin } from 'rete-vue-plugin'
 import { reactive } from 'vue'
 import type { AreaPlugin } from 'rete-area-plugin'
@@ -402,6 +402,7 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
         menuPanelMinimized:false as boolean,
         selectionPanelMinimized:false as boolean,
         read_only_mode: false as boolean,
+        connection_drop: null as null|SocketData,
         minimizeMenuPanel(){
           this.menuPanelMinimized = !this.menuPanelMinimized
         },

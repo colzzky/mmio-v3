@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { context } from 'node_modules/radix-vue/dist/DismissableLayer/DismissableLayer'
 import Audio from '../rete/TemplateNode/audio.vue'
 import Carousel from '../rete/TemplateNode/carousel.vue'
 import Condition from '../rete/TemplateNode/condition.vue'
@@ -30,7 +31,7 @@ import {
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { NodeEditor, ClassicPreset, type NodeId } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
-import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
+import { ConnectionPlugin, Presets as ConnectionPresets, canMakeConnection } from 'rete-connection-plugin'
 import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-menu-plugin'
 import { ReadonlyPlugin } from "rete-readonly-plugin";
 import { VuePlugin, Presets } from 'rete-vue-plugin'
@@ -166,7 +167,7 @@ async function initializeFlow() {
       console.log({ update: context })
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-        'undefined'
+          'undefined'
           ? 200
           : context.data.delay
       if (context.data.type === 'contextmenu') {
@@ -181,7 +182,7 @@ async function initializeFlow() {
     render: function render(context: ContextMenuRenderContext) {
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-        'undefined'
+          'undefined'
           ? 200
           : context.data.delay
       console.log({ render: context })
@@ -324,8 +325,17 @@ function isMouseOutsideNode(details: {
 // Track mouse events and handle right-click
 function trackMouseEvents() {
   const area = rete_init.area
+  const connection = rete_init.connection
+  const render = rete_init.render
+  const editor = rete_init.editor
+  const mouse_event = ref<PointerEvent | null>(null)
   if (area) {
-    area.addPipe((context) => {
+    area.addPipe(async(context) => {
+
+      if (context.type === 'pointermove') {
+        mouse_event.value = context.data.event
+      }
+
       if (context.type === 'connectionremove') {
         if (rete_init.editor) {
           const soure_node = rete_init.editor.getNode(context.data.source)
@@ -403,6 +413,21 @@ function trackMouseEvents() {
         }
       }
 
+      if (context.type === 'nodecreated') {
+        if (rete_init.editor && rete_init.ui.connection_drop) {
+          console.log(rete_init.ui.connection_drop)
+          const sourceNode = rete_init.editor.getNode(rete_init.ui.connection_drop.nodeId)
+          const targetNode = context.data
+          if (sourceNode && targetNode) {
+            await rete_init.editor.addConnection(
+              new Connection(sourceNode, rete_init.ui.connection_drop.key, targetNode, 'num'),
+            )
+          }
+          rete_init.ui.connection_drop = null
+        }
+      }
+
+
       if (context.type === 'zoom') {
         closeMenu()
         closeNodeOption(false)
@@ -446,6 +471,21 @@ function trackMouseEvents() {
     })
   }
 
+  if (connection) {
+    connection.addPipe(async (context) => {
+      if (context.type === 'connectiondrop') {
+        rete_init.ui.connection_drop = null
+        if (!context.data.created && mouse_event.value && rete_init.area) {
+          rete_init.ui.connection_drop = context.data.initial
+          //rete_init.ui.connection_drop = context.data.initial
+          await rete_init.area.emit({ type: 'contextmenu', data: { event: mouse_event.value, context: 'root' } })
+        }
+      }
+
+      return context
+    })
+  }
+
   document.addEventListener('click', (e) => {
     if (menuVisible.value) {
       const target = e.target as HTMLElement
@@ -476,6 +516,7 @@ function trackMouseEvents() {
     }
   })
 }
+
 
 function checkConnectionSocket(data: {
   source: string
@@ -636,7 +677,8 @@ function addCustomBackground() {
 .bg-dotted {
   background: rgb(42, 42, 42);
   background-image: radial-gradient(currentColor 0.5px, transparent 0.5px);
-  color: #404040; /* Text color for contrast */
+  color: #404040;
+  /* Text color for contrast */
   background-size: 10px 10px;
   /* Adjust size of dots */
 
