@@ -1,20 +1,16 @@
 <script lang="ts" setup>
 import Audio from '../rete/TemplateNode/audio.vue'
 import Carousel from '../rete/TemplateNode/carousel.vue'
-import CarouselSidebar from '../rete/TemplateNode/carouselSidebar.vue'
-import Generic from '../rete/TemplateNode/generic.vue'
 import Condition from '../rete/TemplateNode/condition.vue'
-import GenericSidebar from '../rete/TemplateNode/genericSidebar.vue'
+import Generic from '../rete/TemplateNode/generic.vue'
 import Image from '../rete/TemplateNode/image.vue'
 import Media from '../rete/TemplateNode/media.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
-import Sidebar from '../rete/TemplateNode/sidebar.vue'
 import Trigger from '../rete/TemplateNode/trigger.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
 import NodeSheet from '../rete/sheets/node-sheet.vue'
-import { dispatchTriggerNodeSheetEvent } from '../rete/utils'
 import Menu from './custom-contextmenu/index.vue'
 import type { ContextMenuRenderContext } from './custom-contextmenu/types'
 import { toast } from '@/core/components/ui/toast'
@@ -31,7 +27,7 @@ import {
   MetaTemplateOutput,
 } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
-import { NodeEditor, ClassicPreset, type NodeId, type BaseSchemes } from 'rete'
+import { NodeEditor, ClassicPreset, type NodeId } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
 import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-menu-plugin'
@@ -181,7 +177,11 @@ async function initializeFlow() {
       }
     },
     render: function render(context: ContextMenuRenderContext) {
-      const delay = typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) === 'undefined' ? 200: context.data.delay
+      const delay =
+        typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
+        'undefined'
+          ? 200
+          : context.data.delay
       console.log({ render: context })
       if (context.data.type === 'contextmenu') {
         return {
@@ -414,7 +414,7 @@ function trackMouseEvents() {
         rete_init.remove_selected_node()
       }
 
-      if(context.type === 'contextmenu'){
+      if (context.type === 'contextmenu') {
         console.log(context)
       }
 

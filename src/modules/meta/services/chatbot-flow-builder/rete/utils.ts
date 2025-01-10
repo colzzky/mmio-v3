@@ -20,14 +20,6 @@ export function sortByIndex<T extends Output<Socket> | Input<Socket> | MetaTempl
   })
 }
 
-export function dispatchTriggerNodeSheetEvent(args: { id: string; label: keyof NodeType } | null) {
-  document.dispatchEvent(
-    new CustomEvent('triggerNodeSheet', {
-      detail: args,
-    }),
-  )
-}
-
 export interface MessageReplyForm {
   form: FBAttachmentTemplate.Button
   initialState(): void

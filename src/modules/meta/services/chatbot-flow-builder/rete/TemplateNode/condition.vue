@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
-import { dispatchTriggerNodeSheetEvent, nodeIconMapping, sortByIndex } from '../utils'
+import { nodeIconMapping, sortByIndex } from '../utils'
 import Label from '@/core/components/ui/label/Label.vue'
 import type { Node, Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
@@ -153,14 +153,6 @@ const outputs = computed(() => {
           </div>
         </div>
       </section>
-
-      <!-- @temporary: open for refactoring -->
-      <button
-        type="button"
-        @click="dispatchTriggerNodeSheetEvent({ id: props.data.id, label: props.data.label })"
-      >
-        edit
-      </button>
     </NodeCard>
   </div>
 </template>

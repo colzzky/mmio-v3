@@ -8,6 +8,7 @@ import {
   NodeFlowDetailsSheet,
   TriggerSheet,
 } from '.'
+import SettingsTemplateSheet from './settings-template-sheet.vue'
 import { Sheet, SheetContent } from '@/core/components/ui/sheet'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -88,6 +89,7 @@ watch(
       class="w-[clamp(300px,100%,15%)] overflow-y-scroll p-0 shadow-none [&>button]:hidden"
     >
       <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" />
+      <SettingsTemplateSheet v-else />
     </SheetContent>
   </Sheet>
 </template>
