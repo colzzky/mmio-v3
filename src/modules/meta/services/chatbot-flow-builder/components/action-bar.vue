@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Button } from '@/core/components/ui/button'
+import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore';
 import { Icon } from '@iconify/vue'
+const authWorkspaceStore = useAuthWorkspaceStore()
+const { rete_init } = authWorkspaceStore.active_flow
 </script>
 
 <template>
-  <div
-    class="fixed bottom-4 left-1/2 flex -translate-x-1/2 items-center rounded-lg border bg-card text-card-foreground"
-  >
+  <div class="fixed bottom-4 left-1/2 flex -translate-x-1/2 items-center rounded-lg border bg-card text-card-foreground">
     <Button type="button" size="icon" variant="ghost">
       <Icon icon="bx:zoom-in" class="size-6" />
     </Button>
@@ -15,11 +16,12 @@ import { Icon } from '@iconify/vue'
     </Button>
 
     <!-- write and read only -->
-    <Button v-if="true" type="button" size="icon" variant="ghost">
+    <Button v-if="rete_init.ui.read_only_mode" type="button" size="icon" variant="ghost"
+      @click="rete_init.ui.enableReadOnly()">
       <Icon icon="mdi:pencil-circle" class="size-12" />
     </Button>
     <Button v-else type="button" size="icon" variant="ghost">
-      <Icon icon="bx:book-reader" class="size-12" />
+      <Icon icon="bx:book-reader" class="size-12" @click="rete_init.ui.enableReadOnly()" />
     </Button>
 
     <Button type="button" size="icon" variant="ghost">
@@ -28,12 +30,29 @@ import { Icon } from '@iconify/vue'
     <Button type="button" size="icon" variant="ghost">
       <Icon icon="bx:redo" class="size-6" />
     </Button>
-
-    <div
-      class="absolute inset-x-4 bottom-[calc(100%+theme(spacing.2))] flex items-center justify-between rounded-lg bg-neutral-300 px-3 py-1.5 text-sm text-card-foreground"
-    >
-      <span>Read Mode</span>
-      <button type="button" class="text-blue-500 hover:text-blue-600">Edit</button>
-    </div>
+    <Transition name="slide-fade" mode="out-in">
+      <div v-if="rete_init.ui.read_only_mode"
+        class="absolute inset-x-4 bottom-[calc(100%+theme(spacing.2))] flex items-center justify-between rounded-lg bg-neutral-300 px-3 py-1.5 text-sm text-card-foreground">
+        <span>Read Mode</span>
+        <button type="button" class="text-blue-500 hover:text-blue-600"
+          @click="rete_init.ui.enableReadOnly()">Edit</button>
+      </div>
+    </Transition>
   </div>
 </template>
+
+<style scoped>
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.4s;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translatey(20px);
+  opacity: 0;
+}
+</style>

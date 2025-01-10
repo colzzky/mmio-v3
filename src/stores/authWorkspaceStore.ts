@@ -33,6 +33,7 @@ import type { ConnectionPlugin } from 'rete-connection-plugin'
 import type { VuePlugin } from 'rete-vue-plugin'
 import { reactive } from 'vue'
 import type { AreaPlugin } from 'rete-area-plugin'
+import { ReadonlyPlugin } from 'rete-readonly-plugin'
 
 export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
   const active_workspace = reactive<ActiveWorkspace>({
@@ -396,13 +397,27 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     rete_init: {
       selected_node_id:'' as string,
       selected_node: null as Node<keyof NodeType> | null,
+      
       ui:{
         menuPanelMinimized:false as boolean,
         selectionPanelMinimized:false as boolean,
-        minimize(){
+        read_only_mode: false as boolean,
+        minimizeMenuPanel(){
           this.menuPanelMinimized = !this.menuPanelMinimized
+        },
+        minimizeSelectionPanel(){
           this.selectionPanelMinimized = !this.selectionPanelMinimized
-        }
+        },
+        enableReadOnly(){
+          if(!this.read_only_mode){
+            active_flow.rete_init.readonly.enable()
+            this.read_only_mode = true
+          }else{
+            active_flow.rete_init.readonly.disable()
+            this.read_only_mode = false
+          }
+          
+        },
       },
 
       async node_select(id:string){
@@ -431,7 +446,8 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
       editor: null as NodeEditor<Schemes> | null,
       render: null as VuePlugin<Schemes, AreaExtra> | null,
       connection: null as ConnectionPlugin<Schemes, AreaExtra> | null,
-      area:null as AreaPlugin<Schemes, AreaExtra> | null
+      area:null as AreaPlugin<Schemes, AreaExtra> | null,
+      readonly: new ReadonlyPlugin<Schemes>()
     },
   })
 

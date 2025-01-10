@@ -32,6 +32,7 @@ import { NodeEditor, ClassicPreset, type NodeId } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
 import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-menu-plugin'
+import { ReadonlyPlugin } from "rete-readonly-plugin";
 import { VuePlugin, Presets } from 'rete-vue-plugin'
 import type { Input } from 'rete/_types/presets/classic'
 import { ref, onMounted, watch } from 'vue'
@@ -197,10 +198,13 @@ async function initializeFlow() {
       }
     },
   })
-
   rete_init.editor.use(rete_init.area)
+  rete_init.editor.use(rete_init.readonly.root);
   rete_init.area.use(rete_init.connection)
+  rete_init.area.use(rete_init.readonly.area);
   rete_init.area.use(rete_init.render)
+
+
 
   if (active_flow.json) {
     //Reload saved flow if there is an existing state

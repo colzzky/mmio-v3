@@ -14,6 +14,8 @@ import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import type { BaseSchemes } from 'rete'
 import { reactive, watch } from 'vue'
+import { Icon } from '@iconify/vue'
+import Button from '@/core/components/ui/button/Button.vue'
 
 const authWorkspaceStore = useAuthWorkspaceStore()
 const { active_flow } = authWorkspaceStore
@@ -21,9 +23,9 @@ const { rete_init } = active_flow
 
 type Data =
   | {
-      id: string
-      label: keyof Omit<NodeType, 'reference_node'>
-    }
+    id: string
+    label: keyof Omit<NodeType, 'reference_node'>
+  }
   | undefined
 type SheetState = {
   isOpen: boolean
@@ -80,16 +82,67 @@ watch(
 </script>
 
 <template>
-  <Sheet :modal="false" :open="true">
-    <NodeFlowDetailsSheet />
-  </Sheet>
+  <NodeFlowDetailsSheet />
 
-  <Sheet :modal="false" :open="true">
-    <SheetContent
-      class="w-[clamp(300px,100%,15%)] overflow-y-scroll p-0 shadow-none [&>button]:hidden"
-    >
+  <Sheet :modal="false" :open="!rete_init.ui.selectionPanelMinimized">
+    <SheetContent class="w-[clamp(300px,100%,15%)] overflow-y-scroll p-0 shadow-none [&>button]:hidden">
+      <header class="flex items-center justify-between border-b p-3">
+        <div class="flex items-center gap-x-2">
+          <Button @click="rete_init.ui.minimizeSelectionPanel()" size="icon" variant="ghost">
+            <Icon icon="mdi:arrow-vertical-collapse" class="size-5" />
+          </Button>
+          <span class="flex items-center gap-x-2">
+            <Icon icon="tabler:zoom" class="size-4" />
+            <span class="text-sm">300%</span>
+          </span>
+        </div>
+
+        <span class="flex items-center gap-x-2">
+          <Button type="button" class="bg-green-500 hover:bg-green-600" size="xs">Publish</Button>
+          <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="xs">Save</Button>
+        </span>
+      </header>
       <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" />
       <SettingsTemplateSheet v-else />
     </SheetContent>
   </Sheet>
+
+  <transition  name="slide-fade" mode="out-in">
+    <div v-if="rete_init.ui.selectionPanelMinimized" class="fixed top-0 right-0 p-4">
+      <div class="gap-y-0 overflow-hidden overflow-y-scroll p-0 shadow-none [&>button]:hidden bg-white rounded-lg">
+        <header class="flex items-center justify-between border-b p-3 gap-12">
+          <div class="flex items-center gap-x-2">
+            <Button @click="rete_init.ui.minimizeSelectionPanel()" size="icon" variant="ghost">
+              <Icon icon="mdi:arrow-vertical-collapse" class="size-5" />
+            </Button>
+            <span class="flex items-center gap-x-2">
+              <Icon icon="tabler:zoom" class="size-4" />
+              <span class="text-sm">300%</span>
+            </span>
+          </div>
+
+          <span class="flex items-center gap-x-2">
+            <Button type="button" class="bg-green-500 hover:bg-green-600" size="xs">Publish</Button>
+            <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="xs">Save</Button>
+          </span>
+        </header>
+      </div>
+    </div>
+  </transition>
 </template>
+
+<style scoped>
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.4s;
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
+}
+</style>
