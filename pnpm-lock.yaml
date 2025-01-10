@@ -80,6 +80,9 @@ importers:
       rete-context-menu-plugin:
         specifier: ^2.0.4
         version: 2.0.4(rete-area-plugin@2.1.3(rete@2.0.5))(rete@2.0.5)
+      rete-readonly-plugin:
+        specifier: ^2.0.2
+        version: 2.0.2(rete-area-plugin@2.1.3(rete@2.0.5))(rete-connection-plugin@2.0.5(rete-area-plugin@2.1.3(rete@2.0.5))(rete@2.0.5))(rete@2.0.5)
       rete-render-utils:
         specifier: ^2.0.3
         version: 2.0.3(rete-area-plugin@2.1.3(rete@2.0.5))(rete@2.0.5)
@@ -3379,6 +3382,13 @@ packages:
     peerDependencies:
       rete: ^2.0.1
       rete-area-plugin: ^2.0.0
+
+  rete-readonly-plugin@2.0.2:
+    resolution: {integrity: sha512-+ap6vSzXxOOmopoZhwJQe2Qh82jIG7Nki5wBQnKvN572QSkP0Yr/KSvOMDCh89a+gJz1DRAIjzbhio3sCAhZ9g==}
+    peerDependencies:
+      rete: ^2.0.1
+      rete-area-plugin: ^2.0.0
+      rete-connection-plugin: ^2.0.0
 
   rete-render-utils@2.0.3:
     resolution: {integrity: sha512-Oz4W2PNayHocRvlzadb5BCNf+tDzJ8RhTwB3ucBPCdCLKZ974wWDiTSCRfA287L2hmHVzRfBdyAwC03K9eP+4g==}
@@ -7554,6 +7564,13 @@ snapshots:
       '@babel/runtime': 7.26.0
       rete: 2.0.5
       rete-area-plugin: 2.1.3(rete@2.0.5)
+
+  rete-readonly-plugin@2.0.2(rete-area-plugin@2.1.3(rete@2.0.5))(rete-connection-plugin@2.0.5(rete-area-plugin@2.1.3(rete@2.0.5))(rete@2.0.5))(rete@2.0.5):
+    dependencies:
+      '@babel/runtime': 7.26.0
+      rete: 2.0.5
+      rete-area-plugin: 2.1.3(rete@2.0.5)
+      rete-connection-plugin: 2.0.5(rete-area-plugin@2.1.3(rete@2.0.5))(rete@2.0.5)
 
   rete-render-utils@2.0.3(rete-area-plugin@2.1.3(rete@2.0.5))(rete@2.0.5):
     dependencies:

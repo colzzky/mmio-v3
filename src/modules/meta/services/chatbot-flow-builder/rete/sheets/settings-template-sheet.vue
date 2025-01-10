@@ -61,16 +61,6 @@ const nodeMapping: Record<
 </script>
 
 <template>
-  <header class="flex items-center justify-between border-b p-3">
-    <span class="flex items-center gap-x-2">
-      <Icon icon="tabler:zoom" class="size-5" />
-      300%
-    </span>
-    <span class="flex items-center gap-x-2">
-      <Button type="button" class="bg-green-500 hover:bg-green-600" size="xs">Publish</Button>
-      <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="xs">Save</Button>
-    </span>
-  </header>
   <Tabs default-value="settings">
     <TabsList class="mx-2 mt-2 flex justify-start">
       <TabsTrigger value="settings">Settings</TabsTrigger>
