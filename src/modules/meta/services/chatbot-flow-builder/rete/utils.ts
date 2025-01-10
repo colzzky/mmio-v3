@@ -6,6 +6,7 @@ import type {
   QuickReply,
   Button as MetaButton,
   Button,
+  Condition,
 } from '@/modules/meta/utils/flow-types'
 import type { Input, Output, Socket } from 'rete/_types/presets/classic'
 
@@ -17,14 +18,6 @@ export function sortByIndex<T extends Output<Socket> | Input<Socket> | MetaTempl
     const bi = b[1]?.index || 0
     return ai - bi
   })
-}
-
-export function dispatchTriggerNodeSheetEvent(args: { id: string; label: keyof NodeType } | null) {
-  document.dispatchEvent(
-    new CustomEvent('triggerNodeSheet', {
-      detail: args,
-    }),
-  )
 }
 
 export interface MessageReplyForm {
@@ -95,4 +88,32 @@ export interface CarouselCardForm {
       | { intent: 'edit-carousel-card-button'; key: string; button: Button }
       | { intent: 'edit-carousel-card'; key: number; card?: CarouselCard },
   ): void
+}
+
+export interface ConditionForm {
+  form: Condition
+  initialState(): void
+
+  submitForm(event: SubmitEvent): void
+  createCondition(): void
+  updateCondition(): void
+  deleteCondition(key: number): void
+
+  intent: 'default' | 'create-condition' | 'edit-condition'
+  conditionKey: number | null
+  changeIntent(
+    args:
+      | { intent: 'default' | 'create-condition' }
+      | { intent: 'edit-condition'; key: number; condition: Condition },
+  ): void
+}
+
+export const nodeIconMapping: Record<keyof NodeType, string> = {
+  reference_node: 'bx:bolt-circle',
+  message_node: 'bx:message',
+  generic_node: 'solar:posts-carousel-horizontal-bold-duotone',
+  carousel_node: 'solar:posts-carousel-horizontal-bold',
+  media_node: 'bx:image',
+  trigger_node: 'bxs:bolt',
+  condition_node: 'ix:logic-diagram',
 }

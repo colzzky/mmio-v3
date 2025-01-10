@@ -3,7 +3,7 @@ import type { FBAttachmentTemplate } from './flow-meta-types'
 import { toast } from '@/core/components/ui/toast'
 import { ClassicPreset, type GetSchemes } from 'rete'
 import type { VueArea2D } from 'rete-vue-plugin'
-import type { Input, Output } from 'rete/_types/presets/classic'
+import type { Input } from 'rete/_types/presets/classic'
 
 export interface NodeType {
   message_node: MessageNode
@@ -11,6 +11,10 @@ export interface NodeType {
   carousel_node: CarouselNode
   reference_node: ReferenceNode
   media_node: MediaNode
+  condition_node: ConditionNode
+  image_node: ImageNode
+  audio_node: AudioNode
+  trigger_node: TriggerNode
 }
 
 export interface CarouselCard {
@@ -64,6 +68,7 @@ export interface MessageNode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
+
 export interface MediaNode {
   name: string
   url: string
@@ -72,6 +77,53 @@ export interface MediaNode {
   postbackid?: string
   buttons: Record<string, Button>
   quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface Condition {
+  label: string
+  type: string
+  qualifier: string
+  value: any
+}
+
+export interface ConditionNode {
+  name: string
+  conditions: Condition[]
+  type: string
+  delay?: string
+  postbackid?: string
+  giver_data: Record<string, string>
+}
+
+export interface ImageNode {
+  name: string
+  url: string
+  type: string
+  delay?: string
+  postbackid?: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface AudioNode {
+  name: string
+  url: string
+  type: string
+  delay?: string
+  postbackid?: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface TriggerNode {
+  name: string
+  trigger_type: string
+  trigger_keyword?: string
+  keyword_strictness?: string
+  postbackid?: string
   giver_data: Record<string, string>
 }
 
@@ -87,6 +139,7 @@ export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
     super(label) // Call the constructor of the base class (ClassicPreset.Node)
     this.label = label
   }
+  
 }
 
 export function isNodeOfType<T extends keyof NodeType>(
@@ -165,6 +218,29 @@ export namespace ReteTemplates {
         'num1',
       )
 
+      return node
+    },
+    trigger_node() {
+      const node = new Node('trigger_node')
+      const num1_postback = crypto.randomUUID()
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Trigger Node',
+        keyword_strictness: 'wide',
+        trigger_type: 'keyword',
+        trigger_keyword: '',
+        giver_data: {
+          num1: num1_postback,
+        },
+      }
+      node.id = crypto.randomUUID()
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['triggers'],
+        },
+        'num1',
+      )
       return node
     },
     text_node() {
@@ -297,6 +373,107 @@ export namespace ReteTemplates {
       return node
     },
 
+    image_node() {
+      const node = new Node('image_node')
+      const num1_postback = crypto.randomUUID()
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Image Node',
+        url: '',
+        type: '',
+        giver_data: {},
+        quick_replies: {},
+        buttons: {},
+      }
+      node.id = crypto.randomUUID()
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['image'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['image'],
+        },
+        'num1',
+      )
+      return node
+    },
+    audio_node() {
+      const node = new Node('audio_node')
+      const num1_postback = crypto.randomUUID()
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Audio Node',
+        url: '',
+        type: '',
+        giver_data: {},
+        quick_replies: {},
+        buttons: {},
+      }
+      node.id = crypto.randomUUID()
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['audio'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['audio'],
+        },
+        'num1',
+      )
+      return node
+    },
+    condition_node() {
+      const node = new Node('condition_node')
+      const num1_postback = crypto.randomUUID()
+      const num2_postback = crypto.randomUUID()
+      node.id = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Condition Node',
+        type: '',
+        giver_data: {
+          num1: num1_postback,
+          num2: num2_postback,
+        },
+        delay:'',
+        conditions:[],
+        postbackid:crypto.randomUUID()
+      }
+      node.id = crypto.randomUUID()
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['condition'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['condition'],
+        },
+        'num1',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['condition'],
+        },
+        'num2',
+      )
+      return node
+    },
     //Should be generic node
     message_node() {
       const node = new Node('message_node')
@@ -452,6 +629,7 @@ const socketNames = [
   'file',
   'facebookmedia',
   'delay',
+  'audio',
   'delayO',
   'Esequence',
   'Ssequence',
@@ -593,6 +771,19 @@ export const socketDefinitions: Record<
     'Accept All',
   ],
   video: [
+    'carouselItem',
+    'carousel',
+    'text',
+    'image',
+    'file',
+    'video',
+    'facebookmedia',
+    'delay',
+    'timegap',
+    'actions',
+    'Accept All',
+  ],
+  audio: [
     'carouselItem',
     'carousel',
     'text',

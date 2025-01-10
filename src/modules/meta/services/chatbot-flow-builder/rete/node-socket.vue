@@ -1,4 +1,3 @@
-```
 <script setup lang="ts">
 import { Ref } from 'rete-vue-plugin'
 import { twMerge } from 'tailwind-merge'

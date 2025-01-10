@@ -8,6 +8,6 @@ defineProps<{ path: any }>()
     class="overflow-visible pointer-events-none !absolute -z-10 h-[9999px] w-[9999px]"
     
   >
-    <path :d="path" class="pointer-events-auto fill-none stroke-primary stroke-[3px]"></path>
+    <path :d="path" class="pointer-events-auto fill-none stroke-white stroke-[3px] "></path>
   </svg>
 </template>

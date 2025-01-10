@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
-import { dispatchTriggerNodeSheetEvent, sortByIndex } from '../utils'
+import { nodeIconMapping, sortByIndex } from '../utils'
 import type { Node, Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { objectEntries } from '@vueuse/core'
@@ -49,7 +49,7 @@ const outputs = computed(() => {
               <div class="flex items-center justify-center rounded-lg px-2">
                 <div class="flex h-9 w-full items-center rounded-md px-3">
                   <span class="flex items-center gap-x-2 font-semibold">
-                    <Icon icon="bx:message" class="size-6" />
+                    <Icon :icon="nodeIconMapping[data.label]" class="size-6" />
                     Carousel Node
                   </span>
                 </div>
@@ -250,14 +250,6 @@ const outputs = computed(() => {
           </section>
         </div>
       </div>
-
-      <!-- @temporary: open for refactoring -->
-      <button
-        type="button"
-        @click="dispatchTriggerNodeSheetEvent({ id: props.data.id, label: props.data.label })"
-      >
-        edit
-      </button>
     </div>
   </div>
 </template>

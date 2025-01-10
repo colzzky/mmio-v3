@@ -396,6 +396,15 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     rete_init: {
       selected_node_id:'' as string,
       selected_node: null as Node<keyof NodeType> | null,
+      ui:{
+        menuPanelMinimized:false as boolean,
+        selectionPanelMinimized:false as boolean,
+        minimize(){
+          this.menuPanelMinimized = !this.menuPanelMinimized
+          this.selectionPanelMinimized = !this.selectionPanelMinimized
+        }
+      },
+
       async node_select(id:string){
         this.remove_selected_node()
         const node = this.editor?.getNode(id)

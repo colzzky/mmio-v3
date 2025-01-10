@@ -1,15 +1,17 @@
 <script lang="ts" setup>
+import Audio from '../rete/TemplateNode/audio.vue'
 import Carousel from '../rete/TemplateNode/carousel.vue'
-import CarouselSidebar from '../rete/TemplateNode/carouselSidebar.vue'
+import Condition from '../rete/TemplateNode/condition.vue'
 import Generic from '../rete/TemplateNode/generic.vue'
-import GenericSidebar from '../rete/TemplateNode/genericSidebar.vue'
+import Image from '../rete/TemplateNode/image.vue'
+import Media from '../rete/TemplateNode/media.vue'
 import Message from '../rete/TemplateNode/message.vue'
 import Reference from '../rete/TemplateNode/reference.vue'
-import Sidebar from '../rete/TemplateNode/sidebar.vue'
+import Trigger from '../rete/TemplateNode/trigger.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
-import NodeSheet from '../rete/node-sheet.vue'
-import { dispatchTriggerNodeSheetEvent } from '../rete/utils'
+import NodeSheet from '../rete/sheets/node-sheet.vue'
+import ActionBar from './action-bar.vue'
 import Menu from './custom-contextmenu/index.vue'
 import type { ContextMenuRenderContext } from './custom-contextmenu/types'
 import { toast } from '@/core/components/ui/toast'
@@ -26,7 +28,7 @@ import {
   MetaTemplateOutput,
 } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
-import { NodeEditor, ClassicPreset, type NodeId, type BaseSchemes } from 'rete'
+import { NodeEditor, ClassicPreset, type NodeId } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
 import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-menu-plugin'
@@ -94,6 +96,11 @@ async function initializeFlow() {
       ['Message', () => ReteTemplates.node_templates.message_node()],
       ['Generic', () => ReteTemplates.node_templates.generic_node()],
       ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
+      ['Media', () => ReteTemplates.node_templates.media_node()],
+      ['Image', () => ReteTemplates.node_templates.image_node()],
+      ['Audio', () => ReteTemplates.node_templates.audio_node()],
+      ['Trigger', () => ReteTemplates.node_templates.trigger_node()],
+      ['Condition', () => ReteTemplates.node_templates.condition_node()],
     ]),
   })
 
@@ -120,6 +127,21 @@ async function initializeFlow() {
           if (context.payload.label === 'generic_node') {
             return Generic
           }
+          if (context.payload.label === 'media_node') {
+            return Media
+          }
+          if (context.payload.label === 'image_node') {
+            return Image
+          }
+          if (context.payload.label === 'audio_node') {
+            return Audio
+          }
+          if (context.payload.label === 'trigger_node') {
+            return Trigger
+          }
+          if (context.payload.label === 'condition_node') {
+            return Condition
+          }
 
           return Presets.classic.Node
         },
@@ -143,7 +165,7 @@ async function initializeFlow() {
       console.log({ update: context })
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-          'undefined'
+        'undefined'
           ? 200
           : context.data.delay
       if (context.data.type === 'contextmenu') {
@@ -158,7 +180,7 @@ async function initializeFlow() {
     render: function render(context: ContextMenuRenderContext) {
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-          'undefined'
+        'undefined'
           ? 200
           : context.data.delay
       console.log({ render: context })
@@ -184,7 +206,6 @@ async function initializeFlow() {
     //Reload saved flow if there is an existing state
     //reloadEditorState()
   }
-
 
   AreaExtensions.selectableNodes(rete_init.area, selector, { accumulating })
   trackMouseEvents()
@@ -339,13 +360,13 @@ function trackMouseEvents() {
         console.log(context.data)
         if (check) {
           toast({
-            title: 'Copatible',
+            title: 'Compatible',
             variant: 'success',
             duration: 2000,
           })
         } else {
           toast({
-            title: 'Not Copatible',
+            title: 'Not Compatible',
             variant: 'destructive',
             duration: 2000,
           })
@@ -394,6 +415,10 @@ function trackMouseEvents() {
         rete_init.remove_selected_node()
       }
 
+      if (context.type === 'contextmenu') {
+        console.log(context)
+      }
+
       // if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
       //   const checker: boolean[] = []
       //   multi_selected_node.value.forEach((node) => {
@@ -416,7 +441,6 @@ function trackMouseEvents() {
       return context
     })
   }
-
 
   document.addEventListener('click', (e) => {
     if (menuVisible.value) {
@@ -578,14 +602,12 @@ function removeNode(): void {
 function addCustomBackground() {
   if (rete_init.area) {
     rete_init.area.container.classList.add('background')
-    rete_init.area.container.classList.add('bg-dotted')    
+    rete_init.area.container.classList.add('bg-dotted')
   }
-
 }
 </script>
 
 <template>
-
   <!-- Rete.js Canvas -->
   <div class="h-screen">
     <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
@@ -602,38 +624,8 @@ function addCustomBackground() {
     </div>
   </div>
 
-
-  <NodeSheet v-if="!editor_load"/>
-  <!-- <div
-      v-if="
-        selected_node && selected_node_obj && area && selected_node_obj.label != 'reference_node'
-      "
-    >
-      <div
-        class="fixed left-0 top-0 flex h-screen w-[20%] flex-col overflow-auto overflow-y-auto border border-gray-300 bg-gray-100 p-3"
-      >
-        <Sidebar
-          v-if="selected_node_obj.label === 'message_node'"
-          :node="selected_node_obj"
-          :node_id="selected_node_obj.id"
-          :area
-        />
-        <GenericSidebar
-          v-if="selected_node_obj.label === 'generic_node'"
-          :node="selected_node_obj"
-          :node_id="selected_node_obj.id"
-          :area
-        />
-        <CarouselSidebar
-          v-if="selected_node_obj.label === 'carousel_node'"
-          :node="selected_node_obj"
-          :node_id="selected_node_obj.id"
-          :area
-        />
-      </div>
-    </div> -->
-
-  <!-- Floating Menu -->
+  <NodeSheet v-if="!editor_load" />
+  <ActionBar />
 </template>
 
 <style scoped>
@@ -645,28 +637,6 @@ function addCustomBackground() {
   /* Adjust size of dots */
 
   /* Change dot color */
-}
-
-.floating-menu {
-  position: absolute;
-  user-select: none;
-  background: white;
-  border: 1px solid black;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
-  z-index: 1000;
-  padding: 8px;
-  min-width: 150px;
-}
-
-.floating-menu div {
-  cursor: pointer;
-  padding: 4px 8px;
-  transition: background 0.2s;
-}
-
-.floating-menu div:hover {
-  background: #f0f0f0;
 }
 
 .pause-overlay {

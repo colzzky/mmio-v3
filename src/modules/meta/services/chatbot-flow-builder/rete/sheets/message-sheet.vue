@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MessageReplyForm, QuickReplyForm } from '../utils'
+import { nodeIconMapping, type MessageReplyForm, type QuickReplyForm } from '../utils'
 import { Button } from '@/core/components/ui/button'
 import {
   DropdownMenu,
@@ -110,7 +110,7 @@ const messageReplyButtonForm = reactive<MessageReplyForm>({
     localNodeData.value.data.buttons[newButton.key] = { ...this.form }
 
     toast({
-      title: 'Message Reply Button Added',
+      title: 'Message Reply Button Created',
       variant: 'success',
       duration: 2000,
     })
@@ -206,7 +206,7 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
     localNodeData.value.data.quick_replies[newButton.key] = { ...this.form }
 
     toast({
-      title: 'Quick Reply Button Added',
+      title: 'Quick Reply Button Created',
       variant: 'success',
       duration: 2000,
     })
@@ -269,6 +269,18 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
     })
   },
 })
+
+function handleRemoveDelay() {
+  if (!localNodeData.value?.data) return
+
+  localNodeData.value.data.delay = '0'
+
+  toast({
+    title: 'Removed delay',
+    variant: 'success',
+    duration: 2000,
+  })
+}
 </script>
 
 <template>
@@ -278,13 +290,16 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
       <SheetHeader
         class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
-        <Icon icon="bx:message" class="row-span-full size-[var(--icon-size)] self-center" />
+        <Icon
+          :icon="nodeIconMapping[localNodeData.label]"
+          class="row-span-full size-[var(--icon-size)] self-center"
+        />
         <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none"> Message </SheetDescription>
       </SheetHeader>
       <main class="grid gap-y-4 px-6 py-3">
         <div>
-          <Label for="name">Node Name</Label>
+          <Label for="name">Name</Label>
           <Input
             v-model:model-value="localNodeData.data.name"
             id="name"
@@ -292,6 +307,29 @@ const quickReplyButtonForm = reactive<QuickReplyForm>({
             name="name"
             placeholder="What do you call this node?"
           />
+        </div>
+        <div class="text-sm">
+          <div class="flex items-center justify-between">
+            <h3 class="font-medium">Delay</h3>
+            <button type="button" class="font-medium text-destructive" @click="handleRemoveDelay">
+              Remove Delay
+            </button>
+          </div>
+          <div class="flex items-center gap-x-4">
+            <Input
+              v-model:model-value="localNodeData.data.delay"
+              id="delay"
+              type="range"
+              name="delay"
+              min="0"
+              max="10"
+              default-value="0"
+            />
+            <span class="whitespace-nowrap">
+              {{ localNodeData.data.delay ?? '0' }}
+              seconds
+            </span>
+          </div>
         </div>
         <div>
           <Label for="text">Text Message</Label>

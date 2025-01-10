@@ -1,8 +1,14 @@
 <script setup lang="ts" generic="S extends BaseSchemes, K">
-import CarouselSheet from './sheets/carousel-sheet.vue'
-import GenericSheet from './sheets/generic-sheet.vue'
-import MessageSheet from './sheets/message-sheet.vue'
-import { Button } from '@/core/components/ui/button'
+import {
+  MessageSheet,
+  GenericSheet,
+  CarouselSheet,
+  MediaSheet,
+  ConditionSheet,
+  NodeFlowDetailsSheet,
+  TriggerSheet,
+} from '.'
+import SettingsTemplateSheet from './settings-template-sheet.vue'
 import { Sheet, SheetContent } from '@/core/components/ui/sheet'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -56,10 +62,9 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   message_node: MessageSheet,
   generic_node: GenericSheet,
   carousel_node: CarouselSheet,
-}
-
-function selectNode(id: string) {
-  rete_init.node_select(id)
+  media_node: MediaSheet,
+  condition_node: ConditionSheet,
+  trigger_node: TriggerSheet,
 }
 
 watch(
@@ -76,31 +81,15 @@ watch(
 
 <template>
   <Sheet :modal="false" :open="true">
-    <SheetContent
-      class="w-[clamp(300px,100%,15%)] overflow-y-scroll p-0 shadow-none [&>button]:hidden"
-    >
-      <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" :data="sheet.data" />
-    </SheetContent>
+    <NodeFlowDetailsSheet />
   </Sheet>
 
   <Sheet :modal="false" :open="true">
     <SheetContent
-      side="left"
       class="w-[clamp(300px,100%,15%)] overflow-y-scroll p-0 shadow-none [&>button]:hidden"
     >
-      <div v-if="rete_init.editor && rete_init.editor.getNodes().length >= 1">
-        <Button
-          v-for="(node, key) in rete_init.editor.getNodes()"
-          :key
-          @click="selectNode(node.id)"
-          class="w-full justify-start border-none"
-          variant="outline"
-          :class="{ 'bg-slate-100': node.id === rete_init.selected_node_id }"
-        >
-          {{ node.data?.name }}
-        </Button>
-      </div>
-      <template v-else> No node available </template>
+      <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" />
+      <SettingsTemplateSheet v-else />
     </SheetContent>
   </Sheet>
 </template>
