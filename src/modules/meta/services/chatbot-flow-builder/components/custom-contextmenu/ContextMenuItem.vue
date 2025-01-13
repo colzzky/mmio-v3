@@ -57,6 +57,9 @@ const labelMapping: Record<string, keyof NodeType> = {
   carousel: 'carousel_node',
   media: 'media_node',
   trigger: 'trigger_node',
+  condition: 'condition_node',
+  image: 'image_node',
+  audio: 'audio_node',
 }
 
 const icon = computed(() => {

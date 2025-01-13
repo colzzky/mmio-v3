@@ -328,13 +328,8 @@ function trackMouseEvents() {
   const connection = rete_init.connection
   const render = rete_init.render
   const editor = rete_init.editor
-  const mouse_event = ref<PointerEvent | null>(null)
   if (area) {
-    area.addPipe(async(context) => {
-
-      if (context.type === 'pointermove') {
-        mouse_event.value = context.data.event
-      }
+    area.addPipe(async (context) => {
 
       if (context.type === 'connectionremove') {
         if (rete_init.editor) {
@@ -474,11 +469,15 @@ function trackMouseEvents() {
   if (connection) {
     connection.addPipe(async (context) => {
       if (context.type === 'connectiondrop') {
-        rete_init.ui.connection_drop = null
-        if (!context.data.created && mouse_event.value && rete_init.area) {
+        if (!context.data.created && rete_init.area) {
+          const event = new PointerEvent('contextmenu', {
+            clientX:rete_init.area.area.pointer.x,
+            clientY:rete_init.area.area.pointer.y
+          })
+
           rete_init.ui.connection_drop = context.data.initial
           //rete_init.ui.connection_drop = context.data.initial
-          await rete_init.area.emit({ type: 'contextmenu', data: { event: mouse_event.value, context: 'root' } })
+          await rete_init.area.emit({ type: 'contextmenu', data: { event, context: 'root' } })
         }
       }
 
@@ -495,26 +494,26 @@ function trackMouseEvents() {
     }
   })
 
-  document.addEventListener('pointerup', (e) => {
-    if (e.metaKey || e.ctrlKey) {
-      const multi_selected: string[] = []
-      console.log('hey add multi')
-      if (rete_init.editor && rete_init.editor.getNodes().length > 0) {
-        rete_init.editor.getNodes().forEach((node) => {
-          if (node.selected === true) {
-            multi_selected.push(node.id)
-          }
-        })
-      }
-      if (multi_selected.length > 1) {
-        closeNodeOption()
-        closeMenu()
-      }
-      multi_selected_node.value = [...multi_selected]
-      console.log(multi_selected_node.value)
-      console.log(selected_node.value)
-    }
-  })
+  // document.addEventListener('pointerup', (e) => {
+  //   if (e.metaKey || e.ctrlKey) {
+  //     const multi_selected: string[] = []
+  //     console.log('hey add multi')
+  //     if (rete_init.editor && rete_init.editor.getNodes().length > 0) {
+  //       rete_init.editor.getNodes().forEach((node) => {
+  //         if (node.selected === true) {
+  //           multi_selected.push(node.id)
+  //         }
+  //       })
+  //     }
+  //     if (multi_selected.length > 1) {
+  //       closeNodeOption()
+  //       closeMenu()
+  //     }
+  //     multi_selected_node.value = [...multi_selected]
+  //     console.log(multi_selected_node.value)
+  //     console.log(selected_node.value)
+  //   }
+  // })
 }
 
 
