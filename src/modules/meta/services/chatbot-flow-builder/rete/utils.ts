@@ -117,4 +117,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   trigger_node: 'bxs:bolt',
   condition_node: 'ix:logic-diagram',
   image_node: 'bx:image',
+  audio_node: 'gridicons:audio',
 }

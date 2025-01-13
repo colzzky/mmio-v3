@@ -8,6 +8,7 @@ import {
   NodeFlowDetailsSheet,
   TriggerSheet,
 } from '.'
+import AudioSheet from './audio-sheet.vue'
 import ImageSheet from './image-sheet.vue'
 import SettingsTemplateSheet from './settings-template-sheet.vue'
 import Button from '@/core/components/ui/button/Button.vue'
@@ -69,6 +70,7 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   condition_node: ConditionSheet,
   trigger_node: TriggerSheet,
   image_node: ImageSheet,
+  audio_node: AudioSheet,
 }
 
 watch(

@@ -59,6 +59,7 @@ const labelMapping: Record<string, keyof NodeType> = {
   trigger: 'trigger_node',
   condition: 'condition_node',
   image: 'image_node',
+  audio: 'audio_node',
 }
 
 const icon = computed(() => {
