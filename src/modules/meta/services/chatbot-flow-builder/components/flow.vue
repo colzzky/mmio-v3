@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { context } from 'node_modules/radix-vue/dist/DismissableLayer/DismissableLayer'
 import Audio from '../rete/TemplateNode/audio.vue'
 import Carousel from '../rete/TemplateNode/carousel.vue'
 import Condition from '../rete/TemplateNode/condition.vue'
@@ -31,9 +30,8 @@ import {
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { NodeEditor, ClassicPreset, type NodeId } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
-import { ConnectionPlugin, Presets as ConnectionPresets, canMakeConnection } from 'rete-connection-plugin'
+import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
 import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-menu-plugin'
-import { ReadonlyPlugin } from "rete-readonly-plugin";
 import { VuePlugin, Presets } from 'rete-vue-plugin'
 import type { Input } from 'rete/_types/presets/classic'
 import { ref, onMounted, watch } from 'vue'
@@ -471,8 +469,8 @@ function trackMouseEvents() {
       if (context.type === 'connectiondrop') {
         if (!context.data.created && rete_init.area) {
           const event = new PointerEvent('contextmenu', {
-            clientX:rete_init.area.area.pointer.x,
-            clientY:rete_init.area.area.pointer.y
+            clientX: rete_init.area.area.pointer.x,
+            clientY: rete_init.area.area.pointer.y
           })
 
           rete_init.ui.connection_drop = context.data.initial
