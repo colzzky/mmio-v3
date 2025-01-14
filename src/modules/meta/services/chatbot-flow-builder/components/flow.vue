@@ -1,13 +1,4 @@
 <script lang="ts" setup>
-import Audio from '../rete/TemplateNode/audio.vue'
-import Carousel from '../rete/TemplateNode/carousel.vue'
-import Condition from '../rete/TemplateNode/condition.vue'
-import Generic from '../rete/TemplateNode/generic.vue'
-import Image from '../rete/TemplateNode/image.vue'
-import Media from '../rete/TemplateNode/media.vue'
-import Message from '../rete/TemplateNode/message.vue'
-import Reference from '../rete/TemplateNode/reference.vue'
-import Trigger from '../rete/TemplateNode/trigger.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
 import NodeSheet from '../rete/sheets/node-sheet.vue'
@@ -35,6 +26,7 @@ import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-m
 import { VuePlugin, Presets } from 'rete-vue-plugin'
 import type { Input } from 'rete/_types/presets/classic'
 import { ref, onMounted, watch } from 'vue'
+import { labelNodeMapping } from '../rete/utils'
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -111,40 +103,7 @@ async function initializeFlow() {
   rete_init.render.addPreset(
     Presets.classic.setup({
       customize: {
-        node(context) {
-          if (context.payload.label === 'reference_node') {
-            return Reference
-          }
-          // if (context.payload.label === 'text_node') {
-          //   return Text
-          // }
-          if (context.payload.label === 'message_node') {
-            return Message
-          }
-          if (context.payload.label === 'carousel_node') {
-            return Carousel
-          }
-          if (context.payload.label === 'generic_node') {
-            return Generic
-          }
-          if (context.payload.label === 'media_node') {
-            return Media
-          }
-          if (context.payload.label === 'image_node') {
-            return Image
-          }
-          if (context.payload.label === 'audio_node') {
-            return Audio
-          }
-          if (context.payload.label === 'trigger_node') {
-            return Trigger
-          }
-          if (context.payload.label === 'condition_node') {
-            return Condition
-          }
-
-          return Presets.classic.Node
-        },
+        node: (context) => labelNodeMapping[context.payload.label],
         control(context) {
           if (context.payload instanceof CustomControls.Test) {
             return CustomControl

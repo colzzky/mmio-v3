@@ -9,6 +9,8 @@ import type {
   Condition,
 } from '@/modules/meta/utils/flow-types'
 import type { Input, Output, Socket } from 'rete/_types/presets/classic'
+import { AudioNode, CarouselNode, ConditionNode, GenericNode, ImageNode, MediaNode, MessageNode, ReferenceNode, TriggerNode } from './TemplateNode'
+import type { Component } from 'vue'
 
 export function sortByIndex<T extends Output<Socket> | Input<Socket> | MetaTemplateOutput>(
   entries: [string, T | undefined][],
@@ -75,11 +77,11 @@ export interface CarouselCardForm {
   deleteCard(key: number): void
 
   intent:
-    | 'default'
-    | 'create-carousel-card'
-    | 'edit-carousel-card'
-    | 'create-carousel-card-button'
-    | 'edit-carousel-card-button'
+  | 'default'
+  | 'create-carousel-card'
+  | 'edit-carousel-card'
+  | 'create-carousel-card-button'
+  | 'edit-carousel-card-button'
   cardKey: number | null
   buttonKey: string | null
   changeIntent(
@@ -118,4 +120,16 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   condition_node: 'ix:logic-diagram',
   image_node: 'bx:image',
   audio_node: 'gridicons:audio',
+}
+
+export const labelNodeMapping: Record<keyof NodeType, Component> = {
+  reference_node: ReferenceNode,
+  message_node: MessageNode,
+  generic_node: GenericNode,
+  carousel_node: CarouselNode,
+  media_node: MediaNode,
+  image_node: ImageNode,
+  audio_node: AudioNode,
+  trigger_node: TriggerNode,
+  condition_node: ConditionNode
 }
