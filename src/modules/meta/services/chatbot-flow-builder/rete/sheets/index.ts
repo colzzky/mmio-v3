@@ -1,17 +1,10 @@
-import CarouselSheet from './carousel-sheet.vue'
-import ConditionSheet from './condition-sheet.vue'
-import GenericSheet from './generic-sheet.vue'
-import MediaSheet from './media-sheet.vue'
-import MessageSheet from './message-sheet.vue'
-import NodeFlowDetailsSheet from './node-flow-details-sheet.vue'
-import TriggerSheet from './trigger-sheet.vue'
-
-export {
-  MessageSheet,
-  GenericSheet,
-  CarouselSheet,
-  MediaSheet,
-  ConditionSheet,
-  NodeFlowDetailsSheet,
-  TriggerSheet,
-}
+export { default as MessageSheet } from './message-sheet.vue'
+export { default as GenericSheet } from './generic-sheet.vue'
+export { default as CarouselSheet } from './carousel-sheet.vue'
+export { default as MediaSheet } from './media-sheet.vue'
+export { default as ImageSheet } from './image-sheet.vue'
+export { default as AudioSheet } from './audio-sheet.vue'
+export { default as ConditionSheet } from './condition-sheet.vue'
+export { default as TriggerSheet } from './trigger-sheet.vue'
+export { default as NodeFlowDetailsSheet } from './node-flow-details-sheet.vue'
+export { default as SettingsTemplateSheet } from './settings-template-sheet.vue'

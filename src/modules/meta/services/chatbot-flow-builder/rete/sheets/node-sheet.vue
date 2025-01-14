@@ -1,16 +1,4 @@
 <script setup lang="ts" generic="S extends BaseSchemes, K">
-import {
-  MessageSheet,
-  GenericSheet,
-  CarouselSheet,
-  MediaSheet,
-  ConditionSheet,
-  NodeFlowDetailsSheet,
-  TriggerSheet,
-} from '.'
-import AudioSheet from './audio-sheet.vue'
-import ImageSheet from './image-sheet.vue'
-import SettingsTemplateSheet from './settings-template-sheet.vue'
 import Button from '@/core/components/ui/button/Button.vue'
 import { Sheet, SheetContent } from '@/core/components/ui/sheet'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
@@ -18,6 +6,7 @@ import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
 import type { BaseSchemes } from 'rete'
 import { reactive, watch } from 'vue'
+import { MessageSheet, GenericSheet, CarouselSheet, MediaSheet, ImageSheet, AudioSheet,TriggerSheet,ConditionSheet, NodeFlowDetailsSheet, SettingsTemplateSheet } from '.'
 
 const authWorkspaceStore = useAuthWorkspaceStore()
 const { active_flow } = authWorkspaceStore
@@ -62,7 +51,7 @@ const sheet = reactive<SheetState>({
   },
 })
 
-const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
+const nodeSheetMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   message_node: MessageSheet,
   generic_node: GenericSheet,
   carousel_node: CarouselSheet,
@@ -108,7 +97,7 @@ watch(
           <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="xs">Save</Button>
         </span>
       </header>
-      <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" />
+      <component v-if="sheet.data" :is="nodeSheetMapping[sheet.data.label]" />
       <SettingsTemplateSheet v-else />
     </SheetContent>
   </Sheet>
