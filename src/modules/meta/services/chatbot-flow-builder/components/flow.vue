@@ -48,14 +48,13 @@ interface MousePosition {
 const authWorkspace = useAuthWorkspaceStore()
 const { active_flow } = authWorkspace
 const { rete_init } = active_flow
+const { draggable } = rete_init
+
 
 // Menu states
 const menuVisible = ref(false)
 const nodeOptionVisible = ref(false)
-const menuPosition = ref<MousePosition>({ x: 0, y: 0 })
-const mousePosition = ref<MousePosition>({ x: 0, y: 0 })
 const reteContainer = ref<HTMLDivElement>()
-const socket = new ClassicPreset.Socket('socket')
 const editor_load = ref<boolean>(true)
 
 const selector = AreaExtensions.selector()
@@ -326,27 +325,21 @@ function isMouseOutsideNode(details: {
 function trackMouseEvents() {
   const area = rete_init.area
   const connection = rete_init.connection
-  const render = rete_init.render
-  const editor = rete_init.editor
+  const isNodeRemoved = ref(false)
   if (area) {
     area.addPipe(async (context) => {
 
       if (context.type === 'connectionremove') {
+        isNodeRemoved.value = true
         if (rete_init.editor) {
           const soure_node = rete_init.editor.getNode(context.data.source)
           if (soure_node && soure_node.data) {
             const origin = soure_node.data.giver_data[context.data.sourceOutput]
+            console.log(soure_node.data)
             console.log(context.data)
             console.log(soure_node)
-            if (!origin) {
-              toast({
-                title: 'Something went wrong',
-                variant: 'destructive',
-                duration: 2000,
-              })
-              return
-            } else {
-              const target_node = rete_init.editor.getNode(context.data.target)
+
+            const target_node = rete_init.editor.getNode(context.data.target)
               if (target_node && target_node.data) {
                 if (target_node.data.postbackid) {
                   delete target_node.data['postbackid']
@@ -359,7 +352,17 @@ function trackMouseEvents() {
                 })
                 return
               }
-            }
+
+            // if (!origin) {
+            //   toast({
+            //     title: 'Something went wrong',
+            //     variant: 'destructive',
+            //     duration: 2000,
+            //   })
+            //   return
+            // } else {
+
+            // }
           }
         }
       }
@@ -435,12 +438,33 @@ function trackMouseEvents() {
         multi_selected_node.value = [context.data.id]
         rete_init.node_select(context.data.id)
       }
-      if (context.type === 'pointerdown' && rete_init.selected_node) {
-        rete_init.remove_selected_node()
+      if (context.type === 'pointerdown') {
+        if (rete_init.selected_node) {
+          rete_init.remove_selected_node()
+        }
+        if (rete_init.ui.connection_drop) {
+          rete_init.ui.connection_drop = null
+        }
+        if (draggable.visibility === true) {
+          draggable.visibility = false
+          if(draggable.node && rete_init.editor && rete_init.area){
+            await rete_init.editor.addNode(draggable.node);
+            
+            await rete_init.area.translate(draggable.node.id, getTranslatedMousePosition(context.data.event));
+          }
+          draggable.node = null
+          draggable.position = { x: 0, y: 0 }
+        }
+      }
+
+      if(context.type === 'pointermove'){
+        if(draggable.visibility === true){
+          draggable.updatePosition(context.data.event)          
+        }
       }
 
       if (context.type === 'contextmenu') {
-        console.log(context)
+        console.log(rete_init.editor?.getNodes())
       }
 
       // if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
@@ -469,18 +493,18 @@ function trackMouseEvents() {
   if (connection) {
     connection.addPipe(async (context) => {
       if (context.type === 'connectiondrop') {
-        if (!context.data.created && rete_init.area) {
+        if (!context.data.created && rete_init.area && !isNodeRemoved.value) {
           const event = new PointerEvent('contextmenu', {
-            clientX:rete_init.area.area.pointer.x,
-            clientY:rete_init.area.area.pointer.y
+            clientX: rete_init.area.area.pointer.x,
+            clientY: rete_init.area.area.pointer.y
           })
-
           rete_init.ui.connection_drop = context.data.initial
+          console.log('tertre1')
           //rete_init.ui.connection_drop = context.data.initial
           await rete_init.area.emit({ type: 'contextmenu', data: { event, context: 'root' } })
         }
+        if(isNodeRemoved.value) isNodeRemoved.value = false 
       }
-
       return context
     })
   }
@@ -601,9 +625,6 @@ const saveEditorState = async () => {
   })
 }
 
-onMounted(async () => {
-  await initializeFlow()
-})
 
 watch(
   () => rete_init.editor,
@@ -649,10 +670,25 @@ function addCustomBackground() {
     rete_init.area.container.classList.add('bg-dotted')
   }
 }
+
+
+onMounted(async () => {
+  await initializeFlow()
+})
+
+
+// Event listeners for mousemove and click
+
+
 </script>
 
 <template>
   <!-- Rete.js Canvas -->
+  <div v-if="draggable.visibility && draggable.node" :style="{ top: `${draggable.position.y}px`, left: `${draggable.position.x}px` }" 
+  class="tracker border-2 border-dashed h-10 px-4 w-auto absolute pointer-events-none -translate-x-[50%] -translate-y-[50%] border-blue-600 flex items-center justify-center text-white font-bold"> 
+  {{ draggable.node.data?.name }}
+  </div>
+
   <div class="h-screen">
     <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
   </div>

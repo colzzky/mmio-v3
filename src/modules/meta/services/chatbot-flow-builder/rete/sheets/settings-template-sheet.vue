@@ -2,59 +2,70 @@
 import { nodeIconMapping } from '../utils'
 import { Button } from '@/core/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs'
-import type { NodeType } from '@/modules/meta/utils/flow-types'
+import { ReteTemplates, type AreaExtra, type NodeType, type Schemes } from '@/modules/meta/utils/flow-types'
+import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
+import { Area, AreaExtensions, AreaPlugin } from 'rete-area-plugin'
+const authWorkspace = useAuthWorkspaceStore()
+const { active_flow } = authWorkspace
+const { rete_init } = active_flow
+const { draggable } = rete_init
 
-const nodeMapping: Record<
-  keyof Omit<NodeType, 'reference_node'>,
-  { label: string; onClick(): void }
-> = {
+const nodeMapping: Record<keyof Omit<NodeType, 'reference_node'>, { label: string; onClick(): void }> = {
   message_node: {
     label: 'Message',
-    onClick() {
-      alert('message!')
-    },
+    async onClick() {
+      draggable.toggleNode(ReteTemplates.node_templates.message_node())
+      // const event = new PointerEvent('contextmenu', {
+      //   clientX: rete_init.area.area.pointer.x,
+      //   clientY: rete_init.area.area.pointer.y
+      // })
+      // const node = ReteTemplates.node_templates.message_node()
+      // await rete_init.editor.addNode(node);
+      // await rete_init.area.translate(node.id, event);
+      // AreaExtensions.zoomAt(rete_init.area as AreaPlugin<Schemes, AreaExtra>, [node.id]);
+    }
   },
   generic_node: {
     label: 'Generic',
     onClick() {
-      alert('message!')
+      draggable.toggleNode(ReteTemplates.node_templates.generic_node())
     },
   },
   carousel_node: {
     label: 'Carousel',
     onClick() {
-      alert('message!')
+      draggable.toggleNode(ReteTemplates.node_templates.carousel_node())
     },
   },
   media_node: {
     label: 'Media',
     onClick() {
-      alert('message!')
+      draggable.toggleNode(ReteTemplates.node_templates.media_node())
     },
   },
   condition_node: {
     label: 'Condition',
     onClick() {
-      alert('message!')
+      draggable.toggleNode(ReteTemplates.node_templates.condition_node())
     },
   },
   trigger_node: {
     label: 'Trigger',
     onClick() {
-      alert('message!')
+      draggable.toggleNode(ReteTemplates.node_templates.trigger_node())
     },
   },
   audio_node: {
     label: 'Audio',
     onClick() {
-      alert('message!')
+      draggable.toggleNode(ReteTemplates.node_templates.audio_node())
     },
   },
   image_node: {
     label: 'Image',
     onClick() {
-      alert('message!')
+      draggable.toggleNode(ReteTemplates.node_templates.image_node())
     },
   },
 }
@@ -81,14 +92,8 @@ const nodeMapping: Record<
       </Button>
     </TabsContent>
     <TabsContent value="node-templates" class="grid">
-      <Button
-        v-for="(node, key) in nodeMapping"
-        :key
-        type="button"
-        variant="ghost"
-        class="justify-start gap-x-2 rounded-none first:border-t"
-        @click="node.onClick"
-      >
+      <Button v-for="(node, key) in nodeMapping" :key type="button" variant="ghost"
+        class="justify-start gap-x-2 rounded-none first:border-t" @click="node.onClick">
         <Icon :icon="nodeIconMapping[key]" class="size-4" />
         {{ node.label }}
       </Button>
