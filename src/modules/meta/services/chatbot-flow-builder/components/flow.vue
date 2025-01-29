@@ -92,54 +92,57 @@ async function initializeFlow() {
   if (!rete_init.area) return
 
   //Doesnt follow anything
-  // rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
-  //   items(context, plugin) {
-  //     if (context === 'root') {
-  //       return {
-  //         searchBar: true,
-  //         list: [
-  //           {
-  //             label: 'Custom', key: '1', handler: async() => {
-  //               const node = ReteTemplates.node_templates.reference_node()
-  //               if(rete_init.editor){
-  //                 await rete_init.editor.addNode(node)
-  //               }
+  rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
+    items(context: "root" | Schemes["Node"], plugin: ContextMenuPlugin<Schemes>) {
+      if (context === 'root') {
+        return {
+          searchBar: true,
+          list: [
+            {
+              label: 'Reference', key: '1', handler: async() => {
+                const node = ReteTemplates.node_templates.reference_node()
+                if(rete_init.editor){
+                  await rete_init.editor.addNode(node)
+                }
                 
-  //               // Restore node position
-                
-
-  //             }
-  //           },
-  //           {
-  //             label: 'Collection', key: '1', handler: () => null,
-  //             subitems: [
-  //               { label: 'Subitem', key: '1', handler: () => console.log('Subitem') }
-  //             ]
-  //           }
-  //         ]
-  //       }
-  //     }
-  //     return {
-  //       searchBar: false,
-  //       list: []
-  //     }
-  //   }
-  // })
+              }
+            },
+            {
+              label: 'Message', key: '2', handler: async() => {
+                const node = ReteTemplates.node_templates.message_node()
+                if(rete_init.editor){
+                  await rete_init.editor.addNode(node)
+                }
+              }
+            }
+          ]
+        }
+      }else{
+        console.log(context)
+        //On delete/clone add something here
+      }
+      return {
+        searchBar: false,
+        list: [],
+      }
+    }
+  })
 
   //Follows mouse
-  rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
-    items: ContextMenuPresets.classic.setup([
-      ['Reference', () => ReteTemplates.node_templates.reference_node()],
-      ['Message', () => ReteTemplates.node_templates.message_node()],
-      ['Generic', () => ReteTemplates.node_templates.generic_node()],
-      ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
-      ['Media', () => ReteTemplates.node_templates.media_node()],
-      ['Image', () => ReteTemplates.node_templates.image_node()],
-      ['Audio', () => ReteTemplates.node_templates.audio_node()],
-      ['Trigger', () => ReteTemplates.node_templates.trigger_node()],
-      ['Condition', () => ReteTemplates.node_templates.condition_node()],
-    ]),
-  })
+  // rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
+  //   items: ContextMenuPresets.classic.setup([
+  //     ['Reference', () => {
+  //       ReteTemplates.node_templates.reference_node()}],
+  //     ['Message', () => ReteTemplates.node_templates.message_node()],
+  //     ['Generic', () => ReteTemplates.node_templates.generic_node()],
+  //     ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
+  //     ['Media', () => ReteTemplates.node_templates.media_node()],
+  //     ['Image', () => ReteTemplates.node_templates.image_node()],
+  //     ['Audio', () => ReteTemplates.node_templates.audio_node()],
+  //     ['Trigger', () => ReteTemplates.node_templates.trigger_node()],
+  //     ['Condition', () => ReteTemplates.node_templates.condition_node()],
+  //   ]),
+  // })
 
   /* @ts-ignore */
 
