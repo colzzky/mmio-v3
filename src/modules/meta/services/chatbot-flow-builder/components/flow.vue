@@ -91,7 +91,43 @@ async function initializeFlow() {
 
   if (!rete_init.area) return
 
-  const contextMenu = new ContextMenuPlugin<Schemes>({
+  //Doesnt follow anything
+  // rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
+  //   items(context, plugin) {
+  //     if (context === 'root') {
+  //       return {
+  //         searchBar: true,
+  //         list: [
+  //           {
+  //             label: 'Custom', key: '1', handler: async() => {
+  //               const node = ReteTemplates.node_templates.reference_node()
+  //               if(rete_init.editor){
+  //                 await rete_init.editor.addNode(node)
+  //               }
+                
+  //               // Restore node position
+                
+
+  //             }
+  //           },
+  //           {
+  //             label: 'Collection', key: '1', handler: () => null,
+  //             subitems: [
+  //               { label: 'Subitem', key: '1', handler: () => console.log('Subitem') }
+  //             ]
+  //           }
+  //         ]
+  //       }
+  //     }
+  //     return {
+  //       searchBar: false,
+  //       list: []
+  //     }
+  //   }
+  // })
+
+  //Follows mouse
+  rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
     items: ContextMenuPresets.classic.setup([
       ['Reference', () => ReteTemplates.node_templates.reference_node()],
       ['Message', () => ReteTemplates.node_templates.message_node()],
@@ -106,7 +142,7 @@ async function initializeFlow() {
   })
 
   /* @ts-ignore */
-  rete_init.area.use(contextMenu)
+
 
   // Use the customized preset
   rete_init.render.addPreset(
@@ -158,7 +194,7 @@ async function initializeFlow() {
           return CustomConnection
         },
       },
-    }),
+    })
   )
 
   rete_init.render.addPreset({
@@ -203,7 +239,7 @@ async function initializeFlow() {
   rete_init.area.use(rete_init.connection)
   rete_init.area.use(rete_init.readonly.area);
   rete_init.area.use(rete_init.render)
-
+  rete_init.area.use(rete_init.contextMenu)
 
 
   if (active_flow.json) {
@@ -324,7 +360,12 @@ function isMouseOutsideNode(details: {
 // Track mouse events and handle right-click
 function trackMouseEvents() {
   const area = rete_init.area
+  const render = rete_init.render
+  const editor = rete_init.editor
+  const contextMenu = rete_init.contextMenu
   const connection = rete_init.connection
+  let context_menu_position = { x: 0, y: 0 }
+
   const isNodeRemoved = ref(false)
   if (area) {
     area.addPipe(async (context) => {
@@ -340,18 +381,18 @@ function trackMouseEvents() {
             console.log(soure_node)
 
             const target_node = rete_init.editor.getNode(context.data.target)
-              if (target_node && target_node.data) {
-                if (target_node.data.postbackid) {
-                  delete target_node.data['postbackid']
-                }
-              } else {
-                toast({
-                  title: 'Something went wrong here',
-                  variant: 'destructive',
-                  duration: 2000,
-                })
-                return
+            if (target_node && target_node.data) {
+              if (target_node.data.postbackid) {
+                delete target_node.data['postbackid']
               }
+            } else {
+              toast({
+                title: 'Something went wrong here',
+                variant: 'destructive',
+                duration: 2000,
+              })
+              return
+            }
 
             // if (!origin) {
             //   toast({
@@ -411,6 +452,12 @@ function trackMouseEvents() {
         }
       }
 
+      if (context.type === 'nodetranslated') {
+        //await rete_init.area.translate(context.data.id, context_menu_position);
+        console.log(context.data)
+        
+      }
+
       if (context.type === 'nodecreated') {
         if (rete_init.editor && rete_init.ui.connection_drop) {
           console.log(rete_init.ui.connection_drop)
@@ -422,6 +469,11 @@ function trackMouseEvents() {
             )
           }
           rete_init.ui.connection_drop = null
+        }
+
+        if (rete_init.area) {
+          console.log('test')
+          await rete_init.area.translate(context.data.id, getTranslatedMousePosition(context_menu_position));
         }
       }
 
@@ -438,7 +490,15 @@ function trackMouseEvents() {
         multi_selected_node.value = [context.data.id]
         rete_init.node_select(context.data.id)
       }
+
       if (context.type === 'pointerdown') {
+        context_menu_position = {
+          x: context.data.event.clientX,
+          y: context.data.event.clientY
+        }
+
+        console.log(context_menu_position)
+
         if (rete_init.selected_node) {
           rete_init.remove_selected_node()
         }
@@ -446,10 +506,11 @@ function trackMouseEvents() {
           rete_init.ui.connection_drop = null
         }
         if (draggable.visibility === true) {
+          console.log('test')
           draggable.visibility = false
-          if(draggable.node && rete_init.editor && rete_init.area){
+          if (draggable.node && rete_init.editor && rete_init.area) {
             await rete_init.editor.addNode(draggable.node);
-            
+
             await rete_init.area.translate(draggable.node.id, getTranslatedMousePosition(context.data.event));
           }
           draggable.node = null
@@ -457,14 +518,20 @@ function trackMouseEvents() {
         }
       }
 
-      if(context.type === 'pointermove'){
-        if(draggable.visibility === true){
-          draggable.updatePosition(context.data.event)          
+      if (context.type === 'pointermove') {
+        if (draggable.visibility === true) {
+          draggable.updatePosition(context.data.event)
         }
       }
 
       if (context.type === 'contextmenu') {
-        console.log(rete_init.editor?.getNodes())
+        context_menu_position = {
+          x: context.data.event.clientX,
+          y: context.data.event.clientY
+        }
+        
+        console.log(context.data)
+
       }
 
       // if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
@@ -494,20 +561,26 @@ function trackMouseEvents() {
     connection.addPipe(async (context) => {
       if (context.type === 'connectiondrop') {
         if (!context.data.created && rete_init.area && !isNodeRemoved.value) {
-          const event = new PointerEvent('contextmenu', {
-            clientX: rete_init.area.area.pointer.x,
-            clientY: rete_init.area.area.pointer.y
+          console.log(rete_init.area.area)
+          const test = getTranslatedMousePosition({ x: rete_init.area.area.pointer.x, y: rete_init.area.area.pointer.y })
+
+          const event = new PointerEvent('test', {
+            clientX: test.x,
+            clientY: test.y,
           })
+          console.log(event)
+
           rete_init.ui.connection_drop = context.data.initial
           console.log('tertre1')
           //rete_init.ui.connection_drop = context.data.initial
           await rete_init.area.emit({ type: 'contextmenu', data: { event, context: 'root' } })
         }
-        if(isNodeRemoved.value) isNodeRemoved.value = false 
+        if (isNodeRemoved.value) isNodeRemoved.value = false
       }
       return context
     })
   }
+
 
   document.addEventListener('click', (e) => {
     if (menuVisible.value) {
@@ -684,9 +757,10 @@ onMounted(async () => {
 
 <template>
   <!-- Rete.js Canvas -->
-  <div v-if="draggable.visibility && draggable.node" :style="{ top: `${draggable.position.y}px`, left: `${draggable.position.x}px` }" 
-  class="tracker border-2 border-dashed h-10 px-4 w-auto absolute pointer-events-none -translate-x-[50%] -translate-y-[50%] border-blue-600 flex items-center justify-center text-white font-bold"> 
-  {{ draggable.node.data?.name }}
+  <div v-if="draggable.visibility && draggable.node"
+    :style="{ top: `${draggable.position.y}px`, left: `${draggable.position.x}px` }"
+    class="tracker border-2 border-dashed h-10 px-4 w-auto absolute pointer-events-none -translate-x-[50%] -translate-y-[50%] border-blue-600 flex items-center justify-center text-white font-bold">
+    {{ draggable.node.data?.name }}
   </div>
 
   <div class="h-screen">

@@ -34,6 +34,7 @@ import type { VuePlugin } from 'rete-vue-plugin'
 import { reactive } from 'vue'
 import type { AreaPlugin } from 'rete-area-plugin'
 import { ReadonlyPlugin } from 'rete-readonly-plugin'
+import type { ContextMenuPlugin } from 'rete-context-menu-plugin'
 
 export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
   const active_workspace = reactive<ActiveWorkspace>({
@@ -462,6 +463,7 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
       },
       editor: null as NodeEditor<Schemes> | null,
       render: null as VuePlugin<Schemes, AreaExtra> | null,
+      contextMenu:null as ContextMenuPlugin<Schemes> | null,
       connection: null as ConnectionPlugin<Schemes, AreaExtra> | null,
       area: null as AreaPlugin<Schemes, AreaExtra> | null,
       readonly: new ReadonlyPlugin<Schemes>()
