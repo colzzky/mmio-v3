@@ -18,6 +18,7 @@ export interface NodeType {
   video_node: VideoNode
   gif_node: GIFNode
   file_node: FileNode
+  http_node: HTTPNode
 }
 
 export interface CarouselCard {
@@ -152,6 +153,16 @@ export interface GIFNode {
 }
 
 export interface FileNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface HTTPNode {
   name: string
   postbackid?: string
   delay?: string
@@ -568,6 +579,34 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled File Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    http_node() {
+      const node = new Node('http_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled HTTP Node',
         text: '',
         buttons: {},
         quick_replies: {},
@@ -1078,4 +1117,5 @@ export const nodeMapContextMenu: Record<
   video: { label: 'Video', key: '9', template: 'video_node', icon: 'bx:video' },
   gif: { label: 'GIF', key: '10', template: 'gif_node', icon: 'stash:gif-solid' },
   file: { label: 'File', key: '11', template: 'file_node', icon: 'bx:file' },
+  http: { label: 'HTTP', key: '12', template: 'http_node', icon: 'material-symbols:http' },
 }

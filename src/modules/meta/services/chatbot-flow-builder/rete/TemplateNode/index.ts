@@ -10,3 +10,4 @@ export { default as Trigger } from '@/modules/meta/services/chatbot-flow-builder
 export { default as Video } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/video.vue'
 export { default as GIF } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/gif.vue'
 export { default as File } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/file.vue'
+export { default as HTTP } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/http.vue'

@@ -15,6 +15,7 @@ import {
   VideoSheet,
   GIFSheet,
   FileSheet,
+  HTTPSheet,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -77,6 +78,7 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   video_node: VideoSheet,
   gif_node: GIFSheet,
   file_node: FileSheet,
+  http_node: HTTPSheet,
 }
 
 watch(

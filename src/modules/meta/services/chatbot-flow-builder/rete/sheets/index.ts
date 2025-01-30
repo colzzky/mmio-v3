@@ -12,3 +12,4 @@ export { default as AudioSheet } from '@/modules/meta/services/chatbot-flow-buil
 export { default as VideoSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/video-sheet.vue'
 export { default as GIFSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/gif-sheet.vue'
 export { default as FileSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/file-sheet.vue'
+export { default as HTTPSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/http-sheet.vue'
