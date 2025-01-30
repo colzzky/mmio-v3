@@ -16,6 +16,7 @@ export interface NodeType {
   audio_node: AudioNode
   trigger_node: TriggerNode
   video_node: VideoNode
+  gif_node: GIFNode
 }
 
 export interface CarouselCard {
@@ -130,6 +131,16 @@ export interface TriggerNode {
 }
 
 export interface VideoNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface GIFNode {
   name: string
   postbackid?: string
   delay?: string
@@ -490,6 +501,34 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled Video Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    gif_node() {
+      const node = new Node('gif_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled GIF Node',
         text: '',
         buttons: {},
         quick_replies: {},
@@ -998,4 +1037,5 @@ export const nodeMapContextMenu: Record<
   audio: { label: 'Audio', key: '7', template: 'audio_node', icon: 'gridicons:audio' },
   trigger: { label: 'Trigger', key: '8', template: 'trigger_node', icon: 'bx:bolt-circle' },
   video: { label: 'Video', key: '9', template: 'video_node', icon: 'bx:video' },
+  gif: { label: 'GIF', key: '10', template: 'gif_node', icon: 'stash:gif-solid' },
 }

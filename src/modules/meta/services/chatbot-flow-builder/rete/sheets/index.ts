@@ -1,17 +1,13 @@
-import CarouselSheet from './carousel-sheet.vue'
-import ConditionSheet from './condition-sheet.vue'
-import GenericSheet from './generic-sheet.vue'
-import MediaSheet from './media-sheet.vue'
-import MessageSheet from './message-sheet.vue'
-import NodeFlowDetailsSheet from './node-flow-details-sheet.vue'
-import TriggerSheet from './trigger-sheet.vue'
+export { default as NodeFlowDetailsSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/node-flow-details-sheet.vue'
+export { default as SettingsTemplateSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/settings-template-sheet.vue'
 
-export {
-  MessageSheet,
-  GenericSheet,
-  CarouselSheet,
-  MediaSheet,
-  ConditionSheet,
-  NodeFlowDetailsSheet,
-  TriggerSheet,
-}
+export { default as MessageSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/message-sheet.vue'
+export { default as GenericSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/generic-sheet.vue'
+export { default as CarouselSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/carousel-sheet.vue'
+export { default as MediaSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/media-sheet.vue'
+export { default as TriggerSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/trigger-sheet.vue'
+export { default as ConditionSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/condition-sheet.vue'
+export { default as ImageSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/image-sheet.vue'
+export { default as AudioSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/audio-sheet.vue'
+export { default as VideoSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/video-sheet.vue'
+export { default as GIFSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/gif-sheet.vue'

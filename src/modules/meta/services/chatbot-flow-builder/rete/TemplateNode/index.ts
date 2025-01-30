@@ -8,3 +8,4 @@ export { default as Image } from '@/modules/meta/services/chatbot-flow-builder/r
 export { default as Audio } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/audio.vue'
 export { default as Trigger } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/trigger.vue'
 export { default as Video } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/video.vue'
+export { default as GIF } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/gif.vue'

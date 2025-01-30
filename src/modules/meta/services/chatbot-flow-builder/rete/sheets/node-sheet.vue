@@ -1,19 +1,20 @@
 <script setup lang="ts" generic="S extends BaseSchemes, K">
+import { Button } from '@/core/components/ui/button'
+import { Sheet, SheetContent } from '@/core/components/ui/sheet'
 import {
+  NodeFlowDetailsSheet,
+  SettingsTemplateSheet,
   MessageSheet,
   GenericSheet,
   CarouselSheet,
   MediaSheet,
   ConditionSheet,
-  NodeFlowDetailsSheet,
   TriggerSheet,
-} from '.'
-import AudioSheet from './audio-sheet.vue'
-import ImageSheet from './image-sheet.vue'
-import SettingsTemplateSheet from './settings-template-sheet.vue'
-import VideoSheet from './video-sheet.vue'
-import Button from '@/core/components/ui/button/Button.vue'
-import { Sheet, SheetContent } from '@/core/components/ui/sheet'
+  ImageSheet,
+  AudioSheet,
+  VideoSheet,
+  GIFSheet,
+} from '@/modules/meta/services/chatbot-flow-builder/rete/sheets'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
@@ -73,6 +74,7 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   image_node: ImageSheet,
   audio_node: AudioSheet,
   video_node: VideoSheet,
+  gif_node: GIFSheet,
 }
 
 watch(

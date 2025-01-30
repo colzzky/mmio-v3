@@ -9,6 +9,7 @@ import {
   Audio,
   Trigger,
   Video,
+  GIF,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
@@ -131,6 +132,7 @@ export const nodeMapping: Record<keyof NodeType, Component> = {
   image_node: Image,
   audio_node: Audio,
   video_node: Video,
+  gif_node: GIF,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -144,4 +146,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   image_node: 'bx:image',
   audio_node: 'gridicons:audio',
   video_node: 'bx:video',
+  gif_node: 'stash:gif-solid',
 }
