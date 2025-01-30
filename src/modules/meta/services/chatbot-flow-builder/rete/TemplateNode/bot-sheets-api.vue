@@ -8,10 +8,10 @@ import { objectEntries } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps<{ data: Schemes['Node']; emit: any; seed: number }>()
-const node = ref<Node<'gif_node'> | null>(null)
+const node = ref<Node<'bot_sheets_api_node'> | null>(null)
 
 onMounted(() => {
-  node.value = props.data as Node<'gif_node'>
+  node.value = props.data as Node<'bot_sheets_api_node'>
 })
 
 const inputs = computed(() => {
@@ -39,7 +39,7 @@ const outputs = computed(() => {
               <div class="flex h-8 w-full items-center rounded-md px-3">
                 <span class="flex items-center gap-x-1 font-semibold">
                   <Icon :icon="nodeIconMapping[data.label]" class="size-5" />
-                  GIF
+                  Bot Sheets API
                 </span>
               </div>
             </div>
@@ -65,13 +65,13 @@ const outputs = computed(() => {
       <!-- replies -->
       <section class="space-y-1">
         <div class="space-y-1 px-5">
-          <div class="font-bold">GIF</div>
+          <div class="font-bold">Bot Sheets API</div>
           <div class="max-h-47 rounded-lg border border-gray-200 bg-white p-3">
             <div v-if="node?.data?.text" class="line-clamp-5 overflow-hidden">
               {{ node?.data?.text }}
             </div>
             <div v-else>
-              <p class="text-gray-300">No GIF Available</p>
+              <p class="text-gray-300">No Bot Sheets API Available</p>
             </div>
           </div>
           <p class></p>

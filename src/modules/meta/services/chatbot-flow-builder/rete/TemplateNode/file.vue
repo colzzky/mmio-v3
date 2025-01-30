@@ -27,8 +27,8 @@ const outputs = computed(() => {
 
 <template>
   <div class="space-y-1">
-    <div class="border-neutral-199 flex w-full rounded-lg border bg-neutral-100 p-2">
-      <span class="text-gray-599 text-xs font-semibold">{{ node?.data?.name }}</span>
+    <div class="flex w-full rounded-lg border border-neutral-100 bg-neutral-100 p-2">
+      <span class="text-xs font-semibold text-gray-500">{{ node?.data?.name }}</span>
     </div>
     <NodeCard :data-selected="data.selected" class="flex flex-col gap-y-2 pb-0">
       <!-- inputs -->
@@ -71,7 +71,7 @@ const outputs = computed(() => {
               {{ node?.data?.text }}
             </div>
             <div v-else>
-              <p class="text-gray-399">No File Available</p>
+              <p class="text-gray-300">No File Available</p>
             </div>
           </div>
           <p class></p>

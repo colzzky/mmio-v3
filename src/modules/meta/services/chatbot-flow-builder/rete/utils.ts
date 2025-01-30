@@ -12,6 +12,7 @@ import {
   GIF,
   File,
   HTTP,
+  BotSheetsAPI,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
@@ -137,6 +138,7 @@ export const nodeMapping: Record<keyof NodeType, Component> = {
   gif_node: GIF,
   file_node: File,
   http_node: HTTP,
+  bot_sheets_api_node: BotSheetsAPI,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -153,4 +155,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   gif_node: 'stash:gif-solid',
   file_node: 'bx:file',
   http_node: 'material-symbols:http',
+  bot_sheets_api_node: 'healthicons:spreadsheets',
 }

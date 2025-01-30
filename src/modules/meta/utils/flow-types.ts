@@ -19,6 +19,7 @@ export interface NodeType {
   gif_node: GIFNode
   file_node: FileNode
   http_node: HTTPNode
+  bot_sheets_api_node: BotSheetsAPINode
 }
 
 export interface CarouselCard {
@@ -163,6 +164,16 @@ export interface FileNode {
 }
 
 export interface HTTPNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface BotSheetsAPINode {
   name: string
   postbackid?: string
   delay?: string
@@ -607,6 +618,34 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled HTTP Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    bot_sheets_api_node() {
+      const node = new Node('bot_sheets_api_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Bot Sheets API Node',
         text: '',
         buttons: {},
         quick_replies: {},
@@ -1118,4 +1157,12 @@ export const nodeMapContextMenu: Record<
   gif: { label: 'GIF', key: '10', template: 'gif_node', icon: 'stash:gif-solid' },
   file: { label: 'File', key: '11', template: 'file_node', icon: 'bx:file' },
   http: { label: 'HTTP', key: '12', template: 'http_node', icon: 'material-symbols:http' },
+
+  // key depends on lowered-case label
+  'bot sheets api': {
+    label: 'Bot Sheets API',
+    key: '13',
+    template: 'bot_sheets_api_node',
+    icon: 'healthicons:spreadsheets',
+  },
 }

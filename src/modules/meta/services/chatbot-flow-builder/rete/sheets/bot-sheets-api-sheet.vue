@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/core/components/ui/select'
 import { SheetHeader, SheetTitle, SheetDescription } from '@/core/components/ui/sheet'
+import { Textarea } from '@/core/components/ui/textarea'
 import { toast } from '@/core/components/ui/toast'
 import { createMetaTemplateOutIn, Node, ReteSockets } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -28,13 +29,13 @@ import { onMounted, reactive, ref, watch } from 'vue'
 const { active_flow } = storeToRefs(useAuthWorkspaceStore())
 const { rete_init } = active_flow.value
 
-const localNodeData = ref<Node<'media_node'> | undefined>(undefined)
+const localNodeData = ref<Node<'bot_sheets_api_node'> | undefined>(undefined)
 
 onMounted(() => {
   const node = rete_init.editor?.getNode(rete_init.selected_node_id)
   if (!node) throw new Error('No Node found with the given ID')
 
-  localNodeData.value = node as Node<'media_node'>
+  localNodeData.value = node as Node<'bot_sheets_api_node'>
 })
 
 watch(
@@ -44,7 +45,7 @@ watch(
       const node = rete_init.editor?.getNode(node_id)
       if (!node) throw new Error('No Node found with the given ID')
 
-      localNodeData.value = node as Node<'media_node'>
+      localNodeData.value = node as Node<'bot_sheets_api_node'>
     }
   },
 )
@@ -294,7 +295,7 @@ function handleRemoveDelay() {
           class="row-span-full size-[var(--icon-size)] self-center"
         />
         <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
-        <SheetDescription class="leading-none">Facebook Media</SheetDescription>
+        <SheetDescription class="leading-none">Bot Sheets API</SheetDescription>
       </SheetHeader>
       <main class="grid gap-y-4 px-6 py-3">
         <div>
@@ -331,15 +332,15 @@ function handleRemoveDelay() {
           </div>
         </div>
         <div>
-          <Label for="media">Media</Label>
-          <div class="relative aspect-video rounded border-2 border-dashed p-1">
-            <!-- <img alt="" class="size-full rounded object-cover object-center" /> -->
-            <small
-              class="absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 text-balance text-center text-muted-foreground"
-            >
-              Drag and drop media here
-            </small>
-          </div>
+          <Label for="text">Text Message</Label>
+          <Textarea
+            v-model:model-value="localNodeData.data.text"
+            id="text"
+            name="text"
+            rows="5"
+            class="resize-none"
+            placeholder=""
+          />
         </div>
         <div class="grid gap-y-3 text-sm">
           <h3 class="font-medium">Message Reply Buttons</h3>
@@ -469,7 +470,7 @@ function handleRemoveDelay() {
             class="font-medium text-blue-600"
             @click="handleChangeState('default')"
           >
-            Facebook Media
+            Bot Sheets API
           </button>
           > Buttons
         </SheetDescription>
@@ -534,7 +535,7 @@ function handleRemoveDelay() {
             class="font-medium text-blue-600"
             @click="handleChangeState('default')"
           >
-            Facebook Media
+            Bot Sheets API
           </button>
           > Quick Replies
         </SheetDescription>

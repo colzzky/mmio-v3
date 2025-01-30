@@ -168,13 +168,13 @@ function handleRemoveDelay() {
     <!-- default state -->
     <template v-if="sheetState === 'default'">
       <SheetHeader
-        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
+        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-[repeat(2,max-content)] gap-3 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
         <Icon
           :icon="nodeIconMapping[localNodeData.label]"
           class="row-span-full size-[var(--icon-size)] self-center"
         />
-        <SheetTitle class="break-all leading-none">{{ localNodeData.data.name }}</SheetTitle>
+        <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">Condition</SheetDescription>
       </SheetHeader>
       <main class="grid gap-y-4 px-6 py-3 text-sm">
@@ -266,7 +266,7 @@ function handleRemoveDelay() {
     <!-- create-condition-state -->
     <template v-else-if="sheetState === 'create-condition' || sheetState === 'edit-condition'">
       <SheetHeader
-        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
+        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-[repeat(2,max-content)] gap-3 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
         <button
           type="button"
@@ -275,7 +275,7 @@ function handleRemoveDelay() {
         >
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
-        <SheetTitle class="break-all leading-none">{{ localNodeData.data.name }}</SheetTitle>
+        <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">
           <button
             type="button"
