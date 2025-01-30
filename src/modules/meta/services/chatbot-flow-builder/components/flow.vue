@@ -358,10 +358,17 @@ function trackMouseEvents() {
   const contextMenu = rete_init.contextMenu
   const connection = rete_init.connection
   let context_menu_position = { x: 0, y: 0 }
+  let client_position = { x: 0, y: 0 }
 
   const isNodeRemoved = ref(false)
   if (area) {
     area.addPipe(async (context) => {
+
+      if (context.type === 'pointermove'){
+        if(rete_init.ui.connection_drop){
+          client_position = {x:context.data.event.clientX, y:context.data.event.clientY}
+        }
+      }
 
       if (context.type === 'connectionremove') {
         isNodeRemoved.value = true
@@ -470,12 +477,6 @@ function trackMouseEvents() {
         }
       }
 
-
-      if (context.type === 'zoom') {
-        closeMenu()
-        closeNodeOption(false)
-      }
-
       if (context.type === 'nodepicked') {
         menuVisible.value = false
         nodeOptionVisible.value = false
@@ -516,9 +517,7 @@ function trackMouseEvents() {
           x: context.data.event.clientX,
           y: context.data.event.clientY
         }
-
         console.log(context_menu_position)
-
       }
 
       // if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
@@ -546,19 +545,22 @@ function trackMouseEvents() {
 
   if (connection) {
     connection.addPipe(async (context) => {
+      if (context.type === 'connectionpick') {
+        rete_init.ui.connection_drop = context.data.socket
+      }
+
       if (context.type === 'connectiondrop') {
         if (!context.data.created && rete_init.area && !isNodeRemoved.value) {
-          console.log(rete_init.area.area)
-          const test = getTranslatedMousePosition({ x: rete_init.area.area.pointer.x, y: rete_init.area.area.pointer.y })
-          const event = new PointerEvent('test', {
-            clientX: context_menu_position.x,
-            clientY: context_menu_position.y,
+          const event = new PointerEvent('contextmenu', {
+            clientX: client_position.x,  // Adjust X relative to container
+            clientY: client_position.y,   // Adjust Y relative to container
           })
           console.log(event)
 
           rete_init.ui.connection_drop = context.data.initial
           //rete_init.ui.connection_drop = context.data.initial
           await rete_init.area.emit({ type: 'contextmenu', data: { event, context: 'root' } })
+
         }
         if (isNodeRemoved.value) isNodeRemoved.value = false
       }

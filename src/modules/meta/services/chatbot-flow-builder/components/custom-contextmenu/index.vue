@@ -54,7 +54,7 @@ const hide = debounce(() => {
 
 const handler = (event:MouseEvent, item:ContextMenuItemType) =>{
   item.handler(event)
-  hide.cancel()
+  console.log(item)
   props.onHide()
 }
 
