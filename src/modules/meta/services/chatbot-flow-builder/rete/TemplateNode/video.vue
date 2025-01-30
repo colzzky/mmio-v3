@@ -2,17 +2,16 @@
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
 import { nodeIconMapping, sortByIndex } from '../utils'
-import { toast } from '@/core/components/ui/toast'
 import type { Node, Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { objectEntries } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps<{ data: Schemes['Node']; emit: any; seed: number }>()
-const node = ref<Node<'audio_node'> | null>(null)
+const node = ref<Node<'video_node'> | null>(null)
 
 onMounted(() => {
-  node.value = props.data as Node<'audio_node'>
+  node.value = props.data as Node<'video_node'>
 })
 
 const inputs = computed(() => {
@@ -24,36 +23,23 @@ const outputs = computed(() => {
   const entries = Object.entries(node.value?.outputs || {})
   return sortByIndex(entries)
 })
-
-const next_step_disabled = () => {
-  toast({
-    title: 'You cant proceed to next step if you have an available quick reply',
-    variant: 'destructive',
-    duration: 2000,
-  })
-}
 </script>
 
 <template>
   <div class="space-y-2">
-    <div
-      class="flex w-full items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-neutral-100 p-2"
-    >
-      <span class="text-xs font-semibold text-gray-600">{{
-        node?.data?.name ? node?.data?.name : 'Untitled Audio Node'
-      }}</span>
+    <div class="flex w-full rounded-lg border border-neutral-200 bg-neutral-100 p-2">
+      <span class="text-xs font-semibold text-gray-600">{{ node?.data?.name }}</span>
     </div>
-
     <NodeCard :data-selected="data.selected" class="flex flex-col gap-y-3 pb-0">
       <!-- inputs -->
-      <section>
+      <section class="flex flex-col gap-y-4">
         <template v-for="[key, input] in inputs" :key="key + seed">
           <div v-if="input" :data-testid="`input-${key}`" class="relative">
             <div class="flex items-center justify-center rounded-lg px-2">
               <div class="flex h-9 w-full items-center rounded-md px-3">
                 <span class="flex items-center gap-x-2 font-semibold">
                   <Icon :icon="nodeIconMapping[data.label]" class="size-6" />
-                  Audio
+                  Video
                 </span>
               </div>
             </div>
@@ -76,19 +62,19 @@ const next_step_disabled = () => {
         </template>
       </section>
 
+      <!-- replies -->
       <section class="space-y-2">
         <div class="space-y-2 px-5">
-          <div
-            class="flex min-h-28 items-center justify-center rounded-lg border-4 border-dotted border-gray-400 p-2"
-          >
-            <img
-              v-if="node?.data?.url"
-              :src="node?.data?.url"
-              alt="Placeholder Image"
-              class="max-h-full max-w-full rounded-lg object-contain"
-            />
-            <span v-else>No available Image</span>
+          <div class="font-bold">Video</div>
+          <div class="max-h-48 rounded-lg border border-gray-200 bg-white p-3">
+            <div v-if="node?.data?.text" class="line-clamp-6 overflow-hidden">
+              {{ node?.data?.text }}
+            </div>
+            <div v-else>
+              <p class="text-gray-400">No Video Available</p>
+            </div>
           </div>
+          <p class></p>
         </div>
         <div v-if="node && node.data">
           <div v-if="objectEntries(node.data.buttons).length > 0" class="flex flex-col gap-2">
@@ -196,10 +182,7 @@ const next_step_disabled = () => {
                   </span>
                 </div>
                 <!-- Circle overlapping the border of the main div -->
-                <div
-                  v-if="objectEntries(node.data.quick_replies).length <= 0"
-                  class="absolute -right-2.5 -top-0.5 rounded-full"
-                >
+                <div class="absolute -right-2.5 -top-0.5 rounded-full">
                   <NodeSocket
                     :emit
                     :data="{
@@ -212,19 +195,6 @@ const next_step_disabled = () => {
                     class="[--socket-size:16px]"
                   />
                 </div>
-                <div v-else class="pointer-events-none absolute -right-2.5 -top-0.5 rounded-full">
-                  <NodeSocket
-                    :emit
-                    :data="{
-                      type: 'socket',
-                      side: 'output',
-                      key,
-                      nodeId: data.id,
-                      payload: output.socket,
-                    }"
-                    class="[--socket-size:16px] [&>div[class=socket]]:bg-gray-300 [&>div[class=socket]]:ring-white"
-                  />
-                </div>
               </div>
             </template>
           </div>
@@ -233,4 +203,3 @@ const next_step_disabled = () => {
     </NodeCard>
   </div>
 </template>
-w

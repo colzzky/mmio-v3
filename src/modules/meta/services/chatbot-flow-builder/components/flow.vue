@@ -1,17 +1,8 @@
 <script lang="ts" setup>
-import { context } from 'node_modules/radix-vue/dist/DismissableLayer/DismissableLayer'
-import Audio from '../rete/TemplateNode/audio.vue'
-import Carousel from '../rete/TemplateNode/carousel.vue'
-import Condition from '../rete/TemplateNode/condition.vue'
-import Generic from '../rete/TemplateNode/generic.vue'
-import Image from '../rete/TemplateNode/image.vue'
-import Media from '../rete/TemplateNode/media.vue'
-import Message from '../rete/TemplateNode/message.vue'
-import Reference from '../rete/TemplateNode/reference.vue'
-import Trigger from '../rete/TemplateNode/trigger.vue'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
 import NodeSheet from '../rete/sheets/node-sheet.vue'
+import { nodeMapping } from '../rete/utils'
 import ActionBar from './action-bar.vue'
 import Menu from './custom-contextmenu/index.vue'
 import type { ContextMenuRenderContext } from './custom-contextmenu/types'
@@ -32,9 +23,8 @@ import {
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { NodeEditor, ClassicPreset, type NodeId } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
-import { ConnectionPlugin, Presets as ConnectionPresets, canMakeConnection } from 'rete-connection-plugin'
-import { ContextMenuPlugin, Presets as ContextMenuPresets } from 'rete-context-menu-plugin'
-import { ReadonlyPlugin } from "rete-readonly-plugin";
+import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
+import { ContextMenuPlugin } from 'rete-context-menu-plugin'
 import { VuePlugin, Presets } from 'rete-vue-plugin'
 import type { Input } from 'rete/_types/presets/classic'
 import { ref, onMounted, watch } from 'vue'
@@ -50,7 +40,6 @@ const authWorkspace = useAuthWorkspaceStore()
 const { active_flow } = authWorkspace
 const { rete_init } = active_flow
 const { draggable } = rete_init
-
 
 // Menu states
 const menuVisible = ref(false)
@@ -68,16 +57,6 @@ const multi_selected_node = ref<NodeId[]>([])
 function closeMenu() {
   menuVisible.value = false
 }
-function closeNodeOption(reset_selected: boolean = true) {
-  nodeOptionVisible.value = false
-  if (reset_selected) {
-    const multi_index = multi_selected_node.value.indexOf(selected_node.value)
-    if (multi_index > -1) {
-      multi_selected_node.value.splice(multi_index, 1)
-    }
-    selected_node.value = ''
-  }
-}
 
 async function initializeFlow() {
   editor_load.value = true
@@ -94,7 +73,7 @@ async function initializeFlow() {
 
   //Doesnt follow anything
   rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
-    items(context: "root" | Schemes["Node"], plugin: ContextMenuPlugin<Schemes>) {
+    items(context: 'root' | Schemes['Node']) {
       if (context === 'root') {
         return {
           searchBar: true,
@@ -102,13 +81,13 @@ async function initializeFlow() {
             label,
             key,
             handler: async () => {
-              const node = ReteTemplates.node_templates[template]();
+              const node = ReteTemplates.node_templates[template]()
               if (rete_init.editor) {
-                await rete_init.editor.addNode(node);
+                await rete_init.editor.addNode(node)
                 await rete_init.contextMenu?.signal.emit('hide')
               }
-            }
-          }))
+            },
+          })),
         }
       } else {
         console.log(context)
@@ -118,63 +97,14 @@ async function initializeFlow() {
         searchBar: false,
         list: [],
       }
-    }
+    },
   })
-
-  //Follows mouse
-  // rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
-  //   items: ContextMenuPresets.classic.setup([
-  //     ['Reference', () => {ReteTemplates.node_templates.reference_node()}],
-  //     ['Message', () => ReteTemplates.node_templates.message_node()],
-  //     ['Generic', () => ReteTemplates.node_templates.generic_node()],
-  //     ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
-  //     ['Media', () => ReteTemplates.node_templates.media_node()],
-  //     ['Image', () => ReteTemplates.node_templates.image_node()],
-  //     ['Audio', () => ReteTemplates.node_templates.audio_node()],
-  //     ['Trigger', () => ReteTemplates.node_templates.trigger_node()],
-  //     ['Condition', () => ReteTemplates.node_templates.condition_node()],
-  //   ]),
-  // })
-
 
   // Use the customized preset
   rete_init.render.addPreset(
     Presets.classic.setup({
       customize: {
-        node(context) {
-          if (context.payload.label === 'reference_node') {
-            return Reference
-          }
-          // if (context.payload.label === 'text_node') {
-          //   return Text
-          // }
-          if (context.payload.label === 'message_node') {
-            return Message
-          }
-          if (context.payload.label === 'carousel_node') {
-            return Carousel
-          }
-          if (context.payload.label === 'generic_node') {
-            return Generic
-          }
-          if (context.payload.label === 'media_node') {
-            return Media
-          }
-          if (context.payload.label === 'image_node') {
-            return Image
-          }
-          if (context.payload.label === 'audio_node') {
-            return Audio
-          }
-          if (context.payload.label === 'trigger_node') {
-            return Trigger
-          }
-          if (context.payload.label === 'condition_node') {
-            return Condition
-          }
-
-          return Presets.classic.Node
-        },
+        node: (context) => nodeMapping[context.payload.label],
         control(context) {
           if (context.payload instanceof CustomControls.Test) {
             return CustomControl
@@ -187,7 +117,7 @@ async function initializeFlow() {
           return CustomConnection
         },
       },
-    })
+    }),
   )
 
   rete_init.render.addPreset({
@@ -195,7 +125,7 @@ async function initializeFlow() {
       console.log({ update: context })
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-          'undefined'
+        'undefined'
           ? 200
           : context.data.delay
       if (context.data.type === 'contextmenu') {
@@ -210,7 +140,7 @@ async function initializeFlow() {
     render: function render(context: ContextMenuRenderContext) {
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-          'undefined'
+        'undefined'
           ? 200
           : context.data.delay
       console.log({ render: context })
@@ -228,13 +158,12 @@ async function initializeFlow() {
     },
   })
   rete_init.editor.use(rete_init.area)
-  rete_init.editor.use(rete_init.readonly.root);
+  rete_init.editor.use(rete_init.readonly.root)
   rete_init.area.use(rete_init.connection)
-  rete_init.area.use(rete_init.readonly.area);
+  rete_init.area.use(rete_init.readonly.area)
   rete_init.area.use(rete_init.render)
   // @ts-ignore: Unreachable code error
   rete_init.area.use(rete_init.contextMenu)
-
 
   if (active_flow.json) {
     //Reload saved flow if there is an existing state
@@ -250,113 +179,9 @@ async function initializeFlow() {
   console.log(editor_load.value)
 }
 
-const reloadEditorState = async () => {
-  if (!active_flow.json || !rete_init.area || !rete_init.editor) return
-
-  const parsedState: SerializedFlow.State = JSON.parse(active_flow.json)
-  console.log(parsedState)
-
-  for (const nodeData of parsedState.nodes) {
-    const node = new Node(nodeData.label as keyof NodeType) // Recreate node
-    node.id = nodeData.id
-    node.data = nodeData.data
-    Object.keys(nodeData.controls).forEach((key) => {
-      const control = nodeData.controls[key]
-      if (control.type === 'text' || control.type === 'number') {
-        node.addControl(key, ReteTemplates.control_template[control.type])
-      } else {
-        if (control.type === 'testControl')
-          node.addControl(key, ReteTemplates.control_template.testControl)
-        //Add more here
-      }
-    })
-
-    //Should be forloop depending on the saved socket
-    // if (nodeData.inputs && Object.keys(nodeData.inputs).length > 0) {
-    //   Object.keys(nodeData.inputs).forEach((key) => {
-    //     node.addInput(key, new ClassicPreset.Input(socket))
-    //   })
-    // }
-    // if (nodeData.outputs && Object.keys(nodeData.outputs).length > 0) {
-    //   const output = nodeData.outputs
-    //   Object.keys(nodeData.outputs).forEach((key) => {
-    //     createMetaTemplateOutput(
-    //       {
-    //         node,
-    //         type: output[key].type,
-    //         outputOpts: {
-    //           socket,
-    //           data: output[key].data,
-    //         },
-    //       },
-    //       key,
-    //     )
-    //   })
-    // }
-
-    // Add the node back to the editor
-    await rete_init.editor.addNode(node)
-    // Restore node position
-    await rete_init.area.translate(node.id, nodeData.position)
-  }
-
-  // Step 4: Rebuild connections
-  for (const connData of parsedState.connections) {
-    console.log(connData)
-    const sourceNode = rete_init.editor.getNode(connData.source)
-    const targetNode = rete_init.editor.getNode(connData.target)
-    if (sourceNode && targetNode) {
-      await rete_init.editor.addConnection(
-        new Connection(sourceNode, connData.sourceOutput, targetNode, connData.targetInput),
-      )
-    }
-  }
-}
-
-function trackMouseInsideNode(details: {
-  nodeHeight: number
-  nodeWidth: number
-  nodePosition: { x: number; y: number }
-  mousePosition: { x: number; y: number }
-}) {
-  interface Position {
-    x: number
-    y: number
-  }
-
-  const nodePosition: Position = details.nodePosition
-  const mousePosition: Position = details.mousePosition
-
-  return (
-    mousePosition.x >= nodePosition.x &&
-    mousePosition.x <= nodePosition.x + details.nodeWidth &&
-    mousePosition.y >= nodePosition.y &&
-    mousePosition.y <= nodePosition.y + details.nodeHeight
-  )
-}
-
-function isMouseOutsideNode(details: {
-  nodeHeight: number
-  nodeWidth: number
-  nodePosition: { x: number; y: number }
-  mousePosition: { x: number; y: number }
-}): boolean {
-  const { nodeHeight, nodeWidth, nodePosition, mousePosition } = details
-
-  return (
-    mousePosition.x < nodePosition.x ||
-    mousePosition.x > nodePosition.x + nodeWidth ||
-    mousePosition.y < nodePosition.y ||
-    mousePosition.y > nodePosition.y + nodeHeight
-  )
-}
-
 // Track mouse events and handle right-click
 function trackMouseEvents() {
   const area = rete_init.area
-  const render = rete_init.render
-  const editor = rete_init.editor
-  const contextMenu = rete_init.contextMenu
   const connection = rete_init.connection
   let context_menu_position = { x: 0, y: 0 }
   let client_position = { x: 0, y: 0 }
@@ -364,10 +189,9 @@ function trackMouseEvents() {
   const isNodeRemoved = ref(false)
   if (area) {
     area.addPipe(async (context) => {
-
-      if (context.type === 'pointermove'){
-        if(rete_init.ui.connection_drop){
-          client_position = {x:context.data.event.clientX, y:context.data.event.clientY}
+      if (context.type === 'pointermove') {
+        if (rete_init.ui.connection_drop) {
+          client_position = { x: context.data.event.clientX, y: context.data.event.clientY }
         }
       }
 
@@ -376,11 +200,6 @@ function trackMouseEvents() {
         if (rete_init.editor) {
           const soure_node = rete_init.editor.getNode(context.data.source)
           if (soure_node && soure_node.data) {
-            const origin = soure_node.data.giver_data[context.data.sourceOutput]
-            console.log(soure_node.data)
-            console.log(context.data)
-            console.log(soure_node)
-
             const target_node = rete_init.editor.getNode(context.data.target)
             if (target_node && target_node.data) {
               if (target_node.data.postbackid) {
@@ -468,7 +287,10 @@ function trackMouseEvents() {
 
         if (rete_init.area) {
           console.log('test')
-          await rete_init.area.translate(context.data.id, getTranslatedMousePosition(context_menu_position));
+          await rete_init.area.translate(
+            context.data.id,
+            getTranslatedMousePosition(context_menu_position),
+          )
         }
       }
 
@@ -481,7 +303,6 @@ function trackMouseEvents() {
       }
 
       if (context.type === 'pointerdown') {
-
         if (rete_init.selected_node) {
           rete_init.remove_selected_node()
         }
@@ -492,9 +313,12 @@ function trackMouseEvents() {
           console.log('test')
           draggable.visibility = false
           if (draggable.node && rete_init.editor && rete_init.area) {
-            await rete_init.editor.addNode(draggable.node);
+            await rete_init.editor.addNode(draggable.node)
 
-            await rete_init.area.translate(draggable.node.id, getTranslatedMousePosition(context.data.event));
+            await rete_init.area.translate(
+              draggable.node.id,
+              getTranslatedMousePosition(context.data.event),
+            )
           }
           draggable.node = null
           draggable.position = { x: 0, y: 0 }
@@ -510,7 +334,7 @@ function trackMouseEvents() {
       if (context.type === 'contextmenu') {
         context_menu_position = {
           x: context.data.event.clientX,
-          y: context.data.event.clientY
+          y: context.data.event.clientY,
         }
         console.log(context_menu_position)
       }
@@ -547,22 +371,20 @@ function trackMouseEvents() {
       if (context.type === 'connectiondrop') {
         if (!context.data.created && rete_init.area && !isNodeRemoved.value) {
           const event = new PointerEvent('contextmenu', {
-            clientX: client_position.x,  // Adjust X relative to container
-            clientY: client_position.y,   // Adjust Y relative to container
+            clientX: client_position.x, // Adjust X relative to container
+            clientY: client_position.y, // Adjust Y relative to container
           })
           console.log(event)
 
           rete_init.ui.connection_drop = context.data.initial
           //rete_init.ui.connection_drop = context.data.initial
           await rete_init.area.emit({ type: 'contextmenu', data: { event, context: 'root' } })
-
         }
         if (isNodeRemoved.value) isNodeRemoved.value = false
       }
       return context
     })
   }
-
 
   document.addEventListener('click', (e) => {
     if (menuVisible.value) {
@@ -594,7 +416,6 @@ function trackMouseEvents() {
   //   }
   // })
 }
-
 
 function checkConnectionSocket(data: {
   source: string
@@ -680,7 +501,6 @@ const saveEditorState = async () => {
   })
 }
 
-
 watch(
   () => rete_init.editor,
   async (init_new) => {
@@ -704,21 +524,6 @@ watch(
   },
 )
 
-function removeNode(): void {
-  if (selected_node.value && rete_init.area && rete_init.editor) {
-    const connections = rete_init.editor.getConnections()
-    connections.forEach((conn) => {
-      if (conn.source === selected_node.value || conn.target === selected_node.value) {
-        rete_init.editor?.removeConnection(conn.id)
-      }
-    })
-    console.log(selected_node.value)
-    rete_init.editor?.removeNode(selected_node.value)
-
-    closeNodeOption()
-  }
-}
-
 function addCustomBackground() {
   if (rete_init.area) {
     rete_init.area.container.classList.add('background')
@@ -726,22 +531,20 @@ function addCustomBackground() {
   }
 }
 
-
 onMounted(async () => {
   await initializeFlow()
 })
 
-
 // Event listeners for mousemove and click
-
-
 </script>
 
 <template>
   <!-- Rete.js Canvas -->
-  <div v-if="draggable.visibility && draggable.node"
+  <div
+    v-if="draggable.visibility && draggable.node"
     :style="{ top: `${draggable.position.y}px`, left: `${draggable.position.x}px` }"
-    class="tracker border-2 border-dashed h-10 px-4 w-auto absolute pointer-events-none -translate-x-[50%] -translate-y-[50%] border-blue-600 flex items-center justify-center text-white font-bold">
+    class="tracker pointer-events-none absolute flex h-10 w-auto -translate-x-[50%] -translate-y-[50%] items-center justify-center border-2 border-dashed border-blue-600 px-4 font-bold text-white"
+  >
     {{ draggable.node.data?.name }}
   </div>
 

@@ -15,6 +15,7 @@ export interface NodeType {
   image_node: ImageNode
   audio_node: AudioNode
   trigger_node: TriggerNode
+  video_node: VideoNode
 }
 
 export interface CarouselCard {
@@ -59,6 +60,7 @@ export interface CarouselNode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
+
 export interface MessageNode {
   name: string
   postbackid?: string
@@ -127,6 +129,16 @@ export interface TriggerNode {
   giver_data: Record<string, string>
 }
 
+export interface VideoNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
 export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
   Record<string, CustomSocket>, // Inputs
   Record<string, CustomSocket>, // Outputs
@@ -139,7 +151,6 @@ export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
     super(label) // Call the constructor of the base class (ClassicPreset.Node)
     this.label = label
   }
-  
 }
 
 export function isNodeOfType<T extends keyof NodeType>(
@@ -444,9 +455,9 @@ export namespace ReteTemplates {
           num1: num1_postback,
           num2: num2_postback,
         },
-        delay:'',
-        conditions:[],
-        postbackid:crypto.randomUUID()
+        delay: '',
+        conditions: [],
+        postbackid: crypto.randomUUID(),
       }
       node.id = crypto.randomUUID()
       createMetaTemplateOutIn(
@@ -473,6 +484,35 @@ export namespace ReteTemplates {
       )
       return node
     },
+    video_node() {
+      const node = new Node('video_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Video Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+
     //Should be generic node
     message_node() {
       const node = new Node('message_node')
@@ -934,14 +974,28 @@ export async function copyPostback(item_copy: string) {
   }
 }
 
-export const nodeMapContextMenu: Record<string,{ label: string; key: string; template: keyof NodeType, icon:string }> = {
-  reference:{ label: 'Reference', key: '1', template: 'reference_node', icon:'bx:bolt-circle' },
-  message:{ label: 'Message', key: '2', template: 'message_node', icon:'bx:message' },
-  generic:{ label: 'Generic', key: '9', template: 'generic_node', icon:'solar:posts-carousel-horizontal-bold' },
-  carousel:{ label: 'Carousel', key: '3', template: 'carousel_node', icon:'solar:posts-carousel-horizontal-bold-duotone' },
-  media:{ label: 'Media', key: '4', template: 'media_node', icon:'bxs:videos' },
-  condition:{ label: 'Condition', key: '5', template: 'condition_node', icon:'ix:logic-diagram' },
-  image:{ label: 'Image', key: '6', template: 'image_node', icon:'bx:image' },
-  audio:{ label: 'Audio', key: '7', template: 'audio_node', icon:'gridicons:audio' },
-  trigger:{ label: 'Trigger', key: '8', template: 'trigger_node', icon:'bx:bolt-circle' },
-};
+export const nodeMapContextMenu: Record<
+  string,
+  { label: string; key: string; template: keyof NodeType; icon: string }
+> = {
+  reference: { label: 'Reference', key: '1', template: 'reference_node', icon: 'bx:bolt-circle' },
+  message: { label: 'Message', key: '2', template: 'message_node', icon: 'bx:message' },
+  generic: {
+    label: 'Generic',
+    key: '9',
+    template: 'generic_node',
+    icon: 'solar:posts-carousel-horizontal-bold',
+  },
+  carousel: {
+    label: 'Carousel',
+    key: '3',
+    template: 'carousel_node',
+    icon: 'solar:posts-carousel-horizontal-bold-duotone',
+  },
+  media: { label: 'Media', key: '4', template: 'media_node', icon: 'bxs:videos' },
+  condition: { label: 'Condition', key: '5', template: 'condition_node', icon: 'ix:logic-diagram' },
+  image: { label: 'Image', key: '6', template: 'image_node', icon: 'bx:image' },
+  audio: { label: 'Audio', key: '7', template: 'audio_node', icon: 'gridicons:audio' },
+  trigger: { label: 'Trigger', key: '8', template: 'trigger_node', icon: 'bx:bolt-circle' },
+  video: { label: 'Video', key: '9', template: 'video_node', icon: 'bx:video' },
+}

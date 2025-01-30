@@ -1,10 +1,12 @@
 <template>
-  <div class="select-none rounded-md p-2 font-medium hover:bg-neutral-200"
-  @click.stop="(emits('select', $event), emits('hide'))"
-      @wheel.stop=""
-      @pointerover="(hide.cancel(), (visibleSubitems = true))"
-      @pointerleave="hide()"
-      @pointerdown.stop="">
+  <div
+    class="select-none rounded-md p-2 font-medium hover:bg-neutral-200"
+    @click.stop="(emits('select', $event), emits('hide'))"
+    @wheel.stop=""
+    @pointerover="(hide.cancel(), (visibleSubitems = true))"
+    @pointerleave="hide()"
+    @pointerdown.stop=""
+  >
     <div class="flex items-center gap-x-1.5">
       <Icon :icon class="size-4" />
       {{ label }}
@@ -24,9 +26,8 @@
 </template>
 
 <script lang="ts" setup>
-import { nodeIconMapping } from '../../rete/utils'
 import type { ContextMenuItemType } from './types'
-import { nodeMapContextMenu, type NodeType } from '@/modules/meta/utils/flow-types'
+import { nodeMapContextMenu } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { debounce } from 'lodash'
 import { computed, ref } from 'vue'
@@ -47,18 +48,6 @@ const visibleSubitems = ref(false)
 const hide = debounce(() => {
   visibleSubitems.value = false
 }, props.delay)
-
-const labelMapping: Record<string, keyof NodeType> = {
-  reference: 'reference_node',
-  message: 'message_node',
-  generic: 'generic_node',
-  carousel: 'carousel_node',
-  media: 'media_node',
-  trigger: 'trigger_node',
-  condition: 'condition_node',
-  image: 'image_node',
-  audio: 'audio_node',
-}
 
 const icon = computed(() => {
   const label = props.label.toLocaleLowerCase()

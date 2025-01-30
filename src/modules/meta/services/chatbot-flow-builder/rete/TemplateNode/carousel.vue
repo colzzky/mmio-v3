@@ -73,7 +73,7 @@ const outputs = computed(() => {
 
         <!-- quick replies -->
         <section class="space-y-3">
-          <div class="px-5 font-bold">Quick Replies:</div>
+          <div class="px-5 font-bold">Quick Replies</div>
           <div v-if="node && node.data">
             <div
               v-if="objectEntries(node.data.quick_replies).length > 0"
@@ -114,7 +114,7 @@ const outputs = computed(() => {
                     <span
                       class="flex items-center gap-x-2 rounded-full border-2 border-dotted bg-white p-1 px-2 text-xs font-medium text-gray-400"
                     >
-                      <p>No Qucik Replies yet</p>
+                      <p>No Quick Replies yet</p>
                     </span>
                   </div>
                 </div>
@@ -169,6 +169,7 @@ const outputs = computed(() => {
                   :src="card.image"
                   alt="Placeholder Image"
                   class="max-h-full max-w-full rounded-lg object-contain"
+                  draggable="false"
                 />
                 <span v-else>No available Image</span>
               </div>
@@ -232,7 +233,7 @@ const outputs = computed(() => {
                       <span
                         class="border-1 flex w-full items-center justify-center gap-x-2 rounded-md border-2 border-dotted bg-white p-1 px-2 text-xs font-medium text-gray-400"
                       >
-                        <p>No Buttons Avaialable</p>
+                        <p>No Buttons Available</p>
                       </span>
                     </div>
                   </div>

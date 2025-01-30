@@ -418,7 +418,7 @@ function handleRemoveDelay() {
           :icon="nodeIconMapping[localNodeData.label]"
           class="row-span-full size-[var(--icon-size)] self-center"
         />
-        <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
+        <SheetTitle class="break-all leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">Carousel</SheetDescription>
       </SheetHeader>
       <main class="grid gap-y-4 px-6 py-3">
@@ -569,7 +569,7 @@ function handleRemoveDelay() {
         >
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
-        <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
+        <SheetTitle class="break-all leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">
           <button
             type="button"
@@ -716,7 +716,7 @@ function handleRemoveDelay() {
         >
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
-        <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
+        <SheetTitle class="break-all leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">
           <button
             type="button"
@@ -801,7 +801,7 @@ function handleRemoveDelay() {
         >
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
-        <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
+        <SheetTitle class="break-all leading-none">{{ localNodeData.data.name }}</SheetTitle>
         <SheetDescription class="leading-none">
           <button
             type="button"

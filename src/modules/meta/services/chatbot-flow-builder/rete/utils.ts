@@ -1,14 +1,26 @@
+import {
+  Reference,
+  Message,
+  Generic,
+  Carousel,
+  Media,
+  Condition,
+  Image,
+  Audio,
+  Trigger,
+  Video,
+} from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
   CarouselCard,
   MetaTemplateOutput,
   NodeType,
   QuickReply,
-  Button as MetaButton,
   Button,
-  Condition,
+  Condition as ConditionType,
 } from '@/modules/meta/utils/flow-types'
 import type { Input, Output, Socket } from 'rete/_types/presets/classic'
+import type { Component } from 'vue'
 
 export function sortByIndex<T extends Output<Socket> | Input<Socket> | MetaTemplateOutput>(
   entries: [string, T | undefined][],
@@ -34,7 +46,7 @@ export interface MessageReplyForm {
   changeIntent(
     args:
       | { intent: 'default' | 'create-message-reply' }
-      | { intent: 'edit-message-reply'; key: string; reply: MetaButton },
+      | { intent: 'edit-message-reply'; key: string; reply: Button },
   ): void
 }
 
@@ -91,7 +103,7 @@ export interface CarouselCardForm {
 }
 
 export interface ConditionForm {
-  form: Condition
+  form: ConditionType
   initialState(): void
 
   submitForm(event: SubmitEvent): void
@@ -104,8 +116,21 @@ export interface ConditionForm {
   changeIntent(
     args:
       | { intent: 'default' | 'create-condition' }
-      | { intent: 'edit-condition'; key: number; condition: Condition },
+      | { intent: 'edit-condition'; key: number; condition: ConditionType },
   ): void
+}
+
+export const nodeMapping: Record<keyof NodeType, Component> = {
+  reference_node: Reference,
+  message_node: Message,
+  generic_node: Generic,
+  carousel_node: Carousel,
+  media_node: Media,
+  trigger_node: Trigger,
+  condition_node: Condition,
+  image_node: Image,
+  audio_node: Audio,
+  video_node: Video,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -118,4 +143,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   condition_node: 'ix:logic-diagram',
   image_node: 'bx:image',
   audio_node: 'gridicons:audio',
+  video_node: 'bx:video',
 }
