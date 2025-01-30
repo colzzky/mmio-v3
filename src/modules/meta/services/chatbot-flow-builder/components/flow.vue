@@ -27,6 +27,7 @@ import {
   ReteTemplates,
   type NodeType,
   MetaTemplateOutput,
+  nodeMapContextMenu,
 } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { NodeEditor, ClassicPreset, type NodeId } from 'rete'
@@ -97,27 +98,19 @@ async function initializeFlow() {
       if (context === 'root') {
         return {
           searchBar: true,
-          list: [
-            {
-              label: 'Reference', key: '1', handler: async() => {
-                const node = ReteTemplates.node_templates.reference_node()
-                if(rete_init.editor){
-                  await rete_init.editor.addNode(node)
-                }
-                
-              }
-            },
-            {
-              label: 'Message', key: '2', handler: async() => {
-                const node = ReteTemplates.node_templates.message_node()
-                if(rete_init.editor){
-                  await rete_init.editor.addNode(node)
-                }
+          list: Object.values(nodeMapContextMenu).map(({ label, key, template }) => ({
+            label,
+            key,
+            handler: async () => {
+              const node = ReteTemplates.node_templates[template]();
+              if (rete_init.editor) {
+                await rete_init.editor.addNode(node);
+                await rete_init.contextMenu?.signal.emit('hide')
               }
             }
-          ]
+          }))
         }
-      }else{
+      } else {
         console.log(context)
         //On delete/clone add something here
       }
@@ -131,8 +124,7 @@ async function initializeFlow() {
   //Follows mouse
   // rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
   //   items: ContextMenuPresets.classic.setup([
-  //     ['Reference', () => {
-  //       ReteTemplates.node_templates.reference_node()}],
+  //     ['Reference', () => {ReteTemplates.node_templates.reference_node()}],
   //     ['Message', () => ReteTemplates.node_templates.message_node()],
   //     ['Generic', () => ReteTemplates.node_templates.generic_node()],
   //     ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
@@ -143,8 +135,6 @@ async function initializeFlow() {
   //     ['Condition', () => ReteTemplates.node_templates.condition_node()],
   //   ]),
   // })
-
-  /* @ts-ignore */
 
 
   // Use the customized preset
@@ -458,7 +448,7 @@ function trackMouseEvents() {
       if (context.type === 'nodetranslated') {
         //await rete_init.area.translate(context.data.id, context_menu_position);
         console.log(context.data)
-        
+
       }
 
       if (context.type === 'nodecreated') {
@@ -495,12 +485,6 @@ function trackMouseEvents() {
       }
 
       if (context.type === 'pointerdown') {
-        context_menu_position = {
-          x: context.data.event.clientX,
-          y: context.data.event.clientY
-        }
-
-        console.log(context_menu_position)
 
         if (rete_init.selected_node) {
           rete_init.remove_selected_node()
@@ -532,8 +516,8 @@ function trackMouseEvents() {
           x: context.data.event.clientX,
           y: context.data.event.clientY
         }
-        
-        console.log(context.data)
+
+        console.log(context_menu_position)
 
       }
 
@@ -566,15 +550,13 @@ function trackMouseEvents() {
         if (!context.data.created && rete_init.area && !isNodeRemoved.value) {
           console.log(rete_init.area.area)
           const test = getTranslatedMousePosition({ x: rete_init.area.area.pointer.x, y: rete_init.area.area.pointer.y })
-
           const event = new PointerEvent('test', {
-            clientX: test.x,
-            clientY: test.y,
+            clientX: context_menu_position.x,
+            clientY: context_menu_position.y,
           })
           console.log(event)
 
           rete_init.ui.connection_drop = context.data.initial
-          console.log('tertre1')
           //rete_init.ui.connection_drop = context.data.initial
           await rete_init.area.emit({ type: 'contextmenu', data: { event, context: 'root' } })
         }

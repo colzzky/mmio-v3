@@ -1,6 +1,6 @@
 <template>
   <div
-    class="min-w-48 rounded-xl border-2 border-neutral-200 bg-neutral-100 p-2 text-sm shadow-sm"
+    class="min-w-48 rounded-xl border-2 border-neutral-200 bg-neutral-100 px-1 text-sm shadow-sm"
     @mouseover="hide.cancel"
     @mouseleave="hide"
     data-testid="context-menu"
@@ -26,7 +26,7 @@
       :sub-items="item.subItems"
       :label="item.label"
       :delay
-      @select="item.handler"
+      @select="handler($event, item)"
       @hide="typeof onHide === 'function' ? onHide : () => {}"
     />
   </div>
@@ -52,6 +52,13 @@ const hide = debounce(() => {
   if (typeof props.onHide === 'function') props.onHide()
 }, props.delay)
 
+const handler = (event:MouseEvent, item:ContextMenuItemType) =>{
+  item.handler(event)
+  hide.cancel()
+  props.onHide()
+}
+
+
 const getItems = computed(() => {
   const filterRegexp = new RegExp(filter.value, 'i')
   if (!props.items) return []
@@ -59,6 +66,7 @@ const getItems = computed(() => {
 })
 
 onUnmounted(() => {
+  console.log('unmounted')
   hide.cancel()
 })
 
