@@ -232,6 +232,7 @@ async function initializeFlow() {
   rete_init.area.use(rete_init.connection)
   rete_init.area.use(rete_init.readonly.area);
   rete_init.area.use(rete_init.render)
+  // @ts-ignore: Unreachable code error
   rete_init.area.use(rete_init.contextMenu)
 
 
@@ -450,12 +451,6 @@ function trackMouseEvents() {
             // }
           }
         }
-      }
-
-      if (context.type === 'nodetranslated') {
-        //await rete_init.area.translate(context.data.id, context_menu_position);
-        console.log(context.data)
-
       }
 
       if (context.type === 'nodecreated') {

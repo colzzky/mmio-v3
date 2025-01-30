@@ -11,6 +11,7 @@ import { Icon } from '@iconify/vue'
 import {
   browserLocalPersistence,
   FacebookAuthProvider,
+  GoogleAuthProvider,
   setPersistence,
   signInWithEmailAndPassword,
   signInWithPopup,
@@ -94,6 +95,37 @@ async function registerFacebook(): Promise<void> {
   loginLoad.value = false
 }
 
+async function registerGoogle(): Promise<void> {
+  loginLoad.value = true
+  const provider = new GoogleAuthProvider()
+  await setPersistence(auth, browserLocalPersistence).then(async () => {
+    await signInWithPopup(auth, provider)
+      .then(async () => {
+        if (auth.currentUser) {
+          user_auth.setUser(auth.currentUser)
+          await createNewUserProfile({
+            displayName: auth.currentUser.displayName,
+            email: auth.currentUser.email,
+            emailVerified: auth.currentUser.emailVerified,
+            photoURL: auth.currentUser.photoURL,
+            uid: auth.currentUser.uid,
+          })
+          user_auth.listener_refresh()
+      await user_auth.user_auth_initialization();
+          router.replace({ name: 'home' })
+        }
+      })
+      .catch((error) => {
+        toast({
+          title: 'Registration error',
+          description: error,
+          variant: 'destructive',
+        })
+      })
+  })
+  loginLoad.value = false
+}
+
 const pageLoad = ref<boolean>(true)
 
 
@@ -132,7 +164,7 @@ watch(
           <Icon icon="ic:baseline-email" class="absolute left-4 top-1/2 size-5 -translate-y-1/2" />
           Email
         </Button>
-        <Button variant="secondary" class="relative">
+        <Button variant="secondary" class="relative" @click="registerGoogle">
           <Icon icon="bi:google" class="absolute left-4 top-1/2 size-5 -translate-y-1/2" />
           Sign in with Google
         </Button>

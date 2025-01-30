@@ -18,10 +18,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/core/components/ui/table'
+import type { ChatbotFlowServiceData } from '@/core/types/WorkSpaceTypes'
 import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import router from '@/router'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
+import { Icon } from 'lucide-vue-next'
 import { onMounted, useTemplateRef } from 'vue'
 
 export type Flow = {
@@ -49,6 +51,12 @@ onMounted(async () => {
     }
   }
 })
+
+const navigateFlow = (flow:ChatbotFlowServiceData) => {
+  router.push({ name: 'chatbot-flow-final', params:{
+    cb_id:flow.cb_id
+  }})
+}
 
 const createEditModalRef = useTemplateRef('createEditModal')
 // const deleteModalRef = useTemplateRef('deleteModal')
@@ -93,12 +101,15 @@ const createEditModalRef = useTemplateRef('createEditModal')
                       <i class="material-icons text-md">more_vert</i>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
+                      <DropdownMenuItem @click="navigateFlow(flow)" class="gap-x-3">
+                        Navigate Flow
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         class="gap-x-3"
                         @click="
                           createEditModalRef?.modal.open({ intent: 'edit', flowId: flow.cb_id })
                         "
-                        >>
+                        >
                         <i class="bx bx-edit text-xl" />
                         Edit
                       </DropdownMenuItem>

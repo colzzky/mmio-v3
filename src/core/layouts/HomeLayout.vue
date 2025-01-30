@@ -82,7 +82,6 @@ const navigation = [
           </span>
         </div>
       </div>
-
       <slot />
     </div>
   </div>

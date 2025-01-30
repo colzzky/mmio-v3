@@ -2,7 +2,6 @@ import authenticationRoutes from '@/modules/authentication/routes'
 import { allRoutes as metaRoutes } from '@/modules/meta/routes'
 import { routes as settingsRoutes } from '@/modules/settings/routes'
 import { routes as teamsAndPermissionsRoutes } from '@/modules/teams-permissions/routes'
-import othersRoutes from '@/modules/try/routes'
 import { routes as workspaceSettingsRoutes } from '@/modules/workspace-settings/routes'
 import { useAuthStore } from '@/stores/authStore'
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
@@ -44,7 +43,6 @@ const routes = [
   ...authenticationRoutes,
   ...settingsRoutes,
   ...teamsAndPermissionsRoutes,
-  ...othersRoutes,
 ] as RouteRecordRaw[]
 
 const router = createRouter({

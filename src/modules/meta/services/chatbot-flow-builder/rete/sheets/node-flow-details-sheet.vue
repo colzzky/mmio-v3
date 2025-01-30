@@ -9,6 +9,7 @@ import { SheetContent } from '@/core/components/ui/sheet'
 import Sheet from '@/core/components/ui/sheet/Sheet.vue'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/core/components/ui/tabs'
 import type { Node, NodeType } from '@/modules/meta/utils/flow-types'
+import router from '@/router'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
 import { storeToRefs } from 'pinia'
@@ -29,6 +30,10 @@ const nodes = computed(() => {
   const filterRegex = new RegExp(searchNodeTerm.value, 'i')
   return nodes.filter((node) => node.data?.name.match(filterRegex))
 })
+
+const navigateBackChatBotFlow = () =>{
+  router.back()
+}
 </script>
 
 <template>
@@ -36,12 +41,21 @@ const nodes = computed(() => {
     <SheetContent side="left"
       class="w-[clamp(300px,100%,15%)] gap-y-0 overflow-hidden overflow-y-scroll p-0 shadow-none [&>button]:hidden">
       <header class="grid gap-y-1.5 border-b p-2 text-sm">
-        <div class="flex items-center justify-end gap-x-2">
+        <div class="flex items-center justify-between gap-x-2">
+          <div class="flex gap-x-1">
+            <Button size="icon" variant="ghost" @click="navigateBackChatBotFlow()">
+              <Icon icon="bx-left-arrow-alt" class="me-auto size-10" />
+            </Button>
+            
           <Icon icon="bxl:dev-to" class="me-auto size-10" />
-          <AvatarDropdown />
-          <Button size="icon" variant="ghost">
-            <Icon @click="rete_init.ui.minimizeMenuPanel()" icon="mdi:arrow-vertical-collapse" class="size-5" />
-          </Button>
+        </div>
+          <div class="flex gap-x-1">
+            <AvatarDropdown />
+            <Button size="icon" variant="ghost">
+              <Icon @click="rete_init.ui.minimizeMenuPanel()" icon="mdi:arrow-vertical-collapse" class="size-5" />
+            </Button>
+          </div>
+
         </div>
         <h1 class="ps-1.5 font-bold leading-none">Flow Name</h1>
         <h2 class="ps-1.5 text-xs leading-none">Workspace Name</h2>
@@ -86,6 +100,11 @@ const nodes = computed(() => {
         <header class="grid gap-y-1.5 border-b p-2 text-sm">
           <div class="flex items-center justify-between gap-x-2">
             <div class="flex gap-2 items-center">
+              <div class="flex gap-x-1">
+              <Button size="icon" variant="ghost" @click="navigateBackChatBotFlow()">
+              <Icon icon="bx-left-arrow-alt" class="me-auto size-10" />
+            </Button>
+            </div>
               <Icon icon="bxl:dev-to" class="me-auto size-10" />
               <div class="">
                 <h1 class="ps-1.5 font-bold leading-none truncate w-40">Flow Name Marketing Master IO Beta 1</h1>
@@ -121,4 +140,5 @@ const nodes = computed(() => {
 .slide-fade-leave-to {
   transform: translateX(-20px);
   opacity: 0;
-}</style>
+}
+</style>
