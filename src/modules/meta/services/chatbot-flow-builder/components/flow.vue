@@ -529,7 +529,7 @@ function getTranslatedMousePosition(event: MousePosition) {
 }
 
 async function reloadEditor() {
-  if (!active_flow.chatbot_flow_data || !rete_init.editor || !rete_init.area) return
+  if (!active_flow.chatbot_flow_data || !rete_init.editor || !rete_init.area || !active_flow.chatbot_flow_data.botFlow) return
   const orig_editor: SerializedFlow.State = JSON.parse(active_flow.chatbot_flow_data.botFlow)
   for (const node of orig_editor.nodes) {
     const newNode = new Node(node.label)
@@ -613,10 +613,10 @@ onMounted(async () => {
     if (get_flow.data && get_flow.status) {
       const flow = get_flow.data as ChatbotFlowServiceData
       active_flow.setActiveChatBotFlow(flow)
-      initializeFlow()
-      await reloadEditor()
     }
   }
+  initializeFlow()
+  await reloadEditor()
 
   pageLoad.value = false
 })
