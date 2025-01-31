@@ -20,6 +20,7 @@ import {
   OpenAIEmbeddingSheet,
   ChatGPTAPISheet,
   DynamicCarouselSheet,
+  UserInputSheet,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -87,6 +88,7 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   openai_embedding_node: OpenAIEmbeddingSheet,
   chatgpt_api_node: ChatGPTAPISheet,
   dynamic_carousel_node: DynamicCarouselSheet,
+  user_input_node: UserInputSheet,
 }
 
 watch(

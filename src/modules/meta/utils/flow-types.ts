@@ -23,6 +23,7 @@ export interface NodeType {
   openai_embedding_node: OpenAIEmbeddingNode
   chatgpt_api_node: ChatGPTAPINode
   dynamic_carousel_node: DynamicCarouselNode
+  user_input_node: UserInputNode
 }
 
 export interface CarouselCard {
@@ -207,6 +208,16 @@ export interface ChatGPTAPINode {
 }
 
 export interface DynamicCarouselNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface UserInputNode {
   name: string
   postbackid?: string
   delay?: string
@@ -785,6 +796,34 @@ export namespace ReteTemplates {
       )
       return node
     },
+    user_input_node() {
+      const node = new Node('user_input_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled User Input Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
 
     //Should be generic node
     message_node() {
@@ -1299,5 +1338,11 @@ export const nodeMapContextMenu: Record<
     key: '16',
     template: 'dynamic_carousel_node',
     icon: 'solar:posts-carousel-vertical-bold',
+  },
+  'user input': {
+    label: 'User Input',
+    key: '17',
+    template: 'user_input_node',
+    icon: 'radix-icons:input',
   },
 }

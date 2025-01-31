@@ -15,3 +15,4 @@ export { default as BotSheetsAPI } from '@/modules/meta/services/chatbot-flow-bu
 export { default as OpenAIEmbedding } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/openai-embedding.vue'
 export { default as ChatGPTAPI } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/chatgpt-api.vue'
 export { default as DynamicCarousel } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/dynamic-carousel.vue'
+export { default as UserInput } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/user-input.vue'
