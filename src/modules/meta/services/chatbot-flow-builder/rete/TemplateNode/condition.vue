@@ -35,7 +35,7 @@ const outputs = computed(() => {
       }}</span>
     </div>
 
-    <NodeCard :data-selected="data.selected" class="flex flex-col gap-y-3 pb-0">
+    <NodeCard :data-selected="data.selected" class="flex flex-col gap-y-3">
       <!-- inputs -->
       <section>
         <template v-for="[key, input] in inputs" :key="key + seed">

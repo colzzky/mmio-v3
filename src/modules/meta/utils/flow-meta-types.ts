@@ -34,12 +34,6 @@ export namespace FBAttachmentTemplate {
         }
     }
 
-
-
-
-
-
-
     export interface Element {
         title: string
         subtitle?: string

@@ -80,7 +80,7 @@ export async function postCollection<T extends keyof CollectionsInterface>(
     $path: CollectionsInterface[T]['path'] // Path like 'collection/id'
     $sub_params?: CollectionsInterface[T]['sub_params'] | null // Optional sub-params
     id: string // Optional ID
-    data: any // Data to update or create
+    data: CollectionsInterface[T]['interface'] // Data to update or create
     type?: 'update' | 'new' // Defaults to 'update'
   },
 ): Promise<FirebaseReturn> {

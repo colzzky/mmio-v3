@@ -3,7 +3,7 @@ import { Button } from '@/core/components/ui/button'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore';
 import { Icon } from '@iconify/vue'
 const authWorkspaceStore = useAuthWorkspaceStore()
-const { rete_init } = authWorkspaceStore.active_flow
+const { rete_init, active_flow } = authWorkspaceStore
 </script>
 
 <template>
@@ -16,12 +16,12 @@ const { rete_init } = authWorkspaceStore.active_flow
     </Button>
 
     <!-- write and read only -->
-    <Button v-if="rete_init.ui.read_only_mode" type="button" size="icon" variant="ghost"
-      @click="rete_init.ui.enableReadOnly()">
+    <Button v-if="active_flow.ui.read_only_mode" type="button" size="icon" variant="ghost"
+      @click="active_flow.ui.enableReadOnly()">
       <Icon icon="mdi:pencil-circle" class="size-12" />
     </Button>
     <Button v-else type="button" size="icon" variant="ghost">
-      <Icon icon="bx:book-reader" class="size-12" @click="rete_init.ui.enableReadOnly()" />
+      <Icon icon="bx:book-reader" class="size-12" @click="active_flow.ui.enableReadOnly()" />
     </Button>
 
     <Button type="button" size="icon" variant="ghost">
@@ -31,11 +31,11 @@ const { rete_init } = authWorkspaceStore.active_flow
       <Icon icon="bx:redo" class="size-6" />
     </Button>
     <Transition name="slide-fade" mode="out-in">
-      <div v-if="rete_init.ui.read_only_mode"
+      <div v-if="active_flow.ui.read_only_mode"
         class="absolute inset-x-4 bottom-[calc(100%+theme(spacing.2))] flex items-center justify-between rounded-lg bg-neutral-300 px-3 py-1.5 text-sm text-card-foreground">
         <span>Read Mode</span>
         <button type="button" class="text-blue-500 hover:text-blue-600"
-          @click="rete_init.ui.enableReadOnly()">Edit</button>
+          @click="active_flow.ui.enableReadOnly()">Edit</button>
       </div>
     </Transition>
   </div>

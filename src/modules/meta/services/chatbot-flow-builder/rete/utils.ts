@@ -1,14 +1,43 @@
+import {
+  Reference,
+  Message,
+  Generic,
+  Carousel,
+  Media,
+  Condition,
+  Image,
+  Audio,
+  Trigger,
+  Video,
+  GIF,
+  File,
+  HTTP,
+  BotSheetsAPI,
+  OpenAIEmbedding,
+  ChatGPTAPI,
+  DynamicCarousel,
+  UserInput,
+  OTN,
+  ProductSearch,
+  Action,
+  Timegap,
+  GoToFlow,
+  Email,
+  SMS,
+  Function,
+  Recurring,
+} from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
   CarouselCard,
   MetaTemplateOutput,
   NodeType,
   QuickReply,
-  Button as MetaButton,
   Button,
-  Condition,
+  Condition as ConditionType,
 } from '@/modules/meta/utils/flow-types'
 import type { Input, Output, Socket } from 'rete/_types/presets/classic'
+import type { Component } from 'vue'
 
 export function sortByIndex<T extends Output<Socket> | Input<Socket> | MetaTemplateOutput>(
   entries: [string, T | undefined][],
@@ -34,7 +63,7 @@ export interface MessageReplyForm {
   changeIntent(
     args:
       | { intent: 'default' | 'create-message-reply' }
-      | { intent: 'edit-message-reply'; key: string; reply: MetaButton },
+      | { intent: 'edit-message-reply'; key: string; reply: Button },
   ): void
 }
 
@@ -91,7 +120,7 @@ export interface CarouselCardForm {
 }
 
 export interface ConditionForm {
-  form: Condition
+  form: ConditionType
   initialState(): void
 
   submitForm(event: SubmitEvent): void
@@ -104,8 +133,38 @@ export interface ConditionForm {
   changeIntent(
     args:
       | { intent: 'default' | 'create-condition' }
-      | { intent: 'edit-condition'; key: number; condition: Condition },
+      | { intent: 'edit-condition'; key: number; condition: ConditionType },
   ): void
+}
+
+export const nodeMapping: Record<keyof NodeType, Component> = {
+  reference_node: Reference,
+  message_node: Message,
+  generic_node: Generic,
+  carousel_node: Carousel,
+  media_node: Media,
+  trigger_node: Trigger,
+  condition_node: Condition,
+  image_node: Image,
+  audio_node: Audio,
+  video_node: Video,
+  gif_node: GIF,
+  file_node: File,
+  http_node: HTTP,
+  bot_sheets_api_node: BotSheetsAPI,
+  openai_embedding_node: OpenAIEmbedding,
+  chatgpt_api_node: ChatGPTAPI,
+  dynamic_carousel_node: DynamicCarousel,
+  user_input_node: UserInput,
+  otn_node: OTN,
+  product_search_node: ProductSearch,
+  action_node: Action,
+  timegap_node: Timegap,
+  go_to_flow_node: GoToFlow,
+  email_node: Email,
+  sms_node: SMS,
+  function_node: Function,
+  recurring_node: Recurring,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -118,4 +177,22 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   condition_node: 'ix:logic-diagram',
   image_node: 'bx:image',
   audio_node: 'gridicons:audio',
+  video_node: 'bx:video',
+  gif_node: 'stash:gif-solid',
+  file_node: 'bx:file',
+  http_node: 'material-symbols:http',
+  bot_sheets_api_node: 'healthicons:spreadsheets',
+  openai_embedding_node: 'logos:openai',
+  chatgpt_api_node: 'arcticons:openai-chatgpt',
+  dynamic_carousel_node: 'solar:posts-carousel-vertical-bold',
+  user_input_node: 'radix-icons:input',
+  otn_node: 'bx:bell',
+  product_search_node: 'bx:search',
+  action_node: 'mdi:call-to-action',
+  timegap_node: 'ph:spinner-gap-fill',
+  go_to_flow_node: 'ix:goto',
+  email_node: 'bx:envelope',
+  sms_node: 'fa-solid:sms',
+  function_node: 'material-symbols:function',
+  recurring_node: 'wpf:recurring-appointment',
 }

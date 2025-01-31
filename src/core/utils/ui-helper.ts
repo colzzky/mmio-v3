@@ -201,4 +201,26 @@ export const uiHelpers = {
   valueUpdater<T extends Updater<any>>(updaterOrValue: T, ref: Ref) {
     ref.value = typeof updaterOrValue === 'function' ? updaterOrValue(ref.value) : updaterOrValue
   },
+
+  getNextTitle(titles: string | string[]): string {
+    const titleList = Array.isArray(titles) ? titles : [titles];
+    let baseTitle = "";
+    let maxNumber = 0;
+  
+    titleList.forEach(title => {
+      const match = title.match(/^(.*?)(\d+)?$/); // Match any title ending in a number
+  
+      if (match) {
+        const [_, base, num] = match;
+        baseTitle = base.trim(); // Keep only the text part
+        const number = num ? parseInt(num, 10) : 0;
+        maxNumber = Math.max(maxNumber, number);
+      }
+    });
+  
+    return `${baseTitle} ${maxNumber + 1}`.trim();
+  }
+  
+  
+  
 }

@@ -34,7 +34,7 @@ export type Flow = {
 }
 
 const authWorkspaceStore = useAuthWorkspaceStore()
-const { workspace_service, imported_meta_pages } = authWorkspaceStore
+const { workspace_service, imported_meta_pages, active_flow } = authWorkspaceStore
 const { chatbot_flow } = workspace_service
 
 onMounted(async () => {
@@ -53,6 +53,7 @@ onMounted(async () => {
 })
 
 const navigateFlow = (flow:ChatbotFlowServiceData) => {
+  active_flow.setActiveChatBotFlow(flow)
   router.push({ name: 'chatbot-flow-final', params:{
     cb_id:flow.cb_id
   }})

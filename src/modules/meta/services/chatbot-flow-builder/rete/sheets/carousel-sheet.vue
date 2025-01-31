@@ -27,20 +27,20 @@ import { Icon } from '@iconify/vue'
 import { storeToRefs } from 'pinia'
 import { onMounted, reactive, ref, watch } from 'vue'
 
-const { active_flow } = storeToRefs(useAuthWorkspaceStore())
-const { rete_init } = active_flow.value
+const authWorkspace = useAuthWorkspaceStore()
+const { active_flow , rete_init} = authWorkspace
 
 const localNodeData = ref<Node<'carousel_node'> | undefined>(undefined)
 
 onMounted(() => {
-  const node = rete_init.editor?.getNode(rete_init.selected_node_id)
+  const node = rete_init.editor?.getNode(active_flow.selected_node_id)
   if (!node) throw new Error('No Node found with the given ID')
 
   localNodeData.value = node as Node<'carousel_node'>
 })
 
 watch(
-  () => rete_init.selected_node_id,
+  () => active_flow.selected_node_id,
   (node_id) => {
     if (node_id) {
       const node = rete_init.editor?.getNode(node_id)
@@ -412,7 +412,7 @@ function handleRemoveDelay() {
     <!-- default state -->
     <template v-if="sheetState === 'default'">
       <SheetHeader
-        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
+        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-[repeat(2,max-content)] gap-3 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
         <Icon
           :icon="nodeIconMapping[localNodeData.label]"
@@ -560,7 +560,7 @@ function handleRemoveDelay() {
       v-else-if="sheetState === 'create-carousel-card' || sheetState === 'edit-carousel-card'"
     >
       <SheetHeader
-        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
+        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-[repeat(2,max-content)] gap-3 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
         <button
           type="button"
@@ -703,7 +703,7 @@ function handleRemoveDelay() {
       "
     >
       <SheetHeader
-        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
+        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-[repeat(2,max-content)] gap-3 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
         <button
           type="button"
@@ -792,7 +792,7 @@ function handleRemoveDelay() {
       while the browser instance is typed as `SubmitEvent` -->
     <template v-else-if="sheetState === 'create-quick-reply' || sheetState === 'edit-quick-reply'">
       <SheetHeader
-        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 gap-x-3 gap-y-1.5 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
+        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-[repeat(2,max-content)] gap-3 border-b-2 px-6 pb-3 pt-4 [--icon-size:theme(spacing.6)]"
       >
         <button
           type="button"

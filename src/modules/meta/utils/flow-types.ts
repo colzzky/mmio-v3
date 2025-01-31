@@ -3,7 +3,7 @@ import type { FBAttachmentTemplate } from './flow-meta-types'
 import { toast } from '@/core/components/ui/toast'
 import { ClassicPreset, type GetSchemes } from 'rete'
 import type { VueArea2D } from 'rete-vue-plugin'
-import type { Input } from 'rete/_types/presets/classic'
+import type { Input, Output } from 'rete/_types/presets/classic'
 
 export interface NodeType {
   message_node: MessageNode
@@ -15,6 +15,24 @@ export interface NodeType {
   image_node: ImageNode
   audio_node: AudioNode
   trigger_node: TriggerNode
+  video_node: VideoNode
+  gif_node: GIFNode
+  file_node: FileNode
+  http_node: HTTPNode
+  bot_sheets_api_node: BotSheetsAPINode
+  openai_embedding_node: OpenAIEmbeddingNode
+  chatgpt_api_node: ChatGPTAPINode
+  dynamic_carousel_node: DynamicCarouselNode
+  user_input_node: UserInputNode
+  otn_node: OTNNode
+  product_search_node: ProductSearchNode
+  action_node: ActionNode
+  timegap_node: TimegapNode
+  go_to_flow_node: GoToFlowNode
+  email_node: EmailNode
+  sms_node: SMSNode
+  function_node: FunctionNode
+  recurring_node: RecurringNode
 }
 
 export interface CarouselCard {
@@ -59,6 +77,7 @@ export interface CarouselNode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
+
 export interface MessageNode {
   name: string
   postbackid?: string
@@ -127,6 +146,186 @@ export interface TriggerNode {
   giver_data: Record<string, string>
 }
 
+export interface VideoNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface GIFNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface FileNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface HTTPNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface BotSheetsAPINode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface OpenAIEmbeddingNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface ChatGPTAPINode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface DynamicCarouselNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface UserInputNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface OTNNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface ProductSearchNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface ActionNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface TimegapNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface GoToFlowNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface EmailNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface SMSNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface FunctionNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface RecurringNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
 export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
   Record<string, CustomSocket>, // Inputs
   Record<string, CustomSocket>, // Outputs
@@ -139,7 +338,6 @@ export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
     super(label) // Call the constructor of the base class (ClassicPreset.Node)
     this.label = label
   }
-  
 }
 
 export function isNodeOfType<T extends keyof NodeType>(
@@ -171,7 +369,14 @@ export namespace CustomControls {
   //Add more custom control here
 }
 
-export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> {}
+export interface ConnectionProperty{
+  source: string
+  sourceOutput: string
+  target: string
+  targetInput: string
+}
+
+export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> { }
 
 export type Schemes = GetSchemes<Node<keyof NodeType>, Connection<Node<keyof NodeType>>>
 export type AreaExtra = VueArea2D<Schemes>
@@ -444,9 +649,9 @@ export namespace ReteTemplates {
           num1: num1_postback,
           num2: num2_postback,
         },
-        delay:'',
-        conditions:[],
-        postbackid:crypto.randomUUID()
+        delay: '',
+        conditions: [],
+        postbackid: crypto.randomUUID(),
       }
       node.id = crypto.randomUUID()
       createMetaTemplateOutIn(
@@ -473,6 +678,511 @@ export namespace ReteTemplates {
       )
       return node
     },
+    video_node() {
+      const node = new Node('video_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Video Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    gif_node() {
+      const node = new Node('gif_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled GIF Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    file_node() {
+      const node = new Node('file_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled File Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    http_node() {
+      const node = new Node('http_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled HTTP Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    bot_sheets_api_node() {
+      const node = new Node('bot_sheets_api_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Bot Sheets API Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    openai_embedding_node() {
+      const node = new Node('openai_embedding_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled OpenAI Embedding Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    chatgpt_api_node() {
+      const node = new Node('chatgpt_api_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled ChatGPT API Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    dynamic_carousel_node() {
+      const node = new Node('dynamic_carousel_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Dynamic Carousel Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    user_input_node() {
+      const node = new Node('user_input_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled User Input Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    otn_node() {
+      const node = new Node('otn_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled OTN Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    product_search_node() {
+      const node = new Node('product_search_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Product Search Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    action_node() {
+      const node = new Node('action_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Action Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    timegap_node() {
+      const node = new Node('timegap_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Timegap Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    go_to_flow_node() {
+      const node = new Node('go_to_flow_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Go To Flow Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    email_node() {
+      const node = new Node('email_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Email Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    sms_node() {
+      const node = new Node('sms_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled SMS Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    function_node() {
+      const node = new Node('function_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Function Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    recurring_node() {
+      const node = new Node('recurring_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Recurring Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+
     //Should be generic node
     message_node() {
       const node = new Node('message_node')
@@ -507,14 +1217,14 @@ export namespace ReteTemplates {
 
 //Serialized State. This is the typ used when saving and populating rete editor
 export namespace SerializedFlow {
-  export interface Node {
+  export interface Node<T extends keyof NodeType> {
     id: string
-    label: string
-    controls: { [key: string]: ControlInterface }
-    outputs: { [key: string]: MetaTemplateOutput } | undefined
-    inputs: { [key: string]: Input<ClassicPreset.Socket> } | undefined
+    label: keyof NodeType
+    controls:Record<string, ControlInterface>
+    outputs:Record<string, Output<CustomSocket> |undefined>
+    inputs:Record<string, Input<CustomSocket> |undefined>
     position: { x: number; y: number }
-    data: any
+    data: NodeType[T] | null
   }
 
   export interface Connection {
@@ -526,7 +1236,7 @@ export namespace SerializedFlow {
   }
 
   export interface State {
-    nodes: Node[]
+    nodes: Node<keyof NodeType>[]
     connections: Connection[]
     signal: any
     name: string
@@ -934,14 +1644,117 @@ export async function copyPostback(item_copy: string) {
   }
 }
 
-export const nodeMapContextMenu: Record<string,{ label: string; key: string; template: keyof NodeType, icon:string }> = {
-  reference:{ label: 'Reference', key: '1', template: 'reference_node', icon:'bx:bolt-circle' },
-  message:{ label: 'Message', key: '2', template: 'message_node', icon:'bx:message' },
-  generic:{ label: 'Generic', key: '9', template: 'generic_node', icon:'solar:posts-carousel-horizontal-bold' },
-  carousel:{ label: 'Carousel', key: '3', template: 'carousel_node', icon:'solar:posts-carousel-horizontal-bold-duotone' },
-  media:{ label: 'Media', key: '4', template: 'media_node', icon:'bxs:videos' },
-  condition:{ label: 'Condition', key: '5', template: 'condition_node', icon:'ix:logic-diagram' },
-  image:{ label: 'Image', key: '6', template: 'image_node', icon:'bx:image' },
-  audio:{ label: 'Audio', key: '7', template: 'audio_node', icon:'gridicons:audio' },
-  trigger:{ label: 'Trigger', key: '8', template: 'trigger_node', icon:'bx:bolt-circle' },
-};
+export const nodeMapContextMenu: Record<
+  string,
+  { label: string; key: string; template: keyof NodeType; icon: string }
+> = {
+  reference: { label: 'Reference', key: '1', template: 'reference_node', icon: 'bx:bolt-circle' },
+  message: { label: 'Message', key: '2', template: 'message_node', icon: 'bx:message' },
+  generic: {
+    label: 'Generic',
+    key: '9',
+    template: 'generic_node',
+    icon: 'solar:posts-carousel-horizontal-bold',
+  },
+  carousel: {
+    label: 'Carousel',
+    key: '3',
+    template: 'carousel_node',
+    icon: 'solar:posts-carousel-horizontal-bold-duotone',
+  },
+  media: { label: 'Media', key: '4', template: 'media_node', icon: 'bxs:videos' },
+  condition: { label: 'Condition', key: '5', template: 'condition_node', icon: 'ix:logic-diagram' },
+  image: { label: 'Image', key: '6', template: 'image_node', icon: 'bx:image' },
+  audio: { label: 'Audio', key: '7', template: 'audio_node', icon: 'gridicons:audio' },
+  trigger: { label: 'Trigger', key: '8', template: 'trigger_node', icon: 'bx:bolt-circle' },
+  video: { label: 'Video', key: '9', template: 'video_node', icon: 'bx:video' },
+  gif: { label: 'GIF', key: '10', template: 'gif_node', icon: 'stash:gif-solid' },
+  file: { label: 'File', key: '11', template: 'file_node', icon: 'bx:file' },
+  http: { label: 'HTTP', key: '12', template: 'http_node', icon: 'material-symbols:http' },
+
+  // key depends on lowered-case `label`
+  'bot sheets api': {
+    label: 'Bot Sheets API',
+    key: '13',
+    template: 'bot_sheets_api_node',
+    icon: 'healthicons:spreadsheets',
+  },
+  'openai embedding': {
+    label: 'OpenAI Embedding',
+    key: '14',
+    template: 'openai_embedding_node',
+    icon: 'logos:openai',
+  },
+  'chatgpt api': {
+    label: 'ChatGPT API',
+    key: '15',
+    template: 'chatgpt_api_node',
+    icon: 'arcticons:openai-chatgpt',
+  },
+  'dynamic carousel': {
+    label: 'Dynamic Carousel',
+    key: '16',
+    template: 'dynamic_carousel_node',
+    icon: 'solar:posts-carousel-vertical-bold',
+  },
+  'user input': {
+    label: 'User Input',
+    key: '17',
+    template: 'user_input_node',
+    icon: 'radix-icons:input',
+  },
+  otn: {
+    label: 'OTN',
+    key: '18',
+    template: 'otn_node',
+    icon: 'bx:bell',
+  },
+  'product search': {
+    label: 'Product Search',
+    key: '19',
+    template: 'product_search_node',
+    icon: 'bx:search',
+  },
+  action: {
+    label: 'Action',
+    key: '20',
+    template: 'action_node',
+    icon: 'mdi:call-to-action',
+  },
+  timegap: {
+    label: 'Timegap',
+    key: '21',
+    template: 'timegap_node',
+    icon: 'ph:spinner-gap-fill',
+  },
+  'go to flow': {
+    label: 'Go To Flow',
+    key: '22',
+    template: 'go_to_flow_node',
+    icon: 'ix:goto',
+  },
+  email: {
+    label: 'Email',
+    key: '23',
+    template: 'email_node',
+    icon: 'bx:envelope',
+  },
+  sms: {
+    label: 'SMS',
+    key: '24',
+    template: 'sms_node',
+    icon: 'fa-solid:sms',
+  },
+  function: {
+    label: 'Function',
+    key: '25',
+    template: 'function_node',
+    icon: 'material-symbols:function',
+  },
+  recurring: {
+    label: 'Recurring',
+    key: '26',
+    template: 'recurring_node',
+    icon: 'wpf:recurring-appointment',
+  },
+}

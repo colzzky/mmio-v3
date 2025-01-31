@@ -15,11 +15,11 @@ import { Icon } from '@iconify/vue'
 import { storeToRefs } from 'pinia'
 import { computed, ref } from 'vue'
 
-const { active_flow } = storeToRefs(useAuthWorkspaceStore())
-const { rete_init } = active_flow.value
+const authWorkspace = useAuthWorkspaceStore()
+const { active_flow , rete_init} = authWorkspace
 
 function handleSelectNode<T extends keyof NodeType>(nodeId: Node<T>['id']) {
-  rete_init.node_select(nodeId)
+  active_flow.node_select(nodeId)
 }
 
 const searchNodeTerm = ref('')
@@ -37,7 +37,7 @@ const navigateBackChatBotFlow = () =>{
 </script>
 
 <template>
-  <Sheet :modal="false" :open="!rete_init.ui.menuPanelMinimized">
+  <Sheet :modal="false" :open="!active_flow.ui.menuPanelMinimized">
     <SheetContent side="left"
       class="w-[clamp(300px,100%,15%)] gap-y-0 overflow-hidden overflow-y-scroll p-0 shadow-none [&>button]:hidden">
       <header class="grid gap-y-1.5 border-b p-2 text-sm">
@@ -52,7 +52,7 @@ const navigateBackChatBotFlow = () =>{
           <div class="flex gap-x-1">
             <AvatarDropdown />
             <Button size="icon" variant="ghost">
-              <Icon @click="rete_init.ui.minimizeMenuPanel()" icon="mdi:arrow-vertical-collapse" class="size-5" />
+              <Icon @click="active_flow.ui.minimizeMenuPanel()" icon="mdi:arrow-vertical-collapse" class="size-5" />
             </Button>
           </div>
 
@@ -80,7 +80,7 @@ const navigateBackChatBotFlow = () =>{
             class="h-[var(--height)] [--height:calc(100svh-(123px+48px+48px))] [&>div>div]:grid">
             <Button v-for="(node, key) in nodes" :key
               class="justify-start gap-x-2 rounded-none data-[selected=true]:bg-slate-200" variant="ghost"
-              :data-selected="rete_init.selected_node_id === node.id" @click="handleSelectNode(node.id)">
+              :data-selected="active_flow.selected_node_id === node.id" @click="handleSelectNode(node.id)">
               <Icon :icon="nodeIconMapping[node.label]" class="size-4" />
               {{ node.data?.name }}
             </Button>
@@ -94,7 +94,7 @@ const navigateBackChatBotFlow = () =>{
     </SheetContent>
   </Sheet>
   <transition name="slide-fade" mode="out-in">
-    <div v-if="rete_init.ui.menuPanelMinimized" class="fixed top-0 left-0 p-4">
+    <div v-if="active_flow.ui.menuPanelMinimized" class="fixed top-0 left-0 p-4">
       <div
         class="w-[clamp(350px,100%,15%)] gap-y-0 overflow-hidden overflow-y-scroll p-0 shadow-none [&>button]:hidden bg-white rounded-lg">
         <header class="grid gap-y-1.5 border-b p-2 text-sm">
@@ -114,7 +114,7 @@ const navigateBackChatBotFlow = () =>{
             </div>
             <div class="flex items-center gap-1">
               <AvatarDropdown />
-              <Button @click="rete_init.ui.minimizeMenuPanel()" size="icon" variant="ghost">
+              <Button @click="active_flow.ui.minimizeMenuPanel()" size="icon" variant="ghost">
                 <Icon icon="mdi:arrow-vertical-collapse" class="size-5" />
               </Button>
             </div>
