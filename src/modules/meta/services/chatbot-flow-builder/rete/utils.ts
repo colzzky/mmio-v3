@@ -14,6 +14,7 @@ import {
   HTTP,
   BotSheetsAPI,
   OpenAIEmbedding,
+  ChatGPTAPI,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
@@ -141,6 +142,7 @@ export const nodeMapping: Record<keyof NodeType, Component> = {
   http_node: HTTP,
   bot_sheets_api_node: BotSheetsAPI,
   openai_embedding_node: OpenAIEmbedding,
+  chatgpt_api_node: ChatGPTAPI,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -158,5 +160,6 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   file_node: 'bx:file',
   http_node: 'material-symbols:http',
   bot_sheets_api_node: 'healthicons:spreadsheets',
-  openai_embedding_node: 'mingcute:openai-fill',
+  openai_embedding_node: 'logos:openai',
+  chatgpt_api_node: 'arcticons:openai-chatgpt',
 }

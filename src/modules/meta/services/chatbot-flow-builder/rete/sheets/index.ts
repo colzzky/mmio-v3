@@ -15,3 +15,4 @@ export { default as FileSheet } from '@/modules/meta/services/chatbot-flow-build
 export { default as HTTPSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/http-sheet.vue'
 export { default as BotSheetsAPISheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/bot-sheets-api-sheet.vue'
 export { default as OpenAIEmbeddingSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/openai-embedding-sheet.vue'
+export { default as ChatGPTAPISheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/chatgpt-api-sheet.vue'

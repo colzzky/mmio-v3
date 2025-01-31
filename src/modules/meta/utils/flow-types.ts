@@ -21,6 +21,7 @@ export interface NodeType {
   http_node: HTTPNode
   bot_sheets_api_node: BotSheetsAPINode
   openai_embedding_node: OpenAIEmbeddingNode
+  chatgpt_api_node: ChatGPTAPINode
 }
 
 export interface CarouselCard {
@@ -185,6 +186,16 @@ export interface BotSheetsAPINode {
 }
 
 export interface OpenAIEmbeddingNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface ChatGPTAPINode {
   name: string
   postbackid?: string
   delay?: string
@@ -685,6 +696,34 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled OpenAI Embedding Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    chatgpt_api_node() {
+      const node = new Node('chatgpt_api_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled ChatGPT API Node',
         text: '',
         buttons: {},
         quick_replies: {},
@@ -1208,6 +1247,12 @@ export const nodeMapContextMenu: Record<
     label: 'OpenAI Embedding',
     key: '14',
     template: 'openai_embedding_node',
-    icon: 'mingcute:openai-fill',
+    icon: 'logos:openai',
+  },
+  'chatgpt api': {
+    label: 'ChatGPT API',
+    key: '15',
+    template: 'chatgpt_api_node',
+    icon: 'arcticons:openai-chatgpt',
   },
 }
