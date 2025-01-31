@@ -20,6 +20,7 @@ export interface NodeType {
   file_node: FileNode
   http_node: HTTPNode
   bot_sheets_api_node: BotSheetsAPINode
+  openai_embedding_node: OpenAIEmbeddingNode
 }
 
 export interface CarouselCard {
@@ -174,6 +175,16 @@ export interface HTTPNode {
 }
 
 export interface BotSheetsAPINode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface OpenAIEmbeddingNode {
   name: string
   postbackid?: string
   delay?: string
@@ -646,6 +657,34 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled Bot Sheets API Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
+    openai_embedding_node() {
+      const node = new Node('openai_embedding_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled OpenAI Embedding Node',
         text: '',
         buttons: {},
         quick_replies: {},
@@ -1158,11 +1197,17 @@ export const nodeMapContextMenu: Record<
   file: { label: 'File', key: '11', template: 'file_node', icon: 'bx:file' },
   http: { label: 'HTTP', key: '12', template: 'http_node', icon: 'material-symbols:http' },
 
-  // key depends on lowered-case label
+  // key depends on lowered-case `label`
   'bot sheets api': {
     label: 'Bot Sheets API',
     key: '13',
     template: 'bot_sheets_api_node',
     icon: 'healthicons:spreadsheets',
+  },
+  'openai embedding': {
+    label: 'OpenAI Embedding',
+    key: '14',
+    template: 'openai_embedding_node',
+    icon: 'mingcute:openai-fill',
   },
 }

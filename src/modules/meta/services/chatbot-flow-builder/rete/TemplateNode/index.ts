@@ -12,3 +12,4 @@ export { default as GIF } from '@/modules/meta/services/chatbot-flow-builder/ret
 export { default as File } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/file.vue'
 export { default as HTTP } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/http.vue'
 export { default as BotSheetsAPI } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/bot-sheets-api.vue'
+export { default as OpenAIEmbedding } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/openai-embedding.vue'

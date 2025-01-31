@@ -17,6 +17,7 @@ import {
   FileSheet,
   HTTPSheet,
   BotSheetsAPISheet,
+  OpenAIEmbeddingSheet,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -81,6 +82,7 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   file_node: FileSheet,
   http_node: HTTPSheet,
   bot_sheets_api_node: BotSheetsAPISheet,
+  openai_embedding_node: OpenAIEmbeddingSheet,
 }
 
 watch(
