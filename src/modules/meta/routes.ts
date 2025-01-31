@@ -35,7 +35,7 @@ const servicesRecord: ServiceRecord = {
   'chatbot-flow-builder': {
     icon: 'bx-network-chart',
     label: 'Chatbot Flow Builder',
-    pinned: false,
+    pinned: true,
     description:
       'lorem ipsum dolor sit amet consectetur adipiscing elit duis porta eros lacus nec ultricies elit blandit non suspendisse pellentesque mauris sit amet dolor blandit rutrum nunc in tempus turpis',
   },
@@ -210,7 +210,7 @@ const allRoutes = [...routes,
 },
 {
   name: 'chatbot-flow-final',
-  path: 'chatbot-flow-builder/flow-final',
+  path: 'chatbot-flow-builder/:cb_id/flow-final',
   component: () => import('./services/chatbot-flow-builder/chatbot-flow-view.vue'),
 },
 

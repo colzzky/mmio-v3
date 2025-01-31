@@ -1,13 +1,11 @@
 <template>
-  <div class="select-none rounded-md p-2 font-medium hover:bg-neutral-200">
-    <div
-      class="flex items-center gap-x-1.5"
-      @click.stop="(emits('select', $event), emits('hide'))"
+  <div class="select-none rounded-md p-2 font-medium hover:bg-neutral-200"
+  @click.stop="(emits('select', $event), emits('hide'))"
       @wheel.stop=""
       @pointerover="(hide.cancel(), (visibleSubitems = true))"
       @pointerleave="hide()"
-      @pointerdown.stop=""
-    >
+      @pointerdown.stop="">
+    <div class="flex items-center gap-x-1.5">
       <Icon :icon class="size-4" />
       {{ label }}
       <div v-if="subItems && visibleSubitems" class="subitems">
@@ -28,7 +26,7 @@
 <script lang="ts" setup>
 import { nodeIconMapping } from '../../rete/utils'
 import type { ContextMenuItemType } from './types'
-import type { NodeType } from '@/modules/meta/utils/flow-types'
+import { nodeMapContextMenu, type NodeType } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { debounce } from 'lodash'
 import { computed, ref } from 'vue'
@@ -57,6 +55,9 @@ const labelMapping: Record<string, keyof NodeType> = {
   carousel: 'carousel_node',
   media: 'media_node',
   trigger: 'trigger_node',
+  condition: 'condition_node',
+  image: 'image_node',
+  audio: 'audio_node',
 }
 
 const icon = computed(() => {
@@ -64,8 +65,7 @@ const icon = computed(() => {
 
   if (label === 'delete') return 'bx:trash'
   else if (label === 'clone') return 'bx:duplicate'
-
-  return nodeIconMapping[labelMapping[label]]
+  return nodeMapContextMenu[label].icon
 })
 </script>
 

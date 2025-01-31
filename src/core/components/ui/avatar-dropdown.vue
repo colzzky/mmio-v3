@@ -13,6 +13,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const {user} = authStore
 
 async function handleLogout() {
   await authStore.user_auth.signOut()
@@ -38,8 +39,8 @@ const route = useRoute()
           <AvatarImage src="https://placehold.co/32" />
           <AvatarFallback>MMIO</AvatarFallback>
         </Avatar>
-        <span class="font-medium">kodapaul (You)</span>
-        <span class="font-bold text-muted-foreground underline">paul.delavega@gmail.com</span>
+        <span class="font-medium">{{ user.data?.displayName }} (You)</span>
+        <span class="font-bold text-muted-foreground underline">{{ user.data?.email }}</span>
       </DropdownMenuLabel>
       <DropdownMenuSeparator />
       <DropdownMenuItem class="flex items-center gap-x-2" as-child>

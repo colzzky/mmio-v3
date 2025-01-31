@@ -372,7 +372,6 @@ export namespace ReteTemplates {
       )
       return node
     },
-
     image_node() {
       const node = new Node('image_node')
       const num1_postback = crypto.randomUUID()
@@ -934,3 +933,15 @@ export async function copyPostback(item_copy: string) {
     console.error('Failed to copy text:', err)
   }
 }
+
+export const nodeMapContextMenu: Record<string,{ label: string; key: string; template: keyof NodeType, icon:string }> = {
+  reference:{ label: 'Reference', key: '1', template: 'reference_node', icon:'bx:bolt-circle' },
+  message:{ label: 'Message', key: '2', template: 'message_node', icon:'bx:message' },
+  generic:{ label: 'Generic', key: '9', template: 'generic_node', icon:'solar:posts-carousel-horizontal-bold' },
+  carousel:{ label: 'Carousel', key: '3', template: 'carousel_node', icon:'solar:posts-carousel-horizontal-bold-duotone' },
+  media:{ label: 'Media', key: '4', template: 'media_node', icon:'bxs:videos' },
+  condition:{ label: 'Condition', key: '5', template: 'condition_node', icon:'ix:logic-diagram' },
+  image:{ label: 'Image', key: '6', template: 'image_node', icon:'bx:image' },
+  audio:{ label: 'Audio', key: '7', template: 'audio_node', icon:'gridicons:audio' },
+  trigger:{ label: 'Trigger', key: '8', template: 'trigger_node', icon:'bx:bolt-circle' },
+};

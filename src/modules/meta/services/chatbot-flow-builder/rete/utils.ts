@@ -113,7 +113,9 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   message_node: 'bx:message',
   generic_node: 'solar:posts-carousel-horizontal-bold-duotone',
   carousel_node: 'solar:posts-carousel-horizontal-bold',
-  media_node: 'bx:image',
+  media_node: 'bxs:videos',
   trigger_node: 'bxs:bolt',
   condition_node: 'ix:logic-diagram',
+  image_node: 'bx:image',
+  audio_node: 'gridicons:audio',
 }

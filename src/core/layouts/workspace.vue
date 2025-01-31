@@ -11,6 +11,7 @@ import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import Dashboard from '@/modules/meta/services/dashboard/page.vue'
 
 /**
  * Step 1: Check and validated workspace id if it exists on the firestore
@@ -151,12 +152,14 @@ watch(
 <template>
   <Toaster />
   <div v-if="!workspace_load">
-    <div v-if="!(route.name === 'chatbot-flow-final')" vv>
+    <div v-if="!(route.name === 'chatbot-flow-final')">
       <DesktopSidebar />
       <div class="lg:pl-72">
-        <RouterView />
+        <div v-if="route.name === 'workspace'">
+          <Dashboard/>
+        </div>
+        <RouterView v-else/>
       </div>
-
     </div>
     <div v-else>
       <RouterView />

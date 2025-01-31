@@ -34,20 +34,21 @@ import type { VuePlugin } from 'rete-vue-plugin'
 import { reactive } from 'vue'
 import type { AreaPlugin } from 'rete-area-plugin'
 import { ReadonlyPlugin } from 'rete-readonly-plugin'
+import type { ContextMenuPlugin } from 'rete-context-menu-plugin'
 
 export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
   const active_workspace = reactive<ActiveWorkspace>({
     data: null,
     isInitialized: false,
     isLoading: false,
-    reset() {},
+    reset() { },
   })
   const active_team = reactive<ActiveTeam>({
     data: null,
     members: {},
     isInitialized: false,
     isLoading: false,
-    reset() {},
+    reset() { },
   })
   const current_member = reactive<CurrentMember>({
     data: null,
@@ -55,7 +56,7 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     isInitialized: false,
     isLoading: false,
     listener: null,
-    reset() {},
+    reset() { },
     async listen(tm_id: string, member_id: string) {
       current_member.listener = await listenToCollection(
         'team_members',
@@ -395,37 +396,53 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
   const active_flow = reactive({
     json: '' as string,
     rete_init: {
-      selected_node_id:'' as string,
+      selected_node_id: '' as string,
       selected_node: null as Node<keyof NodeType> | null,
-      
-      ui:{
-        menuPanelMinimized:false as boolean,
-        selectionPanelMinimized:false as boolean,
+
+      ui: {
+        menuPanelMinimized: false as boolean,
+        selectionPanelMinimized: false as boolean,
         read_only_mode: false as boolean,
-        connection_drop: null as null|SocketData,
-        minimizeMenuPanel(){
+        connection_drop: null as null | SocketData,
+        minimizeMenuPanel() {
           this.menuPanelMinimized = !this.menuPanelMinimized
         },
-        minimizeSelectionPanel(){
+        minimizeSelectionPanel() {
           this.selectionPanelMinimized = !this.selectionPanelMinimized
         },
-        enableReadOnly(){
-          if(!this.read_only_mode){
+        enableReadOnly() {
+          if (!this.read_only_mode) {
             active_flow.rete_init.readonly.enable()
             this.read_only_mode = true
-          }else{
+          } else {
             active_flow.rete_init.readonly.disable()
             this.read_only_mode = false
           }
-          
+
         },
       },
+      draggable: {
+        visibility: false as boolean,
+        position: { x: 0, y: 0 },
+        node:null as Node<keyof NodeType> | null,
+        toggleNode(node:Node<keyof NodeType>) {
+          this.visibility = !this.visibility;
+          this.node = node
+        },
+        updatePosition(event: MouseEvent) {
+          
+          this.position = {
+            x: event.clientX - 25, // Centering the div
+            y: event.clientY - 25,
+          };
+        }
+      },
 
-      async node_select(id:string){
+      async node_select(id: string) {
         this.remove_selected_node()
         const node = this.editor?.getNode(id)
-        if(node && this.area){
-          if(!node.selected){
+        if (node && this.area) {
+          if (!node.selected) {
             node.selected = true
             this.area.update('node', node.id)
           }
@@ -433,10 +450,10 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
           this.selected_node = node
         }
       },
-      remove_selected_node(){
-        if(this.selected_node && this.area){
+      remove_selected_node() {
+        if (this.selected_node && this.area) {
           const node = this.editor?.getNode(this.selected_node.id)
-          if(node){
+          if (node) {
             node.selected = false
             this.area.update('node', this.selected_node.id)
           }
@@ -446,8 +463,9 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
       },
       editor: null as NodeEditor<Schemes> | null,
       render: null as VuePlugin<Schemes, AreaExtra> | null,
+      contextMenu:null as ContextMenuPlugin<Schemes> | null,
       connection: null as ConnectionPlugin<Schemes, AreaExtra> | null,
-      area:null as AreaPlugin<Schemes, AreaExtra> | null,
+      area: null as AreaPlugin<Schemes, AreaExtra> | null,
       readonly: new ReadonlyPlugin<Schemes>()
     },
   })

@@ -27,6 +27,7 @@ import {
   ReteTemplates,
   type NodeType,
   MetaTemplateOutput,
+  nodeMapContextMenu,
 } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { NodeEditor, ClassicPreset, type NodeId } from 'rete'
@@ -48,14 +49,13 @@ interface MousePosition {
 const authWorkspace = useAuthWorkspaceStore()
 const { active_flow } = authWorkspace
 const { rete_init } = active_flow
+const { draggable } = rete_init
+
 
 // Menu states
 const menuVisible = ref(false)
 const nodeOptionVisible = ref(false)
-const menuPosition = ref<MousePosition>({ x: 0, y: 0 })
-const mousePosition = ref<MousePosition>({ x: 0, y: 0 })
 const reteContainer = ref<HTMLDivElement>()
-const socket = new ClassicPreset.Socket('socket')
 const editor_load = ref<boolean>(true)
 
 const selector = AreaExtensions.selector()
@@ -92,22 +92,50 @@ async function initializeFlow() {
 
   if (!rete_init.area) return
 
-  const contextMenu = new ContextMenuPlugin<Schemes>({
-    items: ContextMenuPresets.classic.setup([
-      ['Reference', () => ReteTemplates.node_templates.reference_node()],
-      ['Message', () => ReteTemplates.node_templates.message_node()],
-      ['Generic', () => ReteTemplates.node_templates.generic_node()],
-      ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
-      ['Media', () => ReteTemplates.node_templates.media_node()],
-      ['Image', () => ReteTemplates.node_templates.image_node()],
-      ['Audio', () => ReteTemplates.node_templates.audio_node()],
-      ['Trigger', () => ReteTemplates.node_templates.trigger_node()],
-      ['Condition', () => ReteTemplates.node_templates.condition_node()],
-    ]),
+  //Doesnt follow anything
+  rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
+    items(context: "root" | Schemes["Node"], plugin: ContextMenuPlugin<Schemes>) {
+      if (context === 'root') {
+        return {
+          searchBar: true,
+          list: Object.values(nodeMapContextMenu).map(({ label, key, template }) => ({
+            label,
+            key,
+            handler: async () => {
+              const node = ReteTemplates.node_templates[template]();
+              if (rete_init.editor) {
+                await rete_init.editor.addNode(node);
+                await rete_init.contextMenu?.signal.emit('hide')
+              }
+            }
+          }))
+        }
+      } else {
+        console.log(context)
+        //On delete/clone add something here
+      }
+      return {
+        searchBar: false,
+        list: [],
+      }
+    }
   })
 
-  /* @ts-ignore */
-  rete_init.area.use(contextMenu)
+  //Follows mouse
+  // rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
+  //   items: ContextMenuPresets.classic.setup([
+  //     ['Reference', () => {ReteTemplates.node_templates.reference_node()}],
+  //     ['Message', () => ReteTemplates.node_templates.message_node()],
+  //     ['Generic', () => ReteTemplates.node_templates.generic_node()],
+  //     ['Carousel', () => ReteTemplates.node_templates.carousel_node()],
+  //     ['Media', () => ReteTemplates.node_templates.media_node()],
+  //     ['Image', () => ReteTemplates.node_templates.image_node()],
+  //     ['Audio', () => ReteTemplates.node_templates.audio_node()],
+  //     ['Trigger', () => ReteTemplates.node_templates.trigger_node()],
+  //     ['Condition', () => ReteTemplates.node_templates.condition_node()],
+  //   ]),
+  // })
+
 
   // Use the customized preset
   rete_init.render.addPreset(
@@ -159,7 +187,7 @@ async function initializeFlow() {
           return CustomConnection
         },
       },
-    }),
+    })
   )
 
   rete_init.render.addPreset({
@@ -204,7 +232,8 @@ async function initializeFlow() {
   rete_init.area.use(rete_init.connection)
   rete_init.area.use(rete_init.readonly.area);
   rete_init.area.use(rete_init.render)
-
+  // @ts-ignore: Unreachable code error
+  rete_init.area.use(rete_init.contextMenu)
 
 
   if (active_flow.json) {
@@ -325,46 +354,57 @@ function isMouseOutsideNode(details: {
 // Track mouse events and handle right-click
 function trackMouseEvents() {
   const area = rete_init.area
-  const connection = rete_init.connection
   const render = rete_init.render
   const editor = rete_init.editor
-  const mouse_event = ref<PointerEvent | null>(null)
-  if (area) {
-    area.addPipe(async(context) => {
+  const contextMenu = rete_init.contextMenu
+  const connection = rete_init.connection
+  let context_menu_position = { x: 0, y: 0 }
+  let client_position = { x: 0, y: 0 }
 
-      if (context.type === 'pointermove') {
-        mouse_event.value = context.data.event
+  const isNodeRemoved = ref(false)
+  if (area) {
+    area.addPipe(async (context) => {
+
+      if (context.type === 'pointermove'){
+        if(rete_init.ui.connection_drop){
+          client_position = {x:context.data.event.clientX, y:context.data.event.clientY}
+        }
       }
 
       if (context.type === 'connectionremove') {
+        isNodeRemoved.value = true
         if (rete_init.editor) {
           const soure_node = rete_init.editor.getNode(context.data.source)
           if (soure_node && soure_node.data) {
             const origin = soure_node.data.giver_data[context.data.sourceOutput]
+            console.log(soure_node.data)
             console.log(context.data)
             console.log(soure_node)
-            if (!origin) {
+
+            const target_node = rete_init.editor.getNode(context.data.target)
+            if (target_node && target_node.data) {
+              if (target_node.data.postbackid) {
+                delete target_node.data['postbackid']
+              }
+            } else {
               toast({
-                title: 'Something went wrong',
+                title: 'Something went wrong here',
                 variant: 'destructive',
                 duration: 2000,
               })
               return
-            } else {
-              const target_node = rete_init.editor.getNode(context.data.target)
-              if (target_node && target_node.data) {
-                if (target_node.data.postbackid) {
-                  delete target_node.data['postbackid']
-                }
-              } else {
-                toast({
-                  title: 'Something went wrong here',
-                  variant: 'destructive',
-                  duration: 2000,
-                })
-                return
-              }
             }
+
+            // if (!origin) {
+            //   toast({
+            //     title: 'Something went wrong',
+            //     variant: 'destructive',
+            //     duration: 2000,
+            //   })
+            //   return
+            // } else {
+
+            // }
           }
         }
       }
@@ -425,12 +465,11 @@ function trackMouseEvents() {
           }
           rete_init.ui.connection_drop = null
         }
-      }
 
-
-      if (context.type === 'zoom') {
-        closeMenu()
-        closeNodeOption(false)
+        if (rete_init.area) {
+          console.log('test')
+          await rete_init.area.translate(context.data.id, getTranslatedMousePosition(context_menu_position));
+        }
       }
 
       if (context.type === 'nodepicked') {
@@ -440,12 +479,40 @@ function trackMouseEvents() {
         multi_selected_node.value = [context.data.id]
         rete_init.node_select(context.data.id)
       }
-      if (context.type === 'pointerdown' && rete_init.selected_node) {
-        rete_init.remove_selected_node()
+
+      if (context.type === 'pointerdown') {
+
+        if (rete_init.selected_node) {
+          rete_init.remove_selected_node()
+        }
+        if (rete_init.ui.connection_drop) {
+          rete_init.ui.connection_drop = null
+        }
+        if (draggable.visibility === true) {
+          console.log('test')
+          draggable.visibility = false
+          if (draggable.node && rete_init.editor && rete_init.area) {
+            await rete_init.editor.addNode(draggable.node);
+
+            await rete_init.area.translate(draggable.node.id, getTranslatedMousePosition(context.data.event));
+          }
+          draggable.node = null
+          draggable.position = { x: 0, y: 0 }
+        }
+      }
+
+      if (context.type === 'pointermove') {
+        if (draggable.visibility === true) {
+          draggable.updatePosition(context.data.event)
+        }
       }
 
       if (context.type === 'contextmenu') {
-        console.log(context)
+        context_menu_position = {
+          x: context.data.event.clientX,
+          y: context.data.event.clientY
+        }
+        console.log(context_menu_position)
       }
 
       // if (context.type === 'pointerup' && multi_selected_node.value.length > 1) {
@@ -473,18 +540,29 @@ function trackMouseEvents() {
 
   if (connection) {
     connection.addPipe(async (context) => {
-      if (context.type === 'connectiondrop') {
-        rete_init.ui.connection_drop = null
-        if (!context.data.created && mouse_event.value && rete_init.area) {
-          rete_init.ui.connection_drop = context.data.initial
-          //rete_init.ui.connection_drop = context.data.initial
-          await rete_init.area.emit({ type: 'contextmenu', data: { event: mouse_event.value, context: 'root' } })
-        }
+      if (context.type === 'connectionpick') {
+        rete_init.ui.connection_drop = context.data.socket
       }
 
+      if (context.type === 'connectiondrop') {
+        if (!context.data.created && rete_init.area && !isNodeRemoved.value) {
+          const event = new PointerEvent('contextmenu', {
+            clientX: client_position.x,  // Adjust X relative to container
+            clientY: client_position.y,   // Adjust Y relative to container
+          })
+          console.log(event)
+
+          rete_init.ui.connection_drop = context.data.initial
+          //rete_init.ui.connection_drop = context.data.initial
+          await rete_init.area.emit({ type: 'contextmenu', data: { event, context: 'root' } })
+
+        }
+        if (isNodeRemoved.value) isNodeRemoved.value = false
+      }
       return context
     })
   }
+
 
   document.addEventListener('click', (e) => {
     if (menuVisible.value) {
@@ -495,26 +573,26 @@ function trackMouseEvents() {
     }
   })
 
-  document.addEventListener('pointerup', (e) => {
-    if (e.metaKey || e.ctrlKey) {
-      const multi_selected: string[] = []
-      console.log('hey add multi')
-      if (rete_init.editor && rete_init.editor.getNodes().length > 0) {
-        rete_init.editor.getNodes().forEach((node) => {
-          if (node.selected === true) {
-            multi_selected.push(node.id)
-          }
-        })
-      }
-      if (multi_selected.length > 1) {
-        closeNodeOption()
-        closeMenu()
-      }
-      multi_selected_node.value = [...multi_selected]
-      console.log(multi_selected_node.value)
-      console.log(selected_node.value)
-    }
-  })
+  // document.addEventListener('pointerup', (e) => {
+  //   if (e.metaKey || e.ctrlKey) {
+  //     const multi_selected: string[] = []
+  //     console.log('hey add multi')
+  //     if (rete_init.editor && rete_init.editor.getNodes().length > 0) {
+  //       rete_init.editor.getNodes().forEach((node) => {
+  //         if (node.selected === true) {
+  //           multi_selected.push(node.id)
+  //         }
+  //       })
+  //     }
+  //     if (multi_selected.length > 1) {
+  //       closeNodeOption()
+  //       closeMenu()
+  //     }
+  //     multi_selected_node.value = [...multi_selected]
+  //     console.log(multi_selected_node.value)
+  //     console.log(selected_node.value)
+  //   }
+  // })
 }
 
 
@@ -602,9 +680,6 @@ const saveEditorState = async () => {
   })
 }
 
-onMounted(async () => {
-  await initializeFlow()
-})
 
 watch(
   () => rete_init.editor,
@@ -650,10 +725,26 @@ function addCustomBackground() {
     rete_init.area.container.classList.add('bg-dotted')
   }
 }
+
+
+onMounted(async () => {
+  await initializeFlow()
+})
+
+
+// Event listeners for mousemove and click
+
+
 </script>
 
 <template>
   <!-- Rete.js Canvas -->
+  <div v-if="draggable.visibility && draggable.node"
+    :style="{ top: `${draggable.position.y}px`, left: `${draggable.position.x}px` }"
+    class="tracker border-2 border-dashed h-10 px-4 w-auto absolute pointer-events-none -translate-x-[50%] -translate-y-[50%] border-blue-600 flex items-center justify-center text-white font-bold">
+    {{ draggable.node.data?.name }}
+  </div>
+
   <div class="h-screen">
     <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
   </div>
