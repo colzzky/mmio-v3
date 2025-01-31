@@ -3,7 +3,7 @@ import type { FBAttachmentTemplate } from './flow-meta-types'
 import { toast } from '@/core/components/ui/toast'
 import { ClassicPreset, type GetSchemes } from 'rete'
 import type { VueArea2D } from 'rete-vue-plugin'
-import type { Input } from 'rete/_types/presets/classic'
+import type { Input, Output } from 'rete/_types/presets/classic'
 
 export interface NodeType {
   message_node: MessageNode
@@ -369,7 +369,14 @@ export namespace CustomControls {
   //Add more custom control here
 }
 
-export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> {}
+export interface ConnectionProperty{
+  source: string
+  sourceOutput: string
+  target: string
+  targetInput: string
+}
+
+export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> { }
 
 export type Schemes = GetSchemes<Node<keyof NodeType>, Connection<Node<keyof NodeType>>>
 export type AreaExtra = VueArea2D<Schemes>
@@ -1210,14 +1217,14 @@ export namespace ReteTemplates {
 
 //Serialized State. This is the typ used when saving and populating rete editor
 export namespace SerializedFlow {
-  export interface Node {
+  export interface Node<T extends keyof NodeType> {
     id: string
-    label: string
-    controls: { [key: string]: ControlInterface }
-    outputs: { [key: string]: MetaTemplateOutput } | undefined
-    inputs: { [key: string]: Input<ClassicPreset.Socket> } | undefined
+    label: keyof NodeType
+    controls:Record<string, ControlInterface>
+    outputs:Record<string, Output<CustomSocket> |undefined>
+    inputs:Record<string, Input<CustomSocket> |undefined>
     position: { x: number; y: number }
-    data: any
+    data: NodeType[T] | null
   }
 
   export interface Connection {
@@ -1229,7 +1236,7 @@ export namespace SerializedFlow {
   }
 
   export interface State {
-    nodes: Node[]
+    nodes: Node<keyof NodeType>[]
     connections: Connection[]
     signal: any
     name: string

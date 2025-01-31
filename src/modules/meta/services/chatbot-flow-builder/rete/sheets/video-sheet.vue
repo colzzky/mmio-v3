@@ -26,20 +26,20 @@ import { Icon } from '@iconify/vue'
 import { storeToRefs } from 'pinia'
 import { onMounted, reactive, ref, watch } from 'vue'
 
-const { active_flow } = storeToRefs(useAuthWorkspaceStore())
-const { rete_init } = active_flow.value
+const authWorkspace = useAuthWorkspaceStore()
+const { active_flow , rete_init} = authWorkspace
 
 const localNodeData = ref<Node<'video_node'> | undefined>(undefined)
 
 onMounted(() => {
-  const node = rete_init.editor?.getNode(rete_init.selected_node_id)
+  const node = rete_init.editor?.getNode(active_flow.selected_node_id)
   if (!node) throw new Error('No Node found with the given ID')
 
   localNodeData.value = node as Node<'video_node'>
 })
 
 watch(
-  () => rete_init.selected_node_id,
+  () => active_flow.selected_node_id,
   (node_id) => {
     if (node_id) {
       const node = rete_init.editor?.getNode(node_id)

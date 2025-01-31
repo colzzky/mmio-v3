@@ -7,8 +7,7 @@ import { Icon } from '@iconify/vue'
 
 const authWorkspace = useAuthWorkspaceStore()
 const { active_flow } = authWorkspace
-const { rete_init } = active_flow
-const { draggable } = rete_init
+const { draggable } = active_flow
 
 const nodeMapping: Record<
   keyof Omit<typeof nodeMapContextMenu, 'reference'>,

@@ -26,15 +26,26 @@ import {
   postCollection,
 } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
-import type { AreaExtra, Node, NodeType, Schemes } from '@/modules/meta/utils/flow-types'
+import type { AreaExtra, Node, NodeType, Schemes, SerializedFlow, Connection as Conn } from '@/modules/meta/utils/flow-types'
 import { defineStore } from 'pinia'
 import type { NodeEditor } from 'rete'
-import type { ConnectionPlugin, SocketData } from 'rete-connection-plugin'
+import type { Connection, ConnectionPlugin, SocketData } from 'rete-connection-plugin'
 import type { VuePlugin } from 'rete-vue-plugin'
 import { reactive } from 'vue'
 import type { AreaPlugin } from 'rete-area-plugin'
 import { ReadonlyPlugin } from 'rete-readonly-plugin'
 import type { ContextMenuPlugin } from 'rete-context-menu-plugin'
+import { toast } from '@/core/components/ui/toast'
+
+
+interface Plugins {
+  editor: NodeEditor<Schemes> | null;
+  render: VuePlugin<Schemes, AreaExtra> | null;
+  contextMenu: ContextMenuPlugin<Schemes> | null;
+  connection: ConnectionPlugin<Schemes, AreaExtra> | null;
+  area: AreaPlugin<Schemes, AreaExtra> | null;
+  readonly: ReadonlyPlugin<Schemes>;
+}
 
 export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
   const active_workspace = reactive<ActiveWorkspace>({
@@ -394,80 +405,125 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     }),
   }
   const active_flow = reactive({
+    chatbot_flow_data: null as ChatbotFlowServiceData|null,
     json: '' as string,
-    rete_init: {
-      selected_node_id: '' as string,
-      selected_node: null as Node<keyof NodeType> | null,
-
-      ui: {
-        menuPanelMinimized: false as boolean,
-        selectionPanelMinimized: false as boolean,
-        read_only_mode: false as boolean,
-        connection_drop: null as null | SocketData,
-        minimizeMenuPanel() {
-          this.menuPanelMinimized = !this.menuPanelMinimized
-        },
-        minimizeSelectionPanel() {
-          this.selectionPanelMinimized = !this.selectionPanelMinimized
-        },
-        enableReadOnly() {
-          if (!this.read_only_mode) {
-            active_flow.rete_init.readonly.enable()
-            this.read_only_mode = true
-          } else {
-            active_flow.rete_init.readonly.disable()
-            this.read_only_mode = false
-          }
-
-        },
+    selected_node_id: '' as string,
+    selected_node: null as Node<keyof NodeType> | null,
+    ui: {
+      menuPanelMinimized: false as boolean,
+      selectionPanelMinimized: false as boolean,
+      read_only_mode: false as boolean,
+      connection_drop: null as null | SocketData,
+      minimizeMenuPanel() {
+        this.menuPanelMinimized = !this.menuPanelMinimized
       },
-      draggable: {
-        visibility: false as boolean,
-        position: { x: 0, y: 0 },
-        node:null as Node<keyof NodeType> | null,
-        toggleNode(node:Node<keyof NodeType>) {
-          this.visibility = !this.visibility;
-          this.node = node
-        },
-        updatePosition(event: MouseEvent) {
-          
-          this.position = {
-            x: event.clientX - 25, // Centering the div
-            y: event.clientY - 25,
-          };
+      minimizeSelectionPanel() {
+        this.selectionPanelMinimized = !this.selectionPanelMinimized
+      },
+      enableReadOnly() {
+        if (!this.read_only_mode) {
+          rete_init.readonly.enable()
+          this.read_only_mode = true
+        } else {
+          rete_init.readonly.disable()
+          this.read_only_mode = false
         }
-      },
 
-      async node_select(id: string) {
-        this.remove_selected_node()
-        const node = this.editor?.getNode(id)
-        if (node && this.area) {
-          if (!node.selected) {
-            node.selected = true
-            this.area.update('node', node.id)
-          }
-          this.selected_node_id = id
-          this.selected_node = node
-        }
       },
-      remove_selected_node() {
-        if (this.selected_node && this.area) {
-          const node = this.editor?.getNode(this.selected_node.id)
-          if (node) {
-            node.selected = false
-            this.area.update('node', this.selected_node.id)
-          }
-        }
-        this.selected_node_id = ''
-        this.selected_node = null
-      },
-      editor: null as NodeEditor<Schemes> | null,
-      render: null as VuePlugin<Schemes, AreaExtra> | null,
-      contextMenu:null as ContextMenuPlugin<Schemes> | null,
-      connection: null as ConnectionPlugin<Schemes, AreaExtra> | null,
-      area: null as AreaPlugin<Schemes, AreaExtra> | null,
-      readonly: new ReadonlyPlugin<Schemes>()
     },
+    draggable: {
+      visibility: false as boolean,
+      position: { x: 0, y: 0 },
+      node: null as Node<keyof NodeType> | null,
+      toggleNode(node: Node<keyof NodeType>) {
+        this.visibility = !this.visibility;
+        this.node = node
+      },
+      updatePosition(event: MouseEvent) {
+
+        this.position = {
+          x: event.clientX - 25, // Centering the div
+          y: event.clientY - 25,
+        };
+      }
+    },
+    async node_select(id: string) {
+      this.remove_selected_node()
+      const node = rete_init.editor?.getNode(id)
+      if (node && rete_init.area) {
+        if (!node.selected) {
+          node.selected = true
+          rete_init.area.update('node', node.id)
+        }
+        this.selected_node_id = id
+        this.selected_node = node
+      }
+    },
+    remove_selected_node() {
+      if (this.selected_node && rete_init.area) {
+        const node = rete_init.editor?.getNode(this.selected_node.id)
+        if (node) {
+          node.selected = false
+          rete_init.area.update('node', this.selected_node.id)
+        }
+      }
+      this.selected_node_id = ''
+      this.selected_node = null
+    },
+    setActiveChatBotFlow(data: ChatbotFlowServiceData) {
+      this.chatbot_flow_data = data
+    },
+    async saveEditorState() {
+      console.log('save')
+      if (!rete_init.editor || !this.chatbot_flow_data) return
+      const serializedNode: SerializedFlow.Node<keyof NodeType>[] = rete_init.editor.getNodes().map(node => ({
+        id: node.id,
+        label: node.label,
+        controls: node.controls,
+        outputs: node.outputs,
+        inputs: node.inputs,
+        data: node.data ? node.data : null, // Use default empty object
+        position: rete_init.area?.nodeViews.get(node.id)?.position ?? { x: 0, y: 0 }, // Use nullish coalescing
+      }));
+      const serializedConnection: Conn<Node<keyof NodeType>>[] = rete_init.editor.getConnections().map(conn => conn);
+
+      const serializedState: SerializedFlow.State = {
+        nodes: serializedNode,
+        connections: serializedConnection,
+        signal: rete_init.editor.signal as any,
+        name: rete_init.editor.name as string,
+      }
+      const parse_serial = JSON.stringify(serializedState)
+      const post = await postCollection('ws_chatbot_flow', {
+        $path: 'workspaces/:ws_id/chatbot_flow_service',
+        data: {
+          ...this.chatbot_flow_data,
+          botFlow: parse_serial
+        },
+        id: this.chatbot_flow_data.cb_id,
+        $sub_params: {
+          ws_id: active_workspace.data ? active_workspace.data.ws_id : ''
+        },
+        type: 'update'
+      })
+      console.log(post)
+
+      //Create a new Output data of the node
+      toast({
+        title: 'Flow saved',
+        variant: 'success',
+        duration: 2000,
+      })
+    }
+  })
+  const rete_init: Plugins = ({
+    editor: null,
+    render: null,
+    contextMenu: null,
+    connection: null,
+    area: null,
+    readonly: new ReadonlyPlugin<Schemes>(),
+
   })
 
   function returnHome() {
@@ -487,5 +543,6 @@ export const useAuthWorkspaceStore = defineStore('authWorkspaceStore', () => {
     service_models,
     returnHome,
     active_flow,
+    rete_init
   }
 })

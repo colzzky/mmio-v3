@@ -37,9 +37,8 @@ import { Icon } from '@iconify/vue'
 import type { BaseSchemes } from 'rete'
 import { reactive, watch } from 'vue'
 
-const authWorkspaceStore = useAuthWorkspaceStore()
-const { active_flow } = authWorkspaceStore
-const { rete_init } = active_flow
+const authWorkspace = useAuthWorkspaceStore()
+const { active_flow,rete_init } = authWorkspace
 
 type Data =
   | {
@@ -110,7 +109,7 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
 }
 
 watch(
-  () => rete_init.selected_node,
+  () => active_flow.selected_node,
   (node) => {
     if (node) {
       sheet.initializeData(node)
@@ -124,13 +123,13 @@ watch(
 <template>
   <NodeFlowDetailsSheet />
 
-  <Sheet :modal="false" :open="!rete_init.ui.selectionPanelMinimized">
+  <Sheet :modal="false" :open="!active_flow.ui.selectionPanelMinimized">
     <SheetContent
       class="w-[clamp(300px,100%,15%)] overflow-y-scroll p-0 shadow-none [&>button]:hidden"
     >
       <header class="flex items-center justify-between border-b p-3">
         <div class="flex items-center gap-x-2">
-          <Button @click="rete_init.ui.minimizeSelectionPanel()" size="icon" variant="ghost">
+          <Button @click="active_flow.ui.minimizeSelectionPanel()" size="icon" variant="ghost">
             <Icon icon="mdi:arrow-vertical-collapse" class="size-5" />
           </Button>
           <span class="flex items-center gap-x-2">
@@ -141,22 +140,22 @@ watch(
 
         <span class="flex items-center gap-x-2">
           <Button type="button" class="bg-green-500 hover:bg-green-600" size="xs">Publish</Button>
-          <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="xs">Save</Button>
+          <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="xs" @click="active_flow.saveEditorState()">Save</Button>
         </span>
       </header>
       <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" />
-      <SettingsTemplateSheet v-else />
+    <SettingsTemplateSheet v-else />
     </SheetContent>
   </Sheet>
 
   <transition name="slide-fade" mode="out-in">
-    <div v-if="rete_init.ui.selectionPanelMinimized" class="fixed right-0 top-0 p-4">
+    <div v-if="active_flow.ui.selectionPanelMinimized" class="fixed right-0 top-0 p-4">
       <div
         class="gap-y-0 overflow-hidden overflow-y-scroll rounded-lg bg-white p-0 shadow-none [&>button]:hidden"
       >
         <header class="flex items-center justify-between gap-12 border-b p-3">
           <div class="flex items-center gap-x-2">
-            <Button @click="rete_init.ui.minimizeSelectionPanel()" size="icon" variant="ghost">
+            <Button @click="active_flow.ui.minimizeSelectionPanel()" size="icon" variant="ghost">
               <Icon icon="mdi:arrow-vertical-collapse" class="size-5" />
             </Button>
             <span class="flex items-center gap-x-2">
@@ -167,7 +166,7 @@ watch(
 
           <span class="flex items-center gap-x-2">
             <Button type="button" class="bg-green-500 hover:bg-green-600" size="xs">Publish</Button>
-            <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="xs">Save</Button>
+            <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="xs" @click="active_flow.saveEditorState()">Save</Button>
           </span>
         </header>
       </div>

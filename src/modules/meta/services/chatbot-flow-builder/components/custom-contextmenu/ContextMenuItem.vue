@@ -54,6 +54,7 @@ const icon = computed(() => {
 
   if (label === 'delete') return 'bx:trash'
   else if (label === 'clone') return 'bx:duplicate'
+  else if (label === 'delete connection') return 'bx:transfer'
   return nodeMapContextMenu[label].icon
 })
 </script>

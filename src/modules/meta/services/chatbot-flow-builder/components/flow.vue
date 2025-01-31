@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { uiHelpers } from '@/core/utils/ui-helper'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
 import NodeSheet from '../rete/sheets/node-sheet.vue'
@@ -13,21 +14,35 @@ import {
   type Schemes,
   Node,
   Connection,
-  type ControlInterface,
-  type SerializedFlow,
   ReteTemplates,
   type NodeType,
-  MetaTemplateOutput,
   nodeMapContextMenu,
+  createMetaTemplateOutIn,
+  ReteSockets,
+  socketDefinitions,
+  type SerializedFlow,
+  CustomSocket,
 } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
+import { objectEntries } from '@vueuse/core'
 import { NodeEditor, ClassicPreset, type NodeId } from 'rete'
 import { AreaPlugin, AreaExtensions } from 'rete-area-plugin'
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin'
 import { ContextMenuPlugin } from 'rete-context-menu-plugin'
 import { VuePlugin, Presets } from 'rete-vue-plugin'
-import type { Input } from 'rete/_types/presets/classic'
 import { ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { getCollection } from '@/core/utils/firebase-collections'
+import type { ChatBotFlowService } from '@/core/types/AuthWorkspaceTypes'
+import type { ChatbotFlowServiceData } from '@/core/types/WorkSpaceTypes'
+import { boolean } from 'zod'
+import AlertDialog from '@/core/components/ui/alert-dialog/AlertDialog.vue'
+import AlertDialogContent from '@/core/components/ui/alert-dialog/AlertDialogContent.vue'
+import AlertDialogHeader from '@/core/components/ui/alert-dialog/AlertDialogHeader.vue'
+import AlertDialogTitle from '@/core/components/ui/alert-dialog/AlertDialogTitle.vue'
+import AlertDialogDescription from '@/core/components/ui/alert-dialog/AlertDialogDescription.vue'
+import AlertDialogFooter from '@/core/components/ui/alert-dialog/AlertDialogFooter.vue'
+const route = useRoute()
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
 
@@ -37,9 +52,8 @@ interface MousePosition {
 }
 
 const authWorkspace = useAuthWorkspaceStore()
-const { active_flow } = authWorkspace
-const { rete_init } = active_flow
-const { draggable } = rete_init
+const { active_flow, rete_init } = authWorkspace
+const { draggable } = active_flow
 
 // Menu states
 const menuVisible = ref(false)
@@ -60,6 +74,7 @@ function closeMenu() {
 
 async function initializeFlow() {
   editor_load.value = true
+
   if (!reteContainer.value) return
 
   // Initialize the Area and Rete
@@ -71,9 +86,11 @@ async function initializeFlow() {
 
   if (!rete_init.area) return
 
+
+
   //Doesnt follow anything
   rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
-    items(context: 'root' | Schemes['Node']) {
+    items(context: 'root' | Schemes['Node'] | Connection<Node<keyof NodeType>>) {
       if (context === 'root') {
         return {
           searchBar: true,
@@ -90,12 +107,74 @@ async function initializeFlow() {
           })),
         }
       } else {
-        console.log(context)
-        //On delete/clone add something here
-      }
-      return {
-        searchBar: false,
-        list: [],
+        if (context instanceof Node) {
+          console.log(context)
+          return {
+            searchBar: false,
+            list: [
+              {
+                label: 'Delete', key: '1', handler: () => {
+                  if (rete_init.editor) {
+                    for (const [key, connection] of Object.entries(rete_init.editor.getConnections())) {
+                      if (connection.target == context.id || connection.source == context.id) {
+                        rete_init.editor.removeConnection(connection.id)
+                      }
+                    }
+                    rete_init.editor.removeNode(context.id)
+                  }
+                }
+              },
+              {
+                label: 'Clone', key: '2', handler: () => {
+                  if (context.data && context.data.name) {
+                    const newNode = new Node(context.label)
+                    newNode.data = uiHelpers.deepCopy(context.data)
+                    newNode.data.name = uiHelpers.getNextTitle(context.data.name)
+                    if (newNode.data) {
+                      createMetaTemplateOutIn(
+                        {
+                          node: newNode,
+                          socket: ReteSockets['text'],
+                        },
+                        'num',
+                        'input',
+                      )
+                      objectEntries(context.outputs).forEach(([key, output]) => {
+                        if (output) {
+
+                          createMetaTemplateOutIn(
+                            {
+                              node: newNode,
+                              socket: ReteSockets[output?.socket.name as keyof typeof socketDefinitions],
+                            },
+                            output.id
+                          )
+                        }
+                      })
+                    }
+                    delete context.data.postbackid
+                    console.log(context)
+                    draggable.toggleNode(newNode)
+                  }
+                }
+              },
+            ]
+          }
+          //For Connections 
+        } else {
+          return {
+            searchBar: false,
+            list: [{
+              label: 'Delete Connection', key: '1', handler: () => {
+                if (rete_init.editor) {
+                  rete_init.editor.removeConnection(context.id)
+                }
+
+              }
+            }]
+          }
+        }
+
       }
     },
   })
@@ -125,7 +204,7 @@ async function initializeFlow() {
       console.log({ update: context })
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-        'undefined'
+          'undefined'
           ? 200
           : context.data.delay
       if (context.data.type === 'contextmenu') {
@@ -140,7 +219,7 @@ async function initializeFlow() {
     render: function render(context: ContextMenuRenderContext) {
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-        'undefined'
+          'undefined'
           ? 200
           : context.data.delay
       console.log({ render: context })
@@ -190,12 +269,13 @@ function trackMouseEvents() {
   if (area) {
     area.addPipe(async (context) => {
       if (context.type === 'pointermove') {
-        if (rete_init.ui.connection_drop) {
+        if (active_flow.ui.connection_drop) {
           client_position = { x: context.data.event.clientX, y: context.data.event.clientY }
         }
       }
 
       if (context.type === 'connectionremove') {
+        console.log('connection remove')
         isNodeRemoved.value = true
         if (rete_init.editor) {
           const soure_node = rete_init.editor.getNode(context.data.source)
@@ -213,20 +293,11 @@ function trackMouseEvents() {
               })
               return
             }
-
-            // if (!origin) {
-            //   toast({
-            //     title: 'Something went wrong',
-            //     variant: 'destructive',
-            //     duration: 2000,
-            //   })
-            //   return
-            // } else {
-
-            // }
           }
         }
       }
+
+
 
       if (context.type === 'connectioncreate') {
         const check = checkConnectionSocket(context.data)
@@ -273,16 +344,16 @@ function trackMouseEvents() {
       }
 
       if (context.type === 'nodecreated') {
-        if (rete_init.editor && rete_init.ui.connection_drop) {
-          console.log(rete_init.ui.connection_drop)
-          const sourceNode = rete_init.editor.getNode(rete_init.ui.connection_drop.nodeId)
+        if (rete_init.editor && active_flow.ui.connection_drop) {
+          console.log(active_flow.ui.connection_drop)
+          const sourceNode = rete_init.editor.getNode(active_flow.ui.connection_drop.nodeId)
           const targetNode = context.data
           if (sourceNode && targetNode) {
             await rete_init.editor.addConnection(
-              new Connection(sourceNode, rete_init.ui.connection_drop.key, targetNode, 'num'),
+              new Connection(sourceNode, active_flow.ui.connection_drop.key, targetNode, 'num'),
             )
           }
-          rete_init.ui.connection_drop = null
+          active_flow.ui.connection_drop = null
         }
 
         if (rete_init.area) {
@@ -299,15 +370,15 @@ function trackMouseEvents() {
         nodeOptionVisible.value = false
         selected_node.value = context.data.id
         multi_selected_node.value = [context.data.id]
-        rete_init.node_select(context.data.id)
+        active_flow.node_select(context.data.id)
       }
 
       if (context.type === 'pointerdown') {
-        if (rete_init.selected_node) {
-          rete_init.remove_selected_node()
+        if (active_flow.selected_node) {
+          active_flow.remove_selected_node()
         }
-        if (rete_init.ui.connection_drop) {
-          rete_init.ui.connection_drop = null
+        if (active_flow.ui.connection_drop) {
+          active_flow.ui.connection_drop = null
         }
         if (draggable.visibility === true) {
           console.log('test')
@@ -365,7 +436,7 @@ function trackMouseEvents() {
   if (connection) {
     connection.addPipe(async (context) => {
       if (context.type === 'connectionpick') {
-        rete_init.ui.connection_drop = context.data.socket
+        active_flow.ui.connection_drop = context.data.socket
       }
 
       if (context.type === 'connectiondrop') {
@@ -376,7 +447,7 @@ function trackMouseEvents() {
           })
           console.log(event)
 
-          rete_init.ui.connection_drop = context.data.initial
+          active_flow.ui.connection_drop = context.data.initial
           //rete_init.ui.connection_drop = context.data.initial
           await rete_init.area.emit({ type: 'contextmenu', data: { event, context: 'root' } })
         }
@@ -457,48 +528,43 @@ function getTranslatedMousePosition(event: MousePosition) {
   }
 }
 
-// Save editor state as JSON
-const saveEditorState = async () => {
-  if (!rete_init.editor) return
-  const serializedNodes: SerializedFlow.Node[] = rete_init.editor.getNodes().map((node) => {
-    const position = rete_init.area?.nodeViews.get(node.id)?.position // Get node position
-    return {
-      id: node.id,
-      label: node.label,
-      controls: node.controls as { [key: string]: ControlInterface },
-      outputs: node.outputs as { [key: string]: MetaTemplateOutput } | undefined,
-      inputs: node.inputs as { [key: string]: Input<ClassicPreset.Socket> } | undefined,
-      position: position || { x: 0, y: 0 },
-      data: node.data, // Any extra props you attached
-    }
-  })
-
-  const serializedState: SerializedFlow.State = {
-    nodes: serializedNodes,
-    connections: rete_init.editor.getConnections().map((conn) => ({
-      id: conn.id as string,
-      source: conn.source as string,
-      sourceOutput: conn.sourceOutput as string,
-      target: conn.target as string,
-      targetInput: conn.targetInput as string,
-    })),
-    signal: rete_init.editor.signal as any,
-    name: rete_init.editor.name as string,
+async function reloadEditor() {
+  if (!active_flow.chatbot_flow_data || !rete_init.editor || !rete_init.area) return
+  const orig_editor: SerializedFlow.State = JSON.parse(active_flow.chatbot_flow_data.botFlow)
+  for (const node of orig_editor.nodes) {
+    const newNode = new Node(node.label)
+    newNode.data = { ...node.data as NodeType[typeof newNode.label] }
+    newNode.id = node.id
+    objectEntries(node.inputs).forEach(([key, input]) => {
+      if (input) {
+        createMetaTemplateOutIn(
+          {
+            node: newNode,
+            socket: ReteSockets[input.label as keyof typeof socketDefinitions],
+          },
+          input.id,
+          'input',
+        )
+      }
+    })
+    objectEntries(node.outputs).forEach(([key, output]) => {
+      if (output) {
+        createMetaTemplateOutIn(
+          {
+            node: newNode,
+            socket: ReteSockets[output.label as keyof typeof socketDefinitions],
+          },
+          output.id,
+        )
+      }
+    })
+    await rete_init.editor.addNode(newNode)
+    rete_init.area.translate(node.id, node.position)
   }
 
-  const parse_serial = JSON.stringify(serializedState)
-  //Print the serialized node and save to firestore
-  console.log(serializedState)
-
-  //Save The Flow to json
-  active_flow.json = parse_serial
-
-  //Create a new Output data of the node
-  toast({
-    title: 'Flow saved',
-    variant: 'success',
-    duration: 2000,
-  })
+  for (const conn of orig_editor.connections) {
+    rete_init.editor.addConnection(conn)
+  }
 }
 
 watch(
@@ -531,8 +597,28 @@ function addCustomBackground() {
   }
 }
 
+const pageLoad = ref(true)
+
 onMounted(async () => {
-  await initializeFlow()
+  pageLoad.value = true
+  if (!active_flow.chatbot_flow_data) {
+    const get_flow = await getCollection('ws_chatbot_flow', {
+      $path: 'workspaces/:ws_id/chatbot_flow_service',
+      id: route.params.cb_id as string,
+      $sub_params: {
+        ws_id: route.params.workspaceId as string
+      }
+    })
+    console.log(get_flow)
+    if (get_flow.data && get_flow.status) {
+      const flow = get_flow.data as ChatbotFlowServiceData
+      active_flow.setActiveChatBotFlow(flow)
+      initializeFlow()
+      await reloadEditor()
+    }
+  }
+
+  pageLoad.value = false
 })
 
 // Event listeners for mousemove and click
@@ -540,31 +626,48 @@ onMounted(async () => {
 
 <template>
   <!-- Rete.js Canvas -->
-  <div
-    v-if="draggable.visibility && draggable.node"
-    :style="{ top: `${draggable.position.y}px`, left: `${draggable.position.x}px` }"
-    class="tracker pointer-events-none absolute flex h-10 w-auto -translate-x-[50%] -translate-y-[50%] items-center justify-center border-2 border-dashed border-blue-600 px-4 font-bold text-white"
-  >
-    {{ draggable.node.data?.name }}
-  </div>
+  <div>
+    <div v-if="draggable.visibility && draggable.node"
+      :style="{ top: `${draggable.position.y}px`, left: `${draggable.position.x}px` }"
+      class="tracker pointer-events-none absolute flex h-10 w-auto -translate-x-[50%] -translate-y-[50%] items-center justify-center border-2 border-dashed border-blue-600 px-4 font-bold text-white">
+      {{ draggable.node.data?.name }}
+    </div>
 
-  <div class="h-screen">
-    <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
-  </div>
+    <div class="h-screen">
+      <div id="no-right-click" ref="reteContainer" class="h-svh"></div>
+    </div>
 
-  <div class="absolute top-0 flex justify-between p-4">
-    <div class="space-y-2">
-      <div class="flex gap-4">
-        <button class="font-bold" @click="saveEditorState">Save</button>
-        <span>
-          {{ multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : '' }}
-        </span>
+    <div class="absolute top-0 flex justify-between p-4">
+      <div class="space-y-2">
+        <div class="flex gap-4">
+          <span>
+            {{ multi_selected_node.length > 0 ? `${multi_selected_node.length} selected` : '' }}
+          </span>
+        </div>
       </div>
     </div>
+
+    <NodeSheet v-if="!pageLoad && !editor_load" />
+    <ActionBar />
+
+
   </div>
 
-  <NodeSheet v-if="!editor_load" />
-  <ActionBar />
+  <AlertDialog :open="!pageLoad && !editor_load ? false : true">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle class="flex justify-center gap-2 items-center">
+          <div>
+            <i class="material-icons animate-spin text-sm">donut_large</i>
+          </div>
+          <span>Creating your flow..</span>
+        </AlertDialogTitle>
+        <AlertDialogDescription class="flex justify-center">
+          Please wait while we recreate and initialze your flow
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>
 
 <style scoped>
