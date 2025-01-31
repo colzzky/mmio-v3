@@ -23,6 +23,7 @@ import {
   Timegap,
   GoToFlow,
   Email,
+  SMS,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
@@ -159,6 +160,7 @@ export const nodeMapping: Record<keyof NodeType, Component> = {
   timegap_node: Timegap,
   go_to_flow_node: GoToFlow,
   email_node: Email,
+  sms_node: SMS,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -186,4 +188,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   timegap_node: 'ph:spinner-gap-fill',
   go_to_flow_node: 'ix:goto',
   email_node: 'bx:envelope',
+  sms_node: 'fa-solid:sms',
 }
