@@ -23,3 +23,4 @@ export { default as ProductSearchSheet } from '@/modules/meta/services/chatbot-f
 export { default as ActionSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/action-sheet.vue'
 export { default as TimegapSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/timegap-sheet.vue'
 export { default as GoToFlowSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/go-to-flow-sheet.vue'
+export { default as EmailSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/email-sheet.vue'

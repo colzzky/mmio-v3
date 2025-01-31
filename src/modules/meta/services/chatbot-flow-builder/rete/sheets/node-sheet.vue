@@ -26,6 +26,7 @@ import {
   ActionSheet,
   TimegapSheet,
   GoToFlowSheet,
+  EmailSheet,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -99,6 +100,7 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   action_node: ActionSheet,
   timegap_node: TimegapSheet,
   go_to_flow_node: GoToFlowSheet,
+  email_node: EmailSheet,
 }
 
 watch(

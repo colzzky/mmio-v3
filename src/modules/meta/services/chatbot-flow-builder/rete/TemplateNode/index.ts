@@ -21,3 +21,4 @@ export { default as ProductSearch } from '@/modules/meta/services/chatbot-flow-b
 export { default as Action } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/action.vue'
 export { default as Timegap } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/timegap.vue'
 export { default as GoToFlow } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/go-to-flow.vue'
+export { default as Email } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/email.vue'
