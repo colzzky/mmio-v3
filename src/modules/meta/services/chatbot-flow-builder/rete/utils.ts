@@ -17,6 +17,7 @@ import {
   ChatGPTAPI,
   DynamicCarousel,
   UserInput,
+  OTN,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
@@ -147,6 +148,7 @@ export const nodeMapping: Record<keyof NodeType, Component> = {
   chatgpt_api_node: ChatGPTAPI,
   dynamic_carousel_node: DynamicCarousel,
   user_input_node: UserInput,
+  otn_node: OTN,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -168,4 +170,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   chatgpt_api_node: 'arcticons:openai-chatgpt',
   dynamic_carousel_node: 'solar:posts-carousel-vertical-bold',
   user_input_node: 'radix-icons:input',
+  otn_node: 'bx:bell',
 }

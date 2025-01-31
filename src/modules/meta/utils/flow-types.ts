@@ -24,6 +24,7 @@ export interface NodeType {
   chatgpt_api_node: ChatGPTAPINode
   dynamic_carousel_node: DynamicCarouselNode
   user_input_node: UserInputNode
+  otn_node: OTNNode
 }
 
 export interface CarouselCard {
@@ -218,6 +219,16 @@ export interface DynamicCarouselNode {
 }
 
 export interface UserInputNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface OTNNode {
   name: string
   postbackid?: string
   delay?: string
@@ -824,6 +835,34 @@ export namespace ReteTemplates {
       )
       return node
     },
+    otn_node() {
+      const node = new Node('otn_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled OTN Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
 
     //Should be generic node
     message_node() {
@@ -1344,5 +1383,11 @@ export const nodeMapContextMenu: Record<
     key: '17',
     template: 'user_input_node',
     icon: 'radix-icons:input',
+  },
+  otn: {
+    label: 'OTN',
+    key: '18',
+    template: 'otn_node',
+    icon: 'bx:bell',
   },
 }
