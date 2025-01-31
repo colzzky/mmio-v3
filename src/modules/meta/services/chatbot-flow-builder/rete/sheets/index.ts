@@ -21,3 +21,4 @@ export { default as UserInputSheet } from '@/modules/meta/services/chatbot-flow-
 export { default as OTNSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/otn-sheet.vue'
 export { default as ProductSearchSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/product-search-sheet.vue'
 export { default as ActionSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/action-sheet.vue'
+export { default as TimegapSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/timegap-sheet.vue'

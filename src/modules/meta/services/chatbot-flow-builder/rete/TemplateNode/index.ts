@@ -19,3 +19,4 @@ export { default as UserInput } from '@/modules/meta/services/chatbot-flow-build
 export { default as OTN } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/otn.vue'
 export { default as ProductSearch } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/product-search.vue'
 export { default as Action } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/action.vue'
+export { default as Timegap } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/timegap.vue'

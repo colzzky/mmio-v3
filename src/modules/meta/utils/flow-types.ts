@@ -27,6 +27,7 @@ export interface NodeType {
   otn_node: OTNNode
   product_search_node: ProductSearchNode
   action_node: ActionNode
+  timegap_node: TimegapNode
 }
 
 export interface CarouselCard {
@@ -251,6 +252,16 @@ export interface ProductSearchNode {
 }
 
 export interface ActionNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface TimegapNode {
   name: string
   postbackid?: string
   delay?: string
@@ -941,6 +952,34 @@ export namespace ReteTemplates {
       )
       return node
     },
+    timegap_node() {
+      const node = new Node('timegap_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Timegap Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
 
     //Should be generic node
     message_node() {
@@ -1479,5 +1518,11 @@ export const nodeMapContextMenu: Record<
     key: '20',
     template: 'action_node',
     icon: 'mdi:call-to-action',
+  },
+  timegap: {
+    label: 'Timegap',
+    key: '21',
+    template: 'timegap_node',
+    icon: 'ph:spinner-gap-fill',
   },
 }

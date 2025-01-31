@@ -20,6 +20,7 @@ import {
   OTN,
   ProductSearch,
   Action,
+  Timegap,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
@@ -153,6 +154,7 @@ export const nodeMapping: Record<keyof NodeType, Component> = {
   otn_node: OTN,
   product_search_node: ProductSearch,
   action_node: Action,
+  timegap_node: Timegap,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -177,4 +179,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   otn_node: 'bx:bell',
   product_search_node: 'bx:search',
   action_node: 'mdi:call-to-action',
+  timegap_node: 'ph:spinner-gap-fill',
 }
