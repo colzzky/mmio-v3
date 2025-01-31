@@ -31,6 +31,7 @@ export interface NodeType {
   go_to_flow_node: GoToFlowNode
   email_node: EmailNode
   sms_node: SMSNode
+  function_node: FunctionNode
 }
 
 export interface CarouselCard {
@@ -295,6 +296,16 @@ export interface EmailNode {
 }
 
 export interface SMSNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface FunctionNode {
   name: string
   postbackid?: string
   delay?: string
@@ -1097,6 +1108,34 @@ export namespace ReteTemplates {
       )
       return node
     },
+    function_node() {
+      const node = new Node('function_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Function Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
 
     //Should be generic node
     message_node() {
@@ -1659,5 +1698,11 @@ export const nodeMapContextMenu: Record<
     key: '24',
     template: 'sms_node',
     icon: 'fa-solid:sms',
+  },
+  function: {
+    label: 'Function',
+    key: '25',
+    template: 'function_node',
+    icon: 'material-symbols:function',
   },
 }

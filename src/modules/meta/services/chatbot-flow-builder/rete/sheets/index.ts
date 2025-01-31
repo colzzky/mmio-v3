@@ -25,3 +25,4 @@ export { default as TimegapSheet } from '@/modules/meta/services/chatbot-flow-bu
 export { default as GoToFlowSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/go-to-flow-sheet.vue'
 export { default as EmailSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/email-sheet.vue'
 export { default as SMSSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/sms-sheet.vue'
+export { default as FunctionSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/function-sheet.vue'
