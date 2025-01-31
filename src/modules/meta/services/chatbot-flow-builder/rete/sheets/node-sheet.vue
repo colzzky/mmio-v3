@@ -29,6 +29,7 @@ import {
   EmailSheet,
   SMSSheet,
   FunctionSheet,
+  RecurringSheet,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets'
 import { Node, type NodeType } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -105,6 +106,7 @@ const componentMapping: Record<keyof Omit<NodeType, 'reference_node'>, any> = {
   email_node: EmailSheet,
   sms_node: SMSSheet,
   function_node: FunctionSheet,
+  recurring_node: RecurringSheet,
 }
 
 watch(

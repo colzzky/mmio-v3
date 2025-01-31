@@ -25,6 +25,7 @@ import {
   Email,
   SMS,
   Function,
+  Recurring,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
@@ -163,6 +164,7 @@ export const nodeMapping: Record<keyof NodeType, Component> = {
   email_node: Email,
   sms_node: SMS,
   function_node: Function,
+  recurring_node: Recurring,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -192,4 +194,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   email_node: 'bx:envelope',
   sms_node: 'fa-solid:sms',
   function_node: 'material-symbols:function',
+  recurring_node: 'wpf:recurring-appointment',
 }

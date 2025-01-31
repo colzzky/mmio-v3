@@ -26,3 +26,4 @@ export { default as GoToFlowSheet } from '@/modules/meta/services/chatbot-flow-b
 export { default as EmailSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/email-sheet.vue'
 export { default as SMSSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/sms-sheet.vue'
 export { default as FunctionSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/function-sheet.vue'
+export { default as RecurringSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/recurring-sheet.vue'

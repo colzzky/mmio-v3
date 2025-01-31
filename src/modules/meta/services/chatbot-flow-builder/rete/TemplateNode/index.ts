@@ -24,3 +24,4 @@ export { default as GoToFlow } from '@/modules/meta/services/chatbot-flow-builde
 export { default as Email } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/email.vue'
 export { default as SMS } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/sms.vue'
 export { default as Function } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/function.vue'
+export { default as Recurring } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/recurring.vue'
