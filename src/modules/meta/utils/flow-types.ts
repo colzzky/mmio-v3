@@ -25,6 +25,7 @@ export interface NodeType {
   dynamic_carousel_node: DynamicCarouselNode
   user_input_node: UserInputNode
   otn_node: OTNNode
+  product_search_node: ProductSearchNode
 }
 
 export interface CarouselCard {
@@ -229,6 +230,16 @@ export interface UserInputNode {
 }
 
 export interface OTNNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface ProductSearchNode {
   name: string
   postbackid?: string
   delay?: string
@@ -863,6 +874,34 @@ export namespace ReteTemplates {
       )
       return node
     },
+    product_search_node() {
+      const node = new Node('product_search_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Product Search Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
 
     //Should be generic node
     message_node() {
@@ -1389,5 +1428,11 @@ export const nodeMapContextMenu: Record<
     key: '18',
     template: 'otn_node',
     icon: 'bx:bell',
+  },
+  'product search': {
+    label: 'Product Search',
+    key: '19',
+    template: 'product_search_node',
+    icon: 'bx:search',
   },
 }

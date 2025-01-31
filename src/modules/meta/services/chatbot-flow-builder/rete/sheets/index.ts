@@ -19,3 +19,4 @@ export { default as ChatGPTAPISheet } from '@/modules/meta/services/chatbot-flow
 export { default as DynamicCarouselSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/dynamic-carousel-sheet.vue'
 export { default as UserInputSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/user-input-sheet.vue'
 export { default as OTNSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/otn-sheet.vue'
+export { default as ProductSearchSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/product-search-sheet.vue'
