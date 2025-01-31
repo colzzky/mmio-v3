@@ -18,3 +18,4 @@ export { default as DynamicCarousel } from '@/modules/meta/services/chatbot-flow
 export { default as UserInput } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/user-input.vue'
 export { default as OTN } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/otn.vue'
 export { default as ProductSearch } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/product-search.vue'
+export { default as Action } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode/action.vue'

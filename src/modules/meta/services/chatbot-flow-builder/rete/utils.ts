@@ -19,6 +19,7 @@ import {
   UserInput,
   OTN,
   ProductSearch,
+  Action,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
@@ -151,6 +152,7 @@ export const nodeMapping: Record<keyof NodeType, Component> = {
   user_input_node: UserInput,
   otn_node: OTN,
   product_search_node: ProductSearch,
+  action_node: Action,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -174,4 +176,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   user_input_node: 'radix-icons:input',
   otn_node: 'bx:bell',
   product_search_node: 'bx:search',
+  action_node: 'mdi:call-to-action',
 }

@@ -26,6 +26,7 @@ export interface NodeType {
   user_input_node: UserInputNode
   otn_node: OTNNode
   product_search_node: ProductSearchNode
+  action_node: ActionNode
 }
 
 export interface CarouselCard {
@@ -240,6 +241,16 @@ export interface OTNNode {
 }
 
 export interface ProductSearchNode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface ActionNode {
   name: string
   postbackid?: string
   delay?: string
@@ -902,6 +913,34 @@ export namespace ReteTemplates {
       )
       return node
     },
+    action_node() {
+      const node = new Node('action_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Action Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
 
     //Should be generic node
     message_node() {
@@ -1434,5 +1473,11 @@ export const nodeMapContextMenu: Record<
     key: '19',
     template: 'product_search_node',
     icon: 'bx:search',
+  },
+  action: {
+    label: 'Action',
+    key: '20',
+    template: 'action_node',
+    icon: 'mdi:call-to-action',
   },
 }
