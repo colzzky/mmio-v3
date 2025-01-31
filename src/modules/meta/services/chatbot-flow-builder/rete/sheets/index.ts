@@ -16,3 +16,4 @@ export { default as HTTPSheet } from '@/modules/meta/services/chatbot-flow-build
 export { default as BotSheetsAPISheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/bot-sheets-api-sheet.vue'
 export { default as OpenAIEmbeddingSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/openai-embedding-sheet.vue'
 export { default as ChatGPTAPISheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/chatgpt-api-sheet.vue'
+export { default as DynamicCarouselSheet } from '@/modules/meta/services/chatbot-flow-builder/rete/sheets/dynamic-carousel-sheet.vue'

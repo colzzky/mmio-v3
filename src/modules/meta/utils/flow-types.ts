@@ -22,6 +22,7 @@ export interface NodeType {
   bot_sheets_api_node: BotSheetsAPINode
   openai_embedding_node: OpenAIEmbeddingNode
   chatgpt_api_node: ChatGPTAPINode
+  dynamic_carousel_node: DynamicCarouselNode
 }
 
 export interface CarouselCard {
@@ -196,6 +197,16 @@ export interface OpenAIEmbeddingNode {
 }
 
 export interface ChatGPTAPINode {
+  name: string
+  postbackid?: string
+  delay?: string
+  text: string
+  buttons: Record<string, Button>
+  quick_replies: Record<string, QuickReply>
+  giver_data: Record<string, string>
+}
+
+export interface DynamicCarouselNode {
   name: string
   postbackid?: string
   delay?: string
@@ -746,6 +757,34 @@ export namespace ReteTemplates {
       )
       return node
     },
+    dynamic_carousel_node() {
+      const node = new Node('dynamic_carousel_node')
+      node.id = crypto.randomUUID()
+      const num1_postback = crypto.randomUUID()
+      node.data = {
+        name: 'Untitled Dynamic Carousel Node',
+        text: '',
+        buttons: {},
+        quick_replies: {},
+        giver_data: {},
+      }
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num',
+        'input',
+      )
+      createMetaTemplateOutIn(
+        {
+          node,
+          socket: ReteSockets['text'],
+        },
+        'num1',
+      )
+      return node
+    },
 
     //Should be generic node
     message_node() {
@@ -1254,5 +1293,11 @@ export const nodeMapContextMenu: Record<
     key: '15',
     template: 'chatgpt_api_node',
     icon: 'arcticons:openai-chatgpt',
+  },
+  'dynamic carousel': {
+    label: 'Dynamic Carousel',
+    key: '16',
+    template: 'dynamic_carousel_node',
+    icon: 'solar:posts-carousel-vertical-bold',
   },
 }

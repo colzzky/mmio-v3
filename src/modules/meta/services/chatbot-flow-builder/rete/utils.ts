@@ -15,6 +15,7 @@ import {
   BotSheetsAPI,
   OpenAIEmbedding,
   ChatGPTAPI,
+  DynamicCarousel,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
@@ -143,6 +144,7 @@ export const nodeMapping: Record<keyof NodeType, Component> = {
   bot_sheets_api_node: BotSheetsAPI,
   openai_embedding_node: OpenAIEmbedding,
   chatgpt_api_node: ChatGPTAPI,
+  dynamic_carousel_node: DynamicCarousel,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -162,4 +164,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   bot_sheets_api_node: 'healthicons:spreadsheets',
   openai_embedding_node: 'logos:openai',
   chatgpt_api_node: 'arcticons:openai-chatgpt',
+  dynamic_carousel_node: 'solar:posts-carousel-vertical-bold',
 }
