@@ -21,6 +21,7 @@ import {
   ProductSearch,
   Action,
   Timegap,
+  GoToFlow,
 } from '@/modules/meta/services/chatbot-flow-builder/rete/TemplateNode'
 import type { FBAttachmentTemplate } from '@/modules/meta/utils/flow-meta-types'
 import type {
@@ -155,6 +156,7 @@ export const nodeMapping: Record<keyof NodeType, Component> = {
   product_search_node: ProductSearch,
   action_node: Action,
   timegap_node: Timegap,
+  go_to_flow_node: GoToFlow,
 }
 
 export const nodeIconMapping: Record<keyof NodeType, string> = {
@@ -180,4 +182,5 @@ export const nodeIconMapping: Record<keyof NodeType, string> = {
   product_search_node: 'bx:search',
   action_node: 'mdi:call-to-action',
   timegap_node: 'ph:spinner-gap-fill',
+  go_to_flow_node: 'ix:goto',
 }

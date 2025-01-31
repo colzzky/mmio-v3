@@ -29,13 +29,13 @@ import { onMounted, reactive, ref, watch } from 'vue'
 const { active_flow } = storeToRefs(useAuthWorkspaceStore())
 const { rete_init } = active_flow.value
 
-const localNodeData = ref<Node<'timegap_node'> | undefined>(undefined)
+const localNodeData = ref<Node<'go_to_flow_node'> | undefined>(undefined)
 
 onMounted(() => {
   const node = rete_init.editor?.getNode(rete_init.selected_node_id)
   if (!node) throw new Error('No Node found with the given ID')
 
-  localNodeData.value = node as Node<'timegap_node'>
+  localNodeData.value = node as Node<'go_to_flow_node'>
 })
 
 watch(
@@ -45,7 +45,7 @@ watch(
       const node = rete_init.editor?.getNode(node_id)
       if (!node) throw new Error('No Node found with the given ID')
 
-      localNodeData.value = node as Node<'timegap_node'>
+      localNodeData.value = node as Node<'go_to_flow_node'>
     }
   },
 )
@@ -295,7 +295,7 @@ function handleRemoveDelay() {
           class="row-span-full size-[var(--icon-size)] self-center"
         />
         <SheetTitle class="leading-none">{{ localNodeData.data.name }}</SheetTitle>
-        <SheetDescription class="leading-none">Timegap</SheetDescription>
+        <SheetDescription class="leading-none">Go To Flow</SheetDescription>
       </SheetHeader>
       <main class="grid gap-y-4 px-6 py-3">
         <div>
@@ -470,7 +470,7 @@ function handleRemoveDelay() {
             class="font-medium text-blue-600"
             @click="handleChangeState('default')"
           >
-            Timegap
+            Go To Flow
           </button>
           > Buttons
         </SheetDescription>
@@ -535,7 +535,7 @@ function handleRemoveDelay() {
             class="font-medium text-blue-600"
             @click="handleChangeState('default')"
           >
-            Timegap
+            Go To Flow
           </button>
           > Quick Replies
         </SheetDescription>
