@@ -24,7 +24,8 @@ import {
   permissionNames,
 } from '@/core/types/PermissionTypes'
 import { type TeamMembersData } from '@/core/types/TeamTypes'
-import { getWhereAny } from '@/core/utils/firebase-collections'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { getWhereAny, postCollection } from '@/core/utils/firebase-collections'
 import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { onMounted, reactive, ref, watch } from 'vue'
@@ -86,8 +87,17 @@ const member_permission_modal = reactive({
       this.member.generalPermissions = current_permission.generalPermission
       team_members.reInit()
       team_members.set(this.member)
-      const update_permission = await team_members.createUpdate(this.team_id, 'update')
-      if (update_permission.status) {
+      const update_permission = await postCollection(DbCollections.team_members,
+        {
+          data:team_members.data,
+          idKey:'member_id',
+          $sub_params:{
+            tm_id:this.team_id
+          }
+        }
+      )
+      
+      if (update_permission.status && update_permission.data) {
         this.member = update_permission.data
         this.close(true)
       }
@@ -227,8 +237,7 @@ async function get_user_created_permission() {
   console.log(checkFetch)
   if (user_auth.data && checkFetch) {
     permissions.data = []
-    const get = await getWhereAny('permission', {
-      $path: 'permissions',
+    const get = await getWhereAny(DbCollections.permissions, {
       whereConditions: [
         {
           fieldName: 'owner_uid',

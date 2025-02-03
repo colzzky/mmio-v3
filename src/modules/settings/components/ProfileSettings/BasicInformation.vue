@@ -11,6 +11,8 @@ import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
 import { Skeleton } from '@/core/components/ui/skeleton'
 import { useToast, Toaster } from '@/core/components/ui/toast'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { postCollection } from '@/core/utils/firebase-collections'
 import { useAuthStore } from '@/stores/authStore'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { z } from 'zod'
@@ -101,11 +103,20 @@ const inputField = reactive<InputField>({
   async updateBasicInfo(): Promise<void> {
     this.isLoading = true
     if (user.data) {
-      user.data.profile.firstName = this.dataInput.firstName
-      user.data.profile.lastName = this.dataInput.lastName
-      user.data.profile.contactEmail = this.dataInput.contactEmail
-      console.log(this.dataInput)
-      const update = await user.createUpdate('update')
+      user.data = {
+        ...user.data,
+        profile: {
+          ...user.data.profile,
+          firstName: this.dataInput.firstName,
+          lastName: this.dataInput.lastName,
+          contactEmail: this.dataInput.contactEmail,
+        },
+      }
+      const update = await postCollection(DbCollections.users, {
+        data: user.data,
+        idKey:'uid'
+      })
+
       if (update.status) {
         toast({
           title: 'Basic Information Update Successful',

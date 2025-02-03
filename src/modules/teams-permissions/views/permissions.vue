@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import Button from '@/core/components/ui/button/Button.vue'
 import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
-import { getWhereAny } from '@/core/utils/firebase-collections'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { getWhereAny, postCollection } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
@@ -27,8 +28,11 @@ async function create_permission() {
   if (user_auth.data) {
     permission_model.reInit()
     permission_model.data.owner_uid = user_auth.data.uid
-    const add_permission = await permission_model.createUpdate('new')
-    if (add_permission.status) {
+    const add_permission = await postCollection(DbCollections.permissions, {
+      data:permission_model.data,
+      idKey:'permission_id',
+    })
+    if (add_permission.status && add_permission.data) {
       permissions.data.push(add_permission.data)
       router.push({
         name: 'permission-view',
@@ -45,8 +49,7 @@ async function get_permissions() {
   console.log(checkFetch)
   if (user_auth.data && checkFetch) {
     permissions.data = []
-    const get = await getWhereAny('permission', {
-      $path: 'permissions',
+    const get = await getWhereAny(DbCollections.permissions, {
       whereConditions: [
         {
           fieldName: 'owner_uid',

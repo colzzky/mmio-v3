@@ -18,6 +18,8 @@ import {
   access_level_byservice,
   permissionNames,
 } from '@/core/types/PermissionTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { getCollection, postCollection } from '@/core/utils/firebase-collections'
 import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
 import { usePermissionStore } from '@/stores/permissionStore'
@@ -46,9 +48,12 @@ const selected_permission = reactive({
     const validated = await name_form.validateInput()
     if (validated && this.data) {
       this.data.name = name_form.input.name
-      pm_model.set(this.data)
-      const post = await pm_model.createUpdate('update')
-      if (post.status) {
+      const post = await postCollection(DbCollections.permissions, {
+        data: this.data,
+        idKey: 'permission_id',
+      })
+
+      if (post.status && post.data) {
         pm_model.reInit()
         this.data = post.data
         toast({
@@ -91,9 +96,9 @@ const selected_permission = reactive({
         this.data.assignment[key].access.forEach(access_level => {
           if (accessLevelsArray[key][access_level]) {
             accessLevelsArray[key][access_level].forEach(tx => {
-              if(!(data.generalPermission.includes(`${key}::${tx}`))){
-                  data.generalPermission.push(`${key}::${tx}`)
-                }
+              if (!(data.generalPermission.includes(`${key}::${tx}`))) {
+                data.generalPermission.push(`${key}::${tx}`)
+              }
             })
           }
         })
@@ -118,10 +123,10 @@ const selected_permission = reactive({
 
             if (accessLevelsArray[key][ac]) {
               accessLevelsArray[key][ac].forEach(tx => {
-                if(!(data.generalPermission.includes(`${key}::${tx}`))){
+                if (!(data.generalPermission.includes(`${key}::${tx}`))) {
                   data.generalPermission.push(`${key}::${tx}`)
                 }
-                
+
               })
             }
           })
@@ -136,9 +141,9 @@ const selected_permission = reactive({
 
       if (this.data.assignment[key].custom[custom_key] === true) {
         this.data.generalPermission.push(`${key}::${custom_key}`)
-      }else{
+      } else {
         const general_index = this.data.generalPermission.indexOf(`${key}::${custom_key}`)
-        if(general_index !== -1){
+        if (general_index !== -1) {
           this.data.generalPermission.splice(general_index, 1)
         }
       }
@@ -148,9 +153,11 @@ const selected_permission = reactive({
     if (this.isPermissionChanged) {
       this.saveLoad = true
       if (this.data) {
-        pm_model.set(this.data)
-        const save = await pm_model.createUpdate('update')
-        if (save.status) {
+        const save = await postCollection(DbCollections.permissions, {
+          data: this.data,
+          idKey: 'permission_id',
+        })
+        if (save.status && save.data) {
           this.data = save.data
           pm_model.reInit()
           toast({
@@ -194,8 +201,10 @@ async function find_selected_permission() {
       selected_permission.data = find_permission
     }
   } else {
-    const find_permission = await pm_model.get(permission_id as string)
-    if (find_permission.status) {
+    const find_permission = await getCollection(DbCollections.permissions, {
+      id:permission_id as string
+    })
+    if (find_permission.status && find_permission.data) {
       selected_permission.data = find_permission.data
     }
   }

@@ -10,7 +10,8 @@ import {
 } from '@/core/components/ui/dropdown-menu'
 import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
 import { PermissionServices } from '@/core/types/PermissionTypes'
-import { deleteCollection } from '@/core/utils/firebase-collections'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { deleteCollection, postCollection } from '@/core/utils/firebase-collections'
 import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import router from '@/router'
@@ -37,13 +38,13 @@ const selectedOption = reactive({
     identifier ? (this.selected = identifier) : (this.selected = null)
     identifier
       ? router.push({
-          query: { selectedOptionQuery: identifier.identifier },
-          replace: true,
-        })
+        query: { selectedOptionQuery: identifier.identifier },
+        replace: true,
+      })
       : router.push({
-          query: { selectedOptionQuery: null },
-          replace: true,
-        })
+        query: { selectedOptionQuery: null },
+        replace: true,
+      })
 
     if (identifier && identifier.identifier === 'meta_pages') {
       await imported_meta_pages.fetch_meta_pages()
@@ -79,10 +80,12 @@ async function testRemove(mp_id: string) {
       meta_page_md.set(imported_meta_pages.data[meta_page_index])
       if (meta_page_md.data) {
         meta_page_md.data.isOnProject = false
-        await meta_page_md.createUpdate('update')
+        await postCollection(DbCollections.meta_pages, {
+          idKey:'mp_id',
+          data: meta_page_md.data,
+        })
       }
-      await deleteCollection('ws_meta_pages_refs', {
-        $path: 'workspaces/:ws_id/meta_pages_refs',
+      await deleteCollection(DbCollections.ws_meta_pages_refs, {
         $sub_params: { ws_id: active_workspace.data.ws_id },
         id: mp_id,
       })
@@ -111,15 +114,9 @@ const importIntegrationModalRef = useTemplateRef('importIntegrationModal')
 <template>
   <div class="container mx-auto mt-4">
     <section v-if="!selectedOption.selected">
-      <ul
-        class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] grid-rows-[1fr_fit-content_1fr_1fr] gap-8"
-      >
-        <li
-          v-for="option in options"
-          :key="option.identifier"
-          :value="option.title"
-          class="row-span-4 grid grid-rows-subgrid gap-y-0 rounded-md border bg-primary/5 p-4"
-        >
+      <ul class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] grid-rows-[1fr_fit-content_1fr_1fr] gap-8">
+        <li v-for="option in options" :key="option.identifier" :value="option.title"
+          class="row-span-4 grid grid-rows-subgrid gap-y-0 rounded-md border bg-primary/5 p-4">
           <div class="flex items-center gap-x-2 text-lg font-bold">
             <i :class="['bx text-2xl', option.icon]" />
             <h2>
@@ -130,11 +127,8 @@ const importIntegrationModalRef = useTemplateRef('importIntegrationModal')
           <div class="mt-4 text-sm font-medium">
             {{ integrations[option.identifier].length }} Integrations
           </div>
-          <Button
-            variant="link"
-            class="mt-4 justify-self-end p-0 text-sm font-medium text-blue-500"
-            @click="selectedOption.initialize_identifier(option)"
-          >
+          <Button variant="link" class="mt-4 justify-self-end p-0 text-sm font-medium text-blue-500"
+            @click="selectedOption.initialize_identifier(option)">
             View linked {{ option.title }}
           </Button>
         </li>
@@ -142,10 +136,8 @@ const importIntegrationModalRef = useTemplateRef('importIntegrationModal')
     </section>
     <section v-else class="grid gap-y-4">
       <div class="flex items-center justify-between">
-        <span
-          @click="selectedOption.initialize_identifier(null)"
-          class="flex cursor-pointer items-center gap-x-2 font-bold"
-        >
+        <span @click="selectedOption.initialize_identifier(null)"
+          class="flex cursor-pointer items-center gap-x-2 font-bold">
           <i class="material-icons">keyboard_return</i>
           {{ selectedOption.selected.title }}
         </span>
@@ -153,22 +145,14 @@ const importIntegrationModalRef = useTemplateRef('importIntegrationModal')
           Import {{ selectedOption.selected.title }}
         </Button>
       </div>
-      <div
-        v-if="!imported_meta_pages.isLoading"
-        class="grid grid-cols-4 gap-4 [&>*]:h-[32vh] [&>*]:rounded-lg [&>*]:border [&>*]:border-gray-200 [&>*]:bg-gray-100"
-      >
-        <div
-          v-for="(integration, index) in imported_meta_pages.reference"
-          :key="index"
-          class="overflow-y-auto hover:bg-slate-100"
-        >
+      <div v-if="!imported_meta_pages.isLoading"
+        class="grid grid-cols-4 gap-4 [&>*]:h-[32vh] [&>*]:rounded-lg [&>*]:border [&>*]:border-gray-200 [&>*]:bg-gray-100">
+        <div v-for="(integration, index) in imported_meta_pages.reference" :key="index"
+          class="overflow-y-auto hover:bg-slate-100">
           <div class="mx-auto max-w-sm space-y-2 p-4">
             <div class="group relative cursor-pointer overflow-hidden rounded-lg">
-              <img
-                :src="integration.image"
-                alt="Dynamic Image"
-                class="h-[20vh] w-full object-cover transition-transform duration-300 group-hover:scale-110"
-              />
+              <img :src="integration.image" alt="Dynamic Image"
+                class="h-[20vh] w-full object-cover transition-transform duration-300 group-hover:scale-110" />
             </div>
             <div class="">
               <div class="flex flex-col gap-1">
@@ -207,7 +191,7 @@ const importIntegrationModalRef = useTemplateRef('importIntegrationModal')
                   <span class="text-sm font-medium">Imported At:</span>
                   <span class="text-sm">{{
                     uiHelpers.formatDateTimeAgo(integration.importedAt)
-                  }}</span>
+                    }}</span>
                 </div>
                 <p class="text-md block font-bold">{{ imported_meta_pages.data[index].access_token }}</p>
               </div>
@@ -215,10 +199,7 @@ const importIntegrationModalRef = useTemplateRef('importIntegrationModal')
           </div>
         </div>
       </div>
-      <div
-        v-else
-        class="grid grid-cols-4 gap-4 [&>*]:h-[32vh] [&>*]:rounded-lg [&>*]:border [&>*]:border-gray-200"
-      >
+      <div v-else class="grid grid-cols-4 gap-4 [&>*]:h-[32vh] [&>*]:rounded-lg [&>*]:border [&>*]:border-gray-200">
         <div v-for="i in 3" :key="i" class="">
           <div class="mx-auto max-w-sm space-y-3 p-4">
             <div class="group relative cursor-pointer overflow-hidden rounded-lg">

@@ -18,7 +18,7 @@ export interface MetaPictureReturn {
   }
 }
 
-export interface MetaPageData extends SubCollections {
+export interface MetaPageData{
   mp_id: string
   page_id: string
   owner_uid: string
@@ -45,7 +45,6 @@ export const meta_page_data: MetaPageData = {
   isOnProject: false,
   createdAt: '',
   updatedAt: '',
-  subCollections: [],
 }
 
 /** Meta Services */

@@ -6,13 +6,15 @@ import DialogTitle from '@/core/components/ui/dialog/DialogTitle.vue'
 import Input from '@/core/components/ui/input/Input.vue'
 import type { TeamData } from '@/core/types/TeamTypes'
 import { type WorkspaceData } from '@/core/types/WorkSpaceTypes'
-import { getWhereAny } from '@/core/utils/firebase-collections'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { getWhereAny, getWhereAnyWithSubcollections, postCollection } from '@/core/utils/firebase-collections'
 import { useWorkspaceStore } from '@/stores/WorkspaceStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
+import { objectEntries } from '@vueuse/core'
 import { VisuallyHidden } from 'radix-vue'
 import { reactive, watch, onMounted, ref } from 'vue'
-import { z, type ZodRawShape } from 'zod'
+import { object, z, type ZodRawShape } from 'zod'
 
 const workspaceStore = useWorkspaceStore()
 const authStore = useAuthStore()
@@ -187,11 +189,15 @@ const workspace_modal = reactive({
     if (user_auth.data) {
       //Create a new sowkrspace
       ws_model.reInit()
+      ws_model.data.ws_id = crypto.randomUUID()
       ws_model.data.name = this.data.name
       ws_model.data.team_id = this.data.team ? this.data.team.tm_id : ''
       ws_model.data.owner_uid = user_auth.data.uid
-      const post = await ws_model.createUpdate('new')
-      if (post.status) {
+      const post = await postCollection(DbCollections.workspaces, {
+        data: ws_model.data,
+        idKey:'ws_id'
+      })
+      if (post.status && post.data) {
         if (post.data.team_id) await this.create_workspace_team_refs(post.data)
         this.data.workspace_data = post.data
         this.close()
@@ -205,7 +211,10 @@ const workspace_modal = reactive({
     tm_ws_refs.reInit()
     tm_ws_refs.data.owner_uid = workspace.owner_uid
     tm_ws_refs.data.workspace_id = workspace.ws_id
-    const create_refs = await tm_ws_refs.createUpdate(workspace.team_id, 'new')
+    const create_refs = await postCollection(DbCollections.team_workspace_refs, {
+        data: tm_ws_refs.data,
+        idKey:'workspace_id'
+      })
     if (create_refs.status) {
       return true
     }
@@ -220,11 +229,10 @@ function select_team(team_data: TeamData | null) {
 
 const user_created_teams = ref<TeamData[]>([])
 async function get_user_team() {
+  user_created_teams.value = []
   if (user_auth.data) {
-    const get = await getWhereAny('team', {
-      $path: 'teams',
+    const get = await getWhereAnyWithSubcollections(DbCollections.teams, {
       $sub_params: {},
-      $sub_col: ['team_members'],
       whereConditions: [
         {
           fieldName: 'owner_uid',
@@ -232,11 +240,13 @@ async function get_user_team() {
           value: user_auth.data.uid,
         },
       ],
+      subCollections:[[DbCollections.team_members]]
     })
 
-    console.log(get)
-    if (get.status) {
-      user_created_teams.value = get.data
+    if (get.status && get.data) {
+      get.data.forEach((team) => {
+        user_created_teams.value.push(team.main)
+      })
     }
   }
 }

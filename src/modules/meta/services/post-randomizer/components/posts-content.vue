@@ -10,6 +10,7 @@ import type {
   PostRandomizerPostsData,
   PostRandomizerServiceData,
 } from '@/core/types/WorkSpaceTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
 import { getWhereAny } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -35,8 +36,7 @@ const campaign_contents = reactive({
   async fetchContents() {
     this.fetchLoad = true
     if (active_workspace.data) {
-      const get = await getWhereAny('ws_post_randomizer_posts', {
-        $path: 'workspaces/:ws_id/post_randomizer_service/:pr_id/post_randomizer_posts',
+      const get = await getWhereAny(DbCollections.ws_post_randomizer_posts, {
         $sub_params: { pr_id: props.campaign_data.pr_id, ws_id: active_workspace.data.ws_id },
       })
       this.data = get.data

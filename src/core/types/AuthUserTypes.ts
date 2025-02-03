@@ -1,5 +1,5 @@
 import type { MetaPictureReturn } from './MetaTypes'
-import type { SubCollections, MutablePick } from './UniTypes'
+import type {MutablePick } from './UniTypes'
 import type { User } from 'firebase/auth'
 
 export interface UserAddress {
@@ -16,17 +16,12 @@ export interface UserProfile {
   contactEmail: string
 }
 
-export interface UserData
-  extends SubCollections,
-    MutablePick<User, 'displayName' | 'email' | 'photoURL' | 'uid' | 'emailVerified'> {
+export interface UserData extends MutablePick<User, 'displayName' | 'email' | 'photoURL' | 'uid' | 'emailVerified'> {
   uid: string
   profile: UserProfile
   address: UserAddress
   createdAt: string
   updatedAt: string
-  subCollections: ('platform_apis' | 'team_refs')[]
-  team_refs?: TeamRefsData[]
-  platform_apis?: PlatformApiData[]
 }
 
 export const user_data: UserData = {
@@ -47,12 +42,11 @@ export const user_data: UserData = {
   email: '',
   emailVerified: true,
   photoURL: '',
-  subCollections: ['platform_apis', 'team_refs'],
   createdAt: '',
   updatedAt: '',
 }
 
-export interface PlatformApiData extends SubCollections {
+export interface PlatformApiData {
   platform: 'Meta' | ''
   client_account: MetaAPIAccount | null
   createdAt: string
@@ -62,7 +56,6 @@ export interface PlatformApiData extends SubCollections {
 export const platform_api_data: PlatformApiData = {
   platform: '',
   client_account: null,
-  subCollections: [],
   createdAt: '',
   updatedAt: '',
 }
@@ -71,7 +64,7 @@ export const platform_api_data: PlatformApiData = {
 //Team Reference//
 //////////////////
 
-export interface TeamRefsData extends SubCollections {
+export interface TeamRefsData {
   team_refs_id: string
   tm_id: string
   createdAt: string
@@ -83,7 +76,6 @@ export const team_refs_data: TeamRefsData = {
   tm_id: '',
   createdAt: '',
   updatedAt: '',
-  subCollections: [],
 }
 
 ///////////////////

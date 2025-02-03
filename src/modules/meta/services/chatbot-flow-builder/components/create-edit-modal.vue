@@ -12,6 +12,8 @@ import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
 import { PermissionServices } from '@/core/types/PermissionTypes'
 import { chatbot_flow_service_Data } from '@/core/types/WorkSpaceTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { postCollection } from '@/core/utils/firebase-collections'
 import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
 import type { ChatbotFlowServiceData, Modal } from '@/core/utils/types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -34,7 +36,7 @@ interface ModalInterface extends Omit<Modal, 'open'> {
 type ChatbotflowFields = Pick<ChatbotFlowServiceData, 'name'>
 
 const authWorkspaceStore = useAuthWorkspaceStore()
-const { service_models, workspace_service } = authWorkspaceStore
+const { service_models, workspace_service, active_workspace } = authWorkspaceStore
 const { chatbot_flow } = workspace_service
 const { chatbot_flow: chatbot_flow_md } = service_models
 const chatbot_flow_data = ref<ChatbotFlowServiceData | null>(null)
@@ -135,7 +137,6 @@ const modal = reactive<ModalInterface>({
         ...flow_form.inputs,
       } as ChatbotFlowServiceData
       chatbot_flow_data.value = updated_chatbot
-      console.log(updated_chatbot)
       this.intent === 'create' ? await this.createFlow() : await this.editFlow()
       this.close()
     } else {
@@ -143,20 +144,32 @@ const modal = reactive<ModalInterface>({
     }
   },
   async createFlow() {
-    if (chatbot_flow_data.value) {
+    if (chatbot_flow_data.value && active_workspace.data) {
       chatbot_flow_md.reInit()
       chatbot_flow_md.set(chatbot_flow_data.value)
-      const create = await chatbot_flow_md.createUpdate('new')
-      if (create.status) {
-        chatbot_flow.data.push(chatbot_flow_md.data)
+      const create = await postCollection(DbCollections.ws_chatbot_flow, {
+        data:{...chatbot_flow_data.value, cb_id:crypto.randomUUID()},
+        idKey:'cb_id',
+        $sub_params:{
+          ws_id:active_workspace.data.ws_id
+        }
+      })
+      if (create.status && create.data) {
+        chatbot_flow.data.push(create.data)
       }
     }
   },
   async editFlow() {
-    if (chatbot_flow_data.value) {
+    if (chatbot_flow_data.value && active_workspace.data) {
       chatbot_flow_md.reInit()
       chatbot_flow_md.set(chatbot_flow_data.value)
-      const update = await chatbot_flow_md.createUpdate('update')
+      const update = await postCollection(DbCollections.ws_chatbot_flow, {
+        data:chatbot_flow_data.value,
+        idKey:'cb_id',
+        $sub_params:{
+          ws_id:active_workspace.data.ws_id
+        }
+      })
       if (update.status) {
         const chatbot_index = chatbot_flow.data.findIndex((flow) => flow.cb_id === this.flowId)
         if (chatbot_index >= 0) {

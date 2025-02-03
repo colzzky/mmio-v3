@@ -1,0 +1,16 @@
+export enum DbCollections {
+  workspaces = 'workspaces',
+  ws_meta_pages_refs = 'workspaces/:ws_id/meta_pages_refs',
+  ws_chatbot_flow = 'workspaces/:ws_id/chatbot_flow_service',
+  ws_post_randomizer = 'workspaces/:ws_id/post_randomizer_service',
+  ws_post_randomizer_posts = 'workspaces/:ws_id/post_randomizer_service/:pr_id/post_randomizer_posts',
+  users = 'users',
+  platform_apis = 'users/:uid/platform_apis',
+  team_refs = 'users/:uid/team_refs',
+  teams = 'teams',
+  team_members = 'teams/:tm_id/team_members',
+  team_workspace_refs = 'teams/:tm_id/team_workspace_refs',
+  meta_pages = 'meta_pages',
+  invitations = 'invitations',
+  permissions = 'permissions',
+}

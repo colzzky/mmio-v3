@@ -42,6 +42,7 @@ import AlertDialogHeader from '@/core/components/ui/alert-dialog/AlertDialogHead
 import AlertDialogTitle from '@/core/components/ui/alert-dialog/AlertDialogTitle.vue'
 import AlertDialogDescription from '@/core/components/ui/alert-dialog/AlertDialogDescription.vue'
 import AlertDialogFooter from '@/core/components/ui/alert-dialog/AlertDialogFooter.vue'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
 const route = useRoute()
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
@@ -602,8 +603,7 @@ const pageLoad = ref(true)
 onMounted(async () => {
   pageLoad.value = true
   if (!active_flow.chatbot_flow_data) {
-    const get_flow = await getCollection('ws_chatbot_flow', {
-      $path: 'workspaces/:ws_id/chatbot_flow_service',
+    const get_flow = await getCollection(DbCollections.ws_chatbot_flow, {
       id: route.params.cb_id as string,
       $sub_params: {
         ws_id: route.params.workspaceId as string

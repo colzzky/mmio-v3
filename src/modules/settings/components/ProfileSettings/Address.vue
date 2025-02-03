@@ -11,6 +11,8 @@ import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
 import { Skeleton } from '@/core/components/ui/skeleton'
 import { useToast, Toaster } from '@/core/components/ui/toast'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { postCollection } from '@/core/utils/firebase-collections'
 import { useAuthStore } from '@/stores/authStore'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { z } from 'zod'
@@ -119,8 +121,23 @@ const inputField = reactive<InputField>({
       user.data.address.street = this.dataInput.street
       user.data.address.country = this.dataInput.country
       user.data.address.zipCode = this.dataInput.zipCode
-      console.log(this.dataInput)
-      const update = await user.createUpdate('update')
+
+      user.data = {
+        ...user.data,
+        address: {
+          ...user.data.address,
+          city: this.dataInput.city,
+          state: this.dataInput.state,
+          street: this.dataInput.street,
+          country: this.dataInput.country,
+          zipCode: this.dataInput.zipCode,
+        },
+      }
+      const update = await postCollection(DbCollections.users, {
+        data: user.data,
+        idKey:'uid'
+      })
+      
       if (update.status) {
         toast({
           title: 'Address Update Successful',

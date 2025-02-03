@@ -10,25 +10,22 @@ export enum TeamRole {
   MEMBER = 'Member',
 }
 
-export interface TeamData extends SubCollections {
+export interface TeamData{
   tm_id: string
   name: string
   owner_uid: string
   inviteLink: string
   createdAt: string
   updatedAt: string
-  subCollections: ('team_members' | 'team_workspace_refs')[]
-  team_members?: TeamMembersData[]
-  workspace_refs?: TeamWorkspaceRefsData[]
 }
 
-export interface TeamWorkspaceRefsData extends SubCollections {
+export interface TeamWorkspaceRefsData{
   workspace_id: string
   owner_uid: string
   createdAt: string
   updatedAt: string
 }
-export interface TeamMembersData extends SubCollections {
+export interface TeamMembersData{
   member_id: string
   uid: string
   role: TeamRole
@@ -53,8 +50,7 @@ export const team_data: TeamData = {
   owner_uid: '',
   inviteLink: '',
   createdAt: '',
-  updatedAt: '',
-  subCollections: ['team_members'],
+  updatedAt: ''
 }
 export const team_members_data: TeamMembersData = {
   member_id: '',
@@ -66,7 +62,6 @@ export const team_members_data: TeamMembersData = {
   isPending: false,
   createdAt: '',
   updatedAt: '',
-  subCollections: [],
 }
 
 export const team_workspace_refs_data: TeamWorkspaceRefsData = {
@@ -74,5 +69,4 @@ export const team_workspace_refs_data: TeamWorkspaceRefsData = {
   owner_uid: '',
   createdAt: '',
   updatedAt: '',
-  subCollections: [],
 }

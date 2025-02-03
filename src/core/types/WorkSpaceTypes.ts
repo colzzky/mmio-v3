@@ -2,7 +2,7 @@ import type { Days, Months, SubCollections } from './UniTypes'
 
 //Only use subcollection if a collection have a data that has multiple data like activity logs etc.
 
-export interface WorkspaceData extends SubCollections {
+export interface WorkspaceData {
   ws_id: string
   name: string
   owner_uid: string
@@ -10,10 +10,8 @@ export interface WorkspaceData extends SubCollections {
   createdAt: string
   updatedAt: string
   team_id: string
-  meta_pages_refs?: WSMetaPagesRefsData[]
-  subCollections: 'meta_pages_refs'[]
 }
-export interface WSMetaPagesRefsData extends SubCollections {
+export interface WSMetaPagesRefsData {
   mp_id: string //same as the meta pages id
   imported_by_uid: string
   createdAt: string
@@ -36,7 +34,6 @@ export const workspace_data: WorkspaceData = {
   status: 'Active',
   createdAt: '',
   updatedAt: '',
-  subCollections: ['meta_pages_refs'],
 }
 
 export const ws_meta_pages_refs_data: WSMetaPagesRefsData = {
@@ -44,11 +41,10 @@ export const ws_meta_pages_refs_data: WSMetaPagesRefsData = {
   imported_by_uid: '',
   createdAt: '',
   updatedAt: '',
-  subCollections: [],
 }
 
 //Meta Services
-export interface ChatbotFlowServiceData extends SubCollections {
+export interface ChatbotFlowServiceData {
   cb_id: string
   connected_account_id: string //meta pages id
   name: string
@@ -67,7 +63,6 @@ export const chatbot_flow_service_Data: ChatbotFlowServiceData = {
   isEnabled: false,
   createdAt: '',
   updatedAt: '',
-  subCollections: [],
 }
 export interface PostRandomizerServiceData extends SubCollections {
   pr_id: string

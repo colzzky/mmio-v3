@@ -2,7 +2,7 @@ import type { SubCollections } from './UniTypes'
 
 //Only use subcollection if a collection have a data that has multiple data like activity logs etc.
 
-export interface InvitationData extends SubCollections {
+export interface InvitationData{
   iv_id: string
   type: 'Team Invite' | 'Member Team Invite' | '' //team invite or member invite
   reference: InvitationReference
@@ -33,5 +33,4 @@ export const invitation_data: InvitationData = {
   expiration: '',
   createdAt: '',
   updatedAt: '',
-  subCollections: [],
 }

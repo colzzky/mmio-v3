@@ -7,7 +7,8 @@ import {
   type PlatformApiData,
 } from '@/core/types/AuthUserTypes'
 import type { Platforms } from '@/core/types/UniTypes'
-import { postCollection, getCollection } from '@/core/utils/firebase-collections'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { postCollection, getCollection, getCollectionWithSubcollections } from '@/core/utils/firebase-collections'
 import generalAxiosInstance from '@/core/utils/general-axios-instance'
 import type { DocumentData } from 'firebase/firestore'
 import { defineStore } from 'pinia'
@@ -18,8 +19,6 @@ interface PlaformApi {
   isInitialized: boolean
   initialize: () => void
   set: (data: PlatformApiData) => void
-  get: (uid: string, platform: Platforms) => Promise<PlatformApiDataReturnData>
-  createUpdate: (uid: string, type: 'new' | 'update') => Promise<PlatformApiDataReturnData>
   resetData: () => void
 }
 
@@ -42,34 +41,31 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
       this.data = { ...platform_api_data }
       this.isInitialized = true
     },
-    async get(uid: string, platform: Platforms) {
-      const get = await getCollection('platform_api', {
-        $path: 'users/:uid/platform_apis',
-        $sub_params: { uid },
-        id: platform,
-        $sub_col: [],
-      })
-      return {
-        status: get.status,
-        data: get.data as PlatformApiData,
-        error: get.error,
-      }
-    },
-    async createUpdate(uid: string, type) {
-      const post = await postCollection('platform_api', {
-        $path: 'users/:uid/platform_apis',
-        $sub_params: { uid },
-        id: this.data ? this.data.platform : '',
-        data: this.data,
-        type,
-      })
+    // async get(uid: string, platform: Platforms) {
+    //   const get = await getCollection(DbCollections.platform_apis, {
+    //     $sub_params: { uid },
+    //     id: platform,
+    //   })
+    //   return {
+    //     status: get.status,
+    //     data: get.data as PlatformApiData,
+    //     error: get.error,
+    //   }
+    // },
+    // async createUpdate(uid: string, type) {
+    //   const post = await postCollection(DbCollections.platform_apis, {
+    //     $sub_params: { uid },
+    //     idKey:'platform',
+    //     data: this.data,
+    //     type,
+    //   })
 
-      return {
-        status: post.status,
-        data: post.data as PlatformApiData,
-        error: post.error,
-      }
-    },
+    //   return {
+    //     status: post.status,
+    //     data: post.data as PlatformApiData,
+    //     error: post.error,
+    //   }
+    // },
     //Only set after fetch
     set(data) {
       this.data = data
@@ -92,8 +88,8 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
       const { user_auth, user } = useAuth
       platform_api_list.isInitialized = false
       platform_api_list.isLoading = true
-      if (user_auth.data && user.data && user.data.platform_apis) {
-        platform_api_list.data = user.data.platform_apis
+      if (user_auth.data && user.data && user.references && user.references.platform_apis) {
+        platform_api_list.data = user.references.platform_apis
       }
       platform_api_list.isInitialized = true
       platform_api_list.isLoading = false
@@ -103,7 +99,7 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
   const facebook_integration = reactive({
     //!!!!NOTE THIS SHOULD BE IN Backend. For now we put this here to test data
     //It should be also save in the firestore
-    async exchangeForUserLongLivedToken(shortLivedToken: string): Promise<PlatformApiData | null> {
+    async exchangeForUserLongLivedToken(shortLivedToken: string): Promise<PlatformApiData | null | undefined> {
       interface FBTokenReturn {
         access_token: string
         token_type: string
@@ -157,26 +153,32 @@ export const usePlatformAPIStore = defineStore('platformAPIStore', () => {
         }
 
         //Map meta account API Information that will be save to firestore
-        const getExistingAcount = await platformAPI.get(uid, 'Meta')
-
-        console.log(getExistingAcount)
-        let type: 'new' | 'update' = 'new'
-        if (getExistingAcount.status) {
-          type = 'update'
+        const getExistingAcount =  await getCollection(DbCollections.platform_apis, {
+              $sub_params: { uid },
+              id: 'Meta',
+            })
+        if (getExistingAcount.status && getExistingAcount.data) {
           platformAPI.set(getExistingAcount.data)
-          if (platformAPI.data) {
-            platformAPI.data.client_account = new_meta_api_account
-          }
         } else {
-          type = 'new'
           platformAPI.initialize()
-          if (platformAPI.data) {
-            platformAPI.data.platform = 'Meta'
-            platformAPI.data.client_account = new_meta_api_account
+        }
+
+        if (platformAPI.data) {
+          platformAPI.data.platform = 'Meta'
+          platformAPI.data.client_account = new_meta_api_account
+          const postPlatform = await postCollection(DbCollections.platform_apis,{
+            data:platformAPI.data,
+            idKey:'platform',
+            $sub_params:{uid},
+          })
+
+          if(postPlatform.data && postPlatform.status){
+            return postPlatform.data
+          }else{
+            console.error('Something went wrong:')
+            return null
           }
         }
-        const postPlatform = await platformAPI.createUpdate(uid, type)
-        return postPlatform.data
       } catch (error) {
         console.error('Error during token exchange:', error)
         return null

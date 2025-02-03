@@ -12,6 +12,8 @@ import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
 import { PermissionServices } from '@/core/types/PermissionTypes'
 import { post_randomizer_service_data } from '@/core/types/WorkSpaceTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { postCollection } from '@/core/utils/firebase-collections'
 import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
 import type { Modal, PostRandomizerServiceData } from '@/core/utils/types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -34,7 +36,7 @@ interface ModalInterface extends Omit<Modal, 'open'> {
 type PostRandomizerFields = Pick<PostRandomizerServiceData, 'name'>
 
 const authWorkspaceStore = useAuthWorkspaceStore()
-const { service_models, workspace_service } = authWorkspaceStore
+const { service_models, workspace_service, active_workspace } = authWorkspaceStore
 const { post_randomizer } = workspace_service
 const { post_randomizer: post_randomizer_md } = service_models
 const post_randomizer_data = ref<PostRandomizerServiceData | null>(null)
@@ -143,20 +145,36 @@ const modal = reactive<ModalInterface>({
     }
   },
   async createCampaign() {
-    if (post_randomizer_data.value) {
+    if (post_randomizer_data.value && active_workspace.data) {
       post_randomizer_md.reInit()
       post_randomizer_md.set(post_randomizer_data.value)
-      const create = await post_randomizer_md.createUpdate('new')
-      if (create.status) {
+      const create = await postCollection(DbCollections.ws_post_randomizer,
+        {
+          data:post_randomizer_data.value,
+          idKey:'pr_id',
+          $sub_params:{
+            ws_id:active_workspace.data.ws_id
+          }
+        }
+      )
+      if (create.status && create.data) {
         post_randomizer.data.push({ ...create.data })
       }
     }
   },
   async editCampaign() {
-    if (post_randomizer_data.value) {
+    if (post_randomizer_data.value && active_workspace.data) {
       post_randomizer_md.reInit()
       post_randomizer_md.set(post_randomizer_data.value)
-      const update = await post_randomizer_md.createUpdate('update')
+      const update = await postCollection(DbCollections.ws_post_randomizer,
+        {
+          data:post_randomizer_data.value,
+          idKey:'pr_id',
+          $sub_params:{
+            ws_id:active_workspace.data.ws_id
+          }
+        }
+      )
       if (update.status) {
         const post_randomizer_index = post_randomizer.data.findIndex(
           (rand) => rand.pr_id === this.prId,

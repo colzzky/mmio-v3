@@ -4,18 +4,6 @@ import BasicInformation from '../components/ProfileSettings/BasicInformation.vue
 import { Button } from '@/core/components/ui/button'
 import { Label } from '@/core/components/ui/label'
 import { Switch } from '@/core/components/ui/switch'
-import { useAuthStore } from '@/stores/authStore'
-import { onMounted } from 'vue'
-
-const useAuth = useAuthStore()
-const { user_auth, user } = useAuth
-onMounted(async () => {
-  if (!user.isInitialized && user_auth.data) {
-    console.log('initializing...')
-    const profile = await user.get(user_auth.data.uid)
-    user.set(profile.data)
-  }
-})
 </script>
 
 <template>

@@ -120,13 +120,13 @@ export const uiHelpers = {
     }
 
     if (Array.isArray(obj)) {
-      return obj.map((item) => this.deepCopy(item)) as unknown as T
+      return obj.map((item) => uiHelpers.deepCopy(item)) as unknown as T
     }
 
     const copy: Partial<T> = {}
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        copy[key] = this.deepCopy(obj[key])
+        copy[key] = uiHelpers.deepCopy(obj[key])
       }
     }
 
@@ -219,7 +219,41 @@ export const uiHelpers = {
     });
   
     return `${baseTitle} ${maxNumber + 1}`.trim();
+  },
+
+  /**
+ * Recursively replaces all undefined values in an object with null.
+ * @param {T} obj The object to process
+ * @return {T} The object with undefined values replaced by null
+ */
+replaceUndefinedWithNull<T>(obj: T): T {
+  if (obj == null) {
+    return obj as T;
   }
+  if (Array.isArray(obj)) {
+    return obj.map(item => uiHelpers.replaceUndefinedWithNull(item)) as T;
+  }
+  if (typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj).map(([key, value]) => [key, uiHelpers.replaceUndefinedWithNull(value)])
+    ) as T;
+  }
+  return obj;
+},
+
+isFullObj:<T>(obj: T): obj is NonNullable<T> => {
+  if (typeof obj !== 'object') return false
+  if (Array.isArray(obj)) return false
+  if (obj === null) return false
+  return Object.keys(obj).length > 0
+},
+
+isFullArray: <T>(arr: T): arr is NonNullable<T> => {
+  if (!Array.isArray(arr)) return false
+  return arr.length > 0
+}
+
+
   
   
   

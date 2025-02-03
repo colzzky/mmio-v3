@@ -1,9 +1,11 @@
 import type { TeamData, TeamMembersData } from './TeamTypes'
 import type {
   ChatbotFlowServiceData,
+  MetaPageRefs,
   PostRandomizerPostsData,
   PostRandomizerServiceData,
   WorkspaceData,
+  WSMetaPagesRefsData,
 } from './WorkSpaceTypes'
 import type { DocumentData } from 'firebase/firestore'
 
@@ -25,13 +27,14 @@ interface MembersInfo extends TeamMembersData {
 
 interface ActiveWorkspace {
   data: WorkspaceData | null
+  meta_page_refs:WSMetaPagesRefsData[]
   isInitialized: boolean
   isLoading: boolean
   reset: () => void
 }
 
 interface ActiveTeam {
-  data: TeamData | null
+  data: {'team': TeamData, 'members': TeamMembersData[]} | null
   members: { [key: TeamMembersData['uid']]: MembersInfo }
   isInitialized: boolean
   isLoading: boolean
@@ -42,7 +45,7 @@ interface CurrentMember {
   isOwner: boolean
   isInitialized: boolean
   isLoading: boolean
-  listener: (() => void) | null
+  listener: (() => void) | null;
   reset: () => void
   listen: (tm_id: string, member_id: string) => Promise<void>
 }
@@ -50,27 +53,18 @@ interface ChatBotFlowService {
   data: ChatbotFlowServiceData
   reInit: () => void
   set: (data: ChatbotFlowServiceData) => void
-  get: (cb_id: string) => Promise<FSReturnData<ChatbotFlowServiceData>>
-  createUpdate: (type: 'new' | 'update') => Promise<FSReturnData<ChatbotFlowServiceData>>
 }
 
 interface PostRandomizerService {
   data: PostRandomizerServiceData
   reInit: () => void
   set: (data: PostRandomizerServiceData) => void
-  get: (pr_id: string) => Promise<FSReturnData<PostRandomizerServiceData>>
-  createUpdate: (type: 'new' | 'update') => Promise<FSReturnData<PostRandomizerServiceData>>
 }
 
 interface PostRandomizerPosts {
   data: PostRandomizerPostsData
   reInit: () => void
   set: (data: PostRandomizerPostsData) => void
-  get: (pr_id: string, prp_id: string) => Promise<FSReturnData<PostRandomizerPostsData>>
-  createUpdate: (
-    pr_id: string,
-    type: 'new' | 'update',
-  ) => Promise<FSReturnData<PostRandomizerPostsData>>
 }
 
 export type {
