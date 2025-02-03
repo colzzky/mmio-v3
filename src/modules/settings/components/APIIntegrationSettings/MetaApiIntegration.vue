@@ -98,7 +98,8 @@ const facebookLogin = async (): Promise<void> => {
   fb_api_load.value = true
   try {
     const FB = await loadFacebookSDK()
-    const scopes = 'email,public_profile,pages_show_list,pages_read_engagement,pages_messaging,pages_manage_metadata';
+    const scopes =
+      'email,public_profile,pages_show_list,pages_read_engagement,pages_messaging,pages_manage_metadata'
     FB.login(
       (response: fb.StatusResponse) => {
         if (response.authResponse) {
@@ -303,7 +304,7 @@ onMounted(async () => {
                     alt="@radix-vue" />
                   <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
-                <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-4">
                   <div class="flex-1 space-y-1">
                     <p class="text-sm font-medium leading-none">
                       {{ fb_api_information.name }}
@@ -321,7 +322,7 @@ onMounted(async () => {
             </div>
             <div v-else>
               <div class="flex items-center space-x-4 rounded-md border p-4">
-                <div class="flex flex-col gap-3">
+                <div class="flex flex-col gap-4">
                   <div class="flex-1 space-y-1">
                     <p class="text-sm font-medium leading-none">No Meta Account connected</p>
                   </div>
@@ -370,7 +371,7 @@ onMounted(async () => {
                     <AvatarImage :src="page.picture ? page.picture.data.url : ''" alt="@radix-vue" />
                     <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
-                  <div class="flex flex-col gap-3">
+                  <div class="flex flex-col gap-4">
                     <div class="flex-1 space-y-1.5">
                       <p class="text-sm font-medium leading-none">
                         {{ page.name }}

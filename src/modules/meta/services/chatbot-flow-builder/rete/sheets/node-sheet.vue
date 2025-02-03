@@ -38,7 +38,7 @@ import type { BaseSchemes } from 'rete'
 import { reactive, watch } from 'vue'
 
 const authWorkspace = useAuthWorkspaceStore()
-const { active_flow,rete_init } = authWorkspace
+const { active_flow } = authWorkspace
 
 type Data =
   | {
@@ -140,11 +140,17 @@ watch(
 
         <span class="flex items-center gap-x-2">
           <Button type="button" class="bg-green-500 hover:bg-green-600" size="xs">Publish</Button>
-          <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="xs" @click="active_flow.saveEditorState()">Save</Button>
+          <Button
+            type="button"
+            class="bg-blue-500 hover:bg-blue-600"
+            size="xs"
+            @click="active_flow.saveEditorState()"
+            >Save</Button
+          >
         </span>
       </header>
       <component v-if="sheet.data" :is="componentMapping[sheet.data.label]" />
-    <SettingsTemplateSheet v-else />
+      <SettingsTemplateSheet v-else />
     </SheetContent>
   </Sheet>
 
@@ -166,7 +172,13 @@ watch(
 
           <span class="flex items-center gap-x-2">
             <Button type="button" class="bg-green-500 hover:bg-green-600" size="xs">Publish</Button>
-            <Button type="button" class="bg-blue-500 hover:bg-blue-600" size="xs" @click="active_flow.saveEditorState()">Save</Button>
+            <Button
+              type="button"
+              class="bg-blue-500 hover:bg-blue-600"
+              size="xs"
+              @click="active_flow.saveEditorState()"
+              >Save</Button
+            >
           </span>
         </header>
       </div>

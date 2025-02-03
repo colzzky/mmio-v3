@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
-import { sortByIndex } from '../utils'
+import { nodeIconMapping, sortByIndex } from '../utils'
 import type { Node, Schemes } from '@/modules/meta/utils/flow-types'
-import { computed, onMounted, ref } from 'vue'
-import { objectEntries } from '@vueuse/core'
 import { Icon } from '@iconify/vue'
+import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps<{ data: Schemes['Node']; emit: any; seed: number }>()
 const node = ref<Node<'trigger_node'> | null>(null)
@@ -14,33 +13,31 @@ onMounted(() => {
   node.value = props.data as Node<'trigger_node'>
 })
 
-const inputs = computed(() => {
-  const entries = Object.entries(node.value?.inputs || {})
-  return sortByIndex(entries)
-})
-
 const outputs = computed(() => {
   const entries = Object.entries(node.value?.outputs || {})
   return sortByIndex(entries)
 })
-
-
 </script>
 
 <template>
   <div class="space-y-2">
-    <div class="w-full p-2 border rounded-lg border-neutral-200 bg-neutral-100 flex justify-between items-center gap-4">
-      <span class="text-xs font-semibold text-gray-600">{{ node?.data?.name ? node?.data?.name : 'Untitled Trigger Node'}}</span>
+    <div
+      class="flex w-full items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-neutral-100 p-2"
+    >
+      <span class="text-xs font-semibold text-gray-600">{{
+        node?.data?.name ? node?.data?.name : 'Untitled Trigger Node'
+      }}</span>
     </div>
 
     <NodeCard :data-selected="data.selected" class="flex flex-col gap-y-3 pb-0">
       <!-- inputs -->
       <section class="space-y-2">
-        <div class="px-5 space-y-2">
-          <div class="min-h-28 border-4 border-dotted rounded-lg p-2 border-gray-400 flex items-center justify-center">
-            <Icon icon="bx:bolt-circle" class="size-20" />
+        <div class="space-y-2 px-5">
+          <div
+            class="flex min-h-28 items-center justify-center rounded-lg border-4 border-dotted border-gray-400 p-2"
+          >
+            <Icon :icon="nodeIconMapping[data.label]" class="size-16" />
           </div>
-
         </div>
       </section>
 
@@ -77,31 +74,31 @@ const outputs = computed(() => {
             </div>
           </div>
         </div>
-        </section>
-
-      
+      </section>
 
       <section class="border-t py-2">
         <div v-if="node && node.data">
           <div class="flex flex-col gap-4">
-            <template v-for="[key, output] in outputs" :key="key + seed" class="flex flex-col gap-4">
+            <template v-for="[key, output] in outputs" :key="key + seed">
               <div v-if="output && key === 'num1'" :data-testid="`input-${key}`" class="relative">
-                <div class="px-5 flex rounded-lg justify-end items-center">
+                <div class="flex items-center justify-end rounded-lg px-5">
                   <span class="flex items-center gap-x-2 font-semibold text-gray-400">
                     Continue to Next Step
                   </span>
-
                 </div>
                 <!-- Circle overlapping the border of the main div -->
-                <div
-                  class="absolute -top-0.5 -right-2.5 rounded-full">
-                  <NodeSocket :emit :data="{
-                    type: 'socket',
-                    side: 'output',
-                    key,
-                    nodeId: data.id,
-                    payload: output.socket,
-                  }" class="[--socket-size:16px]" />
+                <div class="absolute -right-2.5 -top-0.5 rounded-full">
+                  <NodeSocket
+                    :emit
+                    :data="{
+                      type: 'socket',
+                      side: 'output',
+                      key,
+                      nodeId: data.id,
+                      payload: output.socket,
+                    }"
+                    class="[--socket-size:16px]"
+                  />
                 </div>
               </div>
             </template>
@@ -110,5 +107,4 @@ const outputs = computed(() => {
       </section>
     </NodeCard>
   </div>
-
 </template>

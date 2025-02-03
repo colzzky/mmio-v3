@@ -65,16 +65,17 @@ const outputs = computed(() => {
       <!-- replies -->
       <section class="space-y-2">
         <div class="space-y-2 px-5">
-          <div class="font-bold">Video</div>
-          <div class="max-h-48 rounded-lg border border-gray-200 bg-white p-3">
-            <div v-if="node?.data?.text" class="line-clamp-6 overflow-hidden">
-              {{ node?.data?.text }}
-            </div>
-            <div v-else>
-              <p class="text-gray-400">No Video Available</p>
-            </div>
+          <div
+            class="flex min-h-28 items-center justify-center rounded-lg border-4 border-dotted border-gray-400 p-2"
+          >
+            <img
+              v-if="node?.data?.url"
+              :src="node?.data?.url"
+              alt="Placeholder Image"
+              class="max-h-full max-w-full rounded-lg object-contain"
+            />
+            <Icon v-else :icon="nodeIconMapping[data.label]" class="size-12 text-foreground/50" />
           </div>
-          <p class></p>
         </div>
         <div v-if="node && node.data">
           <div v-if="objectEntries(node.data.buttons).length > 0" class="flex flex-col gap-2">

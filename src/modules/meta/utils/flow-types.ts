@@ -17,24 +17,22 @@ export interface NodeType {
   trigger_node: TriggerNode
   video_node: VideoNode
 
-
-
   gif_node: GIFNode
   file_node: FileNode
   http_node: HTTPNode
-  
+
   bot_sheets_api_node: BotSheetsAPINode //Skip for now
   openai_embedding_node: OpenAIEmbeddingNode //Skip for now
   chatgpt_api_node: ChatGPTAPINode //Skip for now
   dynamic_carousel_node: DynamicCarouselNode //Skip for now
   user_input_node: UserInputNode //Skip for now
-  
+
   otn_node: OTNNode
   product_search_node: ProductSearchNode
   action_node: ActionNode //Skip for now
   timegap_node: TimegapNode
   go_to_flow_node: GoToFlowNode
-  email_node: EmailNode //Skip for now 
+  email_node: EmailNode //Skip for now
   sms_node: SMSNode
   function_node: FunctionNode //Skip for now
   recurring_node: RecurringNode // Skip for now
@@ -156,6 +154,7 @@ export interface VideoNode {
   postbackid?: string
   delay?: string
   text: string
+  url: string
   buttons: Record<string, Button>
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
@@ -187,10 +186,10 @@ export interface HTTPNode {
 
   body: string
   map: Record<string, string>
-  params: { key: string, value: string }[]
-  headers: { key: string, value: string }[]
-  type: RestApiTypes,
-  subscribe_id: string,
+  params: { key: string; value: string }[]
+  headers: { key: string; value: string }[]
+  type: RestApiTypes
+  subscribe_id: string
   url: string
 }
 //SKIP FOR NOW
@@ -248,11 +247,11 @@ export interface OTNNode {
   name: string
   postbackid?: string
   delay?: string
-  action: string,
-  giver_data: Record<string, string>,
-  otnTitle: string,
-  otnName?: string,
-  existing?: string,
+  action: string
+  giver_data: Record<string, string>
+  otnTitle: string
+  otnName?: string
+  existing?: string
 }
 
 export interface ProductSearchNode {
@@ -339,12 +338,12 @@ export interface RecurringNode {
   delay?: string
   giver_data: Record<string, string>
   config: {
-    image_url: string,
-    title: string,
-    notification_messages_frequency: string,
-    notification_messages_reoptin: string,
+    image_url: string
+    title: string
+    notification_messages_frequency: string
+    notification_messages_reoptin: string
     notification_messages_timezone: string
-  },
+  }
   id: string
   recurring_name: string
 }
@@ -399,7 +398,7 @@ export interface ConnectionProperty {
   targetInput: string
 }
 
-export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> { }
+export class Connection<A extends Node<keyof NodeType>> extends ClassicPreset.Connection<A, A> {}
 
 export type Schemes = GetSchemes<Node<keyof NodeType>, Connection<Node<keyof NodeType>>>
 export type AreaExtra = VueArea2D<Schemes>
@@ -708,6 +707,7 @@ export namespace ReteTemplates {
       node.data = {
         name: 'Untitled Video Node',
         text: '',
+        url: '',
         buttons: {},
         quick_replies: {},
         giver_data: {},
@@ -729,7 +729,6 @@ export namespace ReteTemplates {
       )
       return node
     },
-
 
     gif_node() {
       const node = new Node('gif_node')
@@ -965,7 +964,7 @@ export namespace ReteTemplates {
         name: 'Untitled OTN Node',
         action: '',
         giver_data: {
-          button_otn: button_otn_postback
+          button_otn: button_otn_postback,
         },
         otnTitle: '',
       }
@@ -995,7 +994,7 @@ export namespace ReteTemplates {
         quick_replies: {},
         giver_data: {},
         cta: '',
-        store_id: ''
+        store_id: '',
       }
       createMetaTemplateOutIn(
         {
@@ -1049,7 +1048,7 @@ export namespace ReteTemplates {
       node.data = {
         name: 'Untitled Timegap Node',
         giver_data: {
-          num1: num1_postback
+          num1: num1_postback,
         },
         value: 0,
         unit: '',
@@ -1085,8 +1084,8 @@ export namespace ReteTemplates {
       node.data = {
         name: 'Untitled Go To Flow Node',
         giver_data: {},
-        flow:'',
-        payload:''
+        flow: '',
+        payload: '',
       }
       createMetaTemplateOutIn(
         {
@@ -1133,9 +1132,9 @@ export namespace ReteTemplates {
       node.data = {
         name: 'Untitled SMS Node',
         giver_data: {},
-        body:'',
-        sender_id:'',
-        to:''
+        body: '',
+        sender_id: '',
+        to: '',
       }
       createMetaTemplateOutIn(
         {
@@ -1700,7 +1699,7 @@ export const nodeMapContextMenu: Record<
   condition: { label: 'Condition', key: '5', template: 'condition_node', icon: 'ix:logic-diagram' },
   image: { label: 'Image', key: '6', template: 'image_node', icon: 'bx:image' },
   audio: { label: 'Audio', key: '7', template: 'audio_node', icon: 'gridicons:audio' },
-  trigger: { label: 'Trigger', key: '8', template: 'trigger_node', icon: 'bx:bolt-circle' },
+  trigger: { label: 'Trigger', key: '8', template: 'trigger_node', icon: 'bxs:bolt' },
   video: { label: 'Video', key: '9', template: 'video_node', icon: 'bx:video' },
   gif: { label: 'GIF', key: '10', template: 'gif_node', icon: 'stash:gif-solid' },
   file: { label: 'File', key: '11', template: 'file_node', icon: 'bx:file' },

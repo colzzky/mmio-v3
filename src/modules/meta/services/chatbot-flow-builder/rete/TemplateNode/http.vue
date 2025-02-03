@@ -26,25 +26,25 @@ const outputs = computed(() => {
 </script>
 
 <template>
-  <div class="space-y-1">
+  <div class="space-y-2">
     <div class="flex w-full rounded-lg border border-neutral-100 bg-neutral-100 p-2">
       <span class="text-xs font-semibold text-gray-500">{{ node?.data?.name }}</span>
     </div>
-    <NodeCard :data-selected="data.selected" class="flex flex-col gap-y-2 pb-0">
+    <NodeCard :data-selected="data.selected" class="flex flex-col gap-y-3 pb-0">
       <!-- inputs -->
-      <section class="flex flex-col gap-y-3">
+      <section class="flex flex-col gap-y-4">
         <template v-for="[key, input] in inputs" :key="key + seed">
           <div v-if="input" :data-testid="`input-${key}`" class="relative">
-            <div class="flex items-center justify-center rounded-lg px-1">
-              <div class="flex h-8 w-full items-center rounded-md px-3">
-                <span class="flex items-center gap-x-1 font-semibold">
-                  <Icon :icon="nodeIconMapping[data.label]" class="size-5" />
+            <div class="flex items-center justify-center rounded-lg px-2">
+              <div class="flex h-9 w-full items-center rounded-md px-3">
+                <span class="flex items-center gap-x-2 font-semibold">
+                  <Icon :icon="nodeIconMapping[data.label]" class="size-6" />
                   HTTP
                 </span>
               </div>
             </div>
             <!-- Circle overlapping the border of the main div -->
-            <div class="absolute -left-2 bottom-2 rounded-full">
+            <div class="absolute -left-3 bottom-2 rounded-full">
               <NodeSocket
                 :emit
                 :data="{
@@ -81,7 +81,7 @@ const outputs = computed(() => {
             <template v-for="(button, key) in node.data.buttons" :key="key + seed">
               <div v-if="button" :data-testid="key">
                 <div class="relative">
-                  <div class="flex items-center rounded-lg px-4">
+                  <div class="flex items-center rounded-lg px-5">
                     <span
                       class="border0 flex w-full items-center justify-center gap-x-2 rounded-md bg-white p-1 px-2 text-xs font-medium text-gray-400"
                     >
@@ -89,7 +89,7 @@ const outputs = computed(() => {
                     </span>
                   </div>
                   <!-- Circle overlapping the border of the main div -->
-                  <div class="absolute -right-1.5 -top-0 rounded-full">
+                  <div class="absolute -right-2.5 top-0 rounded-full">
                     <NodeSocket
                       :emit
                       :data="{
@@ -99,7 +99,7 @@ const outputs = computed(() => {
                         nodeId: data.id,
                         payload: node.outputs[key]?.socket,
                       }"
-                      class="[--socket-size:17px]"
+                      class="[--socket-size:16px]"
                     />
                   </div>
                 </div>
@@ -109,7 +109,7 @@ const outputs = computed(() => {
           <div v-else>
             <div>
               <div class="relative">
-                <div class="flex items-center justify-end rounded-lg px-4">
+                <div class="flex items-center justify-end rounded-lg px-5">
                   <span
                     class="border0 flex w-full items-center justify-center gap-x-2 rounded-md border-2 border-dotted bg-white p-1 px-2 text-xs font-medium text-gray-400"
                   >
@@ -123,22 +123,22 @@ const outputs = computed(() => {
       </section>
 
       <!-- quick replies -->
-      <section class="space-y-2">
-        <div class="px-4 font-bold">Quick Replies</div>
+      <section class="space-y-3">
+        <div class="px-5 font-bold">Quick Replies</div>
         <div v-if="node && node.data">
           <div v-if="objectEntries(node.data.quick_replies).length > 1" class="flex flex-col gap-4">
             <template v-for="(quickReply, key) in node.data.quick_replies" :key="key + seed">
               <div v-if="quickReply" :data-testid="key">
                 <div class="relative">
-                  <div class="flex items-center justify-end rounded-lg px-4">
+                  <div class="flex items-center justify-end rounded-lg px-5">
                     <span
-                      class="border0 flex items-center gap-x-2 rounded-full bg-white p-1 px-2 text-xs font-medium text-gray-400"
+                      class="border-1 flex items-center gap-x-2 rounded-full bg-white p-1 px-2 text-xs font-medium text-gray-400"
                     >
                       <p>{{ quickReply.title }}</p>
                     </span>
                   </div>
                   <!-- Circle overlapping the border of the main div -->
-                  <div class="absolute -right-1.5 -top-0 rounded-full">
+                  <div class="absolute -right-2.5 top-0 rounded-full">
                     <NodeSocket
                       :emit
                       :data="{
@@ -148,7 +148,7 @@ const outputs = computed(() => {
                         nodeId: data.id,
                         payload: node.outputs[key]?.socket,
                       }"
-                      class="[--socket-size:17px]"
+                      class="[--socket-size:16px]"
                     />
                   </div>
                 </div>
@@ -158,9 +158,9 @@ const outputs = computed(() => {
           <div v-else>
             <div>
               <div class="relative">
-                <div class="flex items-center justify-end rounded-lg px-4">
+                <div class="flex items-center justify-end rounded-lg px-5">
                   <span
-                    class="flex items-center gap-x-1 rounded-full border-2 border-dotted bg-white p-1 px-2 text-xs font-medium text-gray-400"
+                    class="flex items-center gap-x-2 rounded-full border-2 border-dotted bg-white p-1 px-2 text-xs font-medium text-gray-400"
                   >
                     <p>No Quick Replies yet</p>
                   </span>
@@ -171,18 +171,18 @@ const outputs = computed(() => {
         </div>
       </section>
 
-      <section class="border-t py-1">
+      <section class="border-t py-2">
         <div v-if="node && node.data">
-          <div class="flex flex-col gap-3">
+          <div class="flex flex-col gap-4">
             <template v-for="[key, output] in outputs" :key="key + seed">
               <div v-if="output && key === 'num2'" :data-testid="`input-${key}`" class="relative">
-                <div class="flex items-center justify-end rounded-lg px-4">
-                  <span class="flex items-center gap-x-1 font-semibold text-gray-400">
+                <div class="flex items-center justify-end rounded-lg px-5">
+                  <span class="flex items-center gap-x-2 font-semibold text-gray-400">
                     Continue to Next Step
                   </span>
                 </div>
                 <!-- Circle overlapping the border of the main div -->
-                <div class="absolute -right-1.5 -top-0.5 rounded-full">
+                <div class="absolute -right-2.5 -top-0.5 rounded-full">
                   <NodeSocket
                     :emit
                     :data="{
@@ -192,7 +192,7 @@ const outputs = computed(() => {
                       nodeId: data.id,
                       payload: output.socket,
                     }"
-                    class="[--socket-size:17px]"
+                    class="[--socket-size:16px]"
                   />
                 </div>
               </div>

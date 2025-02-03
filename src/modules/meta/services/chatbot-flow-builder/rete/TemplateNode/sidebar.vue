@@ -1,5 +1,4 @@
 <script setup lang="ts" generic="T extends Node<keyof NodeType>">
-import CustomSocket from '../customSocket.vue'
 import { Button } from '@/core/components/ui/button'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
@@ -23,14 +22,10 @@ import {
   type NodeType,
   type Schemes,
 } from '@/modules/meta/utils/flow-types'
-import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
-import { ClassicPreset } from 'rete'
 import type { AreaPlugin } from 'rete-area-plugin'
 import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
 
-const authWorkspace = useAuthWorkspaceStore()
-const { active_workspace } = authWorkspace
 const node_obj = ref<Node<'message_node'> | null>(null)
 const props = defineProps<{
   node: T
@@ -40,7 +35,6 @@ const props = defineProps<{
 
 const replies = ref<MetaTemplateOutput[]>([])
 const quickReplies = ref<MetaTemplateOutput[]>([])
-
 
 type State = 'main' | 'create-reply-button' | 'create-quick-reply-button'
 const sheetState = ref<State>('main')

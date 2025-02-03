@@ -23,7 +23,6 @@ import { PermissionAccessError, servicePermission } from '@/core/utils/permissio
 import { uiHelpers } from '@/core/utils/ui-helper'
 import router from '@/router'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
-import { Icon } from 'lucide-vue-next'
 import { onMounted, useTemplateRef } from 'vue'
 
 export type Flow = {
@@ -52,11 +51,14 @@ onMounted(async () => {
   }
 })
 
-const navigateFlow = (flow:ChatbotFlowServiceData) => {
+const navigateFlow = (flow: ChatbotFlowServiceData) => {
   active_flow.setActiveChatBotFlow(flow)
-  router.push({ name: 'chatbot-flow-final', params:{
-    cb_id:flow.cb_id
-  }})
+  router.push({
+    name: 'chatbot-flow-final',
+    params: {
+      cb_id: flow.cb_id,
+    },
+  })
 }
 
 const createEditModalRef = useTemplateRef('createEditModal')
@@ -103,6 +105,7 @@ const createEditModalRef = useTemplateRef('createEditModal')
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       <DropdownMenuItem @click="navigateFlow(flow)" class="gap-x-3">
+                        <i class="bx bx-navigation text-xl" />
                         Navigate Flow
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -110,7 +113,7 @@ const createEditModalRef = useTemplateRef('createEditModal')
                         @click="
                           createEditModalRef?.modal.open({ intent: 'edit', flowId: flow.cb_id })
                         "
-                        >
+                      >
                         <i class="bx bx-edit text-xl" />
                         Edit
                       </DropdownMenuItem>

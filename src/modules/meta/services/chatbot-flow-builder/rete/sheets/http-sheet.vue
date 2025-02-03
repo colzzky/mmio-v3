@@ -23,11 +23,10 @@ import { toast } from '@/core/components/ui/toast'
 import { createMetaTemplateOutIn, Node, ReteSockets } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
-import { storeToRefs } from 'pinia'
 import { onMounted, reactive, ref, watch } from 'vue'
 
 const authWorkspace = useAuthWorkspaceStore()
-const { active_flow , rete_init} = authWorkspace
+const { active_flow, rete_init } = authWorkspace
 
 const localNodeData = ref<Node<'http_node'> | undefined>(undefined)
 

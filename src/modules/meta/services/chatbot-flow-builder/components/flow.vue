@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { uiHelpers } from '@/core/utils/ui-helper'
 import CustomConnection from '../rete/custom-connection.vue'
 import CustomControl from '../rete/customControl.vue'
 import NodeSheet from '../rete/sheets/node-sheet.vue'
@@ -7,7 +6,18 @@ import { nodeMapping } from '../rete/utils'
 import ActionBar from './action-bar.vue'
 import Menu from './custom-contextmenu/index.vue'
 import type { ContextMenuRenderContext } from './custom-contextmenu/types'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+} from '@/core/components/ui/alert-dialog'
 import { toast } from '@/core/components/ui/toast'
+import type { ChatbotFlowServiceData } from '@/core/types/WorkSpaceTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { getCollection } from '@/core/utils/firebase-collections'
+import { uiHelpers } from '@/core/utils/ui-helper'
 import {
   CustomControls,
   type AreaExtra,
@@ -21,7 +31,6 @@ import {
   ReteSockets,
   socketDefinitions,
   type SerializedFlow,
-  CustomSocket,
 } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { objectEntries } from '@vueuse/core'
@@ -32,17 +41,7 @@ import { ContextMenuPlugin } from 'rete-context-menu-plugin'
 import { VuePlugin, Presets } from 'rete-vue-plugin'
 import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { getCollection } from '@/core/utils/firebase-collections'
-import type { ChatBotFlowService } from '@/core/types/AuthWorkspaceTypes'
-import type { ChatbotFlowServiceData } from '@/core/types/WorkSpaceTypes'
-import { boolean } from 'zod'
-import AlertDialog from '@/core/components/ui/alert-dialog/AlertDialog.vue'
-import AlertDialogContent from '@/core/components/ui/alert-dialog/AlertDialogContent.vue'
-import AlertDialogHeader from '@/core/components/ui/alert-dialog/AlertDialogHeader.vue'
-import AlertDialogTitle from '@/core/components/ui/alert-dialog/AlertDialogTitle.vue'
-import AlertDialogDescription from '@/core/components/ui/alert-dialog/AlertDialogDescription.vue'
-import AlertDialogFooter from '@/core/components/ui/alert-dialog/AlertDialogFooter.vue'
-import { DbCollections } from '@/core/utils/enums/dbCollection'
+
 const route = useRoute()
 
 //** Pending: We need to create an interface when saving editor proceed at line saveEditorState and use it when we reload the state */
@@ -87,8 +86,6 @@ async function initializeFlow() {
 
   if (!rete_init.area) return
 
-
-
   //Doesnt follow anything
   rete_init.contextMenu = new ContextMenuPlugin<Schemes>({
     items(context: 'root' | Schemes['Node'] | Connection<Node<keyof NodeType>>) {
@@ -114,19 +111,25 @@ async function initializeFlow() {
             searchBar: false,
             list: [
               {
-                label: 'Delete', key: '1', handler: () => {
+                label: 'Delete',
+                key: '1',
+                handler: () => {
                   if (rete_init.editor) {
-                    for (const [key, connection] of Object.entries(rete_init.editor.getConnections())) {
+                    for (const [key, connection] of Object.entries(
+                      rete_init.editor.getConnections(),
+                    )) {
                       if (connection.target == context.id || connection.source == context.id) {
                         rete_init.editor.removeConnection(connection.id)
                       }
                     }
                     rete_init.editor.removeNode(context.id)
                   }
-                }
+                },
               },
               {
-                label: 'Clone', key: '2', handler: () => {
+                label: 'Clone',
+                key: '2',
+                handler: () => {
                   if (context.data && context.data.name) {
                     const newNode = new Node(context.label)
                     newNode.data = uiHelpers.deepCopy(context.data)
@@ -142,13 +145,13 @@ async function initializeFlow() {
                       )
                       objectEntries(context.outputs).forEach(([key, output]) => {
                         if (output) {
-
                           createMetaTemplateOutIn(
                             {
                               node: newNode,
-                              socket: ReteSockets[output?.socket.name as keyof typeof socketDefinitions],
+                              socket:
+                                ReteSockets[output?.socket.name as keyof typeof socketDefinitions],
                             },
-                            output.id
+                            output.id,
                           )
                         }
                       })
@@ -157,25 +160,27 @@ async function initializeFlow() {
                     console.log(context)
                     draggable.toggleNode(newNode)
                   }
-                }
+                },
               },
-            ]
+            ],
           }
-          //For Connections 
+          //For Connections
         } else {
           return {
             searchBar: false,
-            list: [{
-              label: 'Delete Connection', key: '1', handler: () => {
-                if (rete_init.editor) {
-                  rete_init.editor.removeConnection(context.id)
-                }
-
-              }
-            }]
+            list: [
+              {
+                label: 'Delete Connection',
+                key: '1',
+                handler: () => {
+                  if (rete_init.editor) {
+                    rete_init.editor.removeConnection(context.id)
+                  }
+                },
+              },
+            ],
           }
         }
-
       }
     },
   })
@@ -205,7 +210,7 @@ async function initializeFlow() {
       console.log({ update: context })
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-          'undefined'
+        'undefined'
           ? 200
           : context.data.delay
       if (context.data.type === 'contextmenu') {
@@ -220,7 +225,7 @@ async function initializeFlow() {
     render: function render(context: ContextMenuRenderContext) {
       const delay =
         typeof (context.data === null || context.data === void 0 ? void 0 : context.data.delay) ===
-          'undefined'
+        'undefined'
           ? 200
           : context.data.delay
       console.log({ render: context })
@@ -297,8 +302,6 @@ function trackMouseEvents() {
           }
         }
       }
-
-
 
       if (context.type === 'connectioncreate') {
         const check = checkConnectionSocket(context.data)
@@ -530,11 +533,17 @@ function getTranslatedMousePosition(event: MousePosition) {
 }
 
 async function reloadEditor() {
-  if (!active_flow.chatbot_flow_data || !rete_init.editor || !rete_init.area || !active_flow.chatbot_flow_data.botFlow) return
+  if (
+    !active_flow.chatbot_flow_data ||
+    !rete_init.editor ||
+    !rete_init.area ||
+    !active_flow.chatbot_flow_data.botFlow
+  )
+    return
   const orig_editor: SerializedFlow.State = JSON.parse(active_flow.chatbot_flow_data.botFlow)
   for (const node of orig_editor.nodes) {
     const newNode = new Node(node.label)
-    newNode.data = { ...node.data as NodeType[typeof newNode.label] }
+    newNode.data = { ...(node.data as NodeType[typeof newNode.label]) }
     newNode.id = node.id
     objectEntries(node.inputs).forEach(([key, input]) => {
       if (input) {
@@ -606,8 +615,8 @@ onMounted(async () => {
     const get_flow = await getCollection(DbCollections.ws_chatbot_flow, {
       id: route.params.cb_id as string,
       $sub_params: {
-        ws_id: route.params.workspaceId as string
-      }
+        ws_id: route.params.workspaceId as string,
+      },
     })
     console.log(get_flow)
     if (get_flow.data && get_flow.status) {
@@ -627,9 +636,11 @@ onMounted(async () => {
 <template>
   <!-- Rete.js Canvas -->
   <div>
-    <div v-if="draggable.visibility && draggable.node"
+    <div
+      v-if="draggable.visibility && draggable.node"
       :style="{ top: `${draggable.position.y}px`, left: `${draggable.position.x}px` }"
-      class="tracker pointer-events-none absolute flex h-10 w-auto -translate-x-[50%] -translate-y-[50%] items-center justify-center border-2 border-dashed border-blue-600 px-4 font-bold text-white">
+      class="tracker pointer-events-none absolute flex h-10 w-auto -translate-x-[50%] -translate-y-[50%] items-center justify-center border-2 border-dashed border-blue-600 px-4 font-bold text-white"
+    >
       {{ draggable.node.data?.name }}
     </div>
 
@@ -649,14 +660,12 @@ onMounted(async () => {
 
     <NodeSheet v-if="!pageLoad && !editor_load" />
     <ActionBar />
-
-
   </div>
 
   <AlertDialog :open="!pageLoad && !editor_load ? false : true">
     <AlertDialogContent>
       <AlertDialogHeader>
-        <AlertDialogTitle class="flex justify-center gap-2 items-center">
+        <AlertDialogTitle class="flex items-center justify-center gap-2">
           <div>
             <i class="material-icons animate-spin text-sm">donut_large</i>
           </div>

@@ -244,7 +244,7 @@ const outputs = computed(() => {
         </div>
         <div
           v-if="node.data.cards.length < 11"
-          class="flex items-center justify-center rounded-xl border-4 border-dashed border-neutral-200 py-4"
+          class="flex items-center justify-center rounded-xl border-4 border-dashed border-neutral-200 py-4 text-background/75"
         >
           <section>
             <div class="space-y-2 px-5 font-semibold">You can add more Cards</div>

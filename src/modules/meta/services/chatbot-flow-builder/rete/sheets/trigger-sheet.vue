@@ -15,11 +15,10 @@ import { Textarea } from '@/core/components/ui/textarea'
 import { Node } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
-import { storeToRefs } from 'pinia'
 import { onMounted, ref, watch } from 'vue'
 
 const authWorkspace = useAuthWorkspaceStore()
-const { active_flow , rete_init} = authWorkspace
+const { active_flow, rete_init } = authWorkspace
 
 const localNodeData = ref<Node<'trigger_node'> | undefined>(undefined)
 

@@ -18,17 +18,14 @@ import {
   SelectValue,
 } from '@/core/components/ui/select'
 import { SheetHeader, SheetTitle, SheetDescription } from '@/core/components/ui/sheet'
-import { Textarea } from '@/core/components/ui/textarea'
 import { toast } from '@/core/components/ui/toast'
 import { createMetaTemplateOutIn, Node, ReteSockets } from '@/modules/meta/utils/flow-types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
-import { storeToRefs } from 'pinia'
 import { onMounted, reactive, ref, watch } from 'vue'
 
 const authWorkspace = useAuthWorkspaceStore()
-const { active_flow , rete_init} = authWorkspace
-
+const { active_flow, rete_init } = authWorkspace
 
 const localNodeData = ref<Node<'file_node'> | undefined>(undefined)
 
@@ -333,15 +330,14 @@ function handleRemoveDelay() {
           </div>
         </div>
         <div>
-          <Label for="text">Text Message</Label>
-          <Textarea
-            v-model:model-value="localNodeData.data.text"
-            id="text"
-            name="text"
-            rows="5"
-            class="resize-none"
-            placeholder=""
-          />
+          <Label for="file">File</Label>
+          <div class="relative aspect-video rounded border-2 border-dashed p-1">
+            <small
+              class="absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 text-balance text-center text-muted-foreground"
+            >
+              Drag and drop file here
+            </small>
+          </div>
         </div>
         <div class="grid gap-y-3 text-sm">
           <h3 class="font-medium">Message Reply Buttons</h3>

@@ -1,5 +1,4 @@
 <script setup lang="ts" generic="T extends Node<keyof NodeType>">
-import CustomSocket from '../customSocket.vue'
 import { Button } from '@/core/components/ui/button'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
@@ -23,14 +22,9 @@ import {
   type NodeType,
   type Schemes,
 } from '@/modules/meta/utils/flow-types'
-import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { Icon } from '@iconify/vue'
-import { ClassicPreset } from 'rete'
 import type { AreaPlugin } from 'rete-area-plugin'
 import { onMounted, onUnmounted, reactive, ref, watch } from 'vue'
-
-const authWorkspace = useAuthWorkspaceStore()
-const { active_workspace } = authWorkspace
 
 const props = defineProps<{
   node: T
@@ -141,12 +135,19 @@ onUnmounted(() => {
   <div class="space-y-5">
     <div>
       <div
-        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 items-center gap-x-4 text-sm [--icon-size:theme(spacing.6)]">
-        <Icon v-if="sheetState === 'main'" icon="bx:message" class="row-span-full size-[var(--icon-size)]" />
+        class="grid grid-cols-[var(--icon-size),1fr] grid-rows-2 items-center gap-x-4 text-sm [--icon-size:theme(spacing.6)]"
+      >
+        <Icon
+          v-if="sheetState === 'main'"
+          icon="bx:message"
+          class="row-span-full size-[var(--icon-size)]"
+        />
         <button v-else type="button" @click="handleChangeSheetState('main')" class="row-span-full">
           <Icon icon="bxs:left-arrow" class="size-[var(--icon-size)]" />
         </button>
-        <span class="leading-none">{{ node_obj?.data?.name ? node_obj?.data?.name : 'Untitled Generic Node' }}</span>
+        <span class="leading-none">{{
+          node_obj?.data?.name ? node_obj?.data?.name : 'Untitled Generic Node'
+        }}</span>
         <small class="leading-none text-muted-foreground">
           Generic Node
           <template v-if="sheetState === 'create-reply-button'">
@@ -169,39 +170,63 @@ onUnmounted(() => {
         <Input v-model="node_obj.data.image" type="text" placeholder="Enter Image URL" />
       </section>
 
-      <div class="min-h-28 border-4 border-dotted rounded-lg p-2 border-gray-400 flex items-center justify-center">
-        <img v-if="node_obj.data.image" :src="node_obj.data.image" alt="Placeholder Image"
-          class="max-w-full max-h-full object-contain rounded-lg" />
+      <div
+        class="flex min-h-28 items-center justify-center rounded-lg border-4 border-dotted border-gray-400 p-2"
+      >
+        <img
+          v-if="node_obj.data.image"
+          :src="node_obj.data.image"
+          alt="Placeholder Image"
+          class="max-h-full max-w-full rounded-lg object-contain"
+        />
         <span v-else>Please put image URL</span>
       </div>
 
       <section class="grid gap-y-1.5">
         <Label for="title">Title:</Label>
-        <Input v-model="node_obj.data.title" type="text" id="title" name="title" rows="5"
-          placeholder="Whats the heading for this message?" />
+        <Input
+          v-model="node_obj.data.title"
+          type="text"
+          id="title"
+          name="title"
+          rows="5"
+          placeholder="Whats the heading for this message?"
+        />
       </section>
 
       <section class="grid gap-y-1.5">
         <Label for="message">Description:</Label>
-        <Textarea v-model="node_obj.data.text" id="message" name="message" rows="5"
-          placeholder="Whats the message you want to sent to the user?" />
+        <Textarea
+          v-model="node_obj.data.text"
+          id="message"
+          name="message"
+          rows="5"
+          placeholder="Whats the message you want to sent to the user?"
+        />
       </section>
       <section class="grid grid-cols-2 gap-y-3">
         <h3 class="font-medium">Message Reply Buttons</h3>
         <ul class="col-span-full grid gap-y-3">
           <template v-for="(reply, key) in node_obj.data.buttons" :key>
             <li
-              class="grid grid-cols-[1fr_var(--icon-size)] grid-rows-2 items-center [--icon-size:theme(spacing.9)] *:leading-none">
+              class="grid grid-cols-[1fr_var(--icon-size)] grid-rows-2 items-center [--icon-size:theme(spacing.9)] *:leading-none"
+            >
               <p class="text-xs">{{ reply.title }}</p>
               <strong>{{ reply.type }}</strong>
-              <button type="button"
-                class="col-start-2 row-span-full grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5">
+              <button
+                type="button"
+                class="col-start-2 row-span-full grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5"
+              >
                 <Icon icon="bx:dots-vertical-rounded" class="size-5" />
               </button>
             </li>
           </template>
-          <Button size="sm" variant="outline" class="!bg-none border-2 border-dashed"
-            @click="handleChangeSheetState('create-reply-button')">
+          <Button
+            size="sm"
+            variant="outline"
+            class="border-2 border-dashed !bg-none"
+            @click="handleChangeSheetState('create-reply-button')"
+          >
             <p>Create Reply Button</p>
           </Button>
         </ul>
@@ -211,16 +236,23 @@ onUnmounted(() => {
         <ul class="col-span-full grid gap-y-3">
           <template v-for="(quickReply, key) in node_obj.data.quick_replies" :key>
             <li
-              class="grid grid-cols-[1fr_var(--icon-size)] items-center [--icon-size:theme(spacing.9)] *:leading-none">
+              class="grid grid-cols-[1fr_var(--icon-size)] items-center [--icon-size:theme(spacing.9)] *:leading-none"
+            >
               <p>{{ quickReply.title }}</p>
-              <button type="button"
-                class="grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5">
+              <button
+                type="button"
+                class="grid size-[var(--icon-size)] place-content-center rounded-lg hover:bg-primary/5"
+              >
                 <Icon icon="bx:dots-vertical-rounded" class="size-5" />
               </button>
             </li>
           </template>
-          <Button size="sm" variant="outline" class="!bg-none border-2 border-dashed"
-            @click="handleChangeSheetState('create-quick-reply-button')">
+          <Button
+            size="sm"
+            variant="outline"
+            class="border-2 border-dashed !bg-none"
+            @click="handleChangeSheetState('create-quick-reply-button')"
+          >
             <p>Create Quick Reply Button</p>
           </Button>
         </ul>
@@ -229,8 +261,12 @@ onUnmounted(() => {
     <main v-else-if="sheetState === 'create-reply-button'" class="grid gap-y-6 text-sm">
       <section class="grid gap-y-1.5">
         <Label for="buttonName">Button Name</Label>
-        <Input v-model="reply_button.data.title" type="text" name="buttonName"
-          placeholder="What do you call this button" />
+        <Input
+          v-model="reply_button.data.title"
+          type="text"
+          name="buttonName"
+          placeholder="What do you call this button"
+        />
       </section>
       <section class="grid gap-y-1.5">
         <Label for="buttonName">Button Type</Label>
@@ -251,8 +287,13 @@ onUnmounted(() => {
     <main v-else-if="sheetState === 'create-quick-reply-button'" class="grid gap-y-6 text-sm">
       <section class="grid gap-y-1.5">
         <Label for="quickReplyName">Quick Reply Name</Label>
-        <Input v-model="quick_reply_button.title" id="quickReplyName" type="text" name="quickReplyName"
-          placeholder="What do you call this quick reply" />
+        <Input
+          v-model="quick_reply_button.title"
+          id="quickReplyName"
+          type="text"
+          name="quickReplyName"
+          placeholder="What do you call this quick reply"
+        />
       </section>
 
       <Button @click="quick_reply_button.add_new_reply()">Create Quick Reply Button</Button>

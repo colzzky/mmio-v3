@@ -2,7 +2,6 @@
 import NodeCard from '../node-card.vue'
 import NodeSocket from '../node-socket.vue'
 import { nodeIconMapping, sortByIndex } from '../utils'
-import { toast } from '@/core/components/ui/toast'
 import type { Node, Schemes } from '@/modules/meta/utils/flow-types'
 import { Icon } from '@iconify/vue'
 import { objectEntries } from '@vueuse/core'
@@ -24,14 +23,6 @@ const outputs = computed(() => {
   const entries = Object.entries(node.value?.outputs || {})
   return sortByIndex(entries)
 })
-
-const next_step_disabled = () => {
-  toast({
-    title: 'You cant proceed to next step if you have an available quick reply',
-    variant: 'destructive',
-    duration: 2000,
-  })
-}
 </script>
 
 <template>
@@ -87,7 +78,7 @@ const next_step_disabled = () => {
               alt="Placeholder Image"
               class="max-h-full max-w-full rounded-lg object-contain"
             />
-            <span v-else>No available Image</span>
+            <Icon v-else :icon="nodeIconMapping[data.label]" class="size-12 text-foreground/50" />
           </div>
         </div>
         <div v-if="node && node.data">
