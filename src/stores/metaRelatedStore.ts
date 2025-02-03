@@ -1,5 +1,6 @@
 //This is where we save the the thirdparty logins like facebook, omnichannel, etc
 import { type MetaPageData, type MetaPagesReturn, meta_page_data } from '@/core/types/MetaTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
 import { postCollection, getCollection } from '@/core/utils/firebase-collections'
 import generalAxiosInstance from '@/core/utils/general-axios-instance'
 import type { DocumentData } from 'firebase/firestore'
@@ -12,8 +13,6 @@ interface MetaPage {
   data: MetaPageData | null
   reInit: () => void
   set: (data: MetaPageData) => void
-  get: (id: string) => Promise<MetaPageDataReturnData>
-  createUpdate: (type: 'new' | 'update') => Promise<MetaPageDataReturnData>
 }
 
 interface FirebaseReturn {
@@ -38,37 +37,34 @@ export const useMetaRelatedStore = defineStore('metaRelatedStore', () => {
     reInit() {
       this.data = { ...meta_page_data }
     },
-    async get(id: string) {
-      const get = await getCollection('meta_page', {
-        $path: 'meta_pages',
-        $sub_params: null,
-        id: id,
-        $sub_col: [],
-      })
+    // async get(id: string) {
+    //   const get = await getCollection(DbCollections.meta_pages, {
+    //     $sub_params: null,
+    //     id: id,
+    //   })
 
-      return {
-        status: get.status,
-        data: get.data as MetaPageData,
-        error: get.error,
-      }
-    },
-    async createUpdate(type) {
-      const id = this.data?.mp_id ? this.data.mp_id : crypto.randomUUID()
-      if (this.data) this.data.mp_id = id
-      const post = await postCollection('meta_page', {
-        $path: 'meta_pages',
-        $sub_params: null,
-        id,
-        data: this.data,
-        type,
-      })
-      console.log(post)
-      return {
-        status: post.status,
-        data: post.data as MetaPageData,
-        error: post.error,
-      }
-    },
+    //   return {
+    //     status: get.status,
+    //     data: get.data as MetaPageData,
+    //     error: get.error,
+    //   }
+    // },
+    // async createUpdate(type) {
+    //   const id = this.data?.mp_id ? this.data.mp_id : crypto.randomUUID()
+    //   if (this.data) this.data.mp_id = id
+    //   const post = await postCollection(DbCollections.meta_pages, {
+    //     $sub_params: null,
+    //     id,
+    //     data: this.data,
+    //     type,
+    //   })
+    //   console.log(post)
+    //   return {
+    //     status: post.status,
+    //     data: post.data as MetaPageData,
+    //     error: post.error,
+    //   }
+    // },
     //Only set after fetch
     set(data) {
       this.data = data

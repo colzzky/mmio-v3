@@ -19,7 +19,8 @@ import { user_data, type UserData } from '@/core/types/AuthUserTypes'
 import type { InvitationData } from '@/core/types/InvitationTypes'
 import { default_access, default_access_general } from '@/core/types/PermissionTypes'
 import { TeamRole, type TeamData, type TeamMembersData } from '@/core/types/TeamTypes'
-import { getWhereAny, postCollectionBatch } from '@/core/utils/firebase-collections'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { getWhereAny, postCollection, postCollectionBatch } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
@@ -40,21 +41,22 @@ const team_id = route.params.team_id
 const pageLoad = ref<boolean>(true)
 
 const current_team = reactive({
-  data: null as TeamData | null,
+  data: null as {'team': TeamData, 'members': TeamMembersData[]} | null,
   members_info: {} as { [key: string]: UserData },
   invite_load: false as boolean,
   member_email_list: [] as string[],
   get_current_team() {
-    const team = user_team_refs.data.find((team) => team.tm_id === team_id)
+    if(!user_team_refs.data) return
+    const team = user_team_refs.data[team_id as string]
     if (team) {
       this.data = team
     }
     console.log(this.data)
   },
   async get_members() {
-    if (this.data && this.data.team_members) {
+    if (this.data && this.data.team && this.data.members) {
       const non_pending_members = [] as string[]
-      this.data.team_members.forEach((member) => {
+      this.data.members.forEach((member) => {
         if (member.uid) {
           non_pending_members.push(member.uid)
         }
@@ -62,8 +64,7 @@ const current_team = reactive({
           this.member_email_list.push(member.invitation.email)
         }
       })
-      const members = await getWhereAny('user', {
-        $path: 'users',
+      const members = await getWhereAny(DbCollections.users, {
         whereConditions: [
           {
             fieldName: 'uid',
@@ -93,7 +94,7 @@ const current_team = reactive({
      */
     this.invite_load = true
     if (this.data) {
-      team_model.set(this.data)
+      team_model.set(this.data.team)
       const invite_emails = choose_member_form.emails
       const current_user_uid = user_auth.data ? user_auth.data.uid : ''
 
@@ -119,8 +120,7 @@ const current_team = reactive({
             invitedBy: current_user_uid,
           },
           createdAt: '',
-          updatedAt: '',
-          subCollections: [],
+          updatedAt: ''
         })
 
         member_invite.push({
@@ -140,28 +140,27 @@ const current_team = reactive({
           expiration: uiHelpers.generateExpirationDate(1800),
           createdAt: '',
           updatedAt: '',
-          subCollections: [],
         })
         member_invite_ids.push(invite_uuid)
       }
       const add_members = await postCollectionBatch(
-        'team_members',
-        'teams/:tm_id/team_members',
-        { tm_id: team_model.data.tm_id },
-        team_members_ids,
-        team_members,
+        DbCollections.team_members,
+        {
+          data:team_members,
+          idKey:'member_id',
+          $sub_params:{ tm_id: team_model.data.tm_id}
+        }
       )
       const send_invites = await postCollectionBatch(
-        'invitation',
-        'invitations',
-        null,
-        member_invite_ids,
-        member_invite,
+        DbCollections.invitations,
+        {
+          data:member_invite,
+          idKey:'iv_id'
+        }
       )
-      console.log(add_members)
-      console.log(send_invites)
-      if (this.data.team_members)
-        this.data.team_members = [...this.data.team_members, ...team_members]
+
+      if (this.data && this.data.members.length > 0)
+        this.data.members = [...this.data.members, ...team_members]
       await this.get_members()
       choose_member_form.emails = []
     }
@@ -193,16 +192,19 @@ const selected_member = reactive({
   },
 
   async save_update() {
-    if (this.member_info && current_team.data && current_team.data.team_members) {
-      team_members.reInit()
-      team_members.set(this.member_info)
-      const update_member = await team_members.createUpdate(team_id as string, 'update')
-      if (update_member.status) {
+    if (this.member_info && current_team.data && current_team.data.members) {
+      const update_member = await postCollection(DbCollections.team_members,{
+        data:this.member_info,
+        idKey:'member_id',
+        $sub_params:{ tm_id: current_team.data.team.tm_id}
+      })
+      
+      if (update_member.status && update_member.data) {
         this.member_info = update_member.data
-        const team_member_index = current_team.data.team_members.findIndex(
-          (member) => member.member_id === update_member.data.member_id,
+        const team_member_index = current_team.data.members.findIndex(
+          (member) => member.member_id === update_member.data?.member_id,
         )
-        current_team.data.team_members[team_member_index] = update_member.data
+        current_team.data.members[team_member_index] = update_member.data
       }
     }
   },
@@ -345,13 +347,13 @@ watch(
 const member_permission_modal = ref(false)
 async function member_permission_modal_return(member_data: TeamMembersData | null) {
   member_permission_modal.value = false
-  if (member_data && current_team.data && current_team.data.team_members) {
+  if (member_data && current_team.data && current_team.data.members) {
     selected_member.member_info = member_data
-    const member_index = current_team.data.team_members.findIndex(
+    const member_index = current_team.data.members.findIndex(
       (member) => member.member_id === member_data.member_id,
     )
     if (member_index >= 0) {
-      current_team.data.team_members[member_index] = member_data
+      current_team.data.members[member_index] = member_data
       toast({
         title: 'Permission successfully updated',
         variant: 'success',
@@ -369,7 +371,7 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
         <Button variant="ghost" class="flex" @click="router.push({ name: 'teams' })"
           ><i class="material-icons text-md">arrow_back</i></Button
         >
-        <span class="text-lg font-bold">{{ current_team.data.name }}</span>
+        <span class="text-lg font-bold">{{ current_team.data.team.name }}</span>
       </div>
       <div class="grid grid-cols-12 gap-x-4">
         <div class="col-span-7 space-y-4 self-start">
@@ -388,7 +390,7 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
             <div class="max-h-[70vh] overflow-y-scroll">
               <div class="flex flex-col space-y-4 py-4">
                 <div
-                  v-for="member in current_team.data.team_members"
+                  v-for="member in current_team.data.members"
                   :key="member.member_id"
                   class="cursor-pointer rounded-lg transition-colors duration-100 hover:bg-slate-100"
                   @click="selected_member.set_active_member(member.uid, member.isPending, member)"
@@ -472,7 +474,7 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
               <div class="flex flex-col">
                 <span class="text-sm font-semibold">Team Name:</span>
                 <div class="flex items-center justify-between">
-                  <span>{{ current_team.data.name }}</span>
+                  <span>{{ current_team.data.team.name }}</span>
                   <Button
                     variant="ghost"
                     class="p-0 text-sm font-bold text-blue-500 hover:text-blue-700"
@@ -488,13 +490,13 @@ async function member_permission_modal_return(member_data: TeamMembersData | nul
                 </div>
                 <div class="flex items-center justify-between">
                   <span class="w-64 truncate text-xs"
-                    >www.mmiv3.com/invite/{{ current_team.data.inviteLink }}</span
+                    >www.mmiv3.com/invite/{{ current_team.data.team.inviteLink }}</span
                   >
                   <Button
                     class="p-0 text-sm text-blue-500"
                     size="sm"
                     variant="ghost"
-                    @click="copyLink('team', current_team.data.inviteLink)"
+                    @click="copyLink('team', current_team.data.team.inviteLink)"
                     ><i class="material-icons">link</i> Copy link</Button
                   >
                 </div>

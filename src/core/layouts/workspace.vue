@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Toaster from '../components/ui/toast/Toaster.vue'
 import type { TeamData, TeamMembersData } from '../types/TeamTypes'
-import { getWhereAny } from '../utils/firebase-collections'
+import { getCollection, getCollectionWithSubcollections, getWhereAny } from '../utils/firebase-collections'
 import { accessPermission } from '../utils/permissionHelpers'
 import DesktopSidebar from '@/core/components/sidebar/desktop-sidebar.vue'
 import router from '@/router'
@@ -12,6 +12,7 @@ import { useTeamStore } from '@/stores/teamStore'
 import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Dashboard from '@/modules/meta/services/dashboard/page.vue'
+import { DbCollections } from '../utils/enums/dbCollection'
 
 /**
  * Step 1: Check and validated workspace id if it exists on the firestore
@@ -35,9 +36,14 @@ const wp_model = workspace
 
 async function validateWorkspace() {
   if (workspace_id) {
-    const getWorkspace = await wp_model.get(workspace_id as string)
-    if (getWorkspace.status) {
-      active_workspace.data = JSON.parse(JSON.stringify(getWorkspace.data))
+    const getWorkspace = await getCollectionWithSubcollections(DbCollections.workspaces, {
+      id:workspace_id as string,
+      subCollections:[[DbCollections.ws_meta_pages_refs]]
+    })
+
+    if (getWorkspace.status && getWorkspace.data) {
+      active_workspace.data = getWorkspace.data.main
+      active_workspace.meta_page_refs = getWorkspace.data.subCollections[DbCollections.ws_meta_pages_refs]
     } else {
       await router.push({ name: 'home' })
     }
@@ -55,26 +61,31 @@ async function validateMemberOwner() {
   const teamId = active_workspace.data.team_id
 
   // Fetch team data
-  const teamResponse = await team.get(teamId)
+  const teamResponse = await getCollectionWithSubcollections(DbCollections.teams, {
+    id:teamId,
+    subCollections:[[DbCollections.team_members]]
+  })
   let teamData: TeamData | null = null
   let teamMembers: TeamMembersData[] = []
 
   // Check team data validity
-  if (teamResponse.status) {
-    teamData = teamResponse.data
-    if (teamResponse.data && teamResponse.data.team_members)
-      teamMembers = teamResponse.data.team_members
+  if (teamResponse.status && teamResponse.data) {
+    teamData = teamResponse.data.main
+    if (teamResponse.data && teamResponse.data.subCollections[DbCollections.team_members])
+      teamMembers = teamResponse.data.subCollections[DbCollections.team_members]
   }
 
   // Check workspace ownership
-  if (workspaceOwner(active_workspace.data)) {
-    active_team.data = teamData ? JSON.parse(JSON.stringify(teamData)) : null
+  if (workspaceOwner(active_workspace.data) && teamData) {
+    active_team.data = {
+      team:teamData,
+      members:teamMembers
+    }
     await populateTeamMembers()
     return // Valid owner, exit function
   }
 
   if (teamData && teamMembers.length > 0) {
-    // Find member
     const member = teamMembers?.find((m) => m.uid === userId)
 
     // Check membership
@@ -85,16 +96,20 @@ async function validateMemberOwner() {
 
     // Listen for current member updates
     await current_member.listen(teamId, member.member_id)
-    active_team.data = JSON.parse(JSON.stringify(teamData))
+    active_team.data = {
+      team:teamData,
+      members:teamMembers
+    }
     await populateTeamMembers()
     return
   }
 }
 
 async function populateTeamMembers() {
-  if (active_team.data && active_team.data.team_members) {
+  console.log(active_team.data)
+  if (active_team.data) {
     const members_uid: string[] = []
-    active_team.data.team_members.forEach((member) => {
+    active_team.data.members.forEach((member) => {
       active_team.members[member.uid] = {
         ...member,
         displayName: '',
@@ -104,8 +119,7 @@ async function populateTeamMembers() {
       members_uid.push(member.uid)
     })
 
-    const find_members_info = await getWhereAny('user', {
-      $path: 'users',
+    const find_members_info = await getWhereAny(DbCollections.users, {
       whereConditions: [
         {
           fieldName: 'uid',

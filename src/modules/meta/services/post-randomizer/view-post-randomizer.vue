@@ -5,12 +5,13 @@ import Button from '@/core/components/ui/button/Button.vue'
 import Main from '@/core/components/ui/main.vue'
 import type { TransformedTimezone } from '@/core/types/UniTypes'
 import { type PostRandomizerServiceData } from '@/core/types/WorkSpaceTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { getCollection } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import router from '@/router'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute } from 'vue-router'
-
 const timezoneList = ref<TransformedTimezone[]>([])
 
 interface PostRandomizer {
@@ -28,7 +29,7 @@ enum CampaignInterface {
 
 const route = useRoute()
 const authWorkspaceStore = useAuthWorkspaceStore()
-const { workspace_service, service_models } = authWorkspaceStore
+const { workspace_service, service_models, active_workspace } = authWorkspaceStore
 const randomizer_id = route.params.randomizer_id as string
 const campaignInterface = ref<CampaignInterface>(CampaignInterface.INFO_VIEW)
 
@@ -38,7 +39,7 @@ const campaign = reactive<PostRandomizer>({
   fetchLoad: false,
   async getCampaign(): Promise<void> {
     this.fetchLoad = true
-    if (workspace_service.post_randomizer.data) {
+    if (workspace_service.post_randomizer.data && active_workspace.data) {
       const find_campaign = workspace_service.post_randomizer.data.find(
         (campaign) => campaign.pr_id === randomizer_id,
       )
@@ -48,8 +49,14 @@ const campaign = reactive<PostRandomizer>({
         return
       }
     }
-    const get = await service_models.post_randomizer.get(randomizer_id)
-    if (get.status) {
+    
+    const get = await getCollection(DbCollections.ws_post_randomizer, {
+      id:randomizer_id,
+      $sub_params:{
+        ws_id:route.params.ws_id as string
+      }
+    })
+    if (get.status && get.data) {
       this.data = { ...get.data }
       this.fetchLoad = false
       return

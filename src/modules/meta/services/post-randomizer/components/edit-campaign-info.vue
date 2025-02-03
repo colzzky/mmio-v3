@@ -22,6 +22,8 @@ import {
     post_randomizer_service_data,
     type PostRandomizerServiceData,
 } from '@/core/types/WorkSpaceTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { postCollection } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
 import { onBeforeUnmount } from 'vue'
@@ -46,7 +48,7 @@ type PostRandomizerErrors = {
 
 const route = useRoute()
 const authWorkspaceStore = useAuthWorkspaceStore()
-const { service_models } = authWorkspaceStore
+const { service_models, active_workspace } = authWorkspaceStore
 const randomizer_id: string = route.params.randomizer_id as string
 const time_selection = ref<string>('')
 const timezoneList = ref<TransformedTimezone[]>([])
@@ -252,7 +254,7 @@ const campaign_form = reactive({
     async save() {
         this.postLoad = true
         const validate = await this.validateDataInput()
-        if (validate) {
+        if (validate && active_workspace.data) {
             const randomizer_model = service_models.post_randomizer
             randomizer_model.reInit()
             randomizer_model.data = {
@@ -262,8 +264,17 @@ const campaign_form = reactive({
                 endDate: new Date(this.inputs.endDate).toLocaleDateString(),
                 pr_id: randomizer_id,
             }
-            const campaign_post = await randomizer_model.createUpdate('update')
-            if (campaign_post.status) {
+            const campaign_post = await postCollection(DbCollections.ws_post_randomizer,
+                {
+                    data: randomizer_model.data,
+                    idKey: 'pr_id',
+                    $sub_params: {
+                        ws_id: active_workspace.data.ws_id
+                    }
+                }
+            )
+
+            if (campaign_post.status && campaign_post.data) {
                 emit('return', campaign_post.data)
                 toast({
                     title: 'Campaign information has been saved',
@@ -502,7 +513,7 @@ onBeforeUnmount(() => {
                             class="flex items-center space-x-2 self-start rounded-full bg-blue-500 px-3 py-1">
                             <span v-if="time" class="text-sm font-semibold text-white">{{
                                 uiHelpers.convertTimeToReadableFormat(time)
-                            }}</span>
+                                }}</span>
                             <button @click="campaign_form.removeTime(index)"
                                 class="flex cursor-pointer items-center text-white focus:outline-none">
                                 <i class="material-icons text-sm">close</i>

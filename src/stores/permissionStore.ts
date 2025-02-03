@@ -17,8 +17,6 @@ interface Permission {
   data: PermissionData
   reInit: () => void
   set: (data: PermissionData) => void
-  get: (permission_id: string) => Promise<FSReturnData<PermissionData>>
-  createUpdate: (type: 'new' | 'update') => Promise<FSReturnData<PermissionData>>
 }
 
 interface FirebaseReturn {
@@ -37,37 +35,37 @@ export const usePermissionStore = defineStore('permissionStore', () => {
     set(data: PermissionData) {
       this.data = data
     },
-    async get(permission_id: string): Promise<FSReturnData<PermissionData>> {
-      const get = await getCollection('permission', {
-        $path: 'permissions',
-        $sub_params: null,
-        id: permission_id,
-        $sub_col: [],
-      })
-      return {
-        status: get.status,
-        data: get.data as PermissionData,
-        error: get.error,
-      }
-    },
-    async createUpdate(type): Promise<FSReturnData<PermissionData>> {
-      const id = this.data.permission_id !== '' ? this.data.permission_id : crypto.randomUUID()
-      this.data.permission_id = id
-      const post = await postCollection('permission', {
-        $path: 'permissions',
-        $sub_params: null,
-        id,
-        data: this.data,
-        type,
-      })
+    // async get(permission_id: string): Promise<FSReturnData<PermissionData>> {
+    //   const get = await getCollection('permission', {
+    //     $path: 'permissions',
+    //     $sub_params: null,
+    //     id: permission_id,
+    //     $sub_col: [],
+    //   })
+    //   return {
+    //     status: get.status,
+    //     data: get.data as PermissionData,
+    //     error: get.error,
+    //   }
+    // },
+    // async createUpdate(type): Promise<FSReturnData<PermissionData>> {
+    //   const id = this.data.permission_id !== '' ? this.data.permission_id : crypto.randomUUID()
+    //   this.data.permission_id = id
+    //   const post = await postCollection('permission', {
+    //     $path: 'permissions',
+    //     $sub_params: null,
+    //     id,
+    //     data: this.data,
+    //     type,
+    //   })
 
-      console.log(post)
-      return {
-        status: post.status,
-        data: post.data as PermissionData,
-        error: post.error,
-      }
-    },
+    //   console.log(post)
+    //   return {
+    //     status: post.status,
+    //     data: post.data as PermissionData,
+    //     error: post.error,
+    //   }
+    // },
   }
 
   //Regenerate Team Invite

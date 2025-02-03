@@ -3,10 +3,12 @@ import Button from '@/core/components/ui/button/Button.vue'
 import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
 import type { UserData } from '@/core/types/AuthUserTypes'
 import type { TeamData } from '@/core/types/TeamTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
 import { getWhereAny } from '@/core/utils/firebase-collections'
 import CreateTeam from '@/modules/teams-permissions/components/team/CreateTeam.vue'
 import router from '@/router'
 import { useAuthStore } from '@/stores/authStore'
+import { objectEntries } from '@vueuse/core'
 import { onMounted, ref, watch } from 'vue'
 
 const authStore = useAuthStore()
@@ -17,8 +19,8 @@ const new_team_modal = ref(false)
 async function new_team_return(team_data: TeamData | null) {
   new_team_modal.value = false
   pageLoad.value = true
-  if (team_data && team_data.tm_id) {
-    user_team_refs.data.push(team_data)
+  if (team_data && team_data.tm_id && user_team_refs.data) {
+    user_team_refs.data[team_data.tm_id] = {team:team_data,members:[]}
     await fetch_owners()
   }
   pageLoad.value = false
@@ -26,19 +28,18 @@ async function new_team_return(team_data: TeamData | null) {
 
 async function fetch_owners() {
   pageLoad.value = true
-  if (!ud.team_owners) {
+  if (!ud.team_owners && user_team_refs.data) {
     console.log('refetching again')
-    user_team_refs.data.forEach((team) => {
-      if (!ud.team_owners_uid.includes(team.owner_uid)) {
-        if (!ud.team_owners_uid.find((uid) => uid === team.owner_uid)) {
-          ud.team_owners_uid.push(team.owner_uid)
+
+    objectEntries(user_team_refs.data).forEach(([key, data]) => {
+      if (!ud.team_owners_uid.includes(data.team.owner_uid)) {
+        if (!ud.team_owners_uid.find((uid) => uid === data.team.owner_uid)) {
+          ud.team_owners_uid.push(data.team.owner_uid)
         }
       }
     })
-    const fetch_owners = await getWhereAny('user', {
-      $path: 'users',
-      $sub_params: {},
-      $sub_col: [],
+
+    const fetch_owners = await getWhereAny(DbCollections.users, {
       whereConditions: [
         {
           fieldName: 'uid',
@@ -61,7 +62,7 @@ async function fetch_owners() {
 
 onMounted(async () => {
   if (user_team_refs.isInitialized) {
-    if (user_team_refs.data.length) {
+    if (user_team_refs.data && objectEntries(user_team_refs.data).length > 0) {
       await fetch_owners()
     }
     pageLoad.value = false
@@ -73,7 +74,7 @@ watch(
   async (initlized) => {
     console.log('watching')
     if (initlized) {
-      if (user_team_refs.data.length) await fetch_owners()
+      if (user_team_refs.data  && objectEntries(user_team_refs.data).length > 0) await fetch_owners()
       pageLoad.value = false
     }
     // Perform additional actions if needed when myData changes
@@ -103,24 +104,23 @@ watch(
               <div class="col-span-1 text-xs font-light"></div>
             </div>
           </div>
-
           <div v-if="!user_team_refs.isLoading && !pageLoad" class="py-2">
-            <div v-if="user_team_refs.data.length && ud.team_owners">
+            <div v-if="user_team_refs.data && ud.team_owners">
               <div
-                v-for="team in user_team_refs.data"
-                :key="team.tm_id"
+                v-for="data in user_team_refs.data"
+                :key="data.team.tm_id"
                 class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
               >
                 <div class="grid grid-cols-12 items-center">
                   <div
                     class="col-span-6"
-                    @click="router.push({ name: 'team-view', params: { team_id: team.tm_id } })"
+                    @click="router.push({ name: 'team-view', params: { team_id: data.team.tm_id } })"
                   >
                     <div class="flex items-center gap-x-3">
                       <i class="bx bx-google text-2xl"></i>
                       <div class="grid gap-0">
-                        <span class="text-sm">{{ team.name }}</span>
-                        <span class="text-xs">{{ team.team_members?.length }} Members</span>
+                        <span class="text-sm">{{ data.team.name }}</span>
+                        <span class="text-xs">{{ data.members.length }} Members</span>
                       </div>
                     </div>
                   </div>
@@ -130,13 +130,13 @@ watch(
                   <div class="col-span-2 flex flex-col">
                     <span class="text-sm font-bold">
                       {{
-                        ud.team_owners[team.owner_uid].uid === user_auth.data?.uid
-                          ? `${ud.team_owners[team.owner_uid].displayName} (You)`
-                          : ud.team_owners[team.owner_uid].displayName
+                        ud.team_owners[data.team.owner_uid].uid === user_auth.data?.uid
+                          ? `${ud.team_owners[data.team.owner_uid].displayName} (You)`
+                          : ud.team_owners[data.team.owner_uid].displayName
                       }}
                     </span>
                     <span class="text-xs text-gray-600">{{
-                      ud.team_owners[team.owner_uid].email
+                      ud.team_owners[data.team.owner_uid].email
                     }}</span>
                   </div>
                   <div class="col-span-1 flex justify-end">

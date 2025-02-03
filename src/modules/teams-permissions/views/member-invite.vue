@@ -2,7 +2,8 @@
 import type { InvitationData } from '@/core/types/InvitationTypes'
 import { default_access } from '@/core/types/PermissionTypes'
 import { type TeamMembersData } from '@/core/types/TeamTypes'
-import { getExact } from '@/core/utils/firebase-collections'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { getCollection, getExact, postCollection } from '@/core/utils/firebase-collections'
 import { useAuthStore } from '@/stores/authStore'
 import { useInvitationStore } from '@/stores/invitationStore'
 import { useTeamStore } from '@/stores/teamStore'
@@ -34,10 +35,12 @@ async function handleInvitation() {
   }
 
   // Get the invitation details
-  const get_invite = await invitation.get(invitation_id)
+  const get_invite = await getCollection(DbCollections.invitations, {
+    id:invitation_id,
+  })
 
   // Check if invitation fetch from firestore exist
-  if (!get_invite.status || !get_invite.data.teamReference) {
+  if (!get_invite.status || !get_invite.data || !get_invite.data.teamReference) {
     console.log('Invite link not valid')
     return
   }
@@ -70,8 +73,8 @@ async function handleInvitation() {
 }
 
 function check_team_part(team_id: string) {
-  if (user.data && user.data.team_refs && team_id) {
-    if (user.data.team_refs.find((team) => team.tm_id === team_id)) {
+  if (user.data && user.references && user.references.user_team_refs && team_id) {
+    if (user.references?.user_team_refs.find((team) => team.tm_id === team_id)) {
       return true
     }
   }
@@ -85,9 +88,8 @@ async function accept_invite(invitation: InvitationData, team_id: string) {
   if (user_auth.data && team_reference) {
     //Check if the user already exist first
 
-    const member = await getExact('team_members', {
-      $path: '${invitation.reference.path}',
-      $sub_col: [],
+    const member = await getExact(DbCollections.team_members, {
+      $path: '${invitation.reference.path}'
     })
     if (member.status && member.data && member.data.invitation) {
       //Validate if the invitation email matched with the user who is currently logged on
@@ -107,8 +109,10 @@ async function accept_invite(invitation: InvitationData, team_id: string) {
         accessPermissions: JSON.parse(JSON.stringify(default_access)),
       }
 
-      const validate_update = await team_members.createUpdate(team_id, type)
-
+      const validate_update = await postCollection(DbCollections.team_members, {
+        data:team_members.data,
+        idKey:'member_id'
+      })
       //Create Team Reference function
       const validate_reference = await setTeamReference(team_reference.id, user_auth.data.uid)
       if (validate_reference && validate_update) return true

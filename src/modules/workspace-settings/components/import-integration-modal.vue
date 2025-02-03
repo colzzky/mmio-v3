@@ -3,7 +3,8 @@ import { Button } from '@/core/components/ui/button'
 import Checkbox from '@/core/components/ui/checkbox/Checkbox.vue'
 import { Dialog, DialogContent } from '@/core/components/ui/dialog'
 import Skeleton from '@/core/components/ui/skeleton/Skeleton.vue'
-import { getWhereAny, postMultipleCollectionsBatchAtomic } from '@/core/utils/firebase-collections'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { getWhereAny, postMultiCollectionBatch } from '@/core/utils/firebase-collections'
 import type { MetaPageData, Modal, WSMetaPagesRefsData } from '@/core/utils/types'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { useWorkspaceStore } from '@/stores/WorkspaceStore'
@@ -56,8 +57,7 @@ const meta_import = reactive({
   isLoading: false as boolean,
   async get_meta_pages() {
     this.isLoading = true
-    const get_pages = await getWhereAny('meta_page', {
-      $path: 'meta_pages',
+    const get_pages = await getWhereAny(DbCollections.meta_pages, {
       whereConditions: [
         { fieldName: 'owner_uid', operator: '==', value: user_auth.data?.uid },
         { fieldName: 'isOnProject', operator: '==', value: false },
@@ -94,22 +94,22 @@ const meta_import = reactive({
       })
 
       if (batch_meta_page.length > 0 && batch_ws_meta_refs.length > 0) {
-        const post_batch = await postMultipleCollectionsBatchAtomic([
-          {
-            $col: 'ws_meta_pages_refs',
-            $path: 'workspaces/:ws_id/meta_pages_refs',
-            $sub_params: { ws_id: act_wsp.ws_id },
-            ids: this.selected_meta_pages,
-            data: batch_ws_meta_refs,
-          },
-          {
-            $col: 'meta_page',
-            $path: 'meta_pages',
-            $sub_params: {},
-            ids: this.selected_meta_pages,
-            data: batch_meta_page,
-          },
-        ])
+        const post_batch = await postMultiCollectionBatch({
+          collections: [
+            {
+              $col: DbCollections.ws_meta_pages_refs,
+              $sub_params: { ws_id: act_wsp.ws_id },
+              ids: this.selected_meta_pages,
+              data: batch_ws_meta_refs,
+            },
+            {
+              $col: DbCollections.meta_pages,
+              ids: this.selected_meta_pages,
+              data: batch_meta_page,
+            },
+          ]
+        })
+
 
         if (post_batch.status) {
           batch_meta_page.forEach((mp) => {
@@ -146,8 +146,7 @@ defineExpose({
     <DialogContent class="max-w-screen-md p-12">
       <section class="grid gap-y-12">
         <h2
-          class="text-balance bg-gradient-to-r from-gradient-purple to-gradient-red bg-clip-text text-center text-5xl font-bold text-transparent"
-        >
+          class="text-balance bg-gradient-to-r from-gradient-purple to-gradient-red bg-clip-text text-center text-5xl font-bold text-transparent">
           Choose the {{ modal.integrationName }} you want to import
         </h2>
         <div class="w-full py-4">
@@ -163,17 +162,12 @@ defineExpose({
 
           <div v-if="!meta_import.isLoading" class="py-2">
             <div v-if="meta_import.meta_pages.length > 0">
-              <div
-                v-for="page in meta_import.meta_pages"
-                :key="page.mp_id"
-                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300"
-              >
+              <div v-for="page in meta_import.meta_pages" :key="page.mp_id"
+                class="cursor-pointer rounded-xl px-2 py-2 transition-all duration-100 hover:bg-gray-300">
                 <div class="grid grid-cols-12 items-center">
                   <div class="col-span-1">
-                    <Checkbox
-                      @update:checked="meta_import.select_page(page)"
-                      :checked="meta_import.selected_meta_pages.includes(page.mp_id)"
-                    />
+                    <Checkbox @update:checked="meta_import.select_page(page)"
+                      :checked="meta_import.selected_meta_pages.includes(page.mp_id)" />
                   </div>
 
                   <div class="col-span-7">

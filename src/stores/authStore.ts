@@ -1,11 +1,12 @@
 import { usePlatformAPIStore } from './platformAPIStore'
-import type { UserData } from '@/core/types/AuthUserTypes'
+import type { PlatformApiData, TeamRefsData, UserData } from '@/core/types/AuthUserTypes'
 import { user_data } from '@/core/types/AuthUserTypes'
 import type { PermissionData } from '@/core/types/PermissionTypes'
-import type { TeamData } from '@/core/types/TeamTypes'
+import { team_members_data, type TeamData, type TeamMembersData } from '@/core/types/TeamTypes'
 import type { MutablePick } from '@/core/types/UniTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
 import { auth } from '@/core/utils/firebase-client'
-import { postCollection, getCollection, getWhereAny } from '@/core/utils/firebase-collections'
+import { postCollection, getCollection, getWhereAny, getCollectionWithSubcollections, getWhereAnyWithSubcollections } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { onAuthStateChanged, signOut, type Unsubscribe, type User } from 'firebase/auth'
 import type { DocumentData } from 'firebase/firestore'
@@ -24,11 +25,13 @@ type FSReturnData<T> = FirebaseReturnBase & {
 
 interface AuthUser {
   data: UserData | null
+  references: {
+    user_team_refs: TeamRefsData[]
+    platform_apis: PlatformApiData[]
+  } | null
   isInitialized: boolean
   initialize: () => void
-  set: (data: UserData) => void
-  get: (id: string) => Promise<FSReturnData<UserData>>
-  createUpdate: (type: 'new' | 'update') => Promise<FSReturnData<UserData>>
+  fetch: () => Promise<void>
 }
 
 export const useAuthStore = defineStore(
@@ -47,11 +50,7 @@ export const useAuthStore = defineStore(
       },
       async initializeUser(): Promise<boolean> {
         if (this.data) {
-          const uid = user_auth.data ? user_auth.data.uid : ''
-          const fetch_user = await user.get(uid)
-          if (fetch_user.status) {
-            user.set(fetch_user.data)
-          }
+          await user.fetch()
           return true
         } else {
           return false
@@ -98,61 +97,48 @@ export const useAuthStore = defineStore(
 
       async signOut() {
         await signOut(auth)
-      await resetAllStore()
+        await resetAllStore()
       },
     })
+
     const user = reactive<AuthUser>({
       data: null,
+      references: null,
       isInitialized: false,
       initialize() {
         this.data = { ...user_data }
         this.isInitialized = true
       },
-      set(data) {
-        this.data = data
-        console.log(this.data)
-        this.isInitialized = true
-      },
-      async get() {
+      async fetch() {
         const id = user_auth.data ? user_auth.data.uid : ''
-        const get = await getCollection('user', {
-          $path: 'users',
+        const get = await getCollectionWithSubcollections(DbCollections.users, {
           $sub_params: null,
           id: id,
-          $sub_col: ['team_refs', 'platform_apis'],
+          subCollections: [[DbCollections.platform_apis], [DbCollections.team_refs]]
         })
-        console.log(get)
-        return {
-          status: get.status,
-          data: get.data as UserData,
-          error: get.error,
+        
+        if (get.data && get.status) {
+          this.references = {
+            user_team_refs: [],
+            platform_apis: []
+          }
+          this.data = get.data.main
+          this.references.user_team_refs = get.data.subCollections[DbCollections.team_refs]
+          this.references.platform_apis = get.data.subCollections[DbCollections.platform_apis]
         }
-      },
 
-      async createUpdate(type): Promise<FSReturnData<UserData>> {
-        const id = user_auth.data ? user_auth.data.uid : ''
-        const post = await postCollection('user', {
-          $path: 'users',
-          $sub_params: null,
-          id,
-          data: this.data,
-          type,
-        })
-        return {
-          status: post.status,
-          data: post.data as UserData,
-          error: post.error,
-        }
+        console.log(this.data)
+        console.log(this.references)
       },
     })
+
     const user_team_refs = reactive({
-      data: [] as TeamData[],
+      data: null as Record<string, {'team': TeamData, 'members': TeamMembersData[]}> | null,
       isInitialized: false as boolean,
       isLoading: false as boolean,
       lastSnapshot: '' as string,
-      nextFetch: '' as string,
       resetData(): void {
-        this.data = []
+        this.data = null
         this.isInitialized = false
         this.isLoading = false
         this.lastSnapshot = ''
@@ -160,14 +146,12 @@ export const useAuthStore = defineStore(
       async fetch_team_list(): Promise<void> {
         this.isLoading = true
         const user_teams: string[] = []
-        if (user.data && user.data.team_refs && user.data.team_refs.length > 0) {
-          user.data.team_refs.forEach((team) => {
+        if (user.data && user.references && user.references.user_team_refs && user.references.user_team_refs.length > 0) {
+          user.references.user_team_refs.forEach((team) => {
             user_teams.push(team.tm_id)
           })
-          const fetch_team = await getWhereAny('team', {
-            $path: 'teams',
-            $sub_params: {},
-            $sub_col: ['team_members'],
+          const fetch_team = await getWhereAnyWithSubcollections(DbCollections.teams, {
+            subCollections: [[DbCollections.team_members]],
             whereConditions: [
               {
                 fieldName: 'tm_id',
@@ -177,9 +161,11 @@ export const useAuthStore = defineStore(
             ],
           })
 
-          console.log(fetch_team)
-          if (fetch_team.status) {
-            this.data = fetch_team.data
+          if (fetch_team.status && fetch_team.data) {
+            this.data = fetch_team.data.reduce((acc, { main, subCollections }) => {
+              acc[main.tm_id] = {  team:{...main}, members: subCollections['teams/:tm_id/team_members'] };  // Merge main with sub
+              return acc;
+            }, {} as Record<string, {'team': TeamData, 'members': TeamMembersData[]}>);
           }
         }
         this.isLoading = false
@@ -224,14 +210,20 @@ export const useAuthStore = defineStore(
       data: MutablePick<User, 'displayName' | 'email' | 'photoURL' | 'uid' | 'emailVerified'>,
     ) {
       //We need to check first if the user already exist in firebase
-      const checkUser = await user.get(data.uid)
+      const checkUser = await getCollection(DbCollections.users,{
+        id:user.data ? user.data.uid : ''    
+      })
       if (!checkUser.status) {
         user.initialize()
         if (user.data) {
           console.log(user.data)
           user.data = { ...user.data, ...data }
           console.log(user.data)
-          await user.createUpdate('new')
+          
+          await postCollection(DbCollections.users, {
+            idKey: 'uid',
+            data: user.data,
+          })
         }
       }
     }

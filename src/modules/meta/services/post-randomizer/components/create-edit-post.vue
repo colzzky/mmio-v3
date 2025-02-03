@@ -14,6 +14,8 @@ import Textarea from '@/core/components/ui/textarea/Textarea.vue'
 import { toast } from '@/core/components/ui/toast'
 import { PermissionServices } from '@/core/types/PermissionTypes'
 import { post_randomizer_posts_data } from '@/core/types/WorkSpaceTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { postCollection } from '@/core/utils/firebase-collections'
 import { PermissionAccessError, servicePermission } from '@/core/utils/permissionHelpers'
 import type { Modal, PostRandomizerPostsData, PostRandomizerServiceData } from '@/core/utils/types'
 import { useAuthWorkspaceStore } from '@/stores/authWorkspaceStore'
@@ -167,7 +169,7 @@ const modal = reactive<ModalInterface>({
     this.submitLoad = false
   },
   async createPost() {
-    if (post_randomizer_post.value) {
+    if (post_randomizer_post.value && active_workspace.data) {
       post_randomizer_post_md.reInit()
       post_randomizer_post_md.set(post_randomizer_post.value)
       post_randomizer_post_md.data.createdBy = current_member.data
@@ -175,8 +177,18 @@ const modal = reactive<ModalInterface>({
         : active_workspace.data
           ? active_workspace.data.owner_uid
           : ''
-      const create = await post_randomizer_post_md.createUpdate(this.prId, 'new')
-      if (create.status) {
+      const create = await postCollection(DbCollections.ws_post_randomizer_posts,
+        {
+          data:post_randomizer_post.value,
+          idKey:'prp_id',
+          $sub_params:{
+            ws_id:active_workspace.data.ws_id,
+            pr_id:this.prId
+          }
+        }
+      )
+
+      if (create.status && create.data) {
         post_randomizer_post.value = { ...create.data }
         toast({
           title: 'Record has been Created',
@@ -187,11 +199,20 @@ const modal = reactive<ModalInterface>({
     }
   },
   async editPost() {
-    if (post_randomizer_post.value) {
+    if (post_randomizer_post.value && post_randomizer_post.value && active_workspace.data) {
       post_randomizer_post_md.reInit()
       post_randomizer_post_md.set(post_randomizer_post.value)
-      const update = await post_randomizer_post_md.createUpdate(this.prId, 'update')
-      if (update.status) {
+      const update = await postCollection(DbCollections.ws_post_randomizer_posts,
+        {
+          data:post_randomizer_post.value,
+          idKey:'prp_id',
+          $sub_params:{
+            ws_id:active_workspace.data.ws_id,
+            pr_id:this.prId
+          }
+        }
+      )
+      if (update.status && update.data) {
         post_randomizer_post.value = { ...update.data }
         toast({
           title: 'Record has been Updated',

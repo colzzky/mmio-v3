@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import { default_access } from '@/core/types/PermissionTypes'
 import { type TeamMembersData } from '@/core/types/TeamTypes'
-import { getWhereAny } from '@/core/utils/firebase-collections'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
+import { getCollection, getWhereAny, postCollection } from '@/core/utils/firebase-collections'
 import { useAuthStore } from '@/stores/authStore'
 import { useInvitationStore } from '@/stores/invitationStore'
 import { useTeamStore } from '@/stores/teamStore'
@@ -34,10 +35,12 @@ async function handleInvitation() {
 
   // Get the invitation details
   // Check also the status
-  const get_invite = await invitation.get(invitation_id)
+  const get_invite = await getCollection(DbCollections.invitations,{
+    id:invitation_id,
+  })
 
   // Check if invitation fetch from firestore exist
-  if (!get_invite.status) {
+  if (!get_invite.status || !get_invite.data) {
     console.log('Invite link not valid')
     return
   }
@@ -65,8 +68,8 @@ async function handleInvitation() {
 }
 
 function check_team_part(team_id: string) {
-  if (user.data && user.data.team_refs) {
-    if (user.data.team_refs.find((team) => team.tm_id === team_id)) {
+  if (user.data && user.references && user.references.user_team_refs) {
+    if (user.references.user_team_refs.find((team) => team.tm_id === team_id)) {
       return true
     }
   }
@@ -78,8 +81,7 @@ async function accept_invite(team_id: string) {
   let type: 'new' | 'update' = 'new'
   if (user_auth.data) {
     //Check if the user already exist first
-    const member = await getWhereAny('team_members', {
-      $path: 'teams/:tm_id/team_members',
+    const member = await getWhereAny(DbCollections.team_members, {
       $sub_params: { tm_id: team_id },
       whereConditions: [
         {
@@ -120,8 +122,13 @@ async function accept_invite(team_id: string) {
 }
 
 async function addMember(team_id: string, type: 'new' | 'update') {
-  const invite_member = await team_members.createUpdate(team_id, type)
-  console.log(invite_member)
+  const invite_member = await postCollection(DbCollections.team_members,
+    {
+      data:team_members.data,
+      idKey:'member_id',
+      $sub_params:{tm_id:team_id}
+    }
+  )
   if (invite_member.status) {
     team_members.reInit()
     return true

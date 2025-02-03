@@ -117,7 +117,7 @@ export interface PermissionGroup<T = Access_levels> {
 export type CustomPermissions = Partial<Record<TypeOfPermissionType, boolean>>
 export type AccessLevelPermissions = Partial<Record<Access_levels, TypeOfPermissionType[]>>
 
-export interface PermissionData extends SubCollections {
+export interface PermissionData {
   permission_id: string
   owner_uid: string
   name: string
@@ -176,6 +176,5 @@ export const permission_data: PermissionData = {
   assignment: default_access,
   generalPermission: default_access_general,
   createdAt: '',
-  updatedAt: '',
-  subCollections: [],
+  updatedAt: ''
 }

@@ -16,6 +16,7 @@ import { Input } from '@/core/components/ui/input'
 import type { UserData } from '@/core/types/AuthUserTypes'
 import type { TeamData } from '@/core/types/TeamTypes'
 import type { WorkspaceData } from '@/core/types/WorkSpaceTypes'
+import { DbCollections } from '@/core/utils/enums/dbCollection'
 import { getWhereAny } from '@/core/utils/firebase-collections'
 import CreateTeam from '@/modules/teams-permissions/components/team/CreateTeam.vue'
 import { useAuthStore } from '@/stores/authStore'
@@ -25,7 +26,7 @@ import { useRoute } from 'vue-router'
 const allWorkspaceFilter = ref('Most Recent')
 const sharedWorkspaceFilter = ref('Most Recent')
 const pageLoad = ref<boolean>(true)
-const dataLoad = ref<boolean>(true)
+const dataLoad = ref<boolean>(false)
 const selectTeamLoad = ref<boolean>(true)
 const authStore = useAuthStore()
 const { user_auth, user, page_init } = authStore
@@ -45,11 +46,8 @@ function new_team_return() {
 
 async function fetch_workspaces() {
   if (user_auth.data) {
-    if (user.data && user.data.team_refs) {
-      const team_workspace = await getWhereAny('workspaces', {
-        $path: 'workspaces',
-        $sub_params: {},
-        $sub_col: [],
+    if (user.data && user.references && user.references.user_team_refs) {
+      const team_workspace = await getWhereAny(DbCollections.workspaces, {
         whereConditions: [
           { fieldName: 'team_id', operator: 'in', value: team_refs_id },
           { fieldName: 'owner_uid', operator: '!=', value: user_auth.data.uid },
@@ -64,10 +62,7 @@ async function fetch_workspaces() {
       }
     }
 
-    const personal_workspace = await getWhereAny('workspaces', {
-      $path: 'workspaces',
-      $sub_params: {},
-      $sub_col: [],
+    const personal_workspace = await getWhereAny(DbCollections.workspaces, {
       whereConditions: [{ fieldName: 'owner_uid', operator: '==', value: user_auth.data.uid }],
     })
 
@@ -82,10 +77,7 @@ async function fetch_workspaces() {
 
 async function fetch_workspace_owners() {
   if (workspace_owner_uid.value.length > 0) {
-    const get_users = await getWhereAny('user', {
-      $path: 'users',
-      $sub_params: {},
-      $sub_col: [],
+    const get_users = await getWhereAny(DbCollections.users, {
       whereConditions: [{ fieldName: 'uid', operator: 'in', value: workspace_owner_uid.value }],
     })
 
@@ -105,19 +97,14 @@ async function fetch_teams() {
   if (user_auth.data) {
     console.log(user)
 
-    if (user.data && user.data.team_refs) {
-      console.log('ente2')
-      user.data.team_refs.forEach((team) => {
+    if (user.data && user.references && user.references.user_team_refs) {
+      user.references.user_team_refs.forEach((team) => {
         team_refs_id.push(team.tm_id)
       })
-      const team = await getWhereAny('team', {
-        $path: 'teams',
+      const team = await getWhereAny(DbCollections.teams, {
         whereConditions: [{ fieldName: 'tm_id', operator: 'in', value: team_refs_id }],
       })
-      console.log('tesm list')
-      console.log(team)
       if (team.data && team.status) {
-        console.log('ente3')
         user_teams.value = team.data
       }
     }
@@ -125,13 +112,12 @@ async function fetch_teams() {
 }
 
 async function select_team(team: TeamData | null) {
-  if (team && user.data && user.data.team_refs) {
+  if (team && user.data && user.references && user.references.user_team_refs) {
     selectTeamLoad.value = true
-    const validate = user.data.team_refs.find((user_team) => user_team.tm_id === team.tm_id)
+    const validate = user.references.user_team_refs.find((user_team) => user_team.tm_id === team.tm_id)
     if (validate) {
       selected_team.value = team
-      const team_workspace = await getWhereAny('workspaces', {
-        $path: 'workspaces',
+      const team_workspace = await getWhereAny(DbCollections.workspaces, {
         whereConditions: [
           { fieldName: 'team_id', operator: '==', value: selected_team.value.tm_id },
         ],
@@ -150,6 +136,7 @@ async function select_team(team: TeamData | null) {
 }
 
 async function fetch_all_workspaces() {
+  if(dataLoad.value) return
   dataLoad.value = true
   await fetch_teams()
   await fetch_workspaces()
@@ -159,8 +146,8 @@ async function fetch_all_workspaces() {
 
 onMounted(async () => {
   if (page_init.initialize) {
+    console.log('mounted Call')
     pageLoad.value = true;
-    
     pageLoad.value = false;
     await fetch_all_workspaces()
   }
@@ -170,6 +157,7 @@ watch(
   () => authStore.page_init.initialize,
   async (newVal) => {
     if (newVal) {
+      console.log('watch call')
       pageLoad.value = false;
       await fetch_all_workspaces()
     }
