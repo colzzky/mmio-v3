@@ -1,4 +1,4 @@
-import type { SubCollections } from '../../../core/types/UniTypes'
+import type { RestApiTypes, SubCollections } from '../../../core/types/UniTypes'
 import type { FBAttachmentTemplate } from './flow-meta-types'
 import { toast } from '@/core/components/ui/toast'
 import { ClassicPreset, type GetSchemes } from 'rete'
@@ -16,6 +16,9 @@ export interface NodeType {
   audio_node: AudioNode
   trigger_node: TriggerNode
   video_node: VideoNode
+
+
+
   gif_node: GIFNode
   file_node: FileNode
   http_node: HTTPNode
@@ -160,8 +163,7 @@ export interface GIFNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
+  image: string
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
@@ -170,8 +172,7 @@ export interface FileNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
+  file: string
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
@@ -180,12 +181,17 @@ export interface HTTPNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
-}
 
+  body: string
+  map: Record<string, string>
+  params: { key: string, value: string }[]
+  headers: { key: string, value: string }[]
+  type: RestApiTypes,
+  subscribe_id: string,
+  url: string
+}
+//SKIP FOR NOW
 export interface BotSheetsAPINode {
   name: string
   postbackid?: string
@@ -195,7 +201,7 @@ export interface BotSheetsAPINode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
-
+//SKIP FOR NOW
 export interface OpenAIEmbeddingNode {
   name: string
   postbackid?: string
@@ -205,7 +211,7 @@ export interface OpenAIEmbeddingNode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
-
+//SKIP FOR NOW
 export interface ChatGPTAPINode {
   name: string
   postbackid?: string
@@ -215,7 +221,7 @@ export interface ChatGPTAPINode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
-
+//SKIP FOR NOW
 export interface DynamicCarouselNode {
   name: string
   postbackid?: string
@@ -225,7 +231,7 @@ export interface DynamicCarouselNode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
-
+//SKIP FOR NOW
 export interface UserInputNode {
   name: string
   postbackid?: string
@@ -240,22 +246,24 @@ export interface OTNNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
-  giver_data: Record<string, string>
+  action: string,
+  giver_data: Record<string, string>,
+  otnTitle: string,
+  otnName?: string,
+  existing?: string,
 }
 
 export interface ProductSearchNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
+  cta: string
+  store_id: string
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
 
+//Skip for now
 export interface ActionNode {
   name: string
   postbackid?: string
@@ -266,26 +274,33 @@ export interface ActionNode {
   giver_data: Record<string, string>
 }
 
+//Generate its own postback
 export interface TimegapNode {
   name: string
   postbackid?: string
-  delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
+  value: number
+  unit: string
+  from: string
+  to: string
+  timezone: string
+  tag: string
+  send_node: string
+  recurring_id: string
+  otn: string
 }
 
+//No num1
 export interface GoToFlowNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
+  flow: string
+  payload: string
   giver_data: Record<string, string>
 }
 
+//Skip for now
 export interface EmailNode {
   name: string
   postbackid?: string
@@ -299,13 +314,13 @@ export interface EmailNode {
 export interface SMSNode {
   name: string
   postbackid?: string
-  delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
+  body: string
+  sender_id: string
+  to: string
 }
 
+//skid for now
 export interface FunctionNode {
   name: string
   postbackid?: string
@@ -320,10 +335,16 @@ export interface RecurringNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
+  config: {
+    image_url: string,
+    title: string,
+    notification_messages_frequency: string,
+    notification_messages_reoptin: string,
+    notification_messages_timezone: string
+  },
+  id: string
+  recurring_name: string
 }
 
 export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
@@ -369,7 +390,7 @@ export namespace CustomControls {
   //Add more custom control here
 }
 
-export interface ConnectionProperty{
+export interface ConnectionProperty {
   source: string
   sourceOutput: string
   target: string
@@ -706,6 +727,8 @@ export namespace ReteTemplates {
       )
       return node
     },
+
+    
     gif_node() {
       const node = new Node('gif_node')
       node.id = crypto.randomUUID()
@@ -1220,9 +1243,9 @@ export namespace SerializedFlow {
   export interface Node<T extends keyof NodeType> {
     id: string
     label: keyof NodeType
-    controls:Record<string, ControlInterface>
-    outputs:Record<string, Output<CustomSocket> |undefined>
-    inputs:Record<string, Input<CustomSocket> |undefined>
+    controls: Record<string, ControlInterface>
+    outputs: Record<string, Output<CustomSocket> | undefined>
+    inputs: Record<string, Input<CustomSocket> | undefined>
     position: { x: number; y: number }
     data: NodeType[T] | null
   }

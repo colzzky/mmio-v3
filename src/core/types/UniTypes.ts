@@ -22,6 +22,15 @@ export type Platforms =
   | 'OmniChannel'
   | ''
 
+export type RestApiTypes =
+  | 'POST'
+  | 'GET'
+  | 'PUT'
+  | 'DELETE'
+  | 'PATCH'
+  | 'OPTIONS'
+  | 'HEAD'
+
 export const months = [
   'January',
   'February',
