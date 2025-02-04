@@ -728,22 +728,21 @@ export namespace ReteTemplates {
       return node
     },
 
-    
+
     gif_node() {
       const node = new Node('gif_node')
       node.id = crypto.randomUUID()
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled GIF Node',
-        text: '',
-        buttons: {},
+        image: '',
         quick_replies: {},
         giver_data: {},
       }
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['image'],
         },
         'num',
         'input',
@@ -751,7 +750,7 @@ export namespace ReteTemplates {
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['image'],
         },
         'num1',
       )
@@ -763,15 +762,14 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled File Node',
-        text: '',
-        buttons: {},
+        file: '',
         quick_replies: {},
         giver_data: {},
       }
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['file'],
         },
         'num',
         'input',
@@ -779,7 +777,7 @@ export namespace ReteTemplates {
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['file'],
         },
         'num1',
       )
@@ -791,10 +789,14 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled HTTP Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
         giver_data: {},
+        body: '',
+        map: {},
+        params: [],
+        headers: [],
+        type: 'GET',
+        subscribe_id: '',
+        url: '',
       }
       createMetaTemplateOutIn(
         {
@@ -956,18 +958,19 @@ export namespace ReteTemplates {
     otn_node() {
       const node = new Node('otn_node')
       node.id = crypto.randomUUID()
-      const num1_postback = crypto.randomUUID()
+      const button_otn_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled OTN Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
-        giver_data: {},
+        action: '',
+        giver_data: {
+          button_otn: button_otn_postback
+        },
+        otnTitle: '',
       }
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['otn'],
         },
         'num',
         'input',
@@ -975,9 +978,9 @@ export namespace ReteTemplates {
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['otn'],
         },
-        'num1',
+        'button_otn',
       )
       return node
     },
@@ -987,10 +990,10 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled Product Search Node',
-        text: '',
-        buttons: {},
         quick_replies: {},
         giver_data: {},
+        cta: '',
+        store_id: ''
       }
       createMetaTemplateOutIn(
         {
@@ -1043,15 +1046,23 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled Timegap Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
-        giver_data: {},
+        giver_data: {
+          num1: num1_postback
+        },
+        value: 0,
+        unit: '',
+        from: '',
+        to: '',
+        timezone: '',
+        tag: '',
+        send_node: '',
+        recurring_id: '',
+        otn: '',
       }
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['timegap'],
         },
         'num',
         'input',
@@ -1059,7 +1070,7 @@ export namespace ReteTemplates {
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['timegap'],
         },
         'num1',
       )
@@ -1071,25 +1082,17 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled Go To Flow Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
         giver_data: {},
+        flow:'',
+        payload:''
       }
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['triggers'],
         },
         'num',
         'input',
-      )
-      createMetaTemplateOutIn(
-        {
-          node,
-          socket: ReteSockets['text'],
-        },
-        'num1',
       )
       return node
     },
@@ -1127,10 +1130,10 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled SMS Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
         giver_data: {},
+        body:'',
+        sender_id:'',
+        to:''
       }
       createMetaTemplateOutIn(
         {
@@ -1183,10 +1186,16 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled Recurring Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
         giver_data: {},
+        config: {
+          image_url: '',
+          title: '',
+          notification_messages_frequency: '',
+          notification_messages_reoptin: '',
+          notification_messages_timezone: '',
+        },
+        id: '',
+        recurring_name: '',
       }
       createMetaTemplateOutIn(
         {
