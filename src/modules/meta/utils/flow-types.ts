@@ -22,20 +22,22 @@ export interface NodeType {
   gif_node: GIFNode
   file_node: FileNode
   http_node: HTTPNode
-  bot_sheets_api_node: BotSheetsAPINode
-  openai_embedding_node: OpenAIEmbeddingNode
-  chatgpt_api_node: ChatGPTAPINode
-  dynamic_carousel_node: DynamicCarouselNode
-  user_input_node: UserInputNode
+  
+  bot_sheets_api_node: BotSheetsAPINode //Skip for now
+  openai_embedding_node: OpenAIEmbeddingNode //Skip for now
+  chatgpt_api_node: ChatGPTAPINode //Skip for now
+  dynamic_carousel_node: DynamicCarouselNode //Skip for now
+  user_input_node: UserInputNode //Skip for now
+  
   otn_node: OTNNode
   product_search_node: ProductSearchNode
-  action_node: ActionNode
+  action_node: ActionNode //Skip for now
   timegap_node: TimegapNode
   go_to_flow_node: GoToFlowNode
-  email_node: EmailNode
+  email_node: EmailNode //Skip for now 
   sms_node: SMSNode
-  function_node: FunctionNode
-  recurring_node: RecurringNode
+  function_node: FunctionNode //Skip for now
+  recurring_node: RecurringNode // Skip for now
 }
 
 export interface CarouselCard {
@@ -1051,8 +1053,8 @@ export namespace ReteTemplates {
         },
         value: 0,
         unit: '',
-        from: '',
-        to: '',
+        from: '00',
+        to: '00',
         timezone: '',
         tag: '',
         send_node: '',
