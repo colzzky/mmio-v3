@@ -7,7 +7,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/core/components/ui/dialog'
 import { Input } from '@/core/components/ui/input'
 import { Label } from '@/core/components/ui/label'
