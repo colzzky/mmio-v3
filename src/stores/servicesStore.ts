@@ -30,7 +30,3 @@ export const useServicesStore = defineStore('services', () => {
 
   return { services, pinnedServices, toggleServicePinnedStatus }
 })
-
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useServicesStore, import.meta.hot))
-}
