@@ -162,7 +162,7 @@ function handleRemoveDelay() {
         </Select>
       </div>
       <div>
-        <Label>Recurring Campaign</Label>
+        <Label>Select Recurring Campaign</Label>
         <Select>
           <SelectTrigger>
             <SelectValue placeholder="" />

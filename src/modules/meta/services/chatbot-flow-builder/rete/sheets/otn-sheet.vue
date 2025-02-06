@@ -117,12 +117,12 @@ function handleRemoveDelay() {
       </div>
       <div>
         <Label for="otn-title">
-          OTN Title <small>(Completes the phrase: 'Get Notified')</small>
+          Enter OTN Title <small>(Completes the phrase: 'Get Notified')</small>
         </Label>
         <Input id="otn-title" type="text" name="otn-title" placeholder="When..." />
       </div>
       <div>
-        <Label for="otn-name"> OTN Name </Label>
+        <Label for="otn-name">Enter OTN Name</Label>
         <Textarea
           id="otn-name"
           rows="5"

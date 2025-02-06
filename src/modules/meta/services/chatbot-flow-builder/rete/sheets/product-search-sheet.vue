@@ -109,7 +109,7 @@ function handleRemoveDelay() {
         </div>
       </div>
       <div>
-        <Label for="button-cta">Product Carousel Button CTA</Label>
+        <Label for="button-cta">Enter Product Carousel Button CTA</Label>
         <Input id="button-cta" type="text" name="button-cta" placeholder="Buy now" />
       </div>
       <div>
