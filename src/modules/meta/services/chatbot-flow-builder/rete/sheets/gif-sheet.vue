@@ -55,7 +55,7 @@ const gifDialog = reactive({
   selectGIF(url: string) {
     if (!localNodeData.value?.data) return
 
-    localNodeData.value.data.url = url
+    localNodeData.value.data.image = url
 
     this.initialState()
   },
@@ -76,7 +76,7 @@ function handleRemoveDelay() {
 function handleClearGIF() {
   if (!localNodeData.value?.data) return
 
-  localNodeData.value.data.url = ''
+  localNodeData.value.data.image = ''
 
   toast({
     title: 'Cleared GIF',
@@ -136,12 +136,12 @@ function handleClearGIF() {
         <Label for="gif">GIF</Label>
         <div class="relative aspect-video rounded border-[3px] border-dashed p-1">
           <small
-            v-if="!localNodeData.data.url"
+            v-if="!localNodeData.data.image"
             class="absolute left-1/2 top-1/2 -z-10 -translate-x-1/2 -translate-y-1/2 text-balance text-center text-muted-foreground"
           >
             Drag and drop GIF here
           </small>
-          <img v-else :src="localNodeData.data.url" alt="" />
+          <img v-else :src="localNodeData.data.image" alt="" />
         </div>
       </div>
       <Button
@@ -173,7 +173,7 @@ function handleClearGIF() {
                 icon="bx:search"
                 class="absolute left-0 top-1/2 size-5 -translate-y-1/2 translate-x-1/2 text-muted-foreground"
               />
-              <Input v-model="localNodeData.data.url" placeholder="Search GIFs..." class="ps-8" />
+              <Input v-model="localNodeData.data.image" placeholder="Search GIFs..." class="ps-8" />
             </div>
             <Button type="button">Next</Button>
           </div>
