@@ -136,7 +136,7 @@ async function select_team(team: TeamData | null) {
 }
 
 async function fetch_all_workspaces() {
-  if(dataLoad.value) return
+  if (dataLoad.value) return
   dataLoad.value = true
   await fetch_teams()
   await fetch_workspaces()
@@ -161,154 +161,156 @@ watch(
       pageLoad.value = false;
       await fetch_all_workspaces()
     }
-  },{immediate:true}
+  }, { immediate: true }
 );
 
 </script>
 
 <template>
-  <div v-if="!pageLoad">
-    <header class="flex items-center justify-between p-4">
-      <DropdownMenu>
-        <DropdownMenuTrigger class="flex items-center gap-x-1">
-          <i class="material-icons text-5xl">pin</i>
-          <div class="flex flex-col items-start">
-            <strong class="text-xl leading-none">Marketing Master IO</strong>
-            <small class="flex items-center">
-              Team Workspace: {{ selected_team ? selected_team.name : 'All Workspace' }}
-              <i class="material-icons">arrow_drop_down</i>
-            </small>
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent class="text-xs">
-          <DropdownMenuItem v-for="team in user_teams" :key="team.tm_id" class="grid grid-cols-[40px_1fr] gap-x-3"
-            @click="select_team(team)">
-            <Avatar class="size-6 justify-self-center">
-              <AvatarImage src="https://placehold.co/24" />
-              <AvatarFallback>UI</AvatarFallback>
-            </Avatar>
-            {{ team.name }}
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem class="flex items-center gap-x-1" @click="select_team(null)">
-            All Workspace
-          </DropdownMenuItem>
-          <DropdownMenuItem class="flex items-center gap-x-1" @click="new_team_modal = !new_team_modal">
-            Create a Team
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+  <transition name="zoom-fade" appear mode="out-in">
+    <div v-if="!pageLoad">
+      <header class="flex items-center justify-between p-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger class="flex items-center gap-x-1">
+            <i class="material-icons text-5xl">pin</i>
+            <div class="flex flex-col items-start">
+              <strong class="text-xl leading-none">Marketing Master IO</strong>
+              <small class="flex items-center">
+                Team Workspace: {{ selected_team ? selected_team.name : 'All Workspace' }}
+                <i class="material-icons">arrow_drop_down</i>
+              </small>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent class="text-xs">
+            <DropdownMenuItem v-for="team in user_teams" :key="team.tm_id" class="grid grid-cols-[40px_1fr] gap-x-3"
+              @click="select_team(team)">
+              <Avatar class="size-6 justify-self-center">
+                <AvatarImage src="https://placehold.co/24" />
+                <AvatarFallback>UI</AvatarFallback>
+              </Avatar>
+              {{ team.name }}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem class="flex items-center gap-x-1" @click="select_team(null)">
+              All Workspace
+            </DropdownMenuItem>
+            <DropdownMenuItem class="flex items-center gap-x-1" @click="new_team_modal = !new_team_modal">
+              Create a Team
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-      <div class="flex items-center gap-x-2 self-start">
-        <button type="button" class="size-8 rounded hover:bg-primary/5">
-          <i class="bx bx-bell text-xl" />
-        </button>
-        <AvatarDropdown />
-      </div>
-    </header>
+        <div class="flex items-center gap-x-2 self-start">
+          <button type="button" class="size-8 rounded hover:bg-primary/5">
+            <i class="bx bx-bell text-xl" />
+          </button>
+          <AvatarDropdown />
+        </div>
+      </header>
 
-    <main class="mx-auto grid max-w-screen-xl gap-y-12 p-4">
-      <div class="relative mx-auto w-full max-w-screen-md">
-        <span class="absolute inset-y-1 left-1 grid aspect-square place-content-center bg-white">
-          <i class="bx bx-search" />
-        </span>
-        <Input type="search" placeholder="Search Workspace..." class="ps-10" />
-      </div>
-      <div v-if="!selected_team" class="space-y-10">
-        <section class="grid gap-y-6">
-          <div class="flex flex-col items-start text-xs">
-            <h1
-              class="bg-gradient-to-r from-gradient-purple to-gradient-red bg-clip-text text-xl font-bold text-transparent">
-              Your Workspaces
-            </h1>
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                From {{ allWorkspaceFilter }}<i class="bx bx-caret-down" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuRadioGroup v-model="allWorkspaceFilter">
-                  <DropdownMenuRadioItem value="Most Recent">Most Recent</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="Filter #1">Filter #1</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="Filter #2">Filter #2</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div>
-            <Transition name="fade" mode="out-in">
-              <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="user_created_workspaces"
-                :is-shared="false" :workspace-owners="null" />
-            </Transition>
-          </div>
-        </section>
-        <section class="grid gap-y-6">
-          <div class="flex flex-col items-start text-xs">
-            <h1 class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent">
-              Shared Workspaces
-            </h1>
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                From {{ sharedWorkspaceFilter }}<i class="bx bx-caret-down" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuRadioGroup v-model="sharedWorkspaceFilter">
-                  <DropdownMenuRadioItem value="Most Recent">Most Recent</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="Filter #1">Filter #1</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="Filter #2">Filter #2</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div>
-            <Transition name="fade" mode="out-in">
-              <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="shared_workspaces" :is-shared="true"
-                :workspace-owners="workspace_owners" />
-            </Transition>
-          </div>
-        </section>
-      </div>
-      <div v-else>
-        <section class="grid gap-y-6">
-          <div class="flex flex-col items-start text-xs">
-            <h1 class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent">
-              {{ `${selected_team.name} Workspaces` }}
-            </h1>
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                From {{ sharedWorkspaceFilter }}<i class="bx bx-caret-down" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuRadioGroup v-model="sharedWorkspaceFilter">
-                  <DropdownMenuRadioItem value="Most Recent">Most Recent</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="Filter #1">Filter #1</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="Filter #2">Filter #2</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          <div>
-            <Transition name="fade" mode="out-in">
-              <component :is="selectTeamLoad ? WorkspacesLoad : Workspaces" :workspaces="selected_team_workspaces"
-                :is-shared="true" :workspace-owners="workspace_owners" />
-            </Transition>
-          </div>
-        </section>
-      </div>
-    </main>
-    <CreateTeam :open_modal="new_team_modal" @return="new_team_return" />
-  </div>
-  <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
-    <div class="flex animate-pulse items-center gap-x-1">
-      <i class="material-icons text-4xl">pin</i>
-      <span class="text-xl font-extrabold">MMIO</span>
+      <main class="mx-auto grid max-w-screen-xl gap-y-12 p-4">
+        <div class="relative mx-auto w-full max-w-screen-md">
+          <span class="absolute inset-y-1 left-1 grid aspect-square place-content-center bg-white">
+            <i class="bx bx-search" />
+          </span>
+          <Input type="search" placeholder="Search Workspace..." class="ps-10" />
+        </div>
+        <div v-if="!selected_team" class="space-y-10">
+          <section class="grid gap-y-6">
+            <div class="flex flex-col items-start text-xs">
+              <h1
+                class="bg-gradient-to-r from-gradient-purple to-gradient-red bg-clip-text text-xl font-bold text-transparent">
+                Your Workspaces
+              </h1>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  From {{ allWorkspaceFilter }}<i class="bx bx-caret-down" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuRadioGroup v-model="allWorkspaceFilter">
+                    <DropdownMenuRadioItem value="Most Recent">Most Recent</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Filter #1">Filter #1</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Filter #2">Filter #2</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div>
+              <Transition name="fade" mode="out-in">
+                <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="user_created_workspaces"
+                  :is-shared="false" :workspace-owners="null" />
+              </Transition>
+            </div>
+          </section>
+          <section class="grid gap-y-6">
+            <div class="flex flex-col items-start text-xs">
+              <h1 class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent">
+                Shared Workspaces
+              </h1>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  From {{ sharedWorkspaceFilter }}<i class="bx bx-caret-down" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuRadioGroup v-model="sharedWorkspaceFilter">
+                    <DropdownMenuRadioItem value="Most Recent">Most Recent</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Filter #1">Filter #1</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Filter #2">Filter #2</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div>
+              <Transition name="fade" mode="out-in">
+                <component :is="dataLoad ? WorkspacesLoad : Workspaces" :workspaces="shared_workspaces"
+                  :is-shared="true" :workspace-owners="workspace_owners" />
+              </Transition>
+            </div>
+          </section>
+        </div>
+        <div v-else>
+          <section class="grid gap-y-6">
+            <div class="flex flex-col items-start text-xs">
+              <h1 class="bg-gradient-to-r from-[#1A7CFB] to-[#DA72F9] bg-clip-text text-xl font-bold text-transparent">
+                {{ `${selected_team.name} Workspaces` }}
+              </h1>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  From {{ sharedWorkspaceFilter }}<i class="bx bx-caret-down" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuRadioGroup v-model="sharedWorkspaceFilter">
+                    <DropdownMenuRadioItem value="Most Recent">Most Recent</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Filter #1">Filter #1</DropdownMenuRadioItem>
+                    <DropdownMenuRadioItem value="Filter #2">Filter #2</DropdownMenuRadioItem>
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div>
+              <Transition name="fade" mode="out-in">
+                <component :is="selectTeamLoad ? WorkspacesLoad : Workspaces" :workspaces="selected_team_workspaces"
+                  :is-shared="true" :workspace-owners="workspace_owners" />
+              </Transition>
+            </div>
+          </section>
+        </div>
+      </main>
+      <CreateTeam :open_modal="new_team_modal" @return="new_team_return" />
     </div>
-    <div class="flex items-center justify-center space-x-2">
-      <i class="material-icons animate-spin text-sm">donut_large</i>
-      <div>Loading</div>
+    <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
+      <div class="flex animate-pulse items-center gap-x-1">
+        <i class="material-icons text-4xl">pin</i>
+        <span class="text-xl font-extrabold">MMIO</span>
+      </div>
+      <div class="flex items-center justify-center space-x-2">
+        <i class="material-icons animate-spin text-sm">donut_large</i>
+        <div>Loading</div>
+      </div>
     </div>
-  </div>
+  </transition>
 
-  
+
 </template>
 
 <style scoped>

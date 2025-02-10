@@ -1,4 +1,4 @@
-import type { SubCollections } from '../../../core/types/UniTypes'
+import type { RestApiTypes, SubCollections } from '../../../core/types/UniTypes'
 import type { FBAttachmentTemplate } from './flow-meta-types'
 import { toast } from '@/core/components/ui/toast'
 import { ClassicPreset, type GetSchemes } from 'rete'
@@ -16,23 +16,28 @@ export interface NodeType {
   audio_node: AudioNode
   trigger_node: TriggerNode
   video_node: VideoNode
+
+
+
   gif_node: GIFNode
   file_node: FileNode
   http_node: HTTPNode
-  bot_sheets_api_node: BotSheetsAPINode
-  openai_embedding_node: OpenAIEmbeddingNode
-  chatgpt_api_node: ChatGPTAPINode
-  dynamic_carousel_node: DynamicCarouselNode
-  user_input_node: UserInputNode
+  
+  bot_sheets_api_node: BotSheetsAPINode //Skip for now
+  openai_embedding_node: OpenAIEmbeddingNode //Skip for now
+  chatgpt_api_node: ChatGPTAPINode //Skip for now
+  dynamic_carousel_node: DynamicCarouselNode //Skip for now
+  user_input_node: UserInputNode //Skip for now
+  
   otn_node: OTNNode
   product_search_node: ProductSearchNode
-  action_node: ActionNode
+  action_node: ActionNode //Skip for now
   timegap_node: TimegapNode
   go_to_flow_node: GoToFlowNode
-  email_node: EmailNode
+  email_node: EmailNode //Skip for now 
   sms_node: SMSNode
-  function_node: FunctionNode
-  recurring_node: RecurringNode
+  function_node: FunctionNode //Skip for now
+  recurring_node: RecurringNode // Skip for now
 }
 
 export interface CarouselCard {
@@ -160,8 +165,7 @@ export interface GIFNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
+  image: string
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
@@ -170,8 +174,7 @@ export interface FileNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
+  file: string
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
@@ -180,12 +183,17 @@ export interface HTTPNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
-}
 
+  body: string
+  map: Record<string, string>
+  params: { key: string, value: string }[]
+  headers: { key: string, value: string }[]
+  type: RestApiTypes,
+  subscribe_id: string,
+  url: string
+}
+//SKIP FOR NOW
 export interface BotSheetsAPINode {
   name: string
   postbackid?: string
@@ -195,7 +203,7 @@ export interface BotSheetsAPINode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
-
+//SKIP FOR NOW
 export interface OpenAIEmbeddingNode {
   name: string
   postbackid?: string
@@ -205,7 +213,7 @@ export interface OpenAIEmbeddingNode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
-
+//SKIP FOR NOW
 export interface ChatGPTAPINode {
   name: string
   postbackid?: string
@@ -215,7 +223,7 @@ export interface ChatGPTAPINode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
-
+//SKIP FOR NOW
 export interface DynamicCarouselNode {
   name: string
   postbackid?: string
@@ -225,7 +233,7 @@ export interface DynamicCarouselNode {
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
-
+//SKIP FOR NOW
 export interface UserInputNode {
   name: string
   postbackid?: string
@@ -240,22 +248,24 @@ export interface OTNNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
-  giver_data: Record<string, string>
+  action: string,
+  giver_data: Record<string, string>,
+  otnTitle: string,
+  otnName?: string,
+  existing?: string,
 }
 
 export interface ProductSearchNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
+  cta: string
+  store_id: string
   quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
 }
 
+//Skip for now
 export interface ActionNode {
   name: string
   postbackid?: string
@@ -266,26 +276,33 @@ export interface ActionNode {
   giver_data: Record<string, string>
 }
 
+//Generate its own postback
 export interface TimegapNode {
   name: string
   postbackid?: string
-  delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
+  value: number
+  unit: string
+  from: string
+  to: string
+  timezone: string
+  tag: string
+  send_node: string
+  recurring_id: string
+  otn: string
 }
 
+//No num1
 export interface GoToFlowNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
+  flow: string
+  payload: string
   giver_data: Record<string, string>
 }
 
+//Skip for now
 export interface EmailNode {
   name: string
   postbackid?: string
@@ -299,13 +316,13 @@ export interface EmailNode {
 export interface SMSNode {
   name: string
   postbackid?: string
-  delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
+  body: string
+  sender_id: string
+  to: string
 }
 
+//skid for now
 export interface FunctionNode {
   name: string
   postbackid?: string
@@ -320,10 +337,16 @@ export interface RecurringNode {
   name: string
   postbackid?: string
   delay?: string
-  text: string
-  buttons: Record<string, Button>
-  quick_replies: Record<string, QuickReply>
   giver_data: Record<string, string>
+  config: {
+    image_url: string,
+    title: string,
+    notification_messages_frequency: string,
+    notification_messages_reoptin: string,
+    notification_messages_timezone: string
+  },
+  id: string
+  recurring_name: string
 }
 
 export class Node<T extends keyof NodeType> extends ClassicPreset.Node<
@@ -369,7 +392,7 @@ export namespace CustomControls {
   //Add more custom control here
 }
 
-export interface ConnectionProperty{
+export interface ConnectionProperty {
   source: string
   sourceOutput: string
   target: string
@@ -706,21 +729,22 @@ export namespace ReteTemplates {
       )
       return node
     },
+
+
     gif_node() {
       const node = new Node('gif_node')
       node.id = crypto.randomUUID()
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled GIF Node',
-        text: '',
-        buttons: {},
+        image: '',
         quick_replies: {},
         giver_data: {},
       }
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['image'],
         },
         'num',
         'input',
@@ -728,7 +752,7 @@ export namespace ReteTemplates {
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['image'],
         },
         'num1',
       )
@@ -740,15 +764,14 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled File Node',
-        text: '',
-        buttons: {},
+        file: '',
         quick_replies: {},
         giver_data: {},
       }
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['file'],
         },
         'num',
         'input',
@@ -756,7 +779,7 @@ export namespace ReteTemplates {
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['file'],
         },
         'num1',
       )
@@ -768,10 +791,14 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled HTTP Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
         giver_data: {},
+        body: '',
+        map: {},
+        params: [],
+        headers: [],
+        type: 'GET',
+        subscribe_id: '',
+        url: '',
       }
       createMetaTemplateOutIn(
         {
@@ -933,18 +960,19 @@ export namespace ReteTemplates {
     otn_node() {
       const node = new Node('otn_node')
       node.id = crypto.randomUUID()
-      const num1_postback = crypto.randomUUID()
+      const button_otn_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled OTN Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
-        giver_data: {},
+        action: '',
+        giver_data: {
+          button_otn: button_otn_postback
+        },
+        otnTitle: '',
       }
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['otn'],
         },
         'num',
         'input',
@@ -952,9 +980,9 @@ export namespace ReteTemplates {
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['otn'],
         },
-        'num1',
+        'button_otn',
       )
       return node
     },
@@ -964,10 +992,10 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled Product Search Node',
-        text: '',
-        buttons: {},
         quick_replies: {},
         giver_data: {},
+        cta: '',
+        store_id: ''
       }
       createMetaTemplateOutIn(
         {
@@ -1020,15 +1048,23 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled Timegap Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
-        giver_data: {},
+        giver_data: {
+          num1: num1_postback
+        },
+        value: 0,
+        unit: '',
+        from: '00',
+        to: '00',
+        timezone: '',
+        tag: '',
+        send_node: '',
+        recurring_id: '',
+        otn: '',
       }
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['timegap'],
         },
         'num',
         'input',
@@ -1036,7 +1072,7 @@ export namespace ReteTemplates {
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['timegap'],
         },
         'num1',
       )
@@ -1048,25 +1084,17 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled Go To Flow Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
         giver_data: {},
+        flow:'',
+        payload:''
       }
       createMetaTemplateOutIn(
         {
           node,
-          socket: ReteSockets['text'],
+          socket: ReteSockets['triggers'],
         },
         'num',
         'input',
-      )
-      createMetaTemplateOutIn(
-        {
-          node,
-          socket: ReteSockets['text'],
-        },
-        'num1',
       )
       return node
     },
@@ -1104,10 +1132,10 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled SMS Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
         giver_data: {},
+        body:'',
+        sender_id:'',
+        to:''
       }
       createMetaTemplateOutIn(
         {
@@ -1160,10 +1188,16 @@ export namespace ReteTemplates {
       const num1_postback = crypto.randomUUID()
       node.data = {
         name: 'Untitled Recurring Node',
-        text: '',
-        buttons: {},
-        quick_replies: {},
         giver_data: {},
+        config: {
+          image_url: '',
+          title: '',
+          notification_messages_frequency: '',
+          notification_messages_reoptin: '',
+          notification_messages_timezone: '',
+        },
+        id: '',
+        recurring_name: '',
       }
       createMetaTemplateOutIn(
         {
@@ -1220,9 +1254,9 @@ export namespace SerializedFlow {
   export interface Node<T extends keyof NodeType> {
     id: string
     label: keyof NodeType
-    controls:Record<string, ControlInterface>
-    outputs:Record<string, Output<CustomSocket> |undefined>
-    inputs:Record<string, Input<CustomSocket> |undefined>
+    controls: Record<string, ControlInterface>
+    outputs: Record<string, Output<CustomSocket> | undefined>
+    inputs: Record<string, Input<CustomSocket> | undefined>
     position: { x: number; y: number }
     data: NodeType[T] | null
   }

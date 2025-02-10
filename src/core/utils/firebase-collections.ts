@@ -287,6 +287,28 @@ export async function getWhereAny<T extends keyof CollectionsInterface>(
   }
 }
 
+export async function getWhereAnyBatch<T extends keyof CollectionsInterface>(
+  queries: { $col: T; $operation: Parameters<typeof getWhereAny>[1] }[]
+): Promise<Record<T, FirebaseWhereReturn<CollectionsInterface[T]['interface']>>> {
+  try {
+    const results = await Promise.all(
+      queries.map(({ $col, $operation }) => getWhereAny($col, $operation))
+    );
+
+    // Convert results into an object where keys are collection names
+    const resultObject = queries.reduce((acc, { $col }, index) => {
+      acc[$col] = results[index];
+      return acc;
+    }, {} as Record<T, FirebaseWhereReturn<CollectionsInterface[T]['interface']>>);
+
+    return resultObject;
+  } catch (error) {
+    console.error("Error fetching multiple collections:", error);
+    throw new Error("Failed to fetch all collections.");
+  }
+}
+
+
 /**
  * Retrieves documents and their subcollections from Firestore.
  *

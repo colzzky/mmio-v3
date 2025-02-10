@@ -13,6 +13,7 @@ import { onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import Dashboard from '@/modules/meta/services/dashboard/page.vue'
 import { DbCollections } from '../utils/enums/dbCollection'
+import type { ActiveTeam } from '../types/AuthWorkspaceTypes'
 
 /**
  * Step 1: Check and validated workspace id if it exists on the firestore
@@ -37,8 +38,8 @@ const wp_model = workspace
 async function validateWorkspace() {
   if (workspace_id) {
     const getWorkspace = await getCollectionWithSubcollections(DbCollections.workspaces, {
-      id:workspace_id as string,
-      subCollections:[[DbCollections.ws_meta_pages_refs]]
+      id: workspace_id as string,
+      subCollections: [[DbCollections.ws_meta_pages_refs]]
     })
 
     if (getWorkspace.status && getWorkspace.data) {
@@ -61,27 +62,25 @@ async function validateMemberOwner() {
   const teamId = active_workspace.data.team_id
 
   // Fetch team data
-  const teamResponse = await getCollectionWithSubcollections(DbCollections.teams, {
-    id:teamId,
-    subCollections:[[DbCollections.team_members]]
+  const teamResponse = await getCollection(DbCollections.teams, {
+    id: teamId,
   })
   let teamData: TeamData | null = null
   let teamMembers: TeamMembersData[] = []
 
   // Check team data validity
   if (teamResponse.status && teamResponse.data) {
-    teamData = teamResponse.data.main
-    if (teamResponse.data && teamResponse.data.subCollections[DbCollections.team_members])
-      teamMembers = teamResponse.data.subCollections[DbCollections.team_members]
+    teamData = teamResponse.data
   }
 
   // Check workspace ownership
   if (workspaceOwner(active_workspace.data) && teamData) {
     active_team.data = {
-      team:teamData,
-      members:teamMembers
+      team: teamData,
+      members: []
     }
-    await populateTeamMembers()
+    //Populate team member when visiting a member tab
+    //await populateTeamMembers()
     return // Valid owner, exit function
   }
 
@@ -97,8 +96,8 @@ async function validateMemberOwner() {
     // Listen for current member updates
     await current_member.listen(teamId, member.member_id)
     active_team.data = {
-      team:teamData,
-      members:teamMembers
+      team: teamData,
+      members: teamMembers
     }
     await populateTeamMembers()
     return
@@ -106,18 +105,8 @@ async function validateMemberOwner() {
 }
 
 async function populateTeamMembers() {
-  console.log(active_team.data)
   if (active_team.data) {
-    const members_uid: string[] = []
-    active_team.data.members.forEach((member) => {
-      active_team.members[member.uid] = {
-        ...member,
-        displayName: '',
-        email: '',
-        picture: '',
-      }
-      members_uid.push(member.uid)
-    })
+    const members_uid: string[] = active_team.data.members.map(item => item.uid)
 
     const find_members_info = await getWhereAny(DbCollections.users, {
       whereConditions: [
@@ -130,14 +119,21 @@ async function populateTeamMembers() {
     })
 
     if (find_members_info.status && find_members_info.data.length > 0) {
-      Object.keys(active_team.members).forEach((member_uid) => {
-        const member = find_members_info.data.find((m) => m.uid === member_uid)
-        if (member) {
-          active_team.members[member_uid].displayName = member.displayName ? member.displayName : ''
-          active_team.members[member_uid].email = member.email ? member.email : ''
-          active_team.members[member_uid].picture = member.photoURL ? member.photoURL : ''
+      active_team.members = find_members_info.data.reduce((acc, item) => {
+        const member_data = active_team.data?.members.find((m) => m.uid === item.uid)
+        if (member_data) {
+          acc[item.uid] = {
+            ...member_data,
+            displayName: item.displayName ? item.displayName : '',
+            email: item.email ? item.email : '',
+            picture: item.photoURL ? item.photoURL : '',
+          };
+          return acc;
+        } else {
+          return acc
         }
-      })
+
+      }, {} as ActiveTeam['members']);
     }
   }
 }
@@ -165,28 +161,38 @@ watch(
 
 <template>
   <Toaster />
-  <div v-if="!workspace_load">
-    <div v-if="!(route.name === 'chatbot-flow-final')">
-      <DesktopSidebar />
-      <div class="lg:pl-72">
-        <div v-if="route.name === 'workspace'">
-          <Dashboard/>
+    <div v-if="!workspace_load">
+      <div v-if="!(route.name === 'chatbot-flow-final')">
+        <DesktopSidebar />
+
+        <div class="lg:pl-72">
+
+          <div v-if="route.name === 'workspace'">
+            <Dashboard />
+          </div>
+          <div v-else>
+            <RouterView v-slot="{ Component, route }">
+              <transition name="zoom-fade" appear mode="out-in">
+                <div :key="route.name">
+                  <component :is="Component"></component>
+                </div>
+              </transition>
+            </RouterView>
+          </div>
         </div>
-        <RouterView v-else/>
+      </div>
+      <div v-else>
+        <RouterView />
       </div>
     </div>
-    <div v-else>
-      <RouterView />
+    <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
+      <div class="flex animate-pulse items-center gap-x-1">
+        <i class="material-icons text-4xl">pin</i>
+        <span class="text-xl font-extrabold">MMIO</span>
+      </div>
+      <div class="flex items-center justify-center space-x-2">
+        <i class="material-icons animate-spin text-sm">donut_large</i>
+        <div>Loading Workspace. Please wait.</div>
+      </div>
     </div>
-  </div>
-  <div v-else class="flex h-screen flex-col items-center justify-center bg-gray-100">
-    <div class="flex animate-pulse items-center gap-x-1">
-      <i class="material-icons text-4xl">pin</i>
-      <span class="text-xl font-extrabold">MMIO</span>
-    </div>
-    <div class="flex items-center justify-center space-x-2">
-      <i class="material-icons animate-spin text-sm">donut_large</i>
-      <div>Loading Workspace. Please wait.</div>
-    </div>
-  </div>
 </template>

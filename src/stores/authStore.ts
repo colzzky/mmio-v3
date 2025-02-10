@@ -6,7 +6,7 @@ import { team_members_data, type TeamData, type TeamMembersData } from '@/core/t
 import type { MutablePick } from '@/core/types/UniTypes'
 import { DbCollections } from '@/core/utils/enums/dbCollection'
 import { auth } from '@/core/utils/firebase-client'
-import { postCollection, getCollection, getWhereAny, getCollectionWithSubcollections, getWhereAnyWithSubcollections } from '@/core/utils/firebase-collections'
+import { postCollection, getCollection, getWhereAny, getCollectionWithSubcollections, getWhereAnyWithSubcollections, getWhereAnyBatch } from '@/core/utils/firebase-collections'
 import { uiHelpers } from '@/core/utils/ui-helper'
 import { onAuthStateChanged, signOut, type Unsubscribe, type User } from 'firebase/auth'
 import type { DocumentData } from 'firebase/firestore'
@@ -111,29 +111,56 @@ export const useAuthStore = defineStore(
       },
       async fetch() {
         const id = user_auth.data ? user_auth.data.uid : ''
-        const get = await getCollectionWithSubcollections(DbCollections.users, {
+        const get = await getCollection(DbCollections.users, {
           $sub_params: null,
           id: id,
-          subCollections: [[DbCollections.platform_apis], [DbCollections.team_refs]]
         })
-        
         if (get.data && get.status) {
+          console.time("Firestore Fetch Time");
+          // const test = await getWhereAnyBatch([
+          //   {
+          //     $col: DbCollections.team_refs,
+          //     $operation: {
+          //       $sub_params: {
+          //         uid: get.data.uid
+          //       }
+          //     }
+          //   },
+          //   {
+          //     $col: DbCollections.platform_apis,
+          //     $operation: {
+          //       $sub_params: {
+          //         uid: get.data.uid
+          //       }
+          //     }
+          //   },
+          // ])
+          
+          const [user_team_refs, user_platform_apis] = await Promise.all([
+            getWhereAny(DbCollections.team_refs, {
+              $sub_params: { uid: get.data.uid }
+            }),
+            getWhereAny(DbCollections.platform_apis, {
+              $sub_params: { uid: get.data.uid }
+            })
+          ]);
+          console.timeEnd("Firestore Fetch Time");
+
           this.references = {
             user_team_refs: [],
             platform_apis: []
           }
-          this.data = get.data.main
-          this.references.user_team_refs = get.data.subCollections[DbCollections.team_refs]
-          this.references.platform_apis = get.data.subCollections[DbCollections.platform_apis]
+          this.data = get.data
+          this.references.user_team_refs = user_team_refs.data,
+            this.references.platform_apis = user_platform_apis.data
+          // this.references.user_team_refs = test[DbCollections.team_refs].data as TeamRefsData[],
+          // this.references.platform_apis = test[DbCollections.platform_apis].data as PlatformApiData[]
         }
-
-        console.log(this.data)
-        console.log(this.references)
       },
     })
 
     const user_team_refs = reactive({
-      data: null as Record<string, {'team': TeamData, 'members': TeamMembersData[]}> | null,
+      data: null as Record<string, { 'team': TeamData, 'members': TeamMembersData[] }> | null,
       isInitialized: false as boolean,
       isLoading: false as boolean,
       lastSnapshot: '' as string,
@@ -163,9 +190,9 @@ export const useAuthStore = defineStore(
 
           if (fetch_team.status && fetch_team.data) {
             this.data = fetch_team.data.reduce((acc, { main, subCollections }) => {
-              acc[main.tm_id] = {  team:{...main}, members: subCollections['teams/:tm_id/team_members'] };  // Merge main with sub
+              acc[main.tm_id] = { team: { ...main }, members: subCollections['teams/:tm_id/team_members'] };  // Merge main with sub
               return acc;
-            }, {} as Record<string, {'team': TeamData, 'members': TeamMembersData[]}>);
+            }, {} as Record<string, { 'team': TeamData, 'members': TeamMembersData[] }>);
           }
         }
         this.isLoading = false
@@ -210,8 +237,8 @@ export const useAuthStore = defineStore(
       data: MutablePick<User, 'displayName' | 'email' | 'photoURL' | 'uid' | 'emailVerified'>,
     ) {
       //We need to check first if the user already exist in firebase
-      const checkUser = await getCollection(DbCollections.users,{
-        id:user.data ? user.data.uid : ''    
+      const checkUser = await getCollection(DbCollections.users, {
+        id: user.data ? user.data.uid : ''
       })
       if (!checkUser.status) {
         user.initialize()
@@ -219,7 +246,7 @@ export const useAuthStore = defineStore(
           console.log(user.data)
           user.data = { ...user.data, ...data }
           console.log(user.data)
-          
+
           await postCollection(DbCollections.users, {
             idKey: 'uid',
             data: user.data,
@@ -231,9 +258,8 @@ export const useAuthStore = defineStore(
     async function after_auth_initialization() {
       const platformApiStore = usePlatformAPIStore()
       const { platform_api_list } = platformApiStore
-
-      await user_team_refs.fetch_team_list()
-      await platform_api_list.initializeAccountApis()
+      //Call something here when you need to fetch something first before initialization
+      //await Promise.all([user_team_refs.fetch_team_list(), platform_api_list.initializeAccountApis()])
     }
 
     //called when initially fetching team refrence
